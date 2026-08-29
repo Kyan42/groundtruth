@@ -10,7 +10,8 @@ const claims = [
   {
     id: "checkout-application",
     statement: "Apply the discount only at checkout.",
-    sourceQuote: "cart total remains undiscounted until the order is placed",
+    sourceQuote:
+      "The discount is applied at checkout, so the cart total stays undiscounted until the order is placed",
     priority: "must" as const,
     acceptanceCriteria: ["The pre-checkout cart has no discount."],
   },
@@ -72,6 +73,83 @@ const run = makeRun({
 });
 
 describe("claim coverage", () => {
+  it.each(["claim-3", "checkout-application"])(
+    "binds an exact source quote to the current generated claim ID %s",
+    (claimId) => {
+      const sourceQuoteMission = {
+        ...mission,
+        claimIds: ["old-unstable-id"],
+        claimSourceQuote: claims[0].sourceQuote,
+      };
+      const currentRun = makeRun({
+        intentSpec: {
+          schemaVersion: 1,
+          summary: "Promo intent",
+          claims: [{ ...claims[0], id: claimId }, ...claims.slice(1)],
+          nonGoals: [],
+          ambiguities: [],
+        },
+      });
+
+      expect(resolveMission(sourceQuoteMission, currentRun).claimIds).toEqual([claimId]);
+    },
+  );
+
+  it("rejects a source quote that has no exact approved claim match", () => {
+    expect(() =>
+      resolveMission(
+        {
+          ...mission,
+          claimIds: ["checkout-application"],
+          claimSourceQuote: `${claims[0].sourceQuote}.`,
+        },
+        run,
+      ),
+    ).toThrowError(
+      expect.objectContaining({ code: "test_mission_claim_source_quote_unmatched" }),
+    );
+  });
+
+  it("rejects a source quote that matches multiple approved claims", () => {
+    const duplicateQuoteRun = makeRun({
+      intentSpec: {
+        schemaVersion: 1,
+        summary: "Promo intent",
+        claims: [
+          ...claims,
+          { ...claims[1], id: "duplicate-quote", sourceQuote: claims[0].sourceQuote },
+        ],
+        nonGoals: [],
+        ambiguities: [],
+      },
+    });
+
+    expect(() =>
+      resolveMission(
+        { ...mission, claimIds: [], claimSourceQuote: claims[0].sourceQuote },
+        duplicateQuoteRun,
+      ),
+    ).toThrowError(
+      expect.objectContaining({ code: "test_mission_claim_source_quote_ambiguous" }),
+    );
+  });
+
+  it("rejects a deferred claim that overlaps the quote-resolved claim", () => {
+    expect(() =>
+      resolveMission(
+        {
+          ...mission,
+          claimIds: [],
+          claimSourceQuote: claims[0].sourceQuote,
+          deferredClaims: [
+            { claimId: "checkout-application", reason: "Must execute separately." },
+          ],
+        },
+        run,
+      ),
+    ).toThrowError(expect.objectContaining({ code: "test_mission_deferral_stale" }));
+  });
+
   it("rejects a mission without an explicit claim", () => {
     expect(() => resolveMission({ ...mission, claimIds: [] }, run)).toThrowError(
       expect.objectContaining({ code: "test_mission_claim_missing" }),

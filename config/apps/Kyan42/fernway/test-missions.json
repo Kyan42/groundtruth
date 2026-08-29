@@ -4,9 +4,8 @@
     "id": "intent-checkout-application-timing",
     "title": "Cart remains undiscounted before order placement",
     "kind": "intent",
-    "claimIds": [
-      "checkout-application"
-    ],
+    "claimIds": [],
+    "claimSourceQuote": "The discount is applied at checkout, so the cart total stays undiscounted until the order is placed",
     "goal": "Starting from a reset storefront, add one product, open the cart, enter the valid promo code, and leave the promo field without placing an order. Verify the cart remains undiscounted at this pre-checkout point.",
     "startPath": "/",
     "preconditions": [
@@ -17,28 +16,6 @@
     "fixtureValues": {
       "validPromoCode": "FERN10"
     },
-    "deferredClaims": [
-      {
-        "claimId": "shopper-promo-entry",
-        "reason": "This execution isolates discount timing; successful promo-entry behavior needs its own mission."
-      },
-      {
-        "claimId": "invalid-code-error",
-        "reason": "Invalid-code behavior requires a separate fixture and mission."
-      },
-      {
-        "claimId": "admin-management",
-        "reason": "The approved shopper mission excludes blocked admin routes and destructive admin mutations."
-      },
-      {
-        "claimId": "server-validation",
-        "reason": "Server implementation provenance is not established by this browser mission."
-      },
-      {
-        "claimId": "discount-types",
-        "reason": "Percentage and fixed-amount coverage requires multiple promo fixtures."
-      }
-    ],
     "assertions": [
       {
         "kind": "dom",

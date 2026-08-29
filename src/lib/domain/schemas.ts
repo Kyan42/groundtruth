@@ -142,6 +142,7 @@ export const TestMissionSchema = z.object({
   title: z.string().min(1),
   kind: z.enum(["intent", "regression"]),
   claimIds: z.array(z.string().min(1)),
+  claimSourceQuote: z.string().min(1).optional(),
   goal: z.string().min(1),
   startPath: z.string().min(1),
   preconditions: z.array(z.string().min(1)),
