@@ -1,20 +1,17 @@
-import { RunloopSDK } from "@runloop/api-client";
-
-import { requireRunloopEnvironment } from "@/lib/config/env";
-import type { IntentSpec, Run } from "@/lib/domain/schemas";
+import type {
+  BrowserEnvironment,
+  ExecutableJourney,
+  ExecutionResult,
+  IntentSpec,
+  Run,
+  TestMission,
+} from "@/lib/domain/schemas";
+import { getRunloopClient } from "@/lib/runloop/client";
 
 type EventOrigin = "EXTERNAL_EVENT" | "AGENT_EVENT" | "USER_EVENT";
 
-let client: RunloopSDK | undefined;
-
-function getClient(): RunloopSDK {
-  const environment = requireRunloopEnvironment();
-  client ??= new RunloopSDK({ bearerToken: environment.RUNLOOP_API_KEY });
-  return client;
-}
-
 export async function createCoordinationAxon(run: Run): Promise<string> {
-  const axon = await getClient().axon.create({ name: `groundtruth-${run.id}` });
+  const axon = await getRunloopClient().axon.create({ name: `groundtruth-${run.id}` });
   await axon.sql.batch({
     statements: [
       {
@@ -58,6 +55,22 @@ export async function createCoordinationAxon(run: Run): Promise<string> {
           created_at TEXT NOT NULL
         )`,
       },
+      {
+        sql: `CREATE TABLE IF NOT EXISTS environments (
+          run_id TEXT NOT NULL,
+          role TEXT NOT NULL,
+          environment_json TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          PRIMARY KEY (run_id, role)
+        )`,
+      },
+      {
+        sql: `CREATE TABLE IF NOT EXISTS journeys (
+          mission_id TEXT PRIMARY KEY,
+          journey_json TEXT NOT NULL,
+          created_at TEXT NOT NULL
+        )`,
+      },
     ],
   });
   return axon.id;
@@ -69,7 +82,7 @@ export async function publishRunEvent(
   origin: EventOrigin,
   payload: Record<string, unknown>,
 ): Promise<void> {
-  const axon = getClient().axon.fromId(axonId);
+  const axon = getRunloopClient().axon.fromId(axonId);
   await axon.publish({
     event_type: eventType,
     origin,
@@ -84,7 +97,7 @@ export async function saveIntentContract(
   spec: IntentSpec,
   approvedAt: string,
 ): Promise<void> {
-  const axon = getClient().axon.fromId(axonId);
+  const axon = getRunloopClient().axon.fromId(axonId);
   await axon.sql.query({
     sql: `INSERT OR IGNORE INTO contracts (run_id, schema_version, spec_json, approved_at)
       VALUES (?, ?, ?, ?)`,
@@ -98,4 +111,122 @@ export async function saveIntentContract(
   if (verification.meta.changes !== 1) {
     throw new Error("The existing intent contract does not match this approval attempt.");
   }
+}
+
+export async function ensureBrowserTables(axonId: string): Promise<void> {
+    const axon = getRunloopClient().axon.fromId(axonId);
+    await axon.sql.batch({
+      statements: [
+        {
+          sql: `CREATE TABLE IF NOT EXISTS environments (
+            run_id TEXT NOT NULL,
+            role TEXT NOT NULL,
+            environment_json TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            PRIMARY KEY (run_id, role)
+          )`,
+        },
+        {
+          sql: `CREATE TABLE IF NOT EXISTS journeys (
+            mission_id TEXT PRIMARY KEY,
+            journey_json TEXT NOT NULL,
+            created_at TEXT NOT NULL
+          )`,
+        },
+        {
+          sql: `CREATE TABLE IF NOT EXISTS mission_attempts (
+            attempt_id TEXT PRIMARY KEY,
+            run_id TEXT NOT NULL,
+            mission_id TEXT NOT NULL,
+            mission_json TEXT NOT NULL,
+            created_at TEXT NOT NULL
+          )`,
+        },
+        {
+          sql: `CREATE TABLE IF NOT EXISTS journey_attempts (
+            attempt_id TEXT PRIMARY KEY,
+            run_id TEXT NOT NULL,
+            mission_id TEXT NOT NULL,
+            journey_json TEXT NOT NULL,
+            created_at TEXT NOT NULL
+          )`,
+        },
+      ],
+    });
+  }
+
+export async function saveMission(
+    axonId: string,
+    attemptId: string,
+    runId: string,
+    mission: TestMission,
+    createdAt: string,
+  ): Promise<void> {
+    const axon = getRunloopClient().axon.fromId(axonId);
+    await axon.sql.query({
+      sql: `INSERT INTO mission_attempts
+        (attempt_id, run_id, mission_id, mission_json, created_at)
+        VALUES (?, ?, ?, ?, ?)`,
+      params: [attemptId, runId, mission.id, JSON.stringify(mission), createdAt],
+    });
+  }
+
+export async function saveEnvironment(
+    axonId: string,
+    runId: string,
+    environment: BrowserEnvironment,
+    updatedAt: string,
+  ): Promise<void> {
+    const axon = getRunloopClient().axon.fromId(axonId);
+    await axon.sql.query({
+      sql: `INSERT OR REPLACE INTO environments (run_id, role, environment_json, updated_at)
+        VALUES (?, ?, ?, ?)`,
+      params: [runId, environment.role, JSON.stringify(environment), updatedAt],
+    });
+  }
+
+export async function saveJourney(
+    axonId: string,
+    attemptId: string,
+    runId: string,
+    journey: ExecutableJourney,
+    createdAt: string,
+  ): Promise<void> {
+    const axon = getRunloopClient().axon.fromId(axonId);
+    await axon.sql.query({
+      sql: `INSERT INTO journey_attempts
+        (attempt_id, run_id, mission_id, journey_json, created_at)
+        VALUES (?, ?, ?, ?, ?)`,
+      params: [attemptId, runId, journey.missionId, JSON.stringify(journey), createdAt],
+    });
+  }
+
+export async function saveExecution(
+    axonId: string,
+    executionId: string,
+    result: ExecutionResult,
+    createdAt: string,
+  ): Promise<void> {
+    const axon = getRunloopClient().axon.fromId(axonId);
+    await axon.sql.query({
+      sql: `INSERT OR REPLACE INTO executions
+        (execution_id, mission_id, target, result_json, created_at)
+        VALUES (?, ?, ?, ?, ?)`,
+      params: [executionId, result.missionId, result.target, JSON.stringify(result), createdAt],
+    });
+  }
+
+export async function saveArtifact(
+    axonId: string,
+    artifactId: string,
+    executionId: string,
+    kind: string,
+    objectId: string,
+  ): Promise<void> {
+    const axon = getRunloopClient().axon.fromId(axonId);
+    await axon.sql.query({
+      sql: `INSERT OR REPLACE INTO artifacts (artifact_id, execution_id, kind, object_id)
+        VALUES (?, ?, ?, ?)`,
+      params: [artifactId, executionId, kind, objectId],
+    });
 }

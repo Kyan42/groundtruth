@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "repository": "Kyan42/fernway",
+  "compatibility": {
+    "baseSha": "db5c5ae6e25fdc3947738b37327a626394420365",
+    "headSha": "716b9f36e35f4f1cd1944e043bfdfb13f8f97ea4"
+  },
+  "workspace": {
+    "workingDirectory": "app",
+    "installCommand": "corepack enable && corepack prepare pnpm@9.15.5 --activate && pnpm install --no-frozen-lockfile",
+    "startCommand": "pnpm dev --hostname 0.0.0.0",
+    "port": 3000,
+    "healthPath": "/api/health"
+  },
+  "fixtures": {
+    "resetCommand": "pnpm seed --reset"
+  },
+  "auth": {
+    "mode": "none"
+  },
+  "safety": {
+    "allowedHosts": [
+      "*.tunnel.runloop.ai"
+    ],
+    "blockedPathPrefixes": [
+      "/admin",
+      "/api/orders"
+    ],
+    "allowStateChangingRequests": true
+  }
+}

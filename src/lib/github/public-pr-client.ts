@@ -21,6 +21,11 @@ const PullRequestResponseSchema = z.object({
   head: z.object({
     ref: z.string().min(1),
     sha: z.string().regex(/^[a-f0-9]{40}$/i),
+    repo: z
+      .object({
+        full_name: z.string().min(1),
+      })
+      .nullable(),
   }),
 });
 
@@ -140,6 +145,17 @@ export async function fetchPublicPullRequest(value: string): Promise<PublicPullR
       "pr_unavailable",
       "The pull request does not exist or is not publicly accessible.",
       404,
+    );
+  }
+  if (
+    !pullRequest.head.repo ||
+    pullRequest.head.repo.full_name.toLowerCase() !==
+      `${pullRequest.base.repo.owner.login}/${pullRequest.base.repo.name}`.toLowerCase()
+  ) {
+    throw new GroundtruthError(
+      "fork_pr_unsupported",
+      "Fork pull requests are not supported by the browser verification prototype.",
+      422,
     );
   }
   return {

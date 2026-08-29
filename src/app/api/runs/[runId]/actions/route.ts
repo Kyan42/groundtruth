@@ -7,7 +7,14 @@ import { getRunService } from "@/lib/orchestration/run-service";
 export const runtime = "nodejs";
 
 const ActionRequestSchema = z.object({
-  action: z.enum(["resume", "approve_intent", "retry_intent", "interrupt_intent"]),
+  action: z.enum([
+    "resume",
+    "approve_intent",
+    "retry_intent",
+    "interrupt_intent",
+    "start_verification",
+    "rerun_verification",
+  ]),
 });
 
 export async function POST(
@@ -38,7 +45,11 @@ export async function POST(
           ? await service.approveIntent(runId)
           : body.data.action === "retry_intent"
             ? await service.retryIntent(runId)
-            : await service.interruptIntent(runId);
+            : body.data.action === "interrupt_intent"
+              ? await service.interruptIntent(runId)
+              : body.data.action === "rerun_verification"
+                ? await service.rerunVerification(runId)
+                : await service.startVerification(runId);
     return NextResponse.json(view);
   } catch (error) {
     const response = toErrorResponse(error);

@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "repository": "Kyan42/fernway",
+  "baseSha": "db5c5ae6e25fdc3947738b37327a626394420365",
+  "routes": [
+    {
+      "path": "/",
+      "sourceFiles": [
+        "app/page.tsx",
+        "components/ProductCard.tsx"
+      ]
+    },
+    {
+      "path": "/cart",
+      "sourceFiles": [
+        "app/cart/page.tsx",
+        "components/OrderSummary.tsx",
+        "components/PromoInput.tsx"
+      ]
+    },
+    {
+      "path": "/checkout",
+      "sourceFiles": [
+        "app/checkout/page.tsx",
+        "components/OrderSummary.tsx"
+      ]
+    },
+    {
+      "path": "/admin",
+      "sourceFiles": [
+        "app/admin/page.tsx"
+      ]
+    }
+  ],
+  "components": [
+    {
+      "name": "PromoInput",
+      "sourceFiles": [
+        "components/PromoInput.tsx"
+      ],
+      "routePaths": [
+        "/cart"
+      ]
+    },
+    {
+      "name": "OrderSummary",
+      "sourceFiles": [
+        "components/OrderSummary.tsx"
+      ],
+      "routePaths": [
+        "/cart",
+        "/checkout"
+      ]
+    }
+  ],
+  "apis": [
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "sourceFiles": [
+        "app/api/health/route.ts"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/cart",
+      "sourceFiles": [
+        "app/api/cart/route.ts"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/promo",
+      "sourceFiles": [
+        "app/api/promo/route.ts",
+        "lib/promo.ts"
+      ]
+    }
+  ],
+  "journeys": [
+    {
+      "id": "shopper-applies-promo",
+      "title": "Shopper adds a plant and applies a promo code",
+      "startPath": "/",
+      "steps": [
+        {
+          "action": "add",
+          "target": "one catalog product"
+        },
+        {
+          "action": "navigate",
+          "target": "/cart"
+        },
+        {
+          "action": "apply",
+          "target": "promo code"
+        }
+      ]
+    }
+  ]
+}
