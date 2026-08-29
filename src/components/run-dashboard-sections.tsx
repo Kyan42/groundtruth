@@ -197,11 +197,20 @@ function ClaimsRail({
         <p className={styles.sectionKicker}>Run contract</p>
         <h1>Claims</h1>
         <p>Checked in a live browser against the exact pull request revision.</p>
+        <p className={styles.coverageSummary} aria-label="Execution coverage">
+          <strong>
+            {items.coverage.intentExercised} of {items.coverage.intentTotal}
+          </strong>{" "}
+          intent {items.coverage.intentTotal === 1 ? "claim" : "claims"} exercised
+          <span aria-hidden="true"> · </span>
+          <strong>{items.coverage.regressionExecuted}</strong>{" "}
+          {items.coverage.regressionExecuted === 1 ? "regression" : "regressions"} executed
+        </p>
       </div>
 
       <div className={styles.claimsScroller}>
         <ClaimGroup
-          label="From the pull request"
+          label={items.collapseNotRun ? "Intent results" : "From the pull request"}
           count={items.intent.length}
           items={items.intent}
           selectedItem={selectedItem}
@@ -220,6 +229,9 @@ function ClaimsRail({
             selectedItem={selectedItem}
             onSelect={onSelect}
           />
+        ) : null}
+        {items.collapseNotRun && items.notRun.length > 0 ? (
+          <NotRunClaims items={items.notRun} />
         ) : null}
       </div>
 
@@ -258,6 +270,30 @@ function ClaimsRail({
         </a>
       </div>
     </aside>
+  );
+}
+
+function NotRunClaims({ items }: { items: DashboardItem[] }) {
+  return (
+    <details className={styles.notRunClaims}>
+      <summary>
+        Not run <span>({items.length})</span>
+      </summary>
+      <div className={styles.notRunList}>
+        {items.map((item) => (
+          <article className={styles.notRunItem} key={item.key}>
+            <div>
+              <span className={styles.claimStatus}>Not run</span>
+              <code>{item.id}</code>
+            </div>
+            <p className={styles.claimStatement}>{item.label}</p>
+            <p className={styles.claimDetail}>
+              {item.detail ?? "No browser mission was executed for this claim."}
+            </p>
+          </article>
+        ))}
+      </div>
+    </details>
   );
 }
 
