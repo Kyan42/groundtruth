@@ -1,8 +1,11 @@
+import { randomUUID } from "node:crypto";
+
 import type {
   BrowserEnvironment,
   ExecutableJourney,
   ExecutionResult,
   IntentSpec,
+  RegressionComparison,
   Run,
   TestMission,
 } from "@/lib/domain/schemas";
@@ -151,6 +154,49 @@ export async function ensureBrowserTables(axonId: string): Promise<void> {
             created_at TEXT NOT NULL
           )`,
         },
+        {
+          sql: `CREATE TABLE IF NOT EXISTS execution_attempts (
+            execution_id TEXT PRIMARY KEY,
+            attempt_id TEXT NOT NULL,
+            mission_id TEXT NOT NULL,
+            target TEXT NOT NULL,
+            result_json TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            UNIQUE (attempt_id, target)
+          )`,
+        },
+        {
+          sql: `CREATE TABLE IF NOT EXISTS environment_attempts (
+            attempt_id TEXT NOT NULL,
+            run_id TEXT NOT NULL,
+            role TEXT NOT NULL,
+            environment_json TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            PRIMARY KEY (attempt_id, role)
+          )`,
+        },
+        {
+          sql: `CREATE TABLE IF NOT EXISTS environment_events (
+            event_id TEXT PRIMARY KEY,
+            attempt_id TEXT NOT NULL,
+            run_id TEXT NOT NULL,
+            role TEXT NOT NULL,
+            status TEXT NOT NULL,
+            environment_json TEXT NOT NULL,
+            created_at TEXT NOT NULL
+          )`,
+        },
+        {
+          sql: `CREATE TABLE IF NOT EXISTS regression_comparisons (
+            comparison_id TEXT PRIMARY KEY,
+            attempt_id TEXT NOT NULL UNIQUE,
+            base_execution_id TEXT NOT NULL,
+            head_execution_id TEXT NOT NULL,
+            verdict TEXT NOT NULL,
+            comparison_json TEXT NOT NULL,
+            created_at TEXT NOT NULL
+          )`,
+        },
       ],
     });
   }
@@ -173,16 +219,40 @@ export async function saveMission(
 
 export async function saveEnvironment(
     axonId: string,
+    attemptId: string,
     runId: string,
     environment: BrowserEnvironment,
     updatedAt: string,
   ): Promise<void> {
     const axon = getRunloopClient().axon.fromId(axonId);
-    await axon.sql.query({
-      sql: `INSERT OR REPLACE INTO environments (run_id, role, environment_json, updated_at)
-        VALUES (?, ?, ?, ?)`,
-      params: [runId, environment.role, JSON.stringify(environment), updatedAt],
+    const environmentJson = JSON.stringify(environment);
+    const result = await axon.sql.batch({
+      statements: [
+        {
+          sql: `INSERT OR REPLACE INTO environment_attempts
+            (attempt_id, run_id, role, environment_json, updated_at)
+            VALUES (?, ?, ?, ?, ?)`,
+          params: [attemptId, runId, environment.role, environmentJson, updatedAt],
+        },
+        {
+          sql: `INSERT INTO environment_events
+            (event_id, attempt_id, run_id, role, status, environment_json, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          params: [
+            randomUUID(),
+            attemptId,
+            runId,
+            environment.role,
+            environment.status,
+            environmentJson,
+            updatedAt,
+          ],
+        },
+      ],
     });
+    if (result.results.some((step) => step.error || !step.success)) {
+      throw new Error("Failed to persist the environment audit transaction.");
+    }
   }
 
 export async function saveJourney(
@@ -208,11 +278,21 @@ export async function saveExecution(
     createdAt: string,
   ): Promise<void> {
     const axon = getRunloopClient().axon.fromId(axonId);
+    if (!result.attemptId) {
+      throw new Error("Attempt-scoped execution persistence requires an attempt ID.");
+    }
     await axon.sql.query({
-      sql: `INSERT OR REPLACE INTO executions
-        (execution_id, mission_id, target, result_json, created_at)
-        VALUES (?, ?, ?, ?, ?)`,
-      params: [executionId, result.missionId, result.target, JSON.stringify(result), createdAt],
+      sql: `INSERT INTO execution_attempts
+        (execution_id, attempt_id, mission_id, target, result_json, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)`,
+      params: [
+        executionId,
+        result.attemptId,
+        result.missionId,
+        result.target,
+        JSON.stringify(result),
+        createdAt,
+      ],
     });
   }
 
@@ -225,8 +305,48 @@ export async function saveArtifact(
   ): Promise<void> {
     const axon = getRunloopClient().axon.fromId(axonId);
     await axon.sql.query({
-      sql: `INSERT OR REPLACE INTO artifacts (artifact_id, execution_id, kind, object_id)
+      sql: `INSERT INTO artifacts (artifact_id, execution_id, kind, object_id)
         VALUES (?, ?, ?, ?)`,
       params: [artifactId, executionId, kind, objectId],
     });
+}
+
+export async function saveRegressionComparison(
+  axonId: string,
+  comparison: RegressionComparison,
+): Promise<void> {
+  const axon = getRunloopClient().axon.fromId(axonId);
+  const comparisonJson = JSON.stringify(comparison);
+  const result = await axon.sql.batch({
+    statements: [
+      {
+        sql: `INSERT INTO regression_comparisons
+          (comparison_id, attempt_id, base_execution_id, head_execution_id, verdict, comparison_json, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        params: [
+          comparison.comparisonId,
+          comparison.attemptId,
+          comparison.baseExecutionId,
+          comparison.headExecutionId,
+          comparison.verdict,
+          comparisonJson,
+          comparison.createdAt,
+        ],
+      },
+      {
+        sql: `INSERT INTO verdicts (verdict_id, mission_id, kind, verdict_json, created_at)
+          VALUES (?, ?, ?, ?, ?)`,
+        params: [
+          comparison.comparisonId,
+          comparison.missionId,
+          "regression",
+          comparisonJson,
+          comparison.createdAt,
+        ],
+      },
+    ],
+  });
+  if (result.results.some((step) => step.error || !step.success)) {
+    throw new Error("Failed to persist the regression comparison transaction.");
+  }
 }

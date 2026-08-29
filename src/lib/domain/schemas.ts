@@ -125,6 +125,17 @@ export const ImpactMapSchema = z.object({
 
 export type ImpactMap = z.infer<typeof ImpactMapSchema>;
 
+const ImpactEvidenceSchema = z.object({
+  routes: z.array(z.string().startsWith("/")),
+  components: z.array(z.string().min(1)),
+  apis: z.array(
+    z.object({
+      method: z.string().min(1),
+      path: z.string().startsWith("/"),
+    }),
+  ),
+});
+
 export const TestMissionSchema = z.object({
   schemaVersion: z.literal(1),
   id: z.string().min(1),
@@ -143,6 +154,7 @@ export const TestMissionSchema = z.object({
       }),
     )
     .optional(),
+  impactEvidence: ImpactEvidenceSchema.optional(),
   assertions: z.array(AssertionSchema).min(1),
 });
 
@@ -151,19 +163,31 @@ export type TestMission = z.infer<typeof TestMissionSchema>;
 export const ExecutableJourneySchema = z.object({
   schemaVersion: z.literal(1),
   missionId: z.string().min(1),
-  discoveredAgainst: z.literal("head"),
+  discoveredAgainst: z.enum(["base", "head"]),
   steps: z.array(JourneyStepSchema).min(1),
   producer: z.object({ kind: z.literal("codex"), agentId: z.string().min(1) }),
 });
 
 export type ExecutableJourney = z.infer<typeof ExecutableJourneySchema>;
 
+export const ExecutionTargetSchema = z.enum(["base", "head"]);
+export type ExecutionTarget = z.infer<typeof ExecutionTargetSchema>;
+
+export const AssertionObservationSchema = z.object({
+  assertionIndex: z.number().int().nonnegative(),
+  assertionId: z.string().min(1).optional(),
+  behavior: z.string().min(1).optional(),
+  comparison: z.enum(["pass_only", "exact"]).optional(),
+  passed: z.boolean(),
+  actual: z.unknown(),
+});
+
 export const ExecutionResultSchema = z.object({
   schemaVersion: z.literal(1),
   attemptId: z.uuid().optional(),
   executionId: z.uuid().optional(),
   missionId: z.string().min(1),
-  target: z.enum(["base", "head"]),
+  target: ExecutionTargetSchema,
   status: z.enum(["passed", "failed", "blocked", "error"]),
   startedAt: IsoDateSchema,
   endedAt: IsoDateSchema,
@@ -174,25 +198,59 @@ export const ExecutionResultSchema = z.object({
       message: z.string().optional(),
     }),
   ),
-  checks: z.array(
-    z.object({
-      assertionIndex: z.number().int().nonnegative(),
-      passed: z.boolean(),
-      actual: z.unknown(),
-    }),
-  ),
+  checks: z.array(AssertionObservationSchema),
   evidence: z.object({
     videoArtifactId: z.string().min(1).optional(),
     traceArtifactId: z.string().min(1).optional(),
     screenshotArtifactIds: z.array(z.string().min(1)),
     actionArtifactId: z.string().min(1).optional(),
     consoleArtifactId: z.string().min(1).optional(),
+    pageErrorArtifactId: z.string().min(1).optional(),
     networkArtifactId: z.string().min(1).optional(),
   }),
+  evidenceErrors: z
+    .array(z.object({ code: z.string().min(1), message: z.string().min(1) }))
+    .optional(),
   error: z.object({ code: z.string().min(1), message: z.string().min(1) }).optional(),
 });
 
 export type ExecutionResult = z.infer<typeof ExecutionResultSchema>;
+
+export const RegressionComparisonSchema = z.object({
+  schemaVersion: z.literal(1),
+  comparisonId: z.uuid(),
+  attemptId: z.uuid(),
+  missionId: z.string().min(1),
+  baseExecutionId: z.uuid(),
+  headExecutionId: z.uuid(),
+  verdict: z.enum(["preserved", "regressed", "inconclusive"]),
+  reason: z.string().min(1),
+  observations: z.array(
+    z.object({
+      assertionId: z.string().min(1),
+      behavior: z.string().min(1),
+      comparison: z.enum(["pass_only", "exact"]),
+      basePassed: z.boolean(),
+      headPassed: z.boolean(),
+      equal: z.boolean().optional(),
+      baseNormalized: z.unknown().optional(),
+      headNormalized: z.unknown().optional(),
+    }),
+  ),
+  firstDivergence: z
+    .object({
+      stage: z.enum(["step", "assertion", "execution"]),
+      stepIndex: z.number().int().nonnegative().optional(),
+      assertionId: z.string().min(1).optional(),
+      behavior: z.string().min(1),
+      baseSummary: z.string().min(1),
+      headSummary: z.string().min(1),
+    })
+    .optional(),
+  createdAt: IsoDateSchema,
+});
+
+export type RegressionComparison = z.infer<typeof RegressionComparisonSchema>;
 
 export const BrowserEnvironmentSchema = z.object({
   role: z.enum(["base", "head", "browser"]),
@@ -212,10 +270,17 @@ export const BrowserVerificationSchema = z.object({
   journey: ExecutableJourneySchema.optional(),
   environments: z.array(BrowserEnvironmentSchema),
   execution: ExecutionResultSchema.optional(),
+  executions: z
+    .object({
+      base: ExecutionResultSchema.optional(),
+      head: ExecutionResultSchema.optional(),
+    })
+    .optional(),
+  comparison: RegressionComparisonSchema.optional(),
   actions: z.array(
     z.object({
       at: IsoDateSchema,
-      target: z.literal("head"),
+      target: ExecutionTargetSchema,
       summary: z.string().min(1),
       status: z.string().min(1),
     }),
@@ -225,7 +290,7 @@ export const BrowserVerificationSchema = z.object({
       method: z.string().min(1),
       url: z.string().min(1),
       status: z.number().int().min(100).max(599),
-      target: z.literal("head"),
+      target: ExecutionTargetSchema,
     }),
   ),
   browserAgent: z
@@ -358,7 +423,9 @@ export const RunViewSchema = z.object({
     regression: z.array(
       z.object({
         missionId: z.string().min(1),
-        verdict: z.enum(["safe", "regression", "inconclusive"]),
+        verdict: z.enum(["preserved", "regressed", "inconclusive"]),
+        reason: z.string().min(1),
+        firstDivergence: RegressionComparisonSchema.shape.firstDivergence,
       }),
     ),
   }),
@@ -366,6 +433,14 @@ export const RunViewSchema = z.object({
   recording: z
     .object({ artifactId: z.string().min(1), contentType: z.string().min(1) })
     .optional(),
+  recordings: z.array(
+    z.object({
+      target: ExecutionTargetSchema,
+      artifactId: z.string().min(1),
+      contentType: z.string().min(1),
+    }),
+  ),
+  verificationAttempts: z.array(BrowserVerificationSchema),
   actions: z.array(
     z.object({
       at: IsoDateSchema,

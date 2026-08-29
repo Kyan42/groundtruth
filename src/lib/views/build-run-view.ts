@@ -10,6 +10,10 @@ export async function buildRunView(run: Run): Promise<RunView> {
   );
   const setupBlockers = appConfiguration.ready ? [] : appConfiguration.blockers;
   const configuredMission = appConfiguration.ready ? appConfiguration.mission : undefined;
+  const attempts = [
+    ...(run.browserVerificationHistory ?? []),
+    ...(run.browserVerification ? [run.browserVerification] : []),
+  ];
 
   if (
     run.blocker?.code.endsWith("_missing") ||
@@ -25,13 +29,13 @@ export async function buildRunView(run: Run): Promise<RunView> {
     Boolean(run.intentSpec);
   const approved = Boolean(run.intentApproval);
   const browser = run.browserVerification;
-  const coverageMission = browser
-    ? browser.attemptId
-      ? browser.mission
-      : undefined
-    : configuredMission;
+  const completedIntentMission = [...attempts]
+    .reverse()
+    .find((attempt) => attempt.attemptId && attempt.mission?.kind === "intent")?.mission;
+  const coverageMission = completedIntentMission ?? configuredMission;
   const journeyComplete = Boolean(browser?.journey);
-  const executionComplete = Boolean(browser?.execution);
+  const executionComplete = Boolean(browser?.execution || browser?.comparison);
+  const executionStatus = browser?.execution?.status;
   const browserActive =
     run.status === "verifying" ||
     browser?.status === "preparing" ||
@@ -53,6 +57,44 @@ export async function buildRunView(run: Run): Promise<RunView> {
         : "Ready to start the trusted browser mission."
       : "Trusted AppProfile and AppMap are required before browser verification."
     : "Waiting for intent contract approval.";
+  const executionPhaseStatus: RunView["phases"][number]["status"] =
+    browser?.status === "blocked" || executionStatus === "blocked"
+      ? "blocked"
+      : browser?.status === "failed" || executionStatus === "error"
+        ? "failed"
+        : executionComplete
+          ? "complete"
+          : browserActive
+            ? "active"
+            : "pending";
+  const executionPhaseDetail =
+    browser?.blocker?.message ??
+    (browser?.comparison
+      ? browser.comparison.reason
+      : browser?.status === "complete" && executionStatus === "failed"
+        ? "Browser replay completed with assertion findings."
+        : executionStatus === "error"
+          ? "Browser replay ended with a runner error."
+          : executionStatus === "blocked"
+            ? "Browser replay was blocked before it could produce a verdict."
+            : downstreamDetail);
+  const results = buildAllResults(attempts);
+  const claimCoverage = buildClaimCoverage(run, coverageMission);
+  const validClaimIds = new Set(run.intentSpec?.claims.map((claim) => claim.id) ?? []);
+  const selectedClaimId =
+    results.intent.find(
+      (result) => result.verdict === "non_conformant" && validClaimIds.has(result.claimId),
+    )?.claimId ??
+    results.intent.find((result) => validClaimIds.has(result.claimId))?.claimId ??
+    (executionComplete
+      ? claimCoverage.find(
+          (coverage) =>
+            coverage.status === "covered" &&
+            coverage.missionId === coverageMission?.id &&
+            validClaimIds.has(coverage.claimId),
+        )?.claimId
+      : coverageMission?.claimIds.find((claimId) => validClaimIds.has(claimId))) ??
+    run.intentSpec?.claims[0]?.id;
 
   return {
     run: {
@@ -103,18 +145,8 @@ export async function buildRunView(run: Run): Promise<RunView> {
       {
         id: "execution",
         label: "Browser execution",
-        status: executionComplete
-          ? browser?.execution?.status === "passed"
-            ? "complete"
-            : "failed"
-          : browser?.status === "blocked"
-            ? "blocked"
-            : browser?.status === "failed"
-              ? "failed"
-              : browserActive
-                ? "active"
-                : "pending",
-        detail: browser?.blocker?.message ?? downstreamDetail,
+        status: executionPhaseStatus,
+        detail: executionPhaseDetail,
       },
     ],
     contract: {
@@ -126,22 +158,18 @@ export async function buildRunView(run: Run): Promise<RunView> {
             ? "invalid"
             : "pending",
       intentSpec: run.intentSpec,
-      selectedClaimId:
-        coverageMission?.claimIds.find((claimId) =>
-          run.intentSpec?.claims.some((claim) => claim.id === claimId),
-        ) ?? run.intentSpec?.claims[0]?.id,
-      claimCoverage: buildClaimCoverage(run, coverageMission),
+      selectedClaimId,
+      claimCoverage,
     },
-    missions: browser?.mission ? [browser.mission] : [],
+    missions: attempts.flatMap((attempt) => (attempt.mission ? [attempt.mission] : [])),
     journey: browser?.journey,
     environments: browser?.environments ?? [],
-    results: buildResults(browser),
-    recording: browser?.execution?.evidence.videoArtifactId
-      ? {
-          artifactId: browser.execution.evidence.videoArtifactId,
-          contentType: "video/webm",
-        }
-      : undefined,
+    results,
+    blastRadius: appConfiguration.ready ? appConfiguration.impactMap : undefined,
+    recording: currentRecordings(browser).find((recording) => recording.target === "head") ??
+      currentRecordings(browser)[0],
+    recordings: currentRecordings(browser),
+    verificationAttempts: attempts,
     actions: browser?.actions ?? [],
     network: browser?.network ?? [],
     blocker: browser?.blocker ?? run.blocker,
@@ -149,13 +177,16 @@ export async function buildRunView(run: Run): Promise<RunView> {
 }
 
 export function buildResults(browser: Run["browserVerification"]): RunView["results"] {
-  if (!browser?.mission || !browser.execution) {
+  if (!browser?.mission) {
     return { intent: [], regression: [] };
   }
-  if (!browser.attemptId || browser.execution.attemptId !== browser.attemptId) {
+  if (!browser.attemptId) {
     return { intent: [], regression: [] };
   }
   if (browser.mission.kind === "intent") {
+    if (!browser.execution || browser.execution.attemptId !== browser.attemptId) {
+      return { intent: [], regression: [] };
+    }
     const claimId =
       browser.mission.claimIds.length === 1 ? browser.mission.claimIds[0] : undefined;
     return {
@@ -176,20 +207,55 @@ export function buildResults(browser: Run["browserVerification"]): RunView["resu
       regression: [],
     };
   }
+  if (!browser.comparison || browser.comparison.attemptId !== browser.attemptId) {
+    return { intent: [], regression: [] };
+  }
   return {
     intent: [],
     regression: [
       {
         missionId: browser.mission.id,
-        verdict:
-          browser.execution.status === "passed"
-            ? ("safe" as const)
-            : browser.execution.status === "failed"
-              ? ("regression" as const)
-              : ("inconclusive" as const),
+        verdict: browser.comparison.verdict,
+        reason: browser.comparison.reason,
+        firstDivergence: browser.comparison.firstDivergence,
       },
     ],
   };
+}
+
+function buildAllResults(attempts: NonNullable<Run["browserVerification"]>[]): RunView["results"] {
+  const intent = new Map<string, RunView["results"]["intent"][number]>();
+  const regression = new Map<string, RunView["results"]["regression"][number]>();
+  for (const attempt of attempts) {
+    const result = buildResults(attempt);
+    for (const item of result.intent) {
+      intent.set(`${item.missionId}:${item.claimId}`, item);
+    }
+    for (const item of result.regression) {
+      regression.set(item.missionId, item);
+    }
+  }
+  return { intent: [...intent.values()], regression: [...regression.values()] };
+}
+
+function currentRecordings(browser: Run["browserVerification"]): RunView["recordings"] {
+  if (!browser) {
+    return [];
+  }
+  const executions = browser.executions
+    ? [browser.executions.base, browser.executions.head]
+    : [browser.execution];
+  return executions.flatMap((execution) =>
+    execution?.evidence.videoArtifactId
+      ? [
+          {
+            target: execution.target,
+            artifactId: execution.evidence.videoArtifactId,
+            contentType: "video/webm",
+          },
+        ]
+      : [],
+  );
 }
 
 export function buildClaimCoverage(

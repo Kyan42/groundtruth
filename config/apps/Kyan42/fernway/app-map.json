@@ -69,6 +69,13 @@
       ]
     },
     {
+      "method": "GET",
+      "path": "/api/cart",
+      "sourceFiles": [
+        "app/api/cart/route.ts"
+      ]
+    },
+    {
       "method": "POST",
       "path": "/api/promo",
       "sourceFiles": [
