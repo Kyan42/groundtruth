@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "baseSha": "db5c5ae6e25fdc3947738b37327a626394420365",
+  "headSha": "716b9f36e35f4f1cd1944e043bfdfb13f8f97ea4",
+  "changedFiles": [
+    "app/api/cart/route.ts",
+    "app/api/orders/route.ts",
+    "app/cart/page.tsx",
+    "components/OrderSummary.tsx",
+    "lib/db.ts",
+    "lib/totals.ts"
+  ],
+  "affectedRoutes": [
+    {
+      "path": "/cart",
+      "evidenceFiles": [
+        "app/cart/page.tsx",
+        "components/OrderSummary.tsx",
+        "lib/totals.ts"
+      ]
+    }
+  ],
+  "affectedComponents": [
+    {
+      "name": "OrderSummary",
+      "evidenceFiles": [
+        "components/OrderSummary.tsx",
+        "lib/totals.ts"
+      ]
+    }
+  ],
+  "affectedApis": [
+    {
+      "method": "GET",
+      "path": "/api/cart",
+      "evidenceFiles": [
+        "app/api/cart/route.ts",
+        "lib/totals.ts"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/cart",
+      "evidenceFiles": [
+        "app/api/cart/route.ts",
+        "lib/totals.ts"
+      ]
+    }
+  ],
+  "riskSignals": [
+    {
+      "label": "Existing no-promo cart totals now flow through discount-aware calculations.",
+      "evidenceFiles": [
+        "app/api/cart/route.ts",
+        "lib/totals.ts",
+        "components/OrderSummary.tsx"
+      ]
+    }
+  ]
+}

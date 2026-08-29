@@ -1,0 +1,187 @@
+[
+  {
+    "schemaVersion": 1,
+    "id": "intent-checkout-application-timing",
+    "title": "Cart remains undiscounted before order placement",
+    "kind": "intent",
+    "claimIds": [
+      "checkout-application"
+    ],
+    "goal": "Starting from a reset storefront, add one product, open the cart, enter the valid promo code, and leave the promo field without placing an order. Verify the cart remains undiscounted at this pre-checkout point.",
+    "startPath": "/",
+    "preconditions": [
+      "The application state was reset with the trusted fixture command.",
+      "The application runs at the exact pull request head SHA.",
+      "No admin identity or external credential is required."
+    ],
+    "fixtureValues": {
+      "validPromoCode": "FERN10"
+    },
+    "deferredClaims": [
+      {
+        "claimId": "shopper-promo-entry",
+        "reason": "This execution isolates discount timing; successful promo-entry behavior needs its own mission."
+      },
+      {
+        "claimId": "invalid-code-error",
+        "reason": "Invalid-code behavior requires a separate fixture and mission."
+      },
+      {
+        "claimId": "admin-management",
+        "reason": "The approved shopper mission excludes blocked admin routes and destructive admin mutations."
+      },
+      {
+        "claimId": "server-validation",
+        "reason": "Server implementation provenance is not established by this browser mission."
+      },
+      {
+        "claimId": "discount-types",
+        "reason": "Percentage and fixed-amount coverage requires multiple promo fixtures."
+      }
+    ],
+    "assertions": [
+      {
+        "kind": "dom",
+        "locator": {
+          "by": "test_id",
+          "value": "discount"
+        },
+        "state": "hidden"
+      },
+      {
+        "kind": "network",
+        "method": "POST",
+        "urlPattern": "/api/promo$",
+        "expectedStatus": 200
+      }
+    ]
+  },
+  {
+    "schemaVersion": 1,
+    "id": "regression-cart-summary",
+    "title": "Existing cart quantity and subtotal remain stable",
+    "kind": "regression",
+    "claimIds": [],
+    "goal": "From a reset catalog, add one available product discovered on base, open the cart, increment it once with the existing quantity stepper, and preserve the resulting cart line, quantity, subtotal, cart response, and error-free runtime behavior.",
+    "startPath": "/",
+    "preconditions": [
+      "Both application environments use the same trusted reset command.",
+      "Product identity and monetary values are discovered and captured from base, not configured as expected results.",
+      "The frozen journey increments quantity through an existing base-observed control.",
+      "No promo code, admin route, order placement, or external credential is required."
+    ],
+    "impactEvidence": {
+      "routes": [
+        "/cart"
+      ],
+      "components": [
+        "OrderSummary"
+      ],
+      "apis": [
+        {
+          "method": "POST",
+          "path": "/api/cart"
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart"
+        }
+      ]
+    },
+    "assertions": [
+      {
+        "id": "cart-line",
+        "behavior": "The selected product remains represented by the same cart line.",
+        "comparison": "exact",
+        "normalizers": [
+          "trim",
+          "collapse_whitespace"
+        ],
+        "kind": "text",
+        "locator": {
+          "by": "test_id",
+          "value": "cart-line"
+        }
+      },
+      {
+        "id": "cart-quantity",
+        "behavior": "Incrementing a cart line once preserves the resulting quantity.",
+        "comparison": "exact",
+        "normalizers": [
+          "trim"
+        ],
+        "kind": "text",
+        "locator": {
+          "by": "test_id",
+          "value": "qty"
+        }
+      },
+      {
+        "id": "cart-subtotal",
+        "behavior": "The cart subtotal remains unchanged after the same quantity increment.",
+        "comparison": "exact",
+        "normalizers": [
+          "trim"
+        ],
+        "kind": "text",
+        "locator": {
+          "by": "test_id",
+          "value": "subtotal"
+        }
+      },
+      {
+        "id": "cart-shipping",
+        "behavior": "The shipping amount remains unchanged for the discovered base cart.",
+        "comparison": "exact",
+        "normalizers": [
+          "trim"
+        ],
+        "kind": "text",
+        "locator": {
+          "by": "test_id",
+          "value": "shipping"
+        }
+      },
+      {
+        "id": "cart-total",
+        "behavior": "The final cart total remains unchanged for the discovered base cart.",
+        "comparison": "exact",
+        "normalizers": [
+          "trim"
+        ],
+        "kind": "text",
+        "locator": {
+          "by": "test_id",
+          "value": "order-total"
+        }
+      },
+      {
+        "id": "cart-api-success",
+        "behavior": "The existing add-to-cart API remains successful.",
+        "comparison": "exact",
+        "normalizers": [
+          "network_path"
+        ],
+        "kind": "network",
+        "method": "POST",
+        "urlPattern": "/api/cart$",
+        "expectedStatus": 200
+      },
+      {
+        "id": "console-errors",
+        "behavior": "The flow does not introduce browser console errors.",
+        "comparison": "pass_only",
+        "kind": "console",
+        "level": "error",
+        "maximumCount": 0
+      },
+      {
+        "id": "page-errors",
+        "behavior": "The flow does not introduce uncaught page errors.",
+        "comparison": "pass_only",
+        "kind": "page_error",
+        "maximumCount": 0
+      }
+    ]
+  }
+]

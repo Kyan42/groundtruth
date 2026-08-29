@@ -9,9 +9,9 @@ export function validateJourneyForReplay(
   journey: ExecutableJourney,
   mission: TestMission,
   profile: AppProfile,
-  headUrl: string,
+  applicationUrl: string,
 ): void {
-  const origin = new URL(headUrl);
+  const origin = new URL(applicationUrl);
   if (!["http:", "https:"].includes(origin.protocol) || !isAllowedHost(origin.hostname, profile.safety.allowedHosts)) {
     throw unsafeJourney("The Runloop application URL is outside the trusted host policy.");
   }
