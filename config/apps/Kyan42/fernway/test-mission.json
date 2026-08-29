@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "intent-valid-promo",
+  "title": "A shopper applies a valid promo code",
+  "kind": "intent",
+  "claimIds": [],
+  "goal": "Starting from a reset storefront, add one product, open the cart, enter a valid promo code, and confirm the shopper sees the applied discount.",
+  "startPath": "/",
+  "preconditions": [
+    "The application state was reset with the trusted fixture command.",
+    "The application runs at the exact pull request head SHA.",
+    "No admin identity or external credential is required."
+  ],
+  "fixtureValues": {
+    "validPromoCode": "FERN10"
+  },
+  "assertions": [
+    {
+      "kind": "text",
+      "locator": {
+        "by": "test_id",
+        "value": "promo-applied"
+      },
+      "operator": "contains",
+      "expected": "FERN10 applied"
+    },
+    {
+      "kind": "dom",
+      "locator": {
+        "by": "test_id",
+        "value": "discount"
+      },
+      "state": "visible"
+    },
+    {
+      "kind": "network",
+      "method": "POST",
+      "urlPattern": "/api/promo$",
+      "expectedStatus": 200
+    }
+  ]
+}

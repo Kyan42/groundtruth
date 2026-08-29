@@ -9,6 +9,7 @@ import {
 } from "@runloop/reflex-client";
 
 import { GroundtruthError } from "@/lib/domain/errors";
+import { loadAppConfiguration } from "@/lib/config/app-config";
 import {
   buildRunKey,
   type Blocker,
@@ -34,6 +35,7 @@ import {
   publishRunEvent,
   saveIntentContract,
 } from "@/lib/runloop/coordination-axon";
+import { executeBrowserVerification } from "@/lib/runloop/browser-verification";
 import { buildRunView } from "@/lib/views/build-run-view";
 
 const livenessByRun = new Map<string, AgentLivenessState>();
@@ -41,6 +43,7 @@ const messageByRun = new Map<string, string>();
 const seenEventIdsByRun = new Map<string, Set<string>>();
 const eventQueuesByRun = new Map<string, Promise<RunView>>();
 const provisioningByRun = new Map<string, Promise<Run>>();
+const verificationByRun = new Map<string, Promise<void>>();
 
 export class RunService {
   async create(prUrl: string): Promise<RunView> {
@@ -106,6 +109,64 @@ export class RunService {
 
   approveIntent(runId: string): Promise<RunView> {
     return this.enqueueRunWork(runId, () => this.approveIntentOnce(runId));
+  }
+
+  async startVerification(runId: string): Promise<RunView> {
+    const run = await this.get(runId);
+    const retryableBrowserFailure =
+      ["blocked", "failed"].includes(run.status) && run.browserVerification?.blocker?.retryable;
+    if (run.status !== "contract_approved" && !retryableBrowserFailure) {
+      throw new GroundtruthError(
+        "browser_verification_not_ready",
+        "Approve the intent contract before starting browser verification.",
+        409,
+      );
+    }
+    const configuration = await loadAppConfiguration(
+      run.repository.owner,
+      run.repository.name,
+      run.pullRequest.baseSha,
+      run.pullRequest.headSha,
+    );
+    if (!configuration.ready) {
+      const blocker: Blocker = {
+        code: configuration.blockers[0]?.code ?? "app_config_missing",
+        message: configuration.blockers.map((candidate) => candidate.message).join(" "),
+        retryable: true,
+      };
+      const blocked = await getRunIndex().update(run.id, (current) => ({
+        ...current,
+        status: "setup_required",
+        blocker,
+        updatedAt: new Date().toISOString(),
+      }));
+      return buildRunView(blocked);
+    }
+    if (verificationByRun.has(run.id)) {
+      return this.getView(run.id);
+    }
+
+    const preparing = await getRunIndex().update(run.id, (current) => ({
+      ...current,
+      status: "verifying",
+      blocker: undefined,
+      browserVerification: {
+        status: "preparing",
+        mission: configuration.mission,
+        environments: [],
+        actions: [],
+        network: [],
+      },
+      updatedAt: new Date().toISOString(),
+    }));
+    const operation = this.runBrowserVerification(preparing, configuration).finally(() => {
+      verificationByRun.delete(run.id);
+    });
+    verificationByRun.set(run.id, operation);
+    void operation.catch((error: unknown) => {
+      console.error("Unhandled browser verification failure.", error);
+    });
+    return buildRunView(preparing);
   }
 
   private async approveIntentOnce(runId: string): Promise<RunView> {
@@ -419,6 +480,28 @@ export class RunService {
     });
     provisioningByRun.set(run.id, provisioning);
     return provisioning;
+  }
+
+  private async runBrowserVerification(
+    run: Run,
+    configuration: Extract<Awaited<ReturnType<typeof loadAppConfiguration>>, { ready: true }>,
+  ): Promise<void> {
+    await executeBrowserVerification(run, configuration, async (browserVerification) => {
+      await getRunIndex().update(run.id, (current) => ({
+        ...current,
+        status:
+          browserVerification.status === "complete"
+            ? "complete"
+            : browserVerification.status === "blocked"
+              ? "blocked"
+              : browserVerification.status === "failed"
+                ? "failed"
+                : "verifying",
+        browserVerification,
+        blocker: browserVerification.blocker,
+        updatedAt: new Date().toISOString(),
+      }));
+    });
   }
 
   private async provision(run: Run): Promise<Run> {

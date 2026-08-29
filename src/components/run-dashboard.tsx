@@ -26,6 +26,25 @@ export function RunDashboard({ initialView }: { initialView: RunView }) {
     return () => source.close();
   }, [view.run.id, view.run.status]);
 
+  useEffect(() => {
+    if (view.run.status !== "verifying") {
+      return;
+    }
+    const refresh = async () => {
+      try {
+        const response = await fetch(`/api/runs/${view.run.id}`, { cache: "no-store" });
+        const payload: unknown = await response.json();
+        if (response.ok) {
+          setView(RunViewSchema.parse(payload));
+        }
+      } catch {
+        setActionError("Could not refresh live browser progress.");
+      }
+    };
+    const timer = window.setInterval(() => void refresh(), 2000);
+    return () => window.clearInterval(timer);
+  }, [view.run.id, view.run.status]);
+
   const selectedClaim = useMemo(
     () => view.contract.intentSpec?.claims.find((claim) => claim.id === selectedClaimId),
     [selectedClaimId, view.contract.intentSpec],
@@ -183,6 +202,17 @@ export function RunDashboard({ initialView }: { initialView: RunView }) {
               ) : (
                 <p className="approved-copy">Contract approved and recorded in the run Axon.</p>
               )}
+              {view.contract.status === "approved" &&
+              view.run.status !== "complete" &&
+              view.run.status !== "verifying" ? (
+                <ActionButton
+                  action="start_verification"
+                  busyAction={busyAction}
+                  onAction={runAction}
+                >
+                  {view.blocker?.retryable ? "Retry browser verification" : "Start browser verification"}
+                </ActionButton>
+              ) : null}
             </>
           ) : (
             <EmptyState
@@ -205,24 +235,40 @@ export function RunDashboard({ initialView }: { initialView: RunView }) {
       <section className="results-grid">
         <ResultGroup
           title="Intent conformance"
-          count={view.results.intent.length}
+          results={view.results.intent.map((result) => ({
+            id: `${result.missionId}:${result.claimId}`,
+            label: result.claimId,
+            verdict: result.verdict,
+          }))}
           detail="No intent missions have been executed."
         />
         <ResultGroup
           title="Regression safety"
-          count={view.results.regression.length}
+          results={view.results.regression.map((result) => ({
+            id: result.missionId,
+            label: result.missionId,
+            verdict: result.verdict,
+          }))}
           detail="No regression missions have been executed."
         />
       </section>
 
       <section className="evidence-grid">
         <div className="panel">
-          <p className="eyebrow">Blast radius</p>
-          <h2>Impact evidence</h2>
-          <EmptyState
-            title="Not mapped"
-            detail="ImpactMap generation is outside the intent-capture foundation."
-          />
+          <p className="eyebrow">Runloop</p>
+          <h2>Application environments</h2>
+          {view.environments.length > 0 ? (
+            <ul>
+              {view.environments.map((environment) => (
+                <li key={environment.devboxId}>
+                  <strong>{environment.role}</strong> {environment.status} — {environment.devboxId}
+                  {environment.exactSha ? ` @ ${environment.exactSha.slice(0, 12)}` : ""}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyState title="Not provisioned" detail="No Runloop application environment exists." />
+          )}
         </div>
         <div className="panel recording-panel">
           <p className="eyebrow">Recording</p>
@@ -236,13 +282,50 @@ export function RunDashboard({ initialView }: { initialView: RunView }) {
         <div className="panel">
           <p className="eyebrow">Action audit</p>
           <h2>{view.actions.length} actions</h2>
-          <EmptyState title="No actions" detail="Mechanical replay has not started." />
+          {view.actions.length > 0 ? (
+            <ol>
+              {view.actions.map((action, index) => (
+                <li key={`${action.at}-${index}`}>
+                  <strong>{action.status}</strong> {action.summary}
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <EmptyState title="No actions" detail="Mechanical replay has not started." />
+          )}
         </div>
         <div className="panel">
           <p className="eyebrow">Network</p>
           <h2>{view.network.length} requests</h2>
-          <EmptyState title="No requests" detail="Sensitive network bodies are never exposed." />
+          {view.network.length > 0 ? (
+            <ul>
+              {view.network.slice(0, 12).map((request, index) => (
+                <li key={`${request.url}-${index}`}>
+                  {request.method} {request.status} {new URL(request.url).pathname}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyState title="No requests" detail="Sensitive network bodies are never exposed." />
+          )}
         </div>
+      </section>
+
+      <section className="panel">
+        <p className="eyebrow">Codex explorer</p>
+        <h2>Frozen executable journey</h2>
+        {view.journey ? (
+          <ol>
+            {view.journey.steps.map((step, index) => (
+              <li key={`${step.action}-${index}`}>
+                <strong>{step.action}</strong>{" "}
+                {"path" in step ? step.path : "locator" in step ? JSON.stringify(step.locator) : ""}
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <EmptyState title="Not discovered" detail="Codex has not frozen a live journey." />
+        )}
       </section>
     </main>
   );
@@ -290,15 +373,33 @@ function NoteList({ title, items }: { title: string; items: string[] }) {
   );
 }
 
-function ResultGroup({ title, count, detail }: { title: string; count: number; detail: string }) {
+function ResultGroup({
+  title,
+  results,
+  detail,
+}: {
+  title: string;
+  results: Array<{ id: string; label: string; verdict: string }>;
+  detail: string;
+}) {
   return (
     <div className="panel result-group">
       <div>
         <p className="eyebrow">Authoritative checks</p>
         <h2>{title}</h2>
       </div>
-      <span className="result-count">{count}</span>
-      <EmptyState title="Not run" detail={detail} />
+      <span className="result-count">{results.length}</span>
+      {results.length > 0 ? (
+        <ul>
+          {results.map((result) => (
+            <li key={result.id}>
+              <strong>{result.verdict.replaceAll("_", " ")}</strong> {result.label}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <EmptyState title="Not run" detail={detail} />
+      )}
     </div>
   );
 }

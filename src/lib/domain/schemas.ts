@@ -37,8 +37,15 @@ export type IntentSpec = z.infer<typeof IntentSpecSchema>;
 export const AppProfileSchema = z.object({
   schemaVersion: z.literal(1),
   repository: RepositoryNameSchema,
+  compatibility: z.object({
+    baseSha: ShaSchema,
+    headSha: ShaSchema,
+  }),
   workspace: z.object({
-    workingDirectory: z.string().min(1),
+    workingDirectory: z
+      .string()
+      .min(1)
+      .regex(/^(?![\\/])(?!.*(?:^|[\\/])\.\.(?:[\\/]|$)).+$/),
     installCommand: z.string().min(1),
     startCommand: z.string().min(1),
     port: z.number().int().min(1).max(65535),
@@ -127,6 +134,7 @@ export const TestMissionSchema = z.object({
   goal: z.string().min(1),
   startPath: z.string().min(1),
   preconditions: z.array(z.string().min(1)),
+  fixtureValues: z.record(z.string().min(1), z.string()).optional(),
   assertions: z.array(AssertionSchema).min(1),
 });
 
@@ -176,11 +184,58 @@ export const ExecutionResultSchema = z.object({
 
 export type ExecutionResult = z.infer<typeof ExecutionResultSchema>;
 
+export const BrowserEnvironmentSchema = z.object({
+  role: z.enum(["base", "head", "browser"]),
+  devboxId: z.string().min(1),
+  status: z.enum(["provisioning", "running", "suspended", "shutdown", "failed"]),
+  exactSha: ShaSchema.optional(),
+  url: z.url().optional(),
+  detail: z.string().min(1).optional(),
+});
+
+export type BrowserEnvironment = z.infer<typeof BrowserEnvironmentSchema>;
+
+export const BrowserVerificationSchema = z.object({
+  status: z.enum(["preparing", "discovering", "executing", "complete", "blocked", "failed"]),
+  mission: TestMissionSchema.optional(),
+  journey: ExecutableJourneySchema.optional(),
+  environments: z.array(BrowserEnvironmentSchema),
+  execution: ExecutionResultSchema.optional(),
+  actions: z.array(
+    z.object({
+      at: IsoDateSchema,
+      target: z.literal("head"),
+      summary: z.string().min(1),
+      status: z.string().min(1),
+    }),
+  ),
+  network: z.array(
+    z.object({
+      method: z.string().min(1),
+      url: z.string().min(1),
+      status: z.number().int().min(100).max(599),
+      target: z.literal("head"),
+    }),
+  ),
+  browserAgent: z
+    .object({
+      devboxId: z.string().min(1),
+      agentName: z.literal("codex"),
+      transport: z.literal("agent_mount"),
+      version: z.string().min(1),
+    })
+    .optional(),
+  blocker: BlockerSchema.optional(),
+});
+
+export type BrowserVerification = z.infer<typeof BrowserVerificationSchema>;
+
 export const RunStatusSchema = z.enum([
   "creating",
   "analyzing_intent",
   "awaiting_contract_approval",
   "contract_approved",
+  "verifying",
   "setup_required",
   "blocked",
   "failed",
@@ -233,6 +288,7 @@ export const RunSchema = z.object({
     })
     .optional(),
   intentApproval: z.object({ approvedAt: IsoDateSchema }).optional(),
+  browserVerification: BrowserVerificationSchema.optional(),
   blocker: BlockerSchema.optional(),
   createdAt: IsoDateSchema,
   updatedAt: IsoDateSchema,
@@ -269,6 +325,8 @@ export const RunViewSchema = z.object({
     selectedClaimId: z.string().optional(),
   }),
   missions: z.array(TestMissionSchema),
+  journey: ExecutableJourneySchema.optional(),
+  environments: z.array(BrowserEnvironmentSchema),
   results: z.object({
     intent: z.array(
       z.object({

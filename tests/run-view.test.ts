@@ -4,7 +4,7 @@ import { buildRunView } from "@/lib/views/build-run-view";
 import { makeRun } from "./fixtures";
 
 describe("RunView", () => {
-  it("keeps intent and regression results separate and unpopulated", async () => {
+  it("keeps intent and regression results separate before browser execution", async () => {
     const run = makeRun({
       status: "contract_approved",
       coordinationAxonId: "axn_123",
@@ -30,7 +30,8 @@ describe("RunView", () => {
 
     expect(view.results.intent).toEqual([]);
     expect(view.results.regression).toEqual([]);
-    expect(view.phases.find((phase) => phase.id === "execution")?.status).toBe("blocked");
+    expect(view.phases.find((phase) => phase.id === "execution")?.status).toBe("pending");
     expect(view.recording).toBeUndefined();
+    expect(view.environments).toEqual([]);
   });
 });

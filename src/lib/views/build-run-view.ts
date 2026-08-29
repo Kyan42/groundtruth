@@ -2,7 +2,12 @@ import { loadAppConfiguration } from "@/lib/config/app-config";
 import type { Run, RunView } from "@/lib/domain/schemas";
 
 export async function buildRunView(run: Run): Promise<RunView> {
-  const appConfiguration = await loadAppConfiguration(run.repository.owner, run.repository.name);
+  const appConfiguration = await loadAppConfiguration(
+    run.repository.owner,
+    run.repository.name,
+    run.pullRequest.baseSha,
+    run.pullRequest.headSha,
+  );
   const setupBlockers = appConfiguration.ready ? [] : appConfiguration.blockers;
 
   if (
@@ -18,8 +23,17 @@ export async function buildRunView(run: Run): Promise<RunView> {
     run.status === "contract_approved" ||
     Boolean(run.intentSpec);
   const approved = Boolean(run.intentApproval);
-  const intentFailed = run.status === "failed";
-  const intentBlocked = run.status === "blocked" || run.status === "setup_required";
+  const browser = run.browserVerification;
+  const journeyComplete = Boolean(browser?.journey);
+  const executionComplete = Boolean(browser?.execution);
+  const browserActive =
+    run.status === "verifying" ||
+    browser?.status === "preparing" ||
+    browser?.status === "discovering" ||
+    browser?.status === "executing";
+  const intentFailed = !run.intentSpec && run.status === "failed";
+  const intentBlocked =
+    !run.intentSpec && (run.status === "blocked" || run.status === "setup_required");
   const invalidContractCodes = new Set([
     "invalid_intent_spec",
     "intent_quote_not_in_pr",
@@ -28,7 +42,9 @@ export async function buildRunView(run: Run): Promise<RunView> {
   ]);
   const downstreamDetail = approved
     ? appConfiguration.ready
-      ? "Not run in the intent-capture foundation."
+      ? browser
+        ? undefined
+        : "Ready to start the trusted browser mission."
       : "Trusted AppProfile and AppMap are required before browser verification."
     : "Waiting for intent contract approval.";
 
@@ -68,21 +84,31 @@ export async function buildRunView(run: Run): Promise<RunView> {
       },
       {
         id: "impact",
-        label: "Impact mapping",
-        status: approved ? "blocked" : "pending",
+        label: "Trusted AppMap",
+        status: browser ? "complete" : approved ? "pending" : "pending",
         detail: downstreamDetail,
       },
       {
         id: "plan",
         label: "Mission planning",
-        status: approved ? "blocked" : "pending",
-        detail: downstreamDetail,
+        status: journeyComplete ? "complete" : browserActive ? "active" : approved ? "pending" : "pending",
+        detail: browser?.blocker?.message ?? downstreamDetail,
       },
       {
         id: "execution",
         label: "Browser execution",
-        status: approved ? "blocked" : "pending",
-        detail: downstreamDetail,
+        status: executionComplete
+          ? browser?.execution?.status === "passed"
+            ? "complete"
+            : "failed"
+          : browser?.status === "blocked"
+            ? "blocked"
+            : browser?.status === "failed"
+              ? "failed"
+              : browserActive
+                ? "active"
+                : "pending",
+        detail: browser?.blocker?.message ?? downstreamDetail,
       },
     ],
     contract: {
@@ -96,10 +122,53 @@ export async function buildRunView(run: Run): Promise<RunView> {
       intentSpec: run.intentSpec,
       selectedClaimId: run.intentSpec?.claims[0]?.id,
     },
-    missions: [],
-    results: { intent: [], regression: [] },
-    actions: [],
-    network: [],
-    blocker: run.blocker,
+    missions: browser?.mission ? [browser.mission] : [],
+    journey: browser?.journey,
+    environments: browser?.environments ?? [],
+    results: buildResults(browser),
+    recording: browser?.execution?.evidence.videoArtifactId
+      ? {
+          artifactId: browser.execution.evidence.videoArtifactId,
+          contentType: "video/webm",
+        }
+      : undefined,
+    actions: browser?.actions ?? [],
+    network: browser?.network ?? [],
+    blocker: browser?.blocker ?? run.blocker,
+  };
+}
+
+function buildResults(browser: Run["browserVerification"]): RunView["results"] {
+  if (!browser?.mission || !browser.execution) {
+    return { intent: [], regression: [] };
+  }
+  if (browser.mission.kind === "intent") {
+    return {
+      intent: browser.mission.claimIds.map((claimId) => ({
+        missionId: browser.mission!.id,
+        claimId,
+        verdict:
+          browser.execution!.status === "passed"
+            ? ("conformant" as const)
+            : browser.execution!.status === "failed"
+              ? ("non_conformant" as const)
+              : ("inconclusive" as const),
+      })),
+      regression: [],
+    };
+  }
+  return {
+    intent: [],
+    regression: [
+      {
+        missionId: browser.mission.id,
+        verdict:
+          browser.execution.status === "passed"
+            ? ("safe" as const)
+            : browser.execution.status === "failed"
+              ? ("regression" as const)
+              : ("inconclusive" as const),
+      },
+    ],
   };
 }
