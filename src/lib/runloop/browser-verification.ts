@@ -434,8 +434,29 @@ export async function executeBrowserVerification(
 }
 
 export function resolveMission(configured: TestMission, run: Run): TestMission {
-  const claimIds = configured.claimIds;
-  const knownClaimIds = new Set(run.intentSpec?.claims.map((claim) => claim.id));
+  const approvedClaims = run.intentSpec?.claims ?? [];
+  const knownClaimIds = new Set(approvedClaims.map((claim) => claim.id));
+  let claimIds = configured.claimIds;
+  if (configured.claimSourceQuote) {
+    const matches = approvedClaims.filter(
+      (claim) => claim.sourceQuote === configured.claimSourceQuote,
+    );
+    if (matches.length === 0) {
+      throw new GroundtruthError(
+        "test_mission_claim_source_quote_unmatched",
+        "The trusted TestMission source quote does not exactly match an approved intent claim.",
+        422,
+      );
+    }
+    if (matches.length !== 1) {
+      throw new GroundtruthError(
+        "test_mission_claim_source_quote_ambiguous",
+        "The trusted TestMission source quote matches more than one approved intent claim.",
+        422,
+      );
+    }
+    claimIds = [matches[0].id];
+  }
   if (claimIds.length === 0) {
     throw new GroundtruthError(
       "test_mission_claim_missing",
@@ -485,7 +506,7 @@ export function resolveMission(configured: TestMission, run: Run): TestMission {
       422,
     );
   }
-  return configured;
+  return { ...configured, claimIds };
 }
 
 export function resolveRegressionMission(

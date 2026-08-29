@@ -32,7 +32,10 @@ describe("trusted app configuration", () => {
           result.appMap,
         ),
       ).toBe(false);
-      expect(result.mission.claimIds).toEqual(["checkout-application"]);
+      expect(result.mission.claimIds).toEqual([]);
+      expect(result.mission.claimSourceQuote).toBe(
+        "The discount is applied at checkout, so the cart total stays undiscounted until the order is placed",
+      );
     }
   });
 

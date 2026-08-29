@@ -152,20 +152,22 @@ export class RunService {
       }));
       return buildRunView(blocked);
     }
-    const mission = configuration.missions.find((candidate) => candidate.kind === missionKind);
-    if (!mission) {
+    const configuredMission = configuration.missions.find(
+      (candidate) => candidate.kind === missionKind,
+    );
+    if (!configuredMission) {
       throw new GroundtruthError(
         "test_mission_missing",
         `No trusted ${missionKind} mission is configured.`,
         422,
       );
     }
+    let mission: TestMission;
     try {
-      if (mission.kind === "intent") {
-        resolveMission(mission, run);
-      } else {
-        resolveRegressionMission(mission, configuration);
-      }
+      mission =
+        configuredMission.kind === "intent"
+          ? resolveMission(configuredMission, run)
+          : resolveRegressionMission(configuredMission, configuration);
     } catch (error) {
       const missionError =
         error instanceof GroundtruthError
