@@ -94,7 +94,9 @@ export async function executeBrowserVerification(
   }
   const mission = resolveMission(configuration.mission, run);
   const axonId = run.coordinationAxonId;
+  const attemptId = randomUUID();
   let state = BrowserVerificationSchema.parse({
+    attemptId,
     status: "preparing",
     mission,
     environments: [],
@@ -119,7 +121,7 @@ export async function executeBrowserVerification(
       );
     }
     await ensureBrowserTables(axonId);
-    await saveMission(axonId, mission, new Date().toISOString());
+    await saveMission(axonId, attemptId, run.id, mission, new Date().toISOString());
     await publishRunEvent(axonId, "mission.loaded", "EXTERNAL_EVENT", {
       runId: run.id,
       missionId: mission.id,
@@ -209,7 +211,7 @@ export async function executeBrowserVerification(
       headUrl,
     );
     validateJourneyForReplay(journey, mission, configuration.profile, headUrl);
-    await saveJourney(axonId, journey, new Date().toISOString());
+    await saveJourney(axonId, attemptId, run.id, journey, new Date().toISOString());
     await emit({ ...state, journey });
     await publishRunEvent(axonId, "journey.frozen", "AGENT_EVENT", {
       runId: run.id,
@@ -236,6 +238,7 @@ export async function executeBrowserVerification(
       browserBox,
       run,
       mission.id,
+      attemptId,
       executionId,
       replay,
       axonId,
@@ -295,22 +298,44 @@ export async function executeBrowserVerification(
   }
 }
 
-function resolveMission(configured: TestMission, run: Run): TestMission {
-  const claimIds =
-    configured.claimIds.length > 0
-      ? configured.claimIds
-      : run.intentSpec?.claims[0]
-        ? [run.intentSpec.claims[0].id]
-        : [];
+export function resolveMission(configured: TestMission, run: Run): TestMission {
+  const claimIds = configured.claimIds;
   const knownClaimIds = new Set(run.intentSpec?.claims.map((claim) => claim.id));
-  if (claimIds.length === 0 || claimIds.some((claimId) => !knownClaimIds.has(claimId))) {
+  if (claimIds.length === 0) {
+    throw new GroundtruthError(
+      "test_mission_claim_missing",
+      "The trusted TestMission must explicitly reference one approved intent claim.",
+      422,
+    );
+  }
+  if (claimIds.length !== 1) {
+    throw new GroundtruthError(
+      "test_mission_claim_scope_unsupported",
+      "This prototype requires exactly one approved intent claim per TestMission.",
+      422,
+    );
+  }
+  if (claimIds.some((claimId) => !knownClaimIds.has(claimId))) {
     throw new GroundtruthError(
       "test_mission_claim_stale",
       "The trusted TestMission does not reference an approved intent claim.",
       422,
     );
   }
-  return { ...configured, claimIds };
+  const deferredClaimIds = configured.deferredClaims?.map((claim) => claim.claimId) ?? [];
+  if (
+    new Set(deferredClaimIds).size !== deferredClaimIds.length ||
+    deferredClaimIds.some(
+      (claimId) => claimIds.includes(claimId) || !knownClaimIds.has(claimId),
+    )
+  ) {
+    throw new GroundtruthError(
+      "test_mission_deferral_stale",
+      "Trusted claim deferrals must be unique, valid, and separate from the executed claim.",
+      422,
+    );
+  }
+  return configured;
 }
 
 async function createApplicationEnvironment(
@@ -463,6 +488,7 @@ async function discoverJourney(
     'Valid examples: {"action":"goto","path":"/"}, {"action":"click","locator":{"by":"role","role":"button","name":"Add to cart"}}, {"action":"fill","locator":{"by":"test_id","value":"promo-code"},"fixtureValueKey":"validPromoCode"}, {"action":"press","locator":{"by":"test_id","value":"promo-code"},"key":"Tab"}, {"action":"wait_for","locator":{"by":"test_id","value":"promo-applied"},"state":"visible"}.',
     "Allowed locators are role {role,name?}, text {text,exact?}, test_id {value}, and css {value}.",
     "Use only paths and elements you actually observed.",
+    "Use wait_for only for prerequisite UI readiness, never to encode the final asserted outcome. End the journey immediately after triggering the behavior under test; the mechanical runner owns verdict assertions.",
     "Never visit blocked path prefixes. State-changing requests are allowed only when the supplied safety policy explicitly allows them.",
   ].join("\n");
   await box.file.write({ file_path: `${directory}/discovery-prompt.txt`, contents: prompt });
@@ -543,6 +569,7 @@ async function persistReplayArtifacts(
   box: Devbox,
   run: Run,
   missionId: string,
+  attemptId: string,
   executionId: string,
   replay: z.infer<typeof RunnerOutputSchema>,
   axonId: string,
@@ -597,6 +624,8 @@ async function persistReplayArtifacts(
 
   return ExecutionResultSchema.parse({
     schemaVersion: 1,
+    attemptId,
+    executionId,
     missionId,
     target: "head",
     status: replay.status,

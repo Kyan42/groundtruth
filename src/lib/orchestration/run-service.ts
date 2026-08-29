@@ -35,7 +35,10 @@ import {
   publishRunEvent,
   saveIntentContract,
 } from "@/lib/runloop/coordination-axon";
-import { executeBrowserVerification } from "@/lib/runloop/browser-verification";
+import {
+  executeBrowserVerification,
+  resolveMission,
+} from "@/lib/runloop/browser-verification";
 import { buildRunView } from "@/lib/views/build-run-view";
 
 const livenessByRun = new Map<string, AgentLivenessState>();
@@ -114,7 +117,8 @@ export class RunService {
   async startVerification(runId: string): Promise<RunView> {
     const run = await this.get(runId);
     const retryableBrowserFailure =
-      ["blocked", "failed"].includes(run.status) && run.browserVerification?.blocker?.retryable;
+      ["blocked", "failed"].includes(run.status) &&
+      (run.browserVerification?.blocker?.retryable || run.blocker?.retryable);
     if (run.status !== "contract_approved" && !retryableBrowserFailure) {
       throw new GroundtruthError(
         "browser_verification_not_ready",
@@ -142,6 +146,29 @@ export class RunService {
       }));
       return buildRunView(blocked);
     }
+    try {
+      resolveMission(configuration.mission, run);
+    } catch (error) {
+      const missionError =
+        error instanceof GroundtruthError
+          ? error
+          : new GroundtruthError(
+              "test_mission_invalid",
+              "The trusted TestMission is not compatible with the approved intent.",
+              422,
+            );
+      const blocked = await getRunIndex().update(run.id, (current) => ({
+        ...current,
+        status: "blocked",
+        blocker: {
+          code: missionError.code,
+          message: missionError.message,
+          retryable: true,
+        },
+        updatedAt: new Date().toISOString(),
+      }));
+      return buildRunView(blocked);
+    }
     if (verificationByRun.has(run.id)) {
       return this.getView(run.id);
     }
@@ -150,6 +177,9 @@ export class RunService {
       ...current,
       status: "verifying",
       blocker: undefined,
+      browserVerificationHistory: current.browserVerification
+        ? [...(current.browserVerificationHistory ?? []), current.browserVerification]
+        : current.browserVerificationHistory,
       browserVerification: {
         status: "preparing",
         mission: configuration.mission,
@@ -167,6 +197,46 @@ export class RunService {
       console.error("Unhandled browser verification failure.", error);
     });
     return buildRunView(preparing);
+  }
+
+  async rerunVerification(runId: string): Promise<RunView> {
+    const source = await this.get(runId);
+    if (!source.intentSpec || !source.intentApproval || source.status !== "complete") {
+      throw new GroundtruthError(
+        "browser_rerun_not_ready",
+        "Only a completed run with an approved intent contract can be rerun.",
+        409,
+      );
+    }
+    const now = new Date().toISOString();
+    const rerunId = randomUUID();
+    let rerun = RunSchema.parse({
+      id: rerunId,
+      key: `${source.key}:verification:${rerunId}`,
+      repository: source.repository,
+      pullRequest: source.pullRequest,
+      status: "contract_approved",
+      intentSpec: source.intentSpec,
+      intentApproval: source.intentApproval,
+      createdAt: now,
+      updatedAt: now,
+    });
+    const axonId = await createCoordinationAxon(rerun);
+    rerun = RunSchema.parse({ ...rerun, coordinationAxonId: axonId });
+    await saveIntentContract(
+      axonId,
+      rerun.id,
+      rerun.intentSpec!,
+      rerun.intentApproval!.approvedAt,
+    );
+    await publishRunEvent(axonId, "verification.rerun_created", "USER_EVENT", {
+      runId: rerun.id,
+      sourceRunId: source.id,
+      baseSha: rerun.pullRequest.baseSha,
+      headSha: rerun.pullRequest.headSha,
+    });
+    await getRunIndex().save(rerun);
+    return this.startVerification(rerun.id);
   }
 
   private async approveIntentOnce(runId: string): Promise<RunView> {

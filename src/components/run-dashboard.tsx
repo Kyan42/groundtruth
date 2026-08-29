@@ -66,6 +66,9 @@ export function RunDashboard({ initialView }: { initialView: RunView }) {
       const next = RunViewSchema.parse(payload);
       setView(next);
       setSelectedClaimId(next.contract.selectedClaimId);
+      if (next.run.id !== view.run.id) {
+        window.history.replaceState(null, "", `/runs/${next.run.id}`);
+      }
     } catch (error) {
       setActionError(error instanceof Error ? error.message : "The action failed.");
     } finally {
@@ -192,6 +195,17 @@ export function RunDashboard({ initialView }: { initialView: RunView }) {
                 </article>
               ) : null}
               <div className="contract-notes">
+                <div>
+                  <strong>Must-claim coverage</strong>
+                  <ul>
+                    {view.contract.claimCoverage.map((coverage) => (
+                      <li key={coverage.claimId}>
+                        <strong>{coverage.status}</strong> {coverage.claimId}
+                        {coverage.reason ? ` — ${coverage.reason}` : ""}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
                 <NoteList title="Ambiguities" items={view.contract.intentSpec.ambiguities} />
                 <NoteList title="Non-goals" items={view.contract.intentSpec.nonGoals} />
               </div>
@@ -203,14 +217,17 @@ export function RunDashboard({ initialView }: { initialView: RunView }) {
                 <p className="approved-copy">Contract approved and recorded in the run Axon.</p>
               )}
               {view.contract.status === "approved" &&
-              view.run.status !== "complete" &&
               view.run.status !== "verifying" ? (
                 <ActionButton
-                  action="start_verification"
+                  action={view.run.status === "complete" ? "rerun_verification" : "start_verification"}
                   busyAction={busyAction}
                   onAction={runAction}
                 >
-                  {view.blocker?.retryable ? "Retry browser verification" : "Start browser verification"}
+                  {view.run.status === "complete"
+                    ? "Rerun browser verification"
+                    : view.blocker?.retryable
+                      ? "Retry browser verification"
+                      : "Start browser verification"}
                 </ActionButton>
               ) : null}
             </>
@@ -299,7 +316,7 @@ export function RunDashboard({ initialView }: { initialView: RunView }) {
           <h2>{view.network.length} requests</h2>
           {view.network.length > 0 ? (
             <ul>
-              {view.network.slice(0, 12).map((request, index) => (
+              {prioritizeNetwork(view.network).slice(0, 12).map((request, index) => (
                 <li key={`${request.url}-${index}`}>
                   {request.method} {request.status} {new URL(request.url).pathname}
                 </li>
@@ -426,6 +443,18 @@ function readApiError(payload: unknown): string {
     return payload.error.message;
   }
   return "The action failed.";
+}
+
+function prioritizeNetwork<T extends { url: string }>(requests: T[]): T[] {
+  return [...requests].sort((left, right) => networkPriority(left.url) - networkPriority(right.url));
+}
+
+function networkPriority(value: string): number {
+  const pathname = new URL(value).pathname;
+  if (pathname.startsWith("/api/")) {
+    return 0;
+  }
+  return pathname.startsWith("/_next/") ? 2 : 1;
 }
 
 function labelStatus(status: string): string {

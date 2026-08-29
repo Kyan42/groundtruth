@@ -12,12 +12,14 @@ This prototype implements a real intent-to-browser vertical slice:
 6. Start isolated base/head applications in Runloop Devboxes from the same pinned setup contract.
 7. Start a separate browser Devbox with Runloop's public Codex mount, OpenAI Agent Gateway,
    Playwright, and Chromium.
-8. Require Codex to inspect the live head application and produce a schema-valid frozen journey.
+8. Require Codex to inspect the live head application and produce a schema-valid frozen journey for
+   one explicit approved claim.
 9. Replay that journey mechanically and persist real assertions, actions, network entries,
    screenshots, trace, video, console output, and lifecycle state.
 
 The dashboard projects only persisted run data. It keeps intent conformance and regression safety
-separate and does not generate placeholder journeys, evidence, or verdicts.
+separate, exposes covered/deferred/uncovered must claims, and does not generate placeholder journeys,
+evidence, or verdicts.
 
 ## Setup
 

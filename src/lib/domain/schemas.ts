@@ -135,6 +135,14 @@ export const TestMissionSchema = z.object({
   startPath: z.string().min(1),
   preconditions: z.array(z.string().min(1)),
   fixtureValues: z.record(z.string().min(1), z.string()).optional(),
+  deferredClaims: z
+    .array(
+      z.object({
+        claimId: z.string().min(1),
+        reason: z.string().min(1),
+      }),
+    )
+    .optional(),
   assertions: z.array(AssertionSchema).min(1),
 });
 
@@ -152,6 +160,8 @@ export type ExecutableJourney = z.infer<typeof ExecutableJourneySchema>;
 
 export const ExecutionResultSchema = z.object({
   schemaVersion: z.literal(1),
+  attemptId: z.uuid().optional(),
+  executionId: z.uuid().optional(),
   missionId: z.string().min(1),
   target: z.enum(["base", "head"]),
   status: z.enum(["passed", "failed", "blocked", "error"]),
@@ -196,6 +206,7 @@ export const BrowserEnvironmentSchema = z.object({
 export type BrowserEnvironment = z.infer<typeof BrowserEnvironmentSchema>;
 
 export const BrowserVerificationSchema = z.object({
+  attemptId: z.uuid().optional(),
   status: z.enum(["preparing", "discovering", "executing", "complete", "blocked", "failed"]),
   mission: TestMissionSchema.optional(),
   journey: ExecutableJourneySchema.optional(),
@@ -289,6 +300,7 @@ export const RunSchema = z.object({
     .optional(),
   intentApproval: z.object({ approvedAt: IsoDateSchema }).optional(),
   browserVerification: BrowserVerificationSchema.optional(),
+  browserVerificationHistory: z.array(BrowserVerificationSchema).optional(),
   blocker: BlockerSchema.optional(),
   createdAt: IsoDateSchema,
   updatedAt: IsoDateSchema,
@@ -323,6 +335,14 @@ export const RunViewSchema = z.object({
     status: z.enum(["pending", "ready", "approved", "invalid"]),
     intentSpec: IntentSpecSchema.optional(),
     selectedClaimId: z.string().optional(),
+    claimCoverage: z.array(
+      z.object({
+        claimId: z.string().min(1),
+        status: z.enum(["covered", "deferred", "uncovered"]),
+        missionId: z.string().min(1).optional(),
+        reason: z.string().min(1).optional(),
+      }),
+    ),
   }),
   missions: z.array(TestMissionSchema),
   journey: ExecutableJourneySchema.optional(),

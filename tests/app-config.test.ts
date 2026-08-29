@@ -13,7 +13,8 @@ describe("trusted app configuration", () => {
     if (result.ready) {
       expect(result.profile.repository).toBe("Kyan42/fernway");
       expect(result.appMap.baseSha).toBe(BASE_SHA);
-      expect(result.mission.id).toBe("intent-valid-promo");
+      expect(result.mission.id).toBe("intent-checkout-application-timing");
+      expect(result.mission.claimIds).toEqual(["checkout-application"]);
     }
   });
 

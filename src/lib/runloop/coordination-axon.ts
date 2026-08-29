@@ -133,20 +133,41 @@ export async function ensureBrowserTables(axonId: string): Promise<void> {
             created_at TEXT NOT NULL
           )`,
         },
+        {
+          sql: `CREATE TABLE IF NOT EXISTS mission_attempts (
+            attempt_id TEXT PRIMARY KEY,
+            run_id TEXT NOT NULL,
+            mission_id TEXT NOT NULL,
+            mission_json TEXT NOT NULL,
+            created_at TEXT NOT NULL
+          )`,
+        },
+        {
+          sql: `CREATE TABLE IF NOT EXISTS journey_attempts (
+            attempt_id TEXT PRIMARY KEY,
+            run_id TEXT NOT NULL,
+            mission_id TEXT NOT NULL,
+            journey_json TEXT NOT NULL,
+            created_at TEXT NOT NULL
+          )`,
+        },
       ],
     });
   }
 
 export async function saveMission(
     axonId: string,
+    attemptId: string,
+    runId: string,
     mission: TestMission,
     createdAt: string,
   ): Promise<void> {
     const axon = getRunloopClient().axon.fromId(axonId);
     await axon.sql.query({
-      sql: `INSERT OR REPLACE INTO missions (mission_id, mission_json, created_at)
-        VALUES (?, ?, ?)`,
-      params: [mission.id, JSON.stringify(mission), createdAt],
+      sql: `INSERT INTO mission_attempts
+        (attempt_id, run_id, mission_id, mission_json, created_at)
+        VALUES (?, ?, ?, ?, ?)`,
+      params: [attemptId, runId, mission.id, JSON.stringify(mission), createdAt],
     });
   }
 
@@ -166,14 +187,17 @@ export async function saveEnvironment(
 
 export async function saveJourney(
     axonId: string,
+    attemptId: string,
+    runId: string,
     journey: ExecutableJourney,
     createdAt: string,
   ): Promise<void> {
     const axon = getRunloopClient().axon.fromId(axonId);
     await axon.sql.query({
-      sql: `INSERT OR REPLACE INTO journeys (mission_id, journey_json, created_at)
-        VALUES (?, ?, ?)`,
-      params: [journey.missionId, JSON.stringify(journey), createdAt],
+      sql: `INSERT INTO journey_attempts
+        (attempt_id, run_id, mission_id, journey_json, created_at)
+        VALUES (?, ?, ?, ?, ?)`,
+      params: [attemptId, runId, journey.missionId, JSON.stringify(journey), createdAt],
     });
   }
 

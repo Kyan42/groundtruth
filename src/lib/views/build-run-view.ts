@@ -1,5 +1,5 @@
 import { loadAppConfiguration } from "@/lib/config/app-config";
-import type { Run, RunView } from "@/lib/domain/schemas";
+import type { Run, RunView, TestMission } from "@/lib/domain/schemas";
 
 export async function buildRunView(run: Run): Promise<RunView> {
   const appConfiguration = await loadAppConfiguration(
@@ -9,6 +9,7 @@ export async function buildRunView(run: Run): Promise<RunView> {
     run.pullRequest.headSha,
   );
   const setupBlockers = appConfiguration.ready ? [] : appConfiguration.blockers;
+  const configuredMission = appConfiguration.ready ? appConfiguration.mission : undefined;
 
   if (
     run.blocker?.code.endsWith("_missing") ||
@@ -24,6 +25,11 @@ export async function buildRunView(run: Run): Promise<RunView> {
     Boolean(run.intentSpec);
   const approved = Boolean(run.intentApproval);
   const browser = run.browserVerification;
+  const coverageMission = browser
+    ? browser.attemptId
+      ? browser.mission
+      : undefined
+    : configuredMission;
   const journeyComplete = Boolean(browser?.journey);
   const executionComplete = Boolean(browser?.execution);
   const browserActive =
@@ -120,7 +126,11 @@ export async function buildRunView(run: Run): Promise<RunView> {
             ? "invalid"
             : "pending",
       intentSpec: run.intentSpec,
-      selectedClaimId: run.intentSpec?.claims[0]?.id,
+      selectedClaimId:
+        coverageMission?.claimIds.find((claimId) =>
+          run.intentSpec?.claims.some((claim) => claim.id === claimId),
+        ) ?? run.intentSpec?.claims[0]?.id,
+      claimCoverage: buildClaimCoverage(run, coverageMission),
     },
     missions: browser?.mission ? [browser.mission] : [],
     journey: browser?.journey,
@@ -138,22 +148,31 @@ export async function buildRunView(run: Run): Promise<RunView> {
   };
 }
 
-function buildResults(browser: Run["browserVerification"]): RunView["results"] {
+export function buildResults(browser: Run["browserVerification"]): RunView["results"] {
   if (!browser?.mission || !browser.execution) {
     return { intent: [], regression: [] };
   }
+  if (!browser.attemptId || browser.execution.attemptId !== browser.attemptId) {
+    return { intent: [], regression: [] };
+  }
   if (browser.mission.kind === "intent") {
+    const claimId =
+      browser.mission.claimIds.length === 1 ? browser.mission.claimIds[0] : undefined;
     return {
-      intent: browser.mission.claimIds.map((claimId) => ({
-        missionId: browser.mission!.id,
-        claimId,
-        verdict:
-          browser.execution!.status === "passed"
-            ? ("conformant" as const)
-            : browser.execution!.status === "failed"
-              ? ("non_conformant" as const)
-              : ("inconclusive" as const),
-      })),
+      intent: claimId
+        ? [
+            {
+            missionId: browser.mission.id,
+            claimId,
+            verdict:
+              browser.execution.status === "passed"
+                ? ("conformant" as const)
+                : browser.execution.status === "failed"
+                  ? ("non_conformant" as const)
+                    : ("inconclusive" as const),
+            },
+          ]
+        : [],
       regression: [],
     };
   }
@@ -171,4 +190,37 @@ function buildResults(browser: Run["browserVerification"]): RunView["results"] {
       },
     ],
   };
+}
+
+export function buildClaimCoverage(
+  run: Run,
+  mission: TestMission | undefined,
+): RunView["contract"]["claimCoverage"] {
+  const covered = new Set(mission?.claimIds ?? []);
+  const deferred = new Map(
+    mission?.deferredClaims?.map((claim) => [claim.claimId, claim.reason]) ?? [],
+  );
+  return (run.intentSpec?.claims ?? [])
+    .filter((claim) => claim.priority === "must")
+    .map((claim) => {
+      if (covered.has(claim.id)) {
+        return {
+          claimId: claim.id,
+          status: "covered" as const,
+          missionId: mission?.id,
+        };
+      }
+      const reason = deferred.get(claim.id);
+      if (reason) {
+        return {
+          claimId: claim.id,
+          status: "deferred" as const,
+          reason,
+        };
+      }
+      return {
+        claimId: claim.id,
+        status: "uncovered" as const,
+      };
+    });
 }
