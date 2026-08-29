@@ -2,16 +2,21 @@ import { z } from "zod";
 
 import { SetupRequiredError } from "@/lib/domain/errors";
 
+const OptionalEnvironmentValueSchema = z.preprocess(
+  (value) => (value === "" ? undefined : value),
+  z.string().min(1).optional(),
+);
+
 const EnvironmentSchema = z.object({
-  RUNLOOP_API_KEY: z.string().min(1).optional(),
-  GITHUB_TOKEN: z.string().min(1).optional(),
+  RUNLOOP_API_KEY: OptionalEnvironmentValueSchema,
+  GITHUB_TOKEN: OptionalEnvironmentValueSchema,
   REFLEX_BASE_URL: z.url().default("https://reflex.runloop.ai"),
-  REFLEX_API_KEY: z.string().min(1).optional(),
-  REFLEX_ORG_ID: z.string().min(1).optional(),
+  REFLEX_API_KEY: OptionalEnvironmentValueSchema,
+  REFLEX_ORG_ID: OptionalEnvironmentValueSchema,
   GROUNDTRUTH_PUBLIC_BASE_URL: z.url().default("http://localhost:3000"),
   GROUNDTRUTH_STATE_DIR: z.string().min(1).default(".groundtruth"),
-  RUNLOOP_BROWSER_BLUEPRINT_ID: z.string().min(1).optional(),
-  CODEX_AUTH_JSON: z.string().min(1).optional(),
+  RUNLOOP_BROWSER_BLUEPRINT_ID: OptionalEnvironmentValueSchema,
+  CODEX_AUTH_JSON: OptionalEnvironmentValueSchema,
 });
 
 export type Environment = z.infer<typeof EnvironmentSchema>;

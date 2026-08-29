@@ -25,6 +25,23 @@ describe("Reflex Codex stream reduction", () => {
     ).toEqual({ mode: "replace", text: '{"schemaVersion":1}' });
   });
 
+  it("extracts the Codex app-server params envelope observed from Reflex", () => {
+    expect(
+      extractAssistantText(
+        event("item/completed", {
+          method: "item/completed",
+          params: {
+            item: {
+              type: "agentMessage",
+              text: '{"schemaVersion":1}',
+              phase: "final_answer",
+            },
+          },
+        }),
+      ),
+    ).toEqual({ mode: "replace", text: '{"schemaVersion":1}' });
+  });
+
   it("does not expose reasoning events as assistant output", () => {
     expect(
       extractAssistantText(

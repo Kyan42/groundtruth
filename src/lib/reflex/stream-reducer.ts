@@ -14,7 +14,10 @@ const AgentItemSchema = z.object({
     .optional(),
 });
 
-const ItemPayloadSchema = z.object({ item: AgentItemSchema }).passthrough();
+const DirectItemPayloadSchema = z.object({ item: AgentItemSchema }).passthrough();
+const WrappedItemPayloadSchema = z
+  .object({ params: z.object({ item: AgentItemSchema }).passthrough() })
+  .passthrough();
 
 const MessagePayloadSchema = z
   .object({
@@ -39,9 +42,15 @@ export function extractAssistantText(
   }
 
   if (event.type === "item/completed") {
-    const parsed = ItemPayloadSchema.safeParse(payload);
-    if (parsed.success && normalizeItemType(parsed.data.item.type) === "agentmessage") {
-      const text = itemText(parsed.data.item);
+    const direct = DirectItemPayloadSchema.safeParse(payload);
+    const wrapped = direct.success ? undefined : WrappedItemPayloadSchema.safeParse(payload);
+    const item = direct.success
+      ? direct.data.item
+      : wrapped?.success
+        ? wrapped.data.params.item
+        : undefined;
+    if (item && normalizeItemType(item.type) === "agentmessage") {
+      const text = itemText(item);
       if (text) {
         return { mode: "replace", text };
       }
