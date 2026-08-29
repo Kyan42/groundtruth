@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import type { BrowserVerification } from "@/lib/domain/schemas";
 import { buildRunView } from "@/lib/views/build-run-view";
 import { BrowserVerificationSchema } from "@/lib/domain/schemas";
 import { makeRun } from "./fixtures";
@@ -35,6 +36,7 @@ describe("RunView", () => {
     expect(view.recording).toBeUndefined();
     expect(view.environments).toEqual([]);
   });
+
 
   it("projects a paired regression verdict without attributing it to intent claims", async () => {
     const attemptId = "62c89727-e786-4592-b886-0bc9f0f570ad";
@@ -169,4 +171,133 @@ describe("RunView", () => {
     ]);
     expect(view.verificationAttempts).toHaveLength(1);
   });
+
+  it("marks completed replay with assertion findings as complete and non-conformant", async () => {
+    const view = await buildRunView(
+      makeRun({
+        status: "complete",
+        intentSpec: intentSpec,
+        intentApproval: { approvedAt: "2026-08-29T20:10:00.000Z" },
+        browserVerification: browserVerificationWith("failed"),
+      }),
+    );
+
+    expect(view.phases.find((phase) => phase.id === "execution")).toMatchObject({
+      status: "complete",
+      detail: "Browser replay completed with assertion findings.",
+    });
+    expect(view.results.intent).toEqual([
+      {
+        missionId: "mission-claim-1",
+        claimId: "claim-1",
+        verdict: "non_conformant",
+      },
+    ]);
+    expect(view.contract.selectedClaimId).toBe("claim-1");
+  });
+
+  it("reserves a failed execution phase for runner errors", async () => {
+    const view = await buildRunView(
+      makeRun({
+        status: "complete",
+        intentSpec: intentSpec,
+        intentApproval: { approvedAt: "2026-08-29T20:10:00.000Z" },
+        browserVerification: browserVerificationWith("error"),
+      }),
+    );
+
+    expect(view.phases.find((phase) => phase.id === "execution")?.status).toBe("failed");
+    expect(view.results.intent[0]?.verdict).toBe("inconclusive");
+  });
 });
+
+const intentSpec = {
+  schemaVersion: 1 as const,
+  summary: "Separate verdicts.",
+  claims: [
+    {
+      id: "claim-0",
+      statement: "Keep the existing overview visible.",
+      sourceQuote: "dashboard",
+      priority: "must" as const,
+      acceptanceCriteria: ["The overview is visible."],
+    },
+    {
+      id: "claim-1",
+      statement: "Show separate verdict groups.",
+      sourceQuote: "separate intent and regression verdicts",
+      priority: "must" as const,
+      acceptanceCriteria: ["Both groups are visible."],
+    },
+  ],
+  nonGoals: [],
+  ambiguities: [],
+};
+
+function browserVerificationWith(
+  executionStatus: "failed" | "error",
+): BrowserVerification {
+  const attemptId = "cd33af50-1572-4081-8e87-13e78d42dc89";
+  return {
+    attemptId,
+    status: "complete",
+    mission: {
+      schemaVersion: 1,
+      id: "mission-claim-1",
+      title: "Verify separate verdict groups",
+      kind: "intent",
+      claimIds: ["claim-1"],
+      goal: "Inspect the result groups.",
+      startPath: "/",
+      preconditions: [],
+      assertions: [
+        {
+          kind: "text",
+          locator: { by: "role", role: "heading", name: "Intent conformance" },
+          operator: "equals",
+          expected: "Intent conformance",
+        },
+      ],
+    },
+    journey: {
+      schemaVersion: 1,
+      missionId: "mission-claim-1",
+      discoveredAgainst: "head",
+      steps: [{ action: "goto", path: "/" }],
+      producer: { kind: "codex", agentId: "runloop:test" },
+    },
+    environments: [],
+    execution: {
+      schemaVersion: 1,
+      attemptId,
+      executionId: "ea266bd4-61b5-4799-8bf0-9df36d998208",
+      missionId: "mission-claim-1",
+      target: "head",
+      status: executionStatus,
+      startedAt: "2026-08-29T20:15:00.000Z",
+      endedAt: "2026-08-29T20:15:02.000Z",
+      steps: [
+        {
+          index: 0,
+          status: executionStatus === "error" ? "failed" : "passed",
+        },
+      ],
+      checks: [
+        {
+          assertionIndex: 0,
+          passed: false,
+          actual: "Regression safety",
+        },
+      ],
+      evidence: {
+        screenshotArtifactIds: [],
+      },
+      error:
+        executionStatus === "error"
+          ? { code: "mechanical_replay_failed", message: "The browser process exited." }
+          : undefined,
+    },
+    actions: [],
+    network: [],
+  };
+}

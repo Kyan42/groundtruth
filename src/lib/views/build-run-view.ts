@@ -35,6 +35,7 @@ export async function buildRunView(run: Run): Promise<RunView> {
   const coverageMission = completedIntentMission ?? configuredMission;
   const journeyComplete = Boolean(browser?.journey);
   const executionComplete = Boolean(browser?.execution || browser?.comparison);
+  const executionStatus = browser?.execution?.status;
   const browserActive =
     run.status === "verifying" ||
     browser?.status === "preparing" ||
@@ -56,6 +57,44 @@ export async function buildRunView(run: Run): Promise<RunView> {
         : "Ready to start the trusted browser mission."
       : "Trusted AppProfile and AppMap are required before browser verification."
     : "Waiting for intent contract approval.";
+  const executionPhaseStatus: RunView["phases"][number]["status"] =
+    browser?.status === "blocked" || executionStatus === "blocked"
+      ? "blocked"
+      : browser?.status === "failed" || executionStatus === "error"
+        ? "failed"
+        : executionComplete
+          ? "complete"
+          : browserActive
+            ? "active"
+            : "pending";
+  const executionPhaseDetail =
+    browser?.blocker?.message ??
+    (browser?.comparison
+      ? browser.comparison.reason
+      : browser?.status === "complete" && executionStatus === "failed"
+        ? "Browser replay completed with assertion findings."
+        : executionStatus === "error"
+          ? "Browser replay ended with a runner error."
+          : executionStatus === "blocked"
+            ? "Browser replay was blocked before it could produce a verdict."
+            : downstreamDetail);
+  const results = buildAllResults(attempts);
+  const claimCoverage = buildClaimCoverage(run, coverageMission);
+  const validClaimIds = new Set(run.intentSpec?.claims.map((claim) => claim.id) ?? []);
+  const selectedClaimId =
+    results.intent.find(
+      (result) => result.verdict === "non_conformant" && validClaimIds.has(result.claimId),
+    )?.claimId ??
+    results.intent.find((result) => validClaimIds.has(result.claimId))?.claimId ??
+    (executionComplete
+      ? claimCoverage.find(
+          (coverage) =>
+            coverage.status === "covered" &&
+            coverage.missionId === coverageMission?.id &&
+            validClaimIds.has(coverage.claimId),
+        )?.claimId
+      : coverageMission?.claimIds.find((claimId) => validClaimIds.has(claimId))) ??
+    run.intentSpec?.claims[0]?.id;
 
   return {
     run: {
@@ -106,25 +145,8 @@ export async function buildRunView(run: Run): Promise<RunView> {
       {
         id: "execution",
         label: "Browser execution",
-        status:
-          browser?.status === "blocked"
-            ? "blocked"
-            : browser?.status === "failed"
-              ? "failed"
-              : executionComplete
-          ? browser?.comparison
-            ? browser.comparison.verdict === "regressed"
-              ? "failed"
-              : browser.comparison.verdict === "inconclusive"
-                ? "blocked"
-                : "complete"
-            : browser?.execution?.status === "passed"
-            ? "complete"
-            : "failed"
-          : browserActive
-            ? "active"
-            : "pending",
-        detail: browser?.blocker?.message ?? downstreamDetail,
+        status: executionPhaseStatus,
+        detail: executionPhaseDetail,
       },
     ],
     contract: {
@@ -136,23 +158,16 @@ export async function buildRunView(run: Run): Promise<RunView> {
             ? "invalid"
             : "pending",
       intentSpec: run.intentSpec,
-      selectedClaimId:
-        coverageMission?.claimIds.find((claimId) =>
-          run.intentSpec?.claims.some((claim) => claim.id === claimId),
-        ) ?? run.intentSpec?.claims[0]?.id,
-      claimCoverage: buildClaimCoverage(run, coverageMission),
+      selectedClaimId,
+      claimCoverage,
     },
     missions: attempts.flatMap((attempt) => (attempt.mission ? [attempt.mission] : [])),
     journey: browser?.journey,
     environments: browser?.environments ?? [],
-    results: buildAllResults(attempts),
+    results,
     blastRadius: appConfiguration.ready ? appConfiguration.impactMap : undefined,
-    recording: browser?.execution?.evidence.videoArtifactId
-      ? {
-          artifactId: browser.execution.evidence.videoArtifactId,
-          contentType: "video/webm",
-        }
-      : undefined,
+    recording: currentRecordings(browser).find((recording) => recording.target === "head") ??
+      currentRecordings(browser)[0],
     recordings: currentRecordings(browser),
     verificationAttempts: attempts,
     actions: browser?.actions ?? [],
