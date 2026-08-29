@@ -89,6 +89,23 @@ describe("claim coverage", () => {
     );
   });
 
+  it("keeps intent assertions strict when regression observations use a base baseline", () => {
+    expect(() =>
+      resolveMission(
+        {
+          ...mission,
+          assertions: [
+            {
+              kind: "text",
+              locator: { by: "test_id", value: "discount" },
+            },
+          ],
+        },
+        run,
+      ),
+    ).toThrowError(expect.objectContaining({ code: "test_mission_assertion_incomplete" }));
+  });
+
   it("projects every must claim as covered, deferred, or uncovered", () => {
     expect(buildClaimCoverage(run, mission)).toEqual([
       {

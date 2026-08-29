@@ -49,6 +49,13 @@ export function RunDashboard({ initialView }: { initialView: RunView }) {
     () => view.contract.intentSpec?.claims.find((claim) => claim.id === selectedClaimId),
     [selectedClaimId, view.contract.intentSpec],
   );
+  const regressionAttempt = useMemo(
+    () =>
+      [...view.verificationAttempts]
+        .reverse()
+        .find((attempt) => attempt.mission?.kind === "regression"),
+    [view.verificationAttempts],
+  );
 
   async function runAction(action: string) {
     setBusyAction(action);
@@ -219,12 +226,18 @@ export function RunDashboard({ initialView }: { initialView: RunView }) {
               {view.contract.status === "approved" &&
               view.run.status !== "verifying" ? (
                 <ActionButton
-                  action={view.run.status === "complete" ? "rerun_verification" : "start_verification"}
+                  action={
+                    view.run.status === "complete" || regressionAttempt?.blocker?.retryable
+                      ? "start_regression"
+                      : "start_verification"
+                  }
                   busyAction={busyAction}
                   onAction={runAction}
                 >
                   {view.run.status === "complete"
-                    ? "Rerun browser verification"
+                    ? view.results.regression.length > 0
+                      ? "Rerun regression check"
+                      : "Run base vs head regression check"
                     : view.blocker?.retryable
                       ? "Retry browser verification"
                       : "Start browser verification"}
@@ -265,10 +278,88 @@ export function RunDashboard({ initialView }: { initialView: RunView }) {
             id: result.missionId,
             label: result.missionId,
             verdict: result.verdict,
+            detail: result.reason,
           }))}
           detail="No regression missions have been executed."
         />
       </section>
+
+      {regressionAttempt ? (
+        <section className="panel regression-comparison">
+          <div className="panel-heading">
+            <div>
+              <p className="eyebrow">Base vs head</p>
+              <h2>{regressionAttempt.mission?.title ?? "Regression preservation"}</h2>
+            </div>
+            <span className="contract-state">
+              {regressionAttempt.comparison?.verdict ?? regressionAttempt.status}
+            </span>
+          </div>
+          {view.blastRadius ? (
+            <p className="contract-summary">
+              Impact evidence: {view.blastRadius.affectedRoutes.map((route) => route.path).join(", ")}
+              {" · "}
+              {view.blastRadius.affectedComponents
+                .map((component) => component.name)
+                .join(", ")}
+            </p>
+          ) : null}
+          {regressionAttempt.comparison ? (
+            <>
+              <p>{regressionAttempt.comparison.reason}</p>
+              {regressionAttempt.comparison.firstDivergence ? (
+                <div className="setup-banner">
+                  <div>
+                    <strong>First divergence</strong>
+                    <p>
+                      {regressionAttempt.comparison.firstDivergence.behavior}:{" "}
+                      {regressionAttempt.comparison.firstDivergence.baseSummary} →{" "}
+                      {regressionAttempt.comparison.firstDivergence.headSummary}
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <EmptyState
+              title="Comparison pending"
+              detail={regressionAttempt.blocker?.message ?? "Both branch executions must finish first."}
+            />
+          )}
+          <div className="branch-evidence-grid">
+            {(["base", "head"] as const).map((target) => {
+              const execution = regressionAttempt.executions?.[target];
+              return (
+                <article className="claim-card" key={target}>
+                  <p className="eyebrow">{target}</p>
+                  <h3>{execution?.status ?? "pending"}</h3>
+                  {execution ? (
+                    <>
+                      <ul>
+                        {execution.checks.map((check) => (
+                          <li key={`${target}-${check.assertionIndex}`}>
+                            <strong>{check.passed ? "pass" : "fail"}</strong>{" "}
+                            {check.behavior ?? check.assertionId ?? `Assertion ${check.assertionIndex + 1}`}
+                            {` — ${formatObservation(check.actual)}`}
+                          </li>
+                        ))}
+                      </ul>
+                      {execution.evidenceErrors?.map((error) => (
+                        <p className="form-error" key={error.code}>
+                          {error.message}
+                        </p>
+                      ))}
+                      <ArtifactLinks execution={execution} />
+                    </>
+                  ) : (
+                    <p>No execution evidence yet.</p>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
 
       <section className="evidence-grid">
         <div className="panel">
@@ -290,8 +381,13 @@ export function RunDashboard({ initialView }: { initialView: RunView }) {
         <div className="panel recording-panel">
           <p className="eyebrow">Recording</p>
           <h2>Browser evidence</h2>
-          {view.recording ? (
-            <video controls src={`/api/artifacts/${view.recording.artifactId}`} />
+          {view.recordings.length > 0 ? (
+            view.recordings.map((recording) => (
+              <div key={`${recording.target}-${recording.artifactId}`}>
+                <strong>{recording.target}</strong>
+                <video controls src={`/api/artifacts/${recording.artifactId}`} />
+              </div>
+            ))
           ) : (
             <EmptyState title="Not recorded" detail="No browser execution has run." />
           )}
@@ -303,7 +399,7 @@ export function RunDashboard({ initialView }: { initialView: RunView }) {
             <ol>
               {view.actions.map((action, index) => (
                 <li key={`${action.at}-${index}`}>
-                  <strong>{action.status}</strong> {action.summary}
+                  <strong>{action.target}</strong> {action.status} {action.summary}
                 </li>
               ))}
             </ol>
@@ -318,7 +414,8 @@ export function RunDashboard({ initialView }: { initialView: RunView }) {
             <ul>
               {prioritizeNetwork(view.network).slice(0, 12).map((request, index) => (
                 <li key={`${request.url}-${index}`}>
-                  {request.method} {request.status} {new URL(request.url).pathname}
+                  <strong>{request.target}</strong> {request.method} {request.status}{" "}
+                  {new URL(request.url).pathname}
                 </li>
               ))}
             </ul>
@@ -396,7 +493,7 @@ function ResultGroup({
   detail,
 }: {
   title: string;
-  results: Array<{ id: string; label: string; verdict: string }>;
+  results: Array<{ id: string; label: string; verdict: string; detail?: string }>;
   detail: string;
 }) {
   return (
@@ -411,6 +508,7 @@ function ResultGroup({
           {results.map((result) => (
             <li key={result.id}>
               <strong>{result.verdict.replaceAll("_", " ")}</strong> {result.label}
+              {result.detail ? <p>{result.detail}</p> : null}
             </li>
           ))}
         </ul>
@@ -419,6 +517,53 @@ function ResultGroup({
       )}
     </div>
   );
+}
+
+function ArtifactLinks({
+  execution,
+}: {
+  execution: NonNullable<RunView["verificationAttempts"][number]["execution"]>;
+}) {
+  const artifacts = [
+    ...execution.evidence.screenshotArtifactIds.map((artifactId, index) => ({
+      label: `Screenshot ${index + 1}`,
+      artifactId,
+    })),
+    ...(execution.evidence.traceArtifactId
+      ? [{ label: "Trace", artifactId: execution.evidence.traceArtifactId }]
+      : []),
+    ...(execution.evidence.videoArtifactId
+      ? [{ label: "Video", artifactId: execution.evidence.videoArtifactId }]
+      : []),
+    ...(execution.evidence.consoleArtifactId
+      ? [{ label: "Console", artifactId: execution.evidence.consoleArtifactId }]
+      : []),
+    ...(execution.evidence.pageErrorArtifactId
+      ? [{ label: "Page errors", artifactId: execution.evidence.pageErrorArtifactId }]
+      : []),
+    ...(execution.evidence.networkArtifactId
+      ? [{ label: "Network", artifactId: execution.evidence.networkArtifactId }]
+      : []),
+  ];
+  return artifacts.length > 0 ? (
+    <p className="artifact-links">
+      {artifacts.map((artifact) => (
+        <a
+          href={`/api/artifacts/${artifact.artifactId}`}
+          key={artifact.artifactId}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {artifact.label}
+        </a>
+      ))}
+    </p>
+  ) : null;
+}
+
+function formatObservation(value: unknown): string {
+  const text = typeof value === "string" ? value : JSON.stringify(value);
+  return (text ?? "missing").replace(/\s+/g, " ").slice(0, 120);
 }
 
 function EmptyState({ title, detail }: { title: string; detail: string }) {

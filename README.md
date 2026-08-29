@@ -8,14 +8,15 @@ This prototype implements a real intent-to-browser vertical slice:
 2. Create a durable coordination Axon with immutable lifecycle events and contract SQL.
 3. Launch a Reflex-managed Codex agent that extracts an `IntentSpec` from PR prose only.
 4. Stream sanitized progress through the Groundtruth server and require human contract approval.
-5. Validate a trusted AppProfile, AppMap, and TestMission against the exact PR base and head SHAs.
+5. Validate a trusted AppProfile, AppMap, ImpactMap, and mission set against the exact PR base and head SHAs.
 6. Start isolated base/head applications in Runloop Devboxes from the same pinned setup contract.
 7. Start a separate browser Devbox with Runloop's public Codex mount, OpenAI Agent Gateway,
    Playwright, and Chromium.
-8. Require Codex to inspect the live head application and produce a schema-valid frozen journey for
-   one explicit approved claim.
-9. Replay that journey mechanically and persist real assertions, actions, network entries,
-   screenshots, trace, video, console output, and lifecycle state.
+8. Require Codex to inspect the live target application and produce a schema-valid frozen journey.
+9. Replay intent journeys on head. For regression missions, discover on base, reset both fixtures,
+   replay the identical journey on base and head, and compare only named normalized observations.
+10. Persist branch-labeled assertions, actions, network entries, screenshots, trace, video, console
+    and page errors, paired comparison rows, and append-only attempt evidence.
 
 The dashboard projects only persisted run data. It keeps intent conformance and regression safety
 separate, exposes covered/deferred/uncovered must claims, and does not generate placeholder journeys,
@@ -47,14 +48,16 @@ Trusted target-app configuration belongs at:
 ```text
 config/apps/<owner>/<repo>/app-profile.json
 config/apps/<owner>/<repo>/app-map.json
-config/apps/<owner>/<repo>/test-mission.json
+config/apps/<owner>/<repo>/impact-map.json
+config/apps/<owner>/<repo>/test-missions.json
 ```
 
 The checked-in `Kyan42/fernway` onboarding data is pinned to PR #4 base
 `db5c5ae6e25fdc3947738b37327a626394420365` and head
 `716b9f36e35f4f1cd1944e043bfdfb13f8f97ea4`. Missing/stale configuration, unsupported fork PRs,
 agent contract failures, and integration failures produce explicit blockers rather than simulated
-success. Devboxes are suspended on terminal paths.
+success. Regression verdicts are `preserved`, `regressed`, or `inconclusive`; setup/runner failures
+are never product regressions. Devboxes are suspended on terminal paths.
 
 ## Validation
 

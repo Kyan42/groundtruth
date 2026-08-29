@@ -16,6 +16,7 @@ import {
   type Run,
   RunSchema,
   type RunView,
+  type TestMission,
 } from "@/lib/domain/schemas";
 import { fetchPublicPullRequest } from "@/lib/github/public-pr-client";
 import { getRunIndex } from "@/lib/persistence/json-run-index";
@@ -37,6 +38,7 @@ import {
 } from "@/lib/runloop/coordination-axon";
 import {
   executeBrowserVerification,
+  resolveRegressionMission,
   resolveMission,
 } from "@/lib/runloop/browser-verification";
 import { buildRunView } from "@/lib/views/build-run-view";
@@ -114,15 +116,19 @@ export class RunService {
     return this.enqueueRunWork(runId, () => this.approveIntentOnce(runId));
   }
 
-  async startVerification(runId: string): Promise<RunView> {
+  async startVerification(
+    runId: string,
+    missionKind: TestMission["kind"] = "intent",
+  ): Promise<RunView> {
     const run = await this.get(runId);
     const retryableBrowserFailure =
       ["blocked", "failed"].includes(run.status) &&
       (run.browserVerification?.blocker?.retryable || run.blocker?.retryable);
-    if (run.status !== "contract_approved" && !retryableBrowserFailure) {
+    const completedRegressionStart = missionKind === "regression" && run.status === "complete";
+    if (run.status !== "contract_approved" && !completedRegressionStart && !retryableBrowserFailure) {
       throw new GroundtruthError(
         "browser_verification_not_ready",
-        "Approve the intent contract before starting browser verification.",
+        "Approve the intent contract before starting browser verification; regression checks may also follow a completed intent run.",
         409,
       );
     }
@@ -146,15 +152,27 @@ export class RunService {
       }));
       return buildRunView(blocked);
     }
+    const mission = configuration.missions.find((candidate) => candidate.kind === missionKind);
+    if (!mission) {
+      throw new GroundtruthError(
+        "test_mission_missing",
+        `No trusted ${missionKind} mission is configured.`,
+        422,
+      );
+    }
     try {
-      resolveMission(configuration.mission, run);
+      if (mission.kind === "intent") {
+        resolveMission(mission, run);
+      } else {
+        resolveRegressionMission(mission, configuration);
+      }
     } catch (error) {
       const missionError =
         error instanceof GroundtruthError
           ? error
           : new GroundtruthError(
               "test_mission_invalid",
-              "The trusted TestMission is not compatible with the approved intent.",
+              "The trusted TestMission is not compatible with this run.",
               422,
             );
       const blocked = await getRunIndex().update(run.id, (current) => ({
@@ -182,14 +200,14 @@ export class RunService {
         : current.browserVerificationHistory,
       browserVerification: {
         status: "preparing",
-        mission: configuration.mission,
+        mission,
         environments: [],
         actions: [],
         network: [],
       },
       updatedAt: new Date().toISOString(),
     }));
-    const operation = this.runBrowserVerification(preparing, configuration).finally(() => {
+    const operation = this.runBrowserVerification(preparing, configuration, mission).finally(() => {
       verificationByRun.delete(run.id);
     });
     verificationByRun.set(run.id, operation);
@@ -197,6 +215,10 @@ export class RunService {
       console.error("Unhandled browser verification failure.", error);
     });
     return buildRunView(preparing);
+  }
+
+  startRegressionVerification(runId: string): Promise<RunView> {
+    return this.startVerification(runId, "regression");
   }
 
   async rerunVerification(runId: string): Promise<RunView> {
@@ -555,8 +577,9 @@ export class RunService {
   private async runBrowserVerification(
     run: Run,
     configuration: Extract<Awaited<ReturnType<typeof loadAppConfiguration>>, { ready: true }>,
+    mission: TestMission,
   ): Promise<void> {
-    await executeBrowserVerification(run, configuration, async (browserVerification) => {
+    await executeBrowserVerification(run, configuration, mission, async (browserVerification) => {
       await getRunIndex().update(run.id, (current) => ({
         ...current,
         status:

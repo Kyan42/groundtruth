@@ -4,7 +4,9 @@ import type { Devbox } from "@runloop/api-client";
 import { z } from "zod";
 
 import type { AppConfiguration } from "@/lib/config/app-config";
+import { hasTrustedRegressionImpact } from "@/lib/config/app-config";
 import { GroundtruthError } from "@/lib/domain/errors";
+import { compareRegressionExecutions } from "@/lib/domain/regression-comparison";
 import {
   type AppMap,
   type AppProfile,
@@ -15,6 +17,7 @@ import {
   ExecutableJourneySchema,
   type ExecutionResult,
   ExecutionResultSchema,
+  type ExecutionTarget,
   type Run,
   type TestMission,
 } from "@/lib/domain/schemas";
@@ -26,6 +29,7 @@ import {
   saveExecution,
   saveJourney,
   saveMission,
+  saveRegressionComparison,
 } from "@/lib/runloop/coordination-axon";
 import { validateJourneyForReplay } from "@/lib/runloop/browser-safety";
 import { getRunloopClient } from "@/lib/runloop/client";
@@ -46,6 +50,9 @@ const RunnerOutputSchema = z.object({
   checks: z.array(
     z.object({
       assertionIndex: z.number().int().nonnegative(),
+      assertionId: z.string().min(1),
+      behavior: z.string().min(1),
+      comparison: z.enum(["pass_only", "exact"]),
       passed: z.boolean(),
       actual: z.unknown(),
     }),
@@ -53,7 +60,7 @@ const RunnerOutputSchema = z.object({
   actions: z.array(
     z.object({
       at: z.iso.datetime(),
-      target: z.literal("head"),
+      target: z.enum(["base", "head"]),
       summary: z.string().min(1),
       status: z.string().min(1),
     }),
@@ -63,7 +70,7 @@ const RunnerOutputSchema = z.object({
       method: z.string().min(1),
       url: z.string().min(1),
       status: z.number().int().min(100).max(599),
-      target: z.literal("head"),
+      target: z.enum(["base", "head"]),
     }),
   ),
   files: z.object({
@@ -72,6 +79,7 @@ const RunnerOutputSchema = z.object({
     video: z.string().min(1).optional(),
     actions: z.string().min(1),
     console: z.string().min(1),
+    errors: z.string().min(1),
     network: z.string().min(1),
   }),
   error: z.object({ code: z.string().min(1), message: z.string().min(1) }).optional(),
@@ -83,6 +91,7 @@ type ProgressCallback = (state: BrowserVerification) => Promise<void>;
 export async function executeBrowserVerification(
   run: Run,
   configuration: Extract<AppConfiguration, { ready: true }>,
+  selectedMission: TestMission,
   onProgress: ProgressCallback,
 ): Promise<BrowserVerification> {
   if (!run.coordinationAxonId || !run.intentSpec || !run.intentApproval) {
@@ -92,7 +101,10 @@ export async function executeBrowserVerification(
       409,
     );
   }
-  const mission = resolveMission(configuration.mission, run);
+  const mission =
+    selectedMission.kind === "intent"
+      ? resolveMission(selectedMission, run)
+      : resolveRegressionMission(selectedMission, configuration);
   const axonId = run.coordinationAxonId;
   const attemptId = randomUUID();
   let state = BrowserVerificationSchema.parse({
@@ -111,6 +123,67 @@ export async function executeBrowserVerification(
     state = BrowserVerificationSchema.parse(next);
     await onProgress(state);
   };
+  const runTarget = async (
+    box: Devbox,
+    target: ExecutionTarget,
+    applicationUrl: string,
+    journey: ExecutableJourney,
+  ): Promise<{
+    result: ExecutionResult;
+    replay?: z.infer<typeof RunnerOutputSchema>;
+  }> => {
+    const executionId = randomUUID();
+    await publishRunEvent(axonId, "execution.started", "EXTERNAL_EVENT", {
+      runId: run.id,
+      attemptId,
+      missionId: mission.id,
+      executionId,
+      target,
+    });
+    let result: ExecutionResult;
+    let replay: z.infer<typeof RunnerOutputSchema> | undefined;
+    try {
+      await resetFixtures(box, configuration.profile, target);
+      await publishRunEvent(axonId, "fixture.reset_completed", "EXTERNAL_EVENT", {
+        runId: run.id,
+        attemptId,
+        missionId: mission.id,
+        target,
+      });
+      replay = await replayJourney(
+        browserBox!,
+        mission,
+        journey,
+        configuration.profile,
+        target,
+        applicationUrl,
+      );
+      result = await persistReplayArtifacts(
+        browserBox!,
+        run,
+        mission.id,
+        attemptId,
+        executionId,
+        target,
+        replay,
+        axonId,
+      );
+    } catch (error) {
+      result = failedExecution(mission.id, attemptId, executionId, target, error);
+    }
+    await saveExecution(axonId, executionId, result, result.endedAt);
+    await publishRunEvent(axonId, "execution.completed", "EXTERNAL_EVENT", {
+      runId: run.id,
+      attemptId,
+      executionId,
+      missionId: mission.id,
+      target,
+      status: result.status,
+      assertionCount: result.checks.length,
+      evidenceCount: countEvidence(result),
+    });
+    return { result, replay };
+  };
 
   try {
     if (configuration.profile.auth.mode !== "none") {
@@ -124,6 +197,7 @@ export async function executeBrowserVerification(
     await saveMission(axonId, attemptId, run.id, mission, new Date().toISOString());
     await publishRunEvent(axonId, "mission.loaded", "EXTERNAL_EVENT", {
       runId: run.id,
+      attemptId,
       missionId: mission.id,
       kind: mission.kind,
     });
@@ -143,7 +217,7 @@ export async function executeBrowserVerification(
       url: baseUrl,
       detail: "Default Runloop image with the trusted install/start commands; no prepared Snapshot was configured.",
     };
-    await saveEnvironment(axonId, run.id, baseEnvironment, new Date().toISOString());
+    await saveEnvironment(axonId, attemptId, run.id, baseEnvironment, new Date().toISOString());
     await emit({ ...state, environments: [baseEnvironment] });
     await publishRunEvent(axonId, "environment.ready", "EXTERNAL_EVENT", {
       runId: run.id,
@@ -167,7 +241,7 @@ export async function executeBrowserVerification(
       url: headUrl,
       detail: "Default Runloop image with the trusted install/start commands; no prepared Snapshot was configured.",
     };
-    await saveEnvironment(axonId, run.id, headEnvironment, new Date().toISOString());
+    await saveEnvironment(axonId, attemptId, run.id, headEnvironment, new Date().toISOString());
     await emit({ ...state, environments: [baseEnvironment, headEnvironment] });
     await publishRunEvent(axonId, "environment.ready", "EXTERNAL_EVENT", {
       runId: run.id,
@@ -185,7 +259,7 @@ export async function executeBrowserVerification(
       status: "running",
       detail: "Default Runloop image with public Codex agent mount, OpenAI Agent Gateway, Playwright, and Chromium.",
     };
-    await saveEnvironment(axonId, run.id, browserEnvironment, new Date().toISOString());
+    await saveEnvironment(axonId, attemptId, run.id, browserEnvironment, new Date().toISOString());
     await emit({
       ...state,
       status: "discovering",
@@ -199,65 +273,126 @@ export async function executeBrowserVerification(
     });
     await publishRunEvent(axonId, "journey.discovery_started", "AGENT_EVENT", {
       runId: run.id,
+      attemptId,
       missionId: mission.id,
       browserDevboxId: browserBox.id,
+      target: mission.kind === "regression" ? "base" : "head",
     });
 
+    const discoveryTarget: ExecutionTarget = mission.kind === "regression" ? "base" : "head";
+    const discoveryBox = discoveryTarget === "base" ? baseBox : headBox;
+    const discoveryUrl = discoveryTarget === "base" ? baseUrl : headUrl;
+    if (mission.kind === "regression") {
+      await resetFixtures(discoveryBox, configuration.profile, discoveryTarget);
+      await publishRunEvent(axonId, "fixture.reset_completed", "EXTERNAL_EVENT", {
+        runId: run.id,
+        attemptId,
+        missionId: mission.id,
+        target: discoveryTarget,
+        phase: "discovery",
+      });
+    }
     const journey = await discoverJourney(
       browserBox,
       mission,
       configuration.profile,
       configuration.appMap,
-      headUrl,
+      discoveryTarget,
+      discoveryUrl,
     );
-    validateJourneyForReplay(journey, mission, configuration.profile, headUrl);
+    validateJourneyForReplay(journey, mission, configuration.profile, discoveryUrl);
     await saveJourney(axonId, attemptId, run.id, journey, new Date().toISOString());
     await emit({ ...state, journey });
     await publishRunEvent(axonId, "journey.frozen", "AGENT_EVENT", {
       runId: run.id,
+      attemptId,
       missionId: mission.id,
+      discoveredAgainst: discoveryTarget,
       stepCount: journey.steps.length,
       producer: journey.producer,
     });
 
     await emit({ ...state, status: "executing" });
-    await executeChecked(
-      headBox,
-      `cd ${shellQuote(homePath(configuration.profile.workspace.workingDirectory))} && ${configuration.profile.fixtures.resetCommand}`,
-      "fixture reset",
-    );
-    const replay = await replayJourney(
-      browserBox,
-      mission,
-      journey,
-      configuration.profile,
-      headUrl,
-    );
-    const executionId = randomUUID();
-    const result = await persistReplayArtifacts(
-      browserBox,
-      run,
-      mission.id,
-      attemptId,
-      executionId,
-      replay,
-      axonId,
-    );
-    await saveExecution(axonId, executionId, result, result.endedAt);
+    if (mission.kind === "intent") {
+      const head = await runTarget(headBox, "head", headUrl, journey);
+      const infrastructureFailure =
+        head.result.status === "error" ||
+        head.result.status === "blocked" ||
+        (head.result.evidenceErrors?.length ?? 0) > 0;
+      await emit({
+        ...state,
+        status: infrastructureFailure ? "blocked" : "complete",
+        execution: head.result,
+        actions: head.replay?.actions ?? [],
+        network: head.replay?.network ?? [],
+        blocker: infrastructureFailure
+          ? {
+              code:
+                head.result.error?.code ??
+                head.result.evidenceErrors?.[0]?.code ??
+                "intent_execution_incomplete",
+              message:
+                head.result.error?.message ??
+                head.result.evidenceErrors?.[0]?.message ??
+                "Intent execution did not produce complete evidence.",
+              retryable: true,
+            }
+          : undefined,
+      });
+      return state;
+    }
+
+    const base = await runTarget(baseBox, "base", baseUrl, journey);
     await emit({
       ...state,
-      status: "complete",
-      execution: result,
-      actions: replay.actions,
-      network: replay.network,
+      executions: { base: base.result },
+      actions: base.replay?.actions ?? [],
+      network: base.replay?.network ?? [],
     });
-    await publishRunEvent(axonId, "execution.completed", "EXTERNAL_EVENT", {
+    const head = await runTarget(headBox, "head", headUrl, journey);
+    const comparison = compareRegressionExecutions(
+      mission,
+      base.result,
+      head.result,
+      { base: baseUrl, head: headUrl },
+    );
+    await saveRegressionComparison(axonId, comparison);
+    await publishRunEvent(axonId, "regression.compared", "EXTERNAL_EVENT", {
       runId: run.id,
-      executionId,
+      attemptId,
       missionId: mission.id,
-      status: result.status,
-      assertionCount: result.checks.length,
-      evidenceCount: countEvidence(result),
+      comparisonId: comparison.comparisonId,
+      baseExecutionId: comparison.baseExecutionId,
+      headExecutionId: comparison.headExecutionId,
+      verdict: comparison.verdict,
+      firstDivergence: comparison.firstDivergence
+        ? {
+            stage: comparison.firstDivergence.stage,
+            stepIndex: comparison.firstDivergence.stepIndex,
+            assertionId: comparison.firstDivergence.assertionId,
+          }
+        : undefined,
+    });
+    const infrastructureFailure = [base.result, head.result].some(
+      (result) =>
+        result.status === "error" ||
+        result.status === "blocked" ||
+        (result.evidenceErrors?.length ?? 0) > 0,
+    );
+    await emit({
+      ...state,
+      status: infrastructureFailure ? "blocked" : "complete",
+      executions: { base: base.result, head: head.result },
+      comparison,
+      actions: [...(base.replay?.actions ?? []), ...(head.replay?.actions ?? [])],
+      network: [...(base.replay?.network ?? []), ...(head.replay?.network ?? [])],
+      blocker: infrastructureFailure
+        ? {
+            code: "regression_execution_incomplete",
+            message: "A runner, setup, or evidence persistence failure made the comparison inconclusive.",
+            retryable: true,
+          }
+        : undefined,
     });
     return state;
   } catch (error) {
@@ -276,9 +411,9 @@ export async function executeBrowserVerification(
     });
     return failed;
   } finally {
-    await suspendEnvironment(browserBox, "browser", run, axonId, state, emit);
-    await suspendEnvironment(headBox, "head", run, axonId, state, emit);
-    await suspendEnvironment(baseBox, "base", run, axonId, state, emit);
+    await suspendEnvironment(browserBox, "browser", run, attemptId, axonId, state, emit);
+    await suspendEnvironment(headBox, "head", run, attemptId, axonId, state, emit);
+    await suspendEnvironment(baseBox, "base", run, attemptId, axonId, state, emit);
     const failedCleanup = state.environments.filter(
       (environment) => environment.status === "failed",
     );
@@ -335,6 +470,48 @@ export function resolveMission(configured: TestMission, run: Run): TestMission {
       422,
     );
   }
+  if (
+    configured.assertions.some(
+      (assertion) =>
+        (assertion.kind === "url" && (!assertion.operator || assertion.expected === undefined)) ||
+        (assertion.kind === "text" &&
+          (!assertion.operator || assertion.expected === undefined)) ||
+        (assertion.kind === "network" && assertion.expectedStatus === undefined),
+    )
+  ) {
+    throw new GroundtruthError(
+      "test_mission_assertion_incomplete",
+      "Intent assertions must include explicit expected values and operators.",
+      422,
+    );
+  }
+  return configured;
+}
+
+export function resolveRegressionMission(
+  configured: TestMission,
+  configuration: Extract<AppConfiguration, { ready: true }>,
+): TestMission {
+  if (
+    configured.kind !== "regression" ||
+    configured.claimIds.length !== 0 ||
+    configured.assertions.some(
+      (assertion) => !assertion.id || !assertion.behavior || !assertion.comparison,
+    )
+  ) {
+    throw new GroundtruthError(
+      "regression_mission_invalid",
+      "A regression mission requires zero claim IDs and named comparison assertions.",
+      422,
+    );
+  }
+  if (!hasTrustedRegressionImpact(configured, configuration.impactMap, configuration.appMap)) {
+    throw new GroundtruthError(
+      "regression_mission_unrelated",
+      "The regression mission is not supported by trusted impact and AppMap evidence.",
+      422,
+    );
+  }
   return configured;
 }
 
@@ -382,6 +559,18 @@ async function createApplicationEnvironment(
     await box.shutdown().catch(() => undefined);
     throw error;
   }
+}
+
+async function resetFixtures(
+  box: Devbox,
+  profile: AppProfile,
+  target: ExecutionTarget,
+): Promise<void> {
+  await executeChecked(
+    box,
+    `cd ${shellQuote(homePath(profile.workspace.workingDirectory))} && ${profile.fixtures.resetCommand}`,
+    `${target} fixture reset`,
+  );
 }
 
 type GatewayBinding = { gatewayId: string; secretName: string };
@@ -458,7 +647,8 @@ async function discoverJourney(
   mission: TestMission,
   profile: AppProfile,
   appMap: AppMap,
-  headUrl: string,
+  target: ExecutionTarget,
+  applicationUrl: string,
 ): Promise<ExecutableJourney> {
   const directory = "/home/user/groundtruth-runner";
   await Promise.all([
@@ -476,7 +666,7 @@ async function discoverJourney(
     "Use the installed Playwright package and Chromium to inspect the live application yourself.",
     "You must execute browser inspection commands against the supplied URL before answering.",
     "Do not infer the journey from source code and do not return a canned journey.",
-    `Live head URL: ${headUrl}`,
+    `Live ${target} URL: ${applicationUrl}`,
     `Approved TestMission: ${JSON.stringify(mission)}`,
     `Candidate routes: ${JSON.stringify(appMap.routes.map((route) => route.path))}`,
     `Fixture reset reference: ${profile.fixtures.resetCommand}`,
@@ -488,6 +678,10 @@ async function discoverJourney(
     'Valid examples: {"action":"goto","path":"/"}, {"action":"click","locator":{"by":"role","role":"button","name":"Add to cart"}}, {"action":"fill","locator":{"by":"test_id","value":"promo-code"},"fixtureValueKey":"validPromoCode"}, {"action":"press","locator":{"by":"test_id","value":"promo-code"},"key":"Tab"}, {"action":"wait_for","locator":{"by":"test_id","value":"promo-applied"},"state":"visible"}.',
     "Allowed locators are role {role,name?}, text {text,exact?}, test_id {value}, and css {value}.",
     "Use only paths and elements you actually observed.",
+    `Set discoveredAgainst to "${target}".`,
+    mission.kind === "regression"
+      ? "Choose an existing behavior available in this base environment. Product identity and observed values must come from live inspection, not from assumptions or configured expected values."
+      : "Discover the approved intent behavior against the pull request head.",
     "Use wait_for only for prerequisite UI readiness, never to encode the final asserted outcome. End the journey immediately after triggering the behavior under test; the mechanical runner owns verdict assertions.",
     "Never visit blocked path prefixes. State-changing requests are allowed only when the supplied safety policy explicitly allows them.",
   ].join("\n");
@@ -538,9 +732,11 @@ async function replayJourney(
   mission: TestMission,
   journey: ExecutableJourney,
   profile: AppProfile,
-  headUrl: string,
+  target: ExecutionTarget,
+  applicationUrl: string,
 ): Promise<z.infer<typeof RunnerOutputSchema>> {
   const directory = "/home/user/groundtruth-runner";
+  const outputDirectory = `${directory}/artifacts-${target}`;
   await Promise.all([
     box.file.write({
       file_path: `${directory}/mission.json`,
@@ -558,10 +754,10 @@ async function replayJourney(
   ]);
   await executeChecked(
     box,
-    `cd ${directory} && HEAD_URL=${shellQuote(headUrl)} node replay.mjs`,
-    "mechanical Playwright replay",
+    `cd ${directory} && APPLICATION_URL=${shellQuote(applicationUrl)} EXECUTION_TARGET=${shellQuote(target)} OUTPUT_DIRECTORY=${shellQuote(outputDirectory)} node replay.mjs`,
+    `${target} mechanical Playwright replay`,
   );
-  const raw = await box.file.read({ file_path: `${directory}/result.json` });
+  const raw = await box.file.read({ file_path: `${directory}/result-${target}.json` });
   return RunnerOutputSchema.parse(JSON.parse(raw));
 }
 
@@ -571,11 +767,12 @@ async function persistReplayArtifacts(
   missionId: string,
   attemptId: string,
   executionId: string,
+  target: ExecutionTarget,
   replay: z.infer<typeof RunnerOutputSchema>,
   axonId: string,
 ): Promise<ExecutionResult> {
   const sdk = getRunloopClient();
-  const uploaded: Array<{ kind: string; id: string }> = [];
+  const artifactFailures: string[] = [];
   const uploadText = async (kind: string, filePath: string, mimeType: string): Promise<string> => {
     const text = await box.file.read({ file_path: filePath });
     const object = await sdk.storageObject.uploadFromText(
@@ -583,7 +780,7 @@ async function persistReplayArtifacts(
       `groundtruth-${run.id}-${executionId}-${kind}.json`,
       { metadata: { run_id: run.id, execution_id: executionId, kind, mime_type: mimeType } },
     );
-    uploaded.push({ kind, id: object.id });
+    await saveArtifact(axonId, object.id, executionId, kind, object.id);
     return object.id;
   };
   const uploadBinary = async (
@@ -598,36 +795,55 @@ async function persistReplayArtifacts(
       "binary",
       { metadata: { run_id: run.id, execution_id: executionId, kind, mime_type: mimeType } },
     );
-    uploaded.push({ kind, id: object.id });
+    await saveArtifact(axonId, object.id, executionId, kind, object.id);
     return object.id;
+  };
+  const retainPartial = async (
+    kind: string,
+    upload: () => Promise<string>,
+  ): Promise<string | undefined> => {
+    try {
+      return await upload();
+    } catch (error) {
+      artifactFailures.push(
+        `${kind}: ${sanitize(error instanceof Error ? error.message : "artifact persistence failed")}`,
+      );
+      return undefined;
+    }
   };
 
   const screenshotArtifactIds = await Promise.all(
     replay.files.screenshots.map((filePath, index) =>
-      uploadBinary(`screenshot-${index}`, filePath, "image/png"),
+      retainPartial(`screenshot-${index}`, () =>
+        uploadBinary(`screenshot-${index}`, filePath, "image/png"),
+      ),
     ),
-  );
-  const [actionArtifactId, consoleArtifactId, networkArtifactId] = await Promise.all([
-    uploadText("actions", replay.files.actions, "application/json"),
-    uploadText("console", replay.files.console, "application/json"),
-    uploadText("network", replay.files.network, "application/json"),
+  ).then((ids) => ids.filter((id): id is string => Boolean(id)));
+  const [actionArtifactId, consoleArtifactId, pageErrorArtifactId, networkArtifactId] = await Promise.all([
+    retainPartial("actions", () => uploadText("actions", replay.files.actions, "application/json")),
+    retainPartial("console", () => uploadText("console", replay.files.console, "application/json")),
+    retainPartial("page-errors", () =>
+      uploadText("page-errors", replay.files.errors, "application/json"),
+    ),
+    retainPartial("network", () => uploadText("network", replay.files.network, "application/json")),
   ]);
   const traceArtifactId = replay.files.trace
-    ? await uploadBinary("trace", replay.files.trace, "application/zip")
+    ? await retainPartial("trace", () =>
+        uploadBinary("trace", replay.files.trace!, "application/zip"),
+      )
     : undefined;
   const videoArtifactId = replay.files.video
-    ? await uploadBinary("video", replay.files.video, "video/webm")
+    ? await retainPartial("video", () =>
+        uploadBinary("video", replay.files.video!, "video/webm"),
+      )
     : undefined;
-  for (const artifact of uploaded) {
-    await saveArtifact(axonId, artifact.id, executionId, artifact.kind, artifact.id);
-  }
 
   return ExecutionResultSchema.parse({
     schemaVersion: 1,
     attemptId,
     executionId,
     missionId,
-    target: "head",
+    target,
     status: replay.status,
     startedAt: replay.startedAt,
     endedAt: replay.endedAt,
@@ -639,9 +855,44 @@ async function persistReplayArtifacts(
       screenshotArtifactIds,
       actionArtifactId,
       consoleArtifactId,
+      pageErrorArtifactId,
       networkArtifactId,
     },
+    evidenceErrors:
+      artifactFailures.length > 0
+        ? [
+            {
+              code: "artifact_persistence_failed",
+              message: `${artifactFailures.length} artifact(s) could not be persisted: ${artifactFailures.join("; ")}`,
+            },
+          ]
+        : undefined,
     error: replay.error,
+  });
+}
+
+function failedExecution(
+  missionId: string,
+  attemptId: string,
+  executionId: string,
+  target: ExecutionTarget,
+  error: unknown,
+): ExecutionResult {
+  const blocker = browserBlocker(error);
+  const now = new Date().toISOString();
+  return ExecutionResultSchema.parse({
+    schemaVersion: 1,
+    missionId,
+    attemptId,
+    executionId,
+    target,
+    status: "error",
+    startedAt: now,
+    endedAt: now,
+    steps: [],
+    checks: [],
+    evidence: { screenshotArtifactIds: [] },
+    error: { code: blocker.code, message: blocker.message },
   });
 }
 
@@ -649,6 +900,7 @@ async function suspendEnvironment(
   box: Devbox | undefined,
   role: BrowserEnvironment["role"],
   run: Run,
+  attemptId: string,
   axonId: string,
   state: BrowserVerification,
   emit: ProgressCallback,
@@ -679,8 +931,24 @@ async function suspendEnvironment(
   );
   const environment = environments.find((candidate) => candidate.devboxId === box.id);
   if (environment) {
-    await saveEnvironment(axonId, run.id, environment, new Date().toISOString()).catch(() => undefined);
-    await emit({ ...state, environments }).catch(() => undefined);
+    try {
+      await saveEnvironment(axonId, attemptId, run.id, environment, new Date().toISOString());
+      await emit({ ...state, environments });
+    } catch (error) {
+      console.error("Failed to persist final environment cleanup state.", error);
+      const failedEnvironments = environments.map((candidate) =>
+        candidate.devboxId === box.id
+          ? {
+              ...candidate,
+              status: "failed" as const,
+              detail: `${candidate.detail ?? ""} Cleanup completed with status ${status}, but its audit state could not be persisted.`.trim(),
+            }
+          : candidate,
+      );
+      await emit({ ...state, environments: failedEnvironments }).catch((emitError: unknown) => {
+        console.error("Failed to project cleanup audit failure.", emitError);
+      });
+    }
   }
 }
 
@@ -763,6 +1031,7 @@ function countEvidence(result: ExecutionResult): number {
       evidence.traceArtifactId,
       evidence.actionArtifactId,
       evidence.consoleArtifactId,
+      evidence.pageErrorArtifactId,
       evidence.networkArtifactId,
     ].filter(Boolean).length
   );
@@ -776,25 +1045,32 @@ import { chromium } from "playwright";
 const mission = JSON.parse(await readFile("mission.json", "utf8"));
 const journey = JSON.parse(await readFile("journey.json", "utf8"));
 const safety = JSON.parse(await readFile("safety.json", "utf8"));
-const headUrl = process.env.HEAD_URL;
-if (!headUrl) throw new Error("HEAD_URL is required.");
-const headOrigin = new URL(headUrl);
+const applicationUrl = process.env.APPLICATION_URL;
+const target = process.env.EXECUTION_TARGET;
+const outputDirectory = process.env.OUTPUT_DIRECTORY;
+if (!applicationUrl) throw new Error("APPLICATION_URL is required.");
+if (!["base", "head"].includes(target)) throw new Error("EXECUTION_TARGET must be base or head.");
+if (!outputDirectory) throw new Error("OUTPUT_DIRECTORY is required.");
+const applicationOrigin = new URL(applicationUrl);
 
-const artifacts = path.resolve("artifacts");
+const artifacts = path.resolve(outputDirectory);
 await mkdir(artifacts, { recursive: true });
 const startedAt = new Date().toISOString();
 const actions = [];
 const network = [];
 const consoleEvents = [];
+const pageErrors = [];
 const steps = [];
 const checks = [];
+const screenshotFiles = [];
 let error;
 let status = "passed";
+let productFailure = false;
 let videoPath;
 const tracePath = path.join(artifacts, "trace.zip");
 const browser = await chromium.launch({ headless: true });
 const context = await browser.newContext({
-  baseURL: headUrl,
+  baseURL: applicationUrl,
   recordVideo: { dir: path.join(artifacts, "video") },
 });
 await context.tracing.start({ screenshots: true, snapshots: true, sources: false });
@@ -815,7 +1091,7 @@ await context.route("**/*", async (route) => {
   const method = request.method().toUpperCase();
   const allowed =
     ["http:", "https:"].includes(url.protocol) &&
-    url.origin === headOrigin.origin &&
+    url.origin === applicationOrigin.origin &&
     isAllowedHost(url.hostname, safety.allowedHosts) &&
     !safety.blockedPathPrefixes.some((prefix) => url.pathname.startsWith(prefix)) &&
     (safety.allowStateChangingRequests || ["GET", "HEAD", "OPTIONS"].includes(method));
@@ -830,12 +1106,15 @@ const video = page.video();
 page.on("console", (message) => {
   consoleEvents.push({ at: new Date().toISOString(), level: message.type(), text: message.text() });
 });
+page.on("pageerror", (cause) => {
+  pageErrors.push({ at: new Date().toISOString(), message: cause.message });
+});
 page.on("response", (response) => {
   network.push({
     method: response.request().method(),
     url: response.url(),
     status: response.status(),
-    target: "head",
+    target,
   });
 });
 
@@ -862,13 +1141,20 @@ try {
       else if (step.action === "wait_for") await locator(step.locator).waitFor({ state: step.state });
       const screenshot = path.join(artifacts, "step-" + index + ".png");
       await page.screenshot({ path: screenshot, fullPage: true });
+      screenshotFiles.push(screenshot);
       steps.push({ index, status: "passed", at, summary });
-      actions.push({ at, target: "head", summary, status: "passed" });
+      actions.push({ at, target, summary, status: "passed" });
     } catch (cause) {
-      status = "error";
+      status = "failed";
+      productFailure = true;
       const message = cause instanceof Error ? cause.message : "Step failed.";
+      const screenshot = path.join(artifacts, "step-" + index + "-failed.png");
+      await page.screenshot({ path: screenshot, fullPage: true }).then(
+        () => screenshotFiles.push(screenshot),
+        () => undefined,
+      );
       steps.push({ index, status: "failed", message, at, summary });
-      actions.push({ at, target: "head", summary, status: "failed" });
+      actions.push({ at, target, summary, status: "failed" });
       throw cause;
     }
   }
@@ -877,34 +1163,60 @@ try {
     const assertion = mission.assertions[index];
     let passed = false;
     let actual;
-    if (assertion.kind === "url") {
-      actual = page.url();
-      passed = assertion.operator === "equals"
-        ? actual === new URL(assertion.expected, headUrl).toString()
-        : new RegExp(assertion.expected).test(actual);
-    } else if (assertion.kind === "dom") {
-      actual = await locator(assertion.locator).isVisible();
-      passed = assertion.state === "visible" ? actual : !actual;
-    } else if (assertion.kind === "text") {
-      actual = await locator(assertion.locator).textContent();
-      passed = assertion.operator === "equals"
-        ? actual === assertion.expected
-        : String(actual).includes(assertion.expected);
-    } else if (assertion.kind === "network") {
-      actual = network.filter((entry) =>
-        entry.method === assertion.method && new RegExp(assertion.urlPattern).test(entry.url)
-      );
-      passed = actual.some((entry) => entry.status === assertion.expectedStatus);
-    } else {
-      actual = consoleEvents.filter((entry) => entry.level === "error").length;
-      passed = actual <= assertion.maximumCount;
+    try {
+      if (assertion.kind === "url") {
+        actual = page.url();
+        passed = assertion.expected === undefined
+          ? true
+          : assertion.operator === "equals"
+            ? actual === new URL(assertion.expected, applicationUrl).toString()
+            : new RegExp(assertion.expected).test(actual);
+      } else if (assertion.kind === "dom") {
+        actual = await locator(assertion.locator).isVisible();
+        passed = assertion.state === "visible" ? actual : !actual;
+      } else if (assertion.kind === "text") {
+        actual = await locator(assertion.locator).textContent();
+        passed = assertion.expected === undefined
+          ? actual !== null
+          : assertion.operator === "equals"
+            ? actual === assertion.expected
+            : String(actual).includes(assertion.expected);
+      } else if (assertion.kind === "network") {
+        actual = network.filter((entry) =>
+          entry.method === assertion.method && new RegExp(assertion.urlPattern).test(entry.url)
+        );
+        passed = assertion.expectedStatus === undefined
+          ? actual.length > 0
+          : actual.some((entry) => entry.status === assertion.expectedStatus);
+      } else if (assertion.kind === "console") {
+        actual = consoleEvents.filter((entry) => entry.level === "error").length;
+        passed = actual <= assertion.maximumCount;
+      } else {
+        actual = pageErrors.length;
+        passed = actual <= assertion.maximumCount;
+      }
+    } catch (cause) {
+      actual = {
+        error: cause instanceof Error ? cause.message : "Assertion observation failed.",
+      };
+      passed = false;
     }
-    checks.push({ assertionIndex: index, passed, actual });
+    checks.push({
+      assertionIndex: index,
+      assertionId: assertion.id ?? "assertion-" + index,
+      behavior: assertion.behavior ?? "Mission assertion " + (index + 1),
+      comparison: assertion.comparison ?? "pass_only",
+      passed,
+      actual,
+    });
     if (!passed) status = "failed";
   }
 } catch (cause) {
-  error = { code: "mechanical_replay_failed", message: cause instanceof Error ? cause.message : "Replay failed." };
-  status = "error";
+  error = {
+    code: productFailure ? "journey_step_failed" : "mechanical_replay_failed",
+    message: cause instanceof Error ? cause.message : "Replay failed.",
+  };
+  if (!productFailure) status = "error";
 } finally {
   await context.tracing.stop({ path: tracePath }).catch(() => undefined);
   await context.close();
@@ -914,15 +1226,14 @@ try {
 
 const actionPath = path.join(artifacts, "actions.json");
 const consolePath = path.join(artifacts, "console.json");
+const errorPath = path.join(artifacts, "page-errors.json");
 const networkPath = path.join(artifacts, "network.json");
 await Promise.all([
   writeFile(actionPath, JSON.stringify(actions, null, 2)),
   writeFile(consolePath, JSON.stringify(consoleEvents, null, 2)),
+  writeFile(errorPath, JSON.stringify(pageErrors, null, 2)),
   writeFile(networkPath, JSON.stringify(network, null, 2)),
 ]);
-const screenshotFiles = steps
-  .filter((step) => step.status === "passed")
-  .map((step) => path.join(artifacts, "step-" + step.index + ".png"));
 const result = {
   status,
   startedAt,
@@ -937,9 +1248,10 @@ const result = {
     video: videoPath,
     actions: actionPath,
     console: consolePath,
+    errors: errorPath,
     network: networkPath,
   },
   error,
 };
-await writeFile("result.json", JSON.stringify(result, null, 2));
+await writeFile("result-" + target + ".json", JSON.stringify(result, null, 2));
 `;

@@ -13,6 +13,7 @@ const ActionRequestSchema = z.object({
     "retry_intent",
     "interrupt_intent",
     "start_verification",
+    "start_regression",
     "rerun_verification",
   ]),
 });
@@ -49,7 +50,9 @@ export async function POST(
               ? await service.interruptIntent(runId)
               : body.data.action === "rerun_verification"
                 ? await service.rerunVerification(runId)
-                : await service.startVerification(runId);
+                : body.data.action === "start_regression"
+                  ? await service.startRegressionVerification(runId)
+                  : await service.startVerification(runId);
     return NextResponse.json(view);
   } catch (error) {
     const response = toErrorResponse(error);

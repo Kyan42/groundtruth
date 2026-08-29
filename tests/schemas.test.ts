@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { IntentSpecSchema } from "@/lib/domain/schemas";
+import { ExecutableJourneySchema, IntentSpecSchema } from "@/lib/domain/schemas";
 import { parseIntentSpec } from "@/lib/reflex/intent-agent";
 import { makeRun } from "./fixtures";
 
@@ -44,5 +44,19 @@ describe("IntentSpec", () => {
     });
 
     expect(() => parseIntentSpec(value, run)).toThrowError(/quote/i);
+  });
+});
+
+describe("ExecutableJourney", () => {
+  it("supports base discovery for regression replay", () => {
+    const journey = ExecutableJourneySchema.parse({
+      schemaVersion: 1,
+      missionId: "regression-cart",
+      discoveredAgainst: "base",
+      steps: [{ action: "goto", path: "/" }],
+      producer: { kind: "codex", agentId: "runloop:browser" },
+    });
+
+    expect(journey.discoveredAgainst).toBe("base");
   });
 });
