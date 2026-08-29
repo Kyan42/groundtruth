@@ -1,0 +1,13 @@
+node_modules/
+.next/
+out/
+coverage/
+.env
+.env.local
+.env.*.local
+.groundtruth/
+*.tsbuildinfo
+playwright-report/
+test-results/
+auth.json
+storage-state.json
