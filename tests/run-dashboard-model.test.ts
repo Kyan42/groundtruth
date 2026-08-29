@@ -9,15 +9,40 @@ import {
 import type { RunView } from "@/lib/domain/schemas";
 
 describe("run dashboard model", () => {
-  it("derives explicit claim states and selects a non-conformant result first", () => {
+  it("groups executed results first, counts coverage, and selects a failure", () => {
     const view = completedView();
+    view.missions.push({
+      ...view.missions[0],
+      id: "regression-cart",
+      title: "Preserve cart behavior",
+      kind: "regression",
+      claimIds: [],
+      deferredClaims: [],
+    });
+    view.results.regression.push({
+      missionId: "regression-cart",
+      verdict: "preserved",
+      reason: "Head preserved the baseline.",
+    });
 
     const items = buildDashboardItems(view);
 
     expect(items.intent.map((item) => [item.id, item.status])).toEqual([
-      ["claim-deferred", "deferred"],
-      ["claim-uncovered", "uncovered"],
       ["claim-failed", "non_conformant"],
+    ]);
+    expect(items.notRun.map((item) => [item.id, item.status, item.detail])).toEqual([
+      ["claim-deferred", "deferred", "A separate fixture is required."],
+      ["claim-uncovered", "uncovered", "No browser mission is linked to this claim."],
+    ]);
+    expect(items.coverage).toEqual({
+      intentExercised: 1,
+      intentTotal: 3,
+      regressionExecuted: 1,
+      regressionTotal: 1,
+    });
+    expect(items.all.map((item) => item.key)).toEqual([
+      "intent:claim-failed",
+      "regression:regression-cart",
     ]);
     expect(getDefaultDashboardItemKey(view)).toBe("intent:claim-failed");
   });
@@ -65,6 +90,45 @@ describe("run dashboard model", () => {
     expect(getDefaultDashboardItemKey(view)).toBe("intent:claim-uncovered");
   });
 
+  it("keeps every claim selectable while the contract is awaiting execution", () => {
+    const view = completedView();
+    view.run.status = "contract_approved";
+    view.results.intent = [];
+    view.journey = undefined;
+    view.recording = undefined;
+    view.recordings = [];
+    view.actions = [];
+
+    const items = buildDashboardItems(view);
+
+    expect(items.collapseNotRun).toBe(false);
+    expect(items.intent.map((item) => item.id)).toEqual([
+      "claim-deferred",
+      "claim-uncovered",
+      "claim-failed",
+    ]);
+    expect(items.notRun).toEqual([]);
+    expect(getDefaultDashboardItemKey(view)).toBe("intent:claim-deferred");
+  });
+
+  it("has no selectable evidence item when a terminal run executed nothing", () => {
+    const view = completedView();
+    view.results.intent = [];
+    view.journey = undefined;
+    view.recording = undefined;
+    view.recordings = [];
+    view.actions = [];
+
+    const items = buildDashboardItems(view);
+
+    expect(items.collapseNotRun).toBe(true);
+    expect(items.coverage.intentExercised).toBe(0);
+    expect(items.intent).toEqual([]);
+    expect(items.notRun).toHaveLength(3);
+    expect(items.all).toEqual([]);
+    expect(getDefaultDashboardItemKey(view)).toBeUndefined();
+  });
+
   it("prioritizes API traffic and removes origins, query values, and fragments", () => {
     const rows = normalizeNetworkRows([
       {
@@ -98,8 +162,9 @@ describe("run dashboard model", () => {
 
   it("uses evidence-backed narrative fallbacks without inventing an assertion cause", () => {
     const view = completedView();
-    const failed = buildDashboardItems(view).intent[2];
-    const deferred = buildDashboardItems(view).intent[0];
+    const items = buildDashboardItems(view);
+    const failed = items.intent.find((item) => item.id === "claim-failed");
+    const deferred = items.notRun.find((item) => item.id === "claim-deferred");
 
     expect(buildVerdictNarrative(view, failed)).toEqual({
       title: "Does not match the intent contract.",

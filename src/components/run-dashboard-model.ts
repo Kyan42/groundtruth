@@ -26,7 +26,15 @@ export type DashboardItem = {
 export type DashboardItemGroups = {
   intent: DashboardItem[];
   regression: DashboardItem[];
+  notRun: DashboardItem[];
   all: DashboardItem[];
+  collapseNotRun: boolean;
+  coverage: {
+    intentExercised: number;
+    intentTotal: number;
+    regressionExecuted: number;
+    regressionTotal: number;
+  };
 };
 
 export type NormalizedNetworkRow = {
@@ -196,7 +204,28 @@ export function buildDashboardItems(view: RunView): DashboardItemGroups {
     });
   }
 
-  return { intent, regression, all: [...intent, ...regression] };
+  const intentExercised = intent.filter((item) => item.executed);
+  const regressionExecuted = regression.filter((item) => item.executed);
+  const collapseNotRun =
+    intentExercised.length > 0 ||
+    regressionExecuted.length > 0 ||
+    finishedRunStatuses.has(view.run.status);
+  const visibleIntent = collapseNotRun ? intentExercised : intent;
+  const visibleRegression = collapseNotRun ? regressionExecuted : regression;
+
+  return {
+    intent: visibleIntent,
+    regression: visibleRegression,
+    notRun: collapseNotRun ? intent.filter((item) => !item.executed) : [],
+    all: [...visibleIntent, ...visibleRegression],
+    collapseNotRun,
+    coverage: {
+      intentExercised: intentExercised.length,
+      intentTotal: intent.length,
+      regressionExecuted: regressionExecuted.length,
+      regressionTotal: regression.length,
+    },
+  };
 }
 
 export function getDefaultDashboardItemKey(view: RunView): string | undefined {

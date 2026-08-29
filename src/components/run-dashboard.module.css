@@ -198,12 +198,24 @@
   letter-spacing: -0.045em;
 }
 
-.claimsIntro > p:last-child {
+.claimsIntro > p:nth-of-type(2) {
   max-width: 260px;
   margin: 0;
   color: var(--muted);
   font-size: 12px;
   line-height: 1.5;
+}
+
+.coverageSummary {
+  margin: 12px 0 0;
+  color: #59645e;
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+.coverageSummary strong {
+  color: var(--ink);
+  font-weight: 760;
 }
 
 .sectionKicker {
@@ -405,6 +417,64 @@
   color: var(--muted);
   font-size: 11px;
   line-height: 1.5;
+}
+
+.notRunClaims {
+  margin-top: 24px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.notRunClaims summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 12px;
+  color: #707b75;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 780;
+  letter-spacing: 0.06em;
+  list-style-position: inside;
+  text-transform: uppercase;
+}
+
+.notRunClaims summary span {
+  color: #a0a8a3;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.notRunList {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.notRunItem {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(244, 246, 243, 0.72);
+}
+
+.notRunItem > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.notRunItem code {
+  overflow: hidden;
+  color: #929b96;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notRunItem p {
+  margin: 6px 0 0;
 }
 
 .runContext {
