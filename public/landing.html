@@ -100,7 +100,7 @@
   .run-form input{flex:1;min-width:0;border:1px solid var(--line-2);border-radius:var(--r-pill);
     background:rgba(255,255,255,.94);padding:12px 18px;font:15px var(--sans);color:var(--ink);
     box-shadow:var(--shadow-card)}
-  .run-form .btn{justify-content:center}
+  .run-form .btn{flex:1;justify-content:center}
   .run-error{min-height:24px;margin-top:8px;text-align:center;color:var(--fail);font-size:14px}
   .run-progress{position:fixed;inset:0;z-index:100;display:none;place-items:center;padding:24px;background:var(--sage)}
   .run-progress.show{display:grid}
@@ -284,11 +284,10 @@
           <span class="word">Groundtruth</span>
         </div>
         <p class="tagline fade d2">Your PR says it works.<br>We check it against the <a class="gt" href="#moment">ground truth</a>.</p>
-        <form class="run-form fade d2" id="run-form">
-          <input id="pr-url" type="url" required autocomplete="url" aria-label="Public pull request URL"
-            value="https://github.com/Kyan42/fernway/pull/4">
-          <button class="btn btn-primary" type="submit">Run</button>
-        </form>
+        <div class="run-form fade d2" id="run-form">
+          <a class="btn btn-primary" href="/new">Run live</a>
+          <a class="btn" href="/runs/recorded-fernway-pr4?recorded=fernway-pr4-v1">View cached demo</a>
+        </div>
         <p class="run-error" id="run-error" role="alert"></p>
       </div>
     </div>
