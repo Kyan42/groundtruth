@@ -371,7 +371,9 @@
 
   /* real recording replaces the simulated stage when a video exists */
   .recording{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#0f1412;z-index:1}
-  .norec{position:absolute;inset:0;display:grid;place-items:center;color:#7f8b86;font-size:13px}
+  .evidence-state{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;
+    color:#a9b3af;background:#0f1412;font-size:13px;z-index:2}
+  .play:disabled{cursor:wait;opacity:.45}
   .loading{position:fixed;inset:0;display:grid;place-items:center;color:#8b928f;
     font-family:var(--d-sans);font-size:14px;background:#e6ebe8;z-index:99}
 </style>
@@ -502,12 +504,12 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
 
         <div class="tabhost">
           <div class="tabs" role="tablist">
-            <button class="tab" role="tab" aria-selected="true" data-pane="steps"><span class="ticon" data-i="cursor"></span>Actions<span class="n" id="stepcount">5</span></button>
-            <button class="tab" role="tab" aria-selected="false" data-pane="net"><span class="ticon" data-i="net"></span>Network<span class="n" id="netcount">2</span></button>
+            <button class="tab" id="steps-tab" role="tab" aria-controls="steps-pane" aria-selected="true" tabindex="0" data-pane="steps"><span class="ticon" data-i="cursor"></span>What the agent did<span class="n" id="stepcount">0</span></button>
+            <button class="tab" id="net-tab" role="tab" aria-controls="net-pane" aria-selected="false" tabindex="-1" data-pane="net"><span class="ticon" data-i="net"></span>Network<span class="n" id="netcount">0</span></button>
           </div>
           <div class="tabbody">
-            <div class="tabpane on" data-pane="steps"><div class="steps" id="steps"></div></div>
-            <div class="tabpane" data-pane="net"><div class="net" id="net"></div></div>
+            <div class="tabpane on" id="steps-pane" role="tabpanel" aria-labelledby="steps-tab" data-pane="steps"><div class="steps" id="steps"></div></div>
+            <div class="tabpane" id="net-pane" role="tabpanel" aria-labelledby="net-tab" data-pane="net" hidden><div class="net" id="net"></div></div>
           </div>
         </div>
       </main>
@@ -647,6 +649,8 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
   function renderDetail(){
     $('#scenelabel').textContent = cur.id;
     $('#verdictline').innerHTML = cur.verdict_line;
+    $('#stepcount').textContent = cur.steps.length;
+    $('#netcount').textContent = cur.net.length;
 
     const st = $('#steps'); st.innerHTML = '';
     cur.steps.forEach(s => {
@@ -676,8 +680,34 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
     });
   }
 
+  function selectTab(pane){
+    $$('.tab').forEach(tab => {
+      const selected = tab.dataset.pane === pane;
+      tab.setAttribute('aria-selected', String(selected));
+      tab.tabIndex = selected ? 0 : -1;
+    });
+    $$('.tabpane').forEach(panel => {
+      const selected = panel.dataset.pane === pane;
+      panel.classList.toggle('on', selected);
+      panel.hidden = !selected;
+    });
+  }
+
+  $$('.tab').forEach(tab => {
+    tab.addEventListener('click', () => selectTab(tab.dataset.pane));
+    tab.addEventListener('keydown', event => {
+      if (!['ArrowLeft','ArrowRight'].includes(event.key)) return;
+      event.preventDefault();
+      const next = tab.dataset.pane === 'steps' ? 'net' : 'steps';
+      selectTab(next);
+      $('.tab[data-pane="' + next + '"]').focus();
+    });
+  });
+
   /* ---------- player ---------- */
   let t = 0, playing = false, raf = null, last = 0, firedClick = -1;
+  const videoObjectUrls = new Map();
+  const videoLoads = new Map();
   function fmt(x){ return '0:0' + Math.min(9, Math.floor(x)); }
 
   function lerpCursor(time){
@@ -749,7 +779,7 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
   }
   $('#play').onclick = () => {
     const vid = $('#stage .recording');
-    if (cur.videoUrl && vid){
+    if (cur.videoUrl && vid && !$('#play').disabled){
       if (vid.paused){ vid.play(); $('#playicon').textContent = '❚❚'; }
       else { vid.pause(); $('#playicon').textContent = '▶'; }
       return;
@@ -765,24 +795,89 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
 
   cur = CLAIMS.find(c => c.verdict === 'f') || CLAIMS[0];
 
+  async function loadVideoObjectUrl(artifactUrl){
+    if (videoObjectUrls.has(artifactUrl)) return videoObjectUrls.get(artifactUrl);
+    if (!videoLoads.has(artifactUrl)){
+      videoLoads.set(artifactUrl, fetch(artifactUrl, {cache:'no-store'}).then(async response => {
+        if (!response.ok) throw new Error('Evidence request returned ' + response.status + '.');
+        const objectUrl = URL.createObjectURL(await response.blob());
+        videoObjectUrls.set(artifactUrl, objectUrl);
+        return objectUrl;
+      }).finally(() => videoLoads.delete(artifactUrl)));
+    }
+    return videoLoads.get(artifactUrl);
+  }
+
+  function evidenceState(message){
+    const stage = $('#stage');
+    let state = stage.querySelector('.evidence-state');
+    if (!state){
+      state = document.createElement('div');
+      state.className = 'evidence-state';
+      stage.appendChild(state);
+    }
+    state.textContent = message;
+    state.hidden = false;
+    return state;
+  }
+
   function mountStage(){
     const stage = $('#stage');
     const chrome = stage.querySelector('.chrome');
     let vid = stage.querySelector('.recording');
     if (cur.videoUrl){
+      const artifactUrl = cur.videoUrl;
+      $('#play').disabled = true;
+      evidenceState('Loading recorded evidence…');
       if (!vid){
         vid = document.createElement('video');
         vid.className = 'recording';
+        vid.preload = 'auto';
         vid.playsInline = true;
         vid.addEventListener('timeupdate', () => { t = vid.currentTime; paintScene(t); });
         stage.insertBefore(vid, stage.firstChild);
       }
-      if (vid.getAttribute('src') !== cur.videoUrl) vid.src = cur.videoUrl;
-      vid.hidden = false;
+      vid.pause();
+      vid.hidden = true;
+      vid.dataset.artifactUrl = artifactUrl;
       chrome.hidden = true;
       $('#cursor').hidden = true;
+      loadVideoObjectUrl(artifactUrl).then(objectUrl => {
+        if (vid.dataset.artifactUrl !== artifactUrl) return;
+        const ready = () => {
+          if (vid.dataset.artifactUrl !== artifactUrl) return;
+          vid.hidden = false;
+          const state = stage.querySelector('.evidence-state');
+          if (state) state.hidden = true;
+          $('#play').disabled = false;
+        };
+        const failed = () => {
+          if (vid.dataset.artifactUrl !== artifactUrl) return;
+          vid.hidden = true;
+          evidenceState('Evidence unavailable: the recording could not be decoded.');
+          $('#play').disabled = true;
+        };
+        if (vid.src !== objectUrl) {
+          vid.addEventListener('loadeddata', ready, {once:true});
+          vid.addEventListener('error', failed, {once:true});
+          vid.src = objectUrl;
+          vid.load();
+        } else if (vid.readyState >= 2) {
+          ready();
+        } else {
+          vid.addEventListener('loadeddata', ready, {once:true});
+        }
+      }).catch(error => {
+        if (vid.dataset.artifactUrl !== artifactUrl) return;
+        vid.hidden = true;
+        evidenceState('Evidence unavailable: ' + error.message);
+        $('#play').disabled = true;
+      });
     } else {
       if (vid) vid.hidden = true;
+      const state = stage.querySelector('.evidence-state');
+      if (state) state.hidden = true;
+      $('#play').disabled = false;
       chrome.hidden = false;
       $('#cursor').hidden = false;
     }
@@ -795,6 +890,11 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
   }
 
   renderAll();
+
+  window.addEventListener('beforeunload', () => {
+    videoObjectUrls.forEach(objectUrl => URL.revokeObjectURL(objectUrl));
+    videoObjectUrls.clear();
+  });
 
   /* ---------- ambient ASCII contour map, behind the app ---------- */
   (function topo(){
