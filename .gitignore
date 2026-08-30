@@ -11,3 +11,4 @@ playwright-report/
 test-results/
 auth.json
 storage-state.json
+.DS_Store

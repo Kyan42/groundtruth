@@ -19,6 +19,7 @@ import {
   type TestMission,
 } from "@/lib/domain/schemas";
 import { fetchPublicPullRequest } from "@/lib/github/public-pr-client";
+import { syncPullRequestResult } from "@/lib/github/pr-sync";
 import { getRunIndex } from "@/lib/persistence/json-run-index";
 import {
   createIntentAgent,
@@ -592,7 +593,7 @@ export class RunService {
     mission: TestMission,
   ): Promise<void> {
     await executeBrowserVerification(run, configuration, mission, async (browserVerification) => {
-      await getRunIndex().update(run.id, (current) => ({
+      const updated = await getRunIndex().update(run.id, (current) => ({
         ...current,
         status:
           browserVerification.status === "complete"
@@ -606,6 +607,11 @@ export class RunService {
         blocker: browserVerification.blocker,
         updatedAt: new Date().toISOString(),
       }));
+      if (["complete", "blocked", "failed"].includes(browserVerification.status)) {
+        // Best-effort; syncPullRequestResult never throws, so this can't turn
+        // a real verification result into a run failure.
+        await syncPullRequestResult(updated);
+      }
     });
   }
 

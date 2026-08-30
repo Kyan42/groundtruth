@@ -1,0 +1,991 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Groundtruth. Your PR says it works. We go check.</title>
+<meta name="description" content="Groundtruth reads the claims in your pull request description and verifies each one in a live browser, with a recording as evidence.">
+<link rel="icon" href="brand/mark-64.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap">
+<style>
+  @font-face{font-family:"PP Neue Montreal";src:url("assets/fonts/PPNeueMontreal-Book.otf") format("opentype");font-weight:400;font-display:swap}
+  @font-face{font-family:"PP Neue Montreal";src:url("assets/fonts/PPNeueMontreal-Medium.otf") format("opentype");font-weight:500;font-display:swap}
+  @font-face{font-family:"PP Neue Montreal";src:url("assets/fonts/PPNeueMontreal-Bold.otf") format("opentype");font-weight:700;font-display:swap}
+
+  :root{
+    --sage:#e9ecea; --white:#fff; --line:#dbe0dd; --line-2:#c8cfcb;
+    --ink:#161717; --mid:#5c6360; --low:#8f9693;
+    --forest:#0e694e; --dot:#12a150; --fail:#c9442f;
+    --sans:"PP Neue Montreal",system-ui,-apple-system,sans-serif;
+    --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --track:-0.035em;
+    --r-card:14px; --r-pill:999px;
+    --shadow-card:0 1px 2px rgba(20,21,21,.04);
+    --shadow-float:0 12px 32px rgba(20,21,21,.08);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;
+    cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M5.2 3.1 19.2 10.4 12.6 12.1 9.5 19.2 Z' fill='%23161717' stroke='%23ffffff' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 5 3, auto}
+  a,button,.hotspot,summary{
+    cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M5.2 3.1 19.2 10.4 12.6 12.1 9.5 19.2 Z' fill='%230e694e' stroke='%23ffffff' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 5 3, pointer}
+  body{
+    margin:0;color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;
+    background:
+      radial-gradient(1100px 460px at 78% -160px,#d6ecdf 0%,rgba(214,236,223,0) 68%),
+      radial-gradient(820px 420px at -8% 4%,#e2eae6 0%,rgba(226,234,230,0) 60%),
+      var(--sage);
+    -webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  h1,h2,h3{margin:0;font-weight:500;letter-spacing:var(--track);text-wrap:balance;line-height:1.08}
+  p{margin:0}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;cursor:pointer}
+  :focus-visible{outline:2px solid var(--forest);outline-offset:2px;border-radius:6px}
+  .gtm{display:block;overflow:visible}
+
+  .btn{display:inline-flex;align-items:center;gap:8px;border-radius:var(--r-pill);padding:11px 22px;
+    font-weight:500;font-size:15px;border:1px solid var(--line-2);background:#fff;color:var(--ink);transition:.15s}
+  .btn:hover{border-color:var(--mid)}
+  .btn-primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .btn-primary:hover{background:#2b2d2c;border-color:#2b2d2c}
+
+  /* ---------- nav: hidden at the top (the hero carries the name), floats in on scroll ---------- */
+  .nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:center;
+    padding:0 16px;pointer-events:none}
+  .nav-inner{pointer-events:none;display:flex;align-items:center;gap:20px;width:100%;max-width:880px;
+    margin-top:14px;padding:8px 8px 8px 18px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);
+    border:1px solid var(--line);border-radius:999px;box-shadow:var(--shadow-float);
+    opacity:0;transform:translateY(-18px);
+    transition:opacity .35s ease,transform .45s cubic-bezier(.2,.7,.2,1)}
+  .nav.scrolled .nav-inner{pointer-events:auto;opacity:1;transform:translateY(0)}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:400;letter-spacing:-0.028em;font-size:18px}
+  .brand .gtm{width:26px;height:26px}
+  .nav-inner nav{display:flex;gap:2px;margin-left:6px}
+  .nav-inner nav a{padding:7px 13px;border-radius:999px;font-size:14px;font-weight:500;color:var(--mid);transition:.13s}
+  .nav-inner nav a:hover{color:var(--ink);background:#f0f3f1}
+  .nav-inner .btn{margin-left:auto;padding:8px 18px;font-size:14px}
+  @media(max-width:760px){.nav-inner nav{display:none}}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;min-height:100vh;display:flex;align-items:center}
+  #field{position:fixed;inset:0;z-index:0;pointer-events:none}
+  #topo{position:absolute;inset:0;width:100%;height:100%;display:block}
+  main,footer{position:relative;z-index:1}
+  .hotspot{position:absolute;width:42px;height:42px;margin:-21px 0 0 -21px;border-radius:50%;z-index:3}
+  .tip{position:absolute;z-index:4;width:258px;background:#fff;border:1px solid var(--line);border-radius:12px;
+    box-shadow:0 1px 2px rgba(20,21,21,.05),0 16px 40px rgba(20,21,21,.10);padding:13px 16px 14px;
+    opacity:0;transform:translateY(5px);transition:opacity .16s ease,transform .16s ease;pointer-events:none}
+  .tip.show{opacity:1;transform:translateY(0)}
+  .tip .th{display:flex;align-items:baseline;gap:8px;margin-bottom:7px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  .tip .tid{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--fail)}
+  .tip .tv{font-size:12.5px;font-weight:500;color:var(--mid)}
+  .tip.ok .tid{color:var(--low)}
+  .tip q{display:block;font-size:13.5px;line-height:1.45;color:var(--ink);font-weight:500;letter-spacing:-0.015em;quotes:"\201C" "\201D";margin-bottom:5px}
+  .tip .why{font-size:12.5px;line-height:1.5;color:var(--mid)}
+
+  .hero-inner{position:relative;z-index:2;width:min(1160px,calc(100% - 48px));margin:0 auto;
+    align-self:stretch;display:flex;flex-direction:column;justify-content:flex-start;padding:max(250px,34vh) 0 80px}
+  .hero-block{width:max-content;max-width:100%}
+  .lockup{display:flex;align-items:center;gap:16px}
+  .lockup .gtm{width:clamp(64px,7vw,96px);height:clamp(64px,7vw,96px);flex:none}
+  .lockup .word{font-size:clamp(44px,6vw,80px);font-weight:400;letter-spacing:-0.028em;color:var(--ink);line-height:1}
+  .tagline{margin-top:clamp(90px,17vh,190px);text-align:center;font-family:var(--mono);
+    font-size:clamp(15px,1.35vw,19px);line-height:1.9;color:var(--ink);letter-spacing:-0.01em}
+  .tagline .gt{color:var(--forest);text-decoration:underline;text-underline-offset:5px;
+    text-decoration-thickness:1px;text-decoration-color:rgba(14,105,78,.55)}
+  .cta{display:flex;gap:10px;flex-wrap:wrap}
+  .run-form{display:flex;gap:10px;width:min(640px,100%);margin:30px auto 0}
+  .run-form input{flex:1;min-width:0;border:1px solid var(--line-2);border-radius:var(--r-pill);
+    background:rgba(255,255,255,.94);padding:12px 18px;font:15px var(--sans);color:var(--ink);
+    box-shadow:var(--shadow-card)}
+  .run-form .btn{justify-content:center}
+  .run-error{min-height:24px;margin-top:8px;text-align:center;color:var(--fail);font-size:14px}
+  .run-progress{position:fixed;inset:0;z-index:100;display:none;place-items:center;padding:24px;background:var(--sage)}
+  .run-progress.show{display:grid}
+  .progress-card{width:min(560px,100%);padding:38px;border:1px solid var(--line);border-radius:var(--r-card);
+    background:#fff;text-align:center;box-shadow:var(--shadow-float)}
+  .progress-card .gtm{width:48px;height:48px;margin-bottom:22px}
+  .progress-card h2{font-size:28px;margin-bottom:12px}
+  .progress-card p{color:var(--mid)}
+  .progress-actions{display:none;justify-content:center;gap:10px;margin-top:24px}
+  .progress-card.error .progress-actions{display:flex}
+  .fade{opacity:0;animation:rise 1.6s ease forwards}
+  @keyframes rise{to{opacity:1}}
+  .d1{animation-delay:.15s}.d2{animation-delay:.15s}
+
+  /* ---------- shared section scaffolding ---------- */
+  .wrap{width:min(1160px,calc(100% - 48px));margin:0 auto}
+  section{padding:100px 0}
+  .shead{max-width:600px;margin-bottom:48px}
+  .shead h2{font-size:clamp(30px,3.4vw,44px);margin-bottom:14px}
+  .shead p{font-size:17px;color:var(--mid);line-height:1.6}
+  .shead p b{color:var(--ink);font-weight:500}
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+
+  /* ---------- the moment: the PR comment, light ---------- */
+  .titem{display:grid;grid-template-columns:44px 1fr;gap:16px;max-width:780px}
+  .tava{width:44px;height:44px;border-radius:11px;background:var(--forest);display:grid;place-items:center}
+  .tava .gtm{width:31px;height:31px}
+  .comment{border:1px solid var(--line);border-radius:var(--r-card);background:#fff;min-width:0;box-shadow:var(--shadow-card);overflow:hidden}
+  .chead{background:#f0f7f3;border-bottom:1px solid var(--line);
+    padding:9px 16px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mid);flex-wrap:wrap}
+  .chead b{color:var(--ink);font-weight:500}
+  .lbl{border:1px solid var(--line-2);border-radius:999px;padding:0 8px;font-size:12px;line-height:18px;color:var(--mid)}
+  .lbl.result{border-color:var(--forest);color:var(--forest);margin-left:auto}
+  .cbody{padding:16px 16px 10px;font-size:14.5px;line-height:1.55}
+  .cbody b{font-weight:500}
+  .vrow{display:flex;gap:10px;align-items:flex-start;padding:10px 16px;border-top:1px solid var(--line);font-size:14.5px;line-height:1.55}
+  .vrow .ic{margin-top:1px;flex:none;width:16px;text-align:center;font-weight:700}
+  .vrow .ic.p{color:var(--dot)} .vrow .ic.f{color:var(--ink)} .vrow .ic.u{color:var(--low)}
+  .cid{font-family:var(--mono);font-size:12px;color:var(--forest);font-weight:500;white-space:nowrap;margin-top:2px}
+  .vrow.f .cid{color:var(--ink)}
+  .vrow.u .cid{color:var(--low)}
+  .vrow .why{display:block;color:var(--mid);font-size:13px;margin-top:3px}
+  .vrow .why b{color:var(--ink);font-weight:500}
+  .cfoot{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#fbfcfb}
+  .gbtn{display:inline-flex;align-items:center;padding:6px 16px;border-radius:999px;font-size:13.5px;font-weight:500;
+    background:var(--ink);border:1px solid var(--ink);color:#fff}
+  .gbtn.ghost{background:#fff;border-color:var(--line-2);color:var(--ink)}
+  .cfoot .note{margin-left:auto;font-size:12px;color:var(--low)}
+  .mergebox{border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden;background:#fff;box-shadow:var(--shadow-card);font-size:13.5px;min-width:0}
+  #moment .shead{margin-left:auto;margin-right:auto;text-align:center}
+  #moment .titem{margin:0 auto}
+  .checkrow{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--line);line-height:1.5}
+  .checkrow:last-child{border-bottom:none}
+  .checkrow .st{flex:none;width:16px;text-align:center;font-weight:700}
+  .checkrow .st.f{color:var(--ink)} .checkrow .st.p{color:var(--dot)}
+  .checkrow .nm{font-weight:500}
+  .checkrow .ds{color:var(--mid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .checkrow .req{border:1px solid var(--line-2);border-radius:999px;padding:0 8px;font-size:12px;line-height:18px;color:var(--mid);margin-left:auto;flex:none}
+
+  /* ---------- how it works ---------- */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media(max-width:900px){.steps{grid-template-columns:1fr}}
+  .stepcard{background:#fff;border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow-card);
+    display:flex;flex-direction:column;overflow:hidden}
+  .stepvis{border-bottom:1px solid var(--line);background:#f6f8f7;padding:18px;min-height:190px;display:flex;align-items:center}
+  .steptxt{padding:22px 22px 26px}
+  .steptxt .n{font-family:var(--mono);font-size:12.5px;color:var(--forest);font-weight:500}
+  .steptxt h3{font-size:20px;margin:8px 0 9px}
+  .steptxt p{font-size:14.5px;line-height:1.55;color:var(--mid)}
+  .steptxt p b{color:var(--ink);font-weight:500}
+
+  .minicontract{width:100%;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:12.5px}
+  .mcrow{display:grid;grid-template-columns:34px 1fr;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);align-items:start;line-height:1.45}
+  .mcrow:last-child{border-bottom:none}
+  .mcrow .id{font-family:var(--mono);font-size:11px;color:var(--forest);font-weight:500;margin-top:1px}
+  .mcrow .q{color:var(--ink);font-weight:500}
+  .mcrow .from{display:block;color:var(--low);font-size:11.5px;margin-top:2px}
+
+  .minibrowser{width:100%;background:#fff;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+  .mb-bar{display:flex;align-items:center;gap:7px;padding:7px 10px;background:#f0f3f1;border-bottom:1px solid var(--line)}
+  .mb-bar i{width:7px;height:7px;border-radius:50%;background:var(--line-2)}
+  .mb-url{flex:1;background:#fff;border:1px solid var(--line);border-radius:4px;padding:2px 8px;font-size:10.5px;color:var(--low);font-family:var(--mono)}
+  .mb-body{padding:12px 14px 16px;position:relative;min-height:100px}
+  .mb-line{height:9px;border-radius:4px;background:#eceeed;margin-bottom:8px}
+  .mb-line.w1{width:62%}.mb-line.w2{width:84%}.mb-line.w3{width:47%}
+  .mb-chip{display:inline-block;padding:2px 9px;border-radius:999px;font-size:10px;font-family:var(--mono);
+    background:rgba(18,161,80,.1);color:var(--forest);box-shadow:inset 0 0 0 1px rgba(18,161,80,.3)}
+  .mb-cursor{position:absolute;left:58%;top:62%;animation:driftc 3s ease-in-out infinite alternate}
+  @keyframes driftc{0%{transform:translate(0,0)}45%{transform:translate(-56px,-24px)}100%{transform:translate(18px,-38px)}}
+
+  .miniverdict{width:100%;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:12.5px}
+  .mvrow{display:flex;gap:9px;padding:9px 12px;border-bottom:1px solid var(--line);align-items:start;line-height:1.45}
+  .mvrow:last-child{border-bottom:none}
+  .mvrow .vm{width:16px;text-align:center;font-weight:700;flex:none;margin-top:1px}
+  .mvrow .vm.p{color:var(--dot)}
+  .mvrow .vm.f{color:var(--ink)}
+  .mvrow .vm.u{color:var(--low)}
+  .mvrow .t{color:var(--ink);font-weight:500}
+  .mvrow .e{display:block;color:var(--low);font-size:11.5px;margin-top:2px}
+
+  /* ---------- why now ---------- */
+  .whynow .wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:64px;align-items:center}
+  @media(max-width:900px){.whynow .wrap{grid-template-columns:1fr;gap:40px}}
+  .asciiart{background:#fff;border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow-card);padding:14px;
+    max-width:432px;justify-self:end}
+  @media(max-width:900px){.asciiart{justify-self:start}}
+  .asciiart .inner{border:1px solid var(--line);border-radius:8px;padding:16px 12px;display:flex;justify-content:center;overflow:hidden}
+  .asciiart pre{margin:0;font-family:var(--mono);font-size:8px;line-height:1.16;letter-spacing:.02em;color:var(--forest);opacity:.9;white-space:pre}
+  .asciiart .cap{display:block;margin-top:12px;font-size:12.5px;color:var(--low);text-align:center}
+  .whynow .big{font-size:clamp(26px,3.2vw,40px);font-weight:500;letter-spacing:var(--track);line-height:1.25;
+    max-width:880px;text-wrap:balance}
+  .whynow .big .quiet{color:var(--low)}
+  .whynow .big .hot{color:var(--forest)}
+  .whynow .after{margin-top:28px;max-width:600px;font-size:17px;color:var(--mid);line-height:1.6}
+  .whynow .after b{color:var(--ink);font-weight:500}
+
+  /* ---------- what it is not ---------- */
+  .nots{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media(max-width:900px){.nots{grid-template-columns:1fr}}
+  .not{background:#fff;border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow-card);padding:26px 24px 28px}
+  .not .x{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;color:var(--mid);font-weight:500}
+  .not .x .vm{width:18px;height:18px;border-radius:5px;background:#f0f2f1;display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--ink)}
+  .not h3{font-size:19px;margin:12px 0 9px}
+  .not p{font-size:14.5px;line-height:1.55;color:var(--mid)}
+  .not p b{color:var(--ink);font-weight:500}
+
+  /* ---------- final cta + footer ---------- */
+  .final{text-align:center;padding:120px 0 110px}
+  .final h2{font-size:clamp(34px,4vw,54px);margin-bottom:16px}
+  .final p{font-size:17px;color:var(--mid);max-width:480px;margin:0 auto 32px;line-height:1.6}
+  footer{border-top:1px solid var(--line);padding:34px 0 44px}
+  footer .wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  footer .brand{font-size:16px}
+  footer .tag{color:var(--mid);font-size:14px}
+  footer .fine{margin-left:auto;color:var(--low);font-size:13px}
+  @media(max-width:700px){footer .fine{margin-left:0}}
+
+  /* ---------- responsive hero ---------- */
+  @media(max-width:900px){
+    .hero{min-height:88vh}
+    .hero-inner{padding:120px 0 12px}
+  }
+  @media(max-width:620px){.run-form{flex-direction:column}.run-form .btn{width:100%}}
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+    .fade,.reveal{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="gt-mark" viewBox="394 394 1260 1260"><g transform="translate(0,2048) scale(0.1,-0.1)">
+    <path fill="var(--mark-ring,#2f6b4f)" fill-rule="evenodd" d="M9960 16269 c-682 -26 -1364 -262 -2036 -704 -458 -302 -1271 -964 -1583 -1291 -254 -266 -426 -513 -576 -828 -127 -266 -199 -487 -336 -1031 -123 -489 -206 -774 -349 -1200 -155 -462 -220 -714 -272 -1066 -30 -208 -33 -697 -5 -879 57 -362 125 -580 277 -889 172 -348 312 -553 771 -1128 257 -322 405 -526 580 -801 433 -678 618 -934 869 -1197 384 -404 812 -674 1362 -859 356 -120 712 -182 1099 -193 734 -20 1374 168 2022 593 334 219 630 462 1052 860 521 492 681 637 1085 984 380 326 472 410 688 624 404 399 647 723 832 1108 87 183 139 327 183 508 117 479 109 918 -28 1461 -36 143 -73 271 -167 569 -162 522 -190 659 -228 1160 -23 289 -35 406 -56 535 -52 318 -135 575 -265 825 -213 406 -516 727 -1094 1161 -372 279 -1092 781 -1335 931 -476 293 -1016 534 -1426 637 -365 91 -682 124 -1064 110z m490 -374 c412 -48 756 -151 1209 -359 393 -181 746 -403 1481 -929 624 -447 789 -577 981 -767 205 -204 331 -375 450 -612 158 -314 213 -557 264 -1163 50 -595 75 -714 280 -1380 191 -620 232 -846 222 -1230 -6 -214 -20 -324 -66 -501 -120 -467 -417 -939 -886 -1409 -171 -171 -354 -335 -870 -781 -329 -284 -474 -415 -805 -729 -684 -648 -1033 -916 -1491 -1146 -306 -153 -578 -239 -929 -294 -144 -23 -538 -31 -711 -15 -658 59 -1291 302 -1748 670 -133 108 -367 350 -487 505 -117 150 -278 381 -414 592 -426 665 -482 745 -745 1072 -388 483 -497 629 -631 855 -376 628 -483 1175 -374 1899 41 266 106 511 280 1042 138 422 196 620 311 1073 150 590 212 777 354 1067 189 385 467 705 995 1141 373 309 721 577 924 713 588 395 1167 621 1766 690 128 14 503 12 640 -4z M10195 14723 c-237 -10 -543 -69 -800 -154 -295 -98 -601 -256 -1075 -557 -478 -302 -692 -479 -908 -751 -144 -179 -257 -386 -392 -716 -129 -313 -189 -441 -427 -905 -78 -151 -168 -338 -201 -415 -113 -265 -193 -549 -223 -789 -15 -123 -7 -420 16 -563 50 -322 180 -640 465 -1138 121 -211 171 -315 295 -615 167 -402 248 -564 379 -765 287 -436 721 -806 1251 -1066 913 -446 1858 -403 2845 130 200 108 401 228 875 524 605 378 734 466 985 676 152 127 395 371 500 501 438 548 589 1122 480 1830 -11 71 -40 234 -64 362 -81 421 -91 553 -74 940 13 312 5 452 -37 663 -98 489 -382 904 -908 1327 -56 45 -176 145 -266 222 -387 331 -603 499 -861 671 -549 366 -1043 547 -1592 585 -78 5 -154 9 -168 8 -14 -1 -56 -3 -95 -5z m385 -377 c302 -41 629 -149 916 -303 152 -81 375 -221 541 -338 125 -89 883 -714 1099 -906 211 -189 368 -385 465 -584 68 -140 100 -235 131 -388 22 -107 23 -129 20 -532 -3 -520 7 -645 88 -1050 108 -544 118 -864 36 -1171 -114 -422 -361 -785 -780 -1143 -201 -172 -384 -300 -786 -553 -118 -74 -303 -191 -410 -258 -679 -429 -1124 -635 -1565 -724 -197 -41 -307 -49 -549 -43 -414 11 -712 91 -1120 300 -378 193 -719 470 -937 759 -173 230 -257 392 -475 918 -117 281 -163 374 -293 600 -245 424 -369 723 -418 1010 -22 132 -22 392 1 534 50 306 174 628 436 1126 146 278 206 406 362 775 285 677 438 854 1123 1297 329 213 502 314 709 414 292 141 623 238 906 267 96 10 405 5 500 -7z M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167 -95 -276 -177 -388 -289 -155 -155 -256 -308 -366 -554 -170 -379 -179 -395 -361 -695 -289 -474 -383 -843 -318 -1240 38 -237 80 -347 277 -735 96 -191 140 -289 172 -390 199 -620 422 -921 930 -1261 408 -273 871 -406 1291 -370 416 36 738 155 1313 485 756 434 958 570 1211 815 219 213 348 407 426 640 92 273 97 485 24 970 -41 279 -51 437 -35 581 19 172 25 387 13 495 -28 250 -115 465 -274 676 -74 98 -235 262 -343 349 -44 35 -154 130 -245 210 -261 231 -327 286 -458 383 -344 258 -656 404 -996 468 -127 24 -435 34 -551 18z m478 -379 c390 -66 722 -260 1251 -729 81 -72 194 -169 250 -214 146 -117 296 -273 366 -379 130 -198 182 -424 159 -688 -5 -63 -12 -203 -15 -310 -6 -193 -6 -198 36 -475 55 -362 63 -565 31 -724 -75 -359 -308 -647 -774 -955 -145 -95 -723 -438 -944 -560 -233 -128 -434 -212 -628 -261 -490 -125 -934 -42 -1397 262 -252 165 -432 343 -555 550 -69 117 -108 207 -183 428 -83 243 -125 341 -240 555 -195 363 -249 551 -237 829 11 259 79 438 324 851 153 258 189 327 293 560 140 314 202 413 343 546 107 102 203 171 352 255 72 39 188 106 260 147 294 171 572 280 810 317 128 21 364 18 498 -5z"/>
+    <path fill="var(--mark-dot,#12a150)" d="M10090 11143 c-195 -35 -358 -119 -496 -257 -154 -154 -237 -329 -264 -554 -20 -169 11 -326 97 -502 53 -107 65 -123 167 -225 80 -80 133 -122 189 -154 242 -136 512 -158 781 -62 118 42 205 100 322 216 102 102 114 118 167 225 86 176 118 339 97 506 -50 405 -333 718 -722 798 -72 15 -274 20 -338 9z"/>
+  </g></symbol>
+</svg>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#"><svg class="gtm" aria-hidden="true"><use href="#gt-mark"/></svg>Groundtruth</a>
+    <nav>
+      <a href="#moment">The check</a>
+      <a href="#how">How it works</a>
+      <a href="#why">Why now</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ================= HERO ================= -->
+  <div class="hero">
+    <div id="field" aria-hidden="true">
+      <canvas id="topo"></canvas>
+    </div>
+    <div class="hero-inner">
+      <div class="hero-block">
+        <div class="lockup fade d1">
+          <svg class="gtm" aria-hidden="true"><use href="#gt-mark"/></svg>
+          <span class="word">Groundtruth</span>
+        </div>
+        <p class="tagline fade d2">Your PR says it works.<br>We check it against the <a class="gt" href="#moment">ground truth</a>.</p>
+        <form class="run-form fade d2" id="run-form">
+          <input id="pr-url" type="url" required autocomplete="url" aria-label="Public pull request URL"
+            value="https://github.com/Kyan42/fernway/pull/4">
+          <button class="btn btn-primary" type="submit">Run</button>
+        </form>
+        <p class="run-error" id="run-error" role="alert"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= THE MOMENT ================= -->
+  <section id="moment" style="padding-top:60px">
+    <div class="wrap">
+      <div class="shead reveal">
+        <h2>The comment that stops a merge.</h2>
+        <p>Every claim is quoted from your own description. When one fails, merge is blocked, <b>with the clip attached</b>.</p>
+      </div>
+      <div class="reveal">
+        <div class="titem">
+          <div class="tava" style="--mark-ring:#d6ece0;--mark-dot:#5ee8a0"><svg class="gtm" aria-hidden="true"><use href="#gt-mark"/></svg></div>
+          <div class="comment">
+            <div class="chead"><b>groundtruth</b><span class="lbl">bot</span> commented 1 minute ago<span class="lbl result">result</span></div>
+            <div class="cbody"><p><b>3 of 5 claims verified.</b> One does not match your description. One needs credentials.</p></div>
+            <div class="vrow"><span class="ic p">&check;</span><span class="cid">C1</span><span>A tag can be attached while creating a todo</span></div>
+            <div class="vrow"><span class="ic p">&check;</span><span class="cid">C2</span><span>Tags render as colored chips on the todo row</span></div>
+            <div class="vrow f"><span class="ic f">&times;</span><span class="cid">C3</span>
+              <span>Clicking a chip filters the list to that tag
+                <span class="why">The URL updates and the API returns the right rows, but the list never re-renders. <b>The repository's existing checks did not report this behavior.</b> Evidence at 0:04.</span></span></div>
+            <div class="vrow u"><span class="ic u">?</span><span class="cid">C4</span>
+              <span>A tag keeps the same color across sessions
+                <span class="why">Could not verify: needs a signed-in session. Configure a test identity and this one finishes on its own.</span></span></div>
+            <div class="cfoot">
+              <span class="gbtn">Open dashboard</span>
+              <span class="gbtn ghost">Re-run C3</span>
+              <span class="note">1m 12s, est. $0.03, dev box torn down</span>
+            </div>
+          </div>
+        </div>
+        <div class="titem" style="margin-top:18px">
+          <div aria-hidden="true"></div>
+          <div class="mergebox">
+            <div class="checkrow">
+              <span class="st f">&times;</span><span class="nm">groundtruth / verify</span>
+              <span class="ds">C3 does not do what the description says</span><span class="req">Required</span>
+            </div>
+            <div class="checkrow">
+              <span class="st p">&check;</span><span class="nm">ci / build-and-test</span>
+              <span class="ds">Successful in 48s</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= HOW IT WORKS ================= -->
+  <section id="how">
+    <div class="wrap">
+      <div class="shead reveal">
+        <h2>Read. Walk. Report.</h2>
+        <p>One config file says how to boot your app. Groundtruth does the rest.</p>
+      </div>
+      <div class="steps">
+        <div class="stepcard reveal">
+          <div class="stepvis">
+            <div class="minicontract">
+              <div class="mcrow"><span class="id">C1</span><span><span class="q">A tag can be attached while creating a todo</span><span class="from">from your description, bullet 1</span></span></div>
+              <div class="mcrow"><span class="id">C3</span><span><span class="q">Clicking a chip filters the list to that tag</span><span class="from">from your description, bullet 3</span></span></div>
+              <div class="mcrow"><span class="id">R1</span><span><span class="q">Completing a todo still moves it to Done</span><span class="from">not claimed, same reducer touched</span></span></div>
+            </div>
+          </div>
+          <div class="steptxt">
+            <span class="n">01</span>
+            <h3>It reads your claims</h3>
+            <p>Your description becomes a <b>contract</b>, quoted verbatim on the PR. You approve or edit it in plain English. Nothing runs until you do.</p>
+          </div>
+        </div>
+        <div class="stepcard reveal">
+          <div class="stepvis">
+            <div class="minibrowser">
+              <div class="mb-bar"><i></i><i></i><i></i><span class="mb-url">pr-142.head.groundtruth.dev</span></div>
+              <div class="mb-body">
+                <div class="mb-line w1"></div>
+                <div class="mb-line w2"></div>
+                <div class="mb-line w3"></div>
+                <span class="mb-chip">tag: work</span>
+                <span class="mb-cursor"><svg width="13" height="13" viewBox="0 0 13 13"><path d="M1 1l4.2 11 1.6-4.6L11.4 6z" fill="#161717" stroke="#fff" stroke-width="1"/></svg></span>
+              </div>
+            </div>
+          </div>
+          <div class="steptxt">
+            <span class="n">02</span>
+            <h3>It walks the terrain</h3>
+            <p>A browser agent uses your running app like a person would, one claim at a time, in <b>paired sandboxes</b>: your branch on one side, main on the other.</p>
+          </div>
+        </div>
+        <div class="stepcard reveal">
+          <div class="stepvis">
+            <div class="miniverdict">
+              <div class="mvrow"><span class="vm p">&check;</span><span><span class="t">Verified</span><span class="e">recording, action log, network trace</span></span></div>
+              <div class="mvrow"><span class="vm f">&times;</span><span><span class="t">Failed</span><span class="e">the clip of the exact moment, timestamped</span></span></div>
+              <div class="mvrow"><span class="vm u">?</span><span><span class="t">Could not verify</span><span class="e">says why, and what it needs from you</span></span></div>
+            </div>
+          </div>
+          <div class="steptxt">
+            <span class="n">03</span>
+            <h3>It returns evidence</h3>
+            <p>A verdict per claim, never a vibe. The journey is replayed by a deterministic runner: <b>the agent explores, but it never grades its own story.</b></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= WHY NOW ================= -->
+  <section class="whynow" id="why" style="padding-top:30px">
+    <div class="wrap">
+      <div>
+        <p class="big reveal"><span class="quiet">CI is green. The reviewer approved.</span> And one thing your description claims is <span class="hot">quietly untrue.</span></p>
+        <p class="after reveal">The description was generated from the conversation that produced the code. The code drifted, the description did not. Reviewers check code against code, tests check code against tests. <b>Nobody was checking the code against the claim.</b></p>
+      </div>
+      <div class="asciiart reveal" aria-hidden="true">
+        <div class="inner"><pre>    ....:::::-------:::::------~~~~~~~~~~~~~--::..... ...
+  ...::::::---------::::--~~~~~~~~~~~~~~~~~-:........ .. ..           ....
+.::::::::--------~---::--~~~~~~~~~~~~~~~~:........... .....     . .....:::
+:---------------~~~----~~~~~========~~~-. .    ......... .. .....:.:::--~~
+-----------~-~~~~~~~~~~~~==========~~:....... .................:::--~====+
+----~~~~~~~~~~~~~~~~~~~~=========~~-:.........................:::--~===+++
+~~~~~~~~~~~~=~~~~~~~=~~~~~==~~~-:............................::::-~==++***
+~~~~~~~~=~======~~~~~~~~---....  .................::........:::::~+==+***#
+~~~~~~~=============~~~-:.......................:.............:--~==****##
+===============+======-.................................::. .::-~~+=+**###
+========++=++++=====~:...................::......:::::..:...::--~==+++***#
+++++++++++++=====+=-:..........::.:::.........:::::.........::---~=+++****
+++++++++++++++==~-:...........::..........:.:.::.........:::---~~~~~+=++**
+++++++++=+++==~:...........:.::....:...::::..:.....::..:::::-~-+======+++*
+++++=====+~--:.....:.........::.:.:::::::::.:...::::.:::----~=~++=+=*+++++
+==+==~~~=~:.::.....::.:.::::::::..::::::::.:.:::::::------~====#=+*=#*****
+++~-----:...:::...::..:::::::::..:::..::::::::::::---~~~=+++++#++#+*#*#*##
+*=----:::.....:::::::--:::::.:::-:.:::-::::::::::-~~==++******+*#**%######
+-.::.:...::::::::::::::.::---:-::-----::::-::--~~~~==+*****+**##*#%##%#%#%
+.::....:::::::::.::...::----::::::::::::::::-~~=++++*###########%#####%#%%
+.....:::::......::::::::::::::::::::.:::.:-~~~~==+**#%%%%%%%%%%%%%%##%%#%#
+.::::::::.::.::::--:::::::::::::::::::.::--~~~~~*#+#%#**#%%%%%%%%%%%%%%%%#
+::::::::::-::.::-:::::::::::::::::-.~------~==~+%=##*=*%#%%%%%%%%%%%%@%%%%
+:::::::::-:-:::-:.:::::::::::::--::--~==~-~==+~#*+%#=*%#*%%%%%%%%%%@%%%%%%
+:::::::--:::-:::::::--:::::-::-::------~++=~*==%*+%+*%#*#%%%%%%%%%%%%%%%%%
+::::::::::::.::::::-::-:----:::.--~---~~=+=++~##=*#+###+%#%%#@@%%@%%@%%%%@
+:---:::::::::::--:-::----::::--~-~~-~~=++=+*=*%+=%#+%##*%#%#%%%%%#%%%@@@@%
+---:::---::-::--:-::-----:--~~~~~~=++++++**=+%#=#%*#%*##**%#%#%%*#%%@%%%@@
+::::-:-:::----::--::~-:--~~~~~==++++***#*++#%#+*%#+%#*%++###%#%*#@%@%#%@%%
+:::::-:------::--------~~====+++++****+++#%%#*#%%*#%##**#%%%##%#%%%%#%@%%@
+::--:::-----:---::::-~====+++++******##%%%##%%##*#%%##%#@%%@#%%%%*%%%@%@@@
+:--:-----::----::-~=~=++++****###%#%%%#%%%%#####%%##%%%%%%@#%%#%#*@#%%@%%@
+::-----::::----~~=++***+++*##%%%%%%%###%%%%%%%#%%%%%%%%#%@##@#%@#%%*@%%%%@
+:-::-----:--~~~=+++*++*#%%%######%%%%%%%%%%%%#%@@@@%%%%@@#%@##@#*@%%@%@%%@
+----------~==+++++**#%###**##%%@@@@@@%%@@@@@@@@@@@@%@@%%#@@%%@%#%@#%%%@%%%
+----:---~~==+++=+##***##%@@@@%%%@@@@@@@%@@@@@@@@@@@@%%%@@%%%@%#%@%%@#%@%@%
+~~-:--~++==**==*%*++%%%@%##%@%%@@%@@@@@@@@@@@@@@%%%@@@@%%@@@%%@@%%@@#@%%@%
+:::-~~===+*+=*%#++#@@%#%%%@@@%@@@@@%@@@@@@@%%%%@@@@@@%@@@@@@@@%%@@@%@@%@%@
+-~-=====*+++*%#+*%@%##%@%%%@@@%@%@@@@@%%%@@@@@@@@@@@@@@@@@@@@%@@@%%@@@@%%@
+~~=++==+**=*%*+#@@%#%@@%%@@%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%@@@@@@@@@@@@%@@
+==*++=+#*=#@*+%@%##@@%#@@%*%@@@@@@@@@@@%%@@@@@@@@@@@@@%%@@@@@@@@@@@@@%%@@%
+=+#+++#*=*@#+%@#*%@@#%@@%%@@@%@@@@@@@@@@@@@@@@@@@@%%%@@@@@@@@@@@@@@@@@@@@@
+=#++=##+*@#+%@#*@@%%@@@%@@@%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+**+=#%++@%+%@##@@%#@@@%@@@%@@@@%@@@@@%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</pre></div>
+        <span class="cap">the actual terrain, not the description of it</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= WHAT IT IS NOT ================= -->
+  <section>
+    <div class="wrap">
+      <div class="shead reveal">
+        <h2>What it is not.</h2>
+        <p>This category has a history of losing developer trust. So the boundaries are part of the product.</p>
+      </div>
+      <div class="nots">
+        <div class="not reveal">
+          <span class="x"><span class="vm">&times;</span>Not a code reviewer</span>
+          <h3>It does not read your diff for style</h3>
+          <p>Reviewers check code against code. Groundtruth checks the running app against <b>the claim you wrote</b>. Keep your reviewer.</p>
+        </div>
+        <div class="not reveal">
+          <span class="x"><span class="vm">&times;</span>Not a test suite</span>
+          <h3>It does not need your tests</h3>
+          <p>No existing suite, no visual baseline, no recorded traffic. The oracle is the description itself, so it works from <b>the first PR of an empty repo</b>.</p>
+        </div>
+        <div class="not reveal">
+          <span class="x"><span class="vm">&times;</span>Not a wall of green</span>
+          <h3>It does not fake confidence</h3>
+          <p>When a claim needs a signed-in session, you get an honest <b>"could not verify"</b> with the reason, not a hopeful pass.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FINAL CTA ================= -->
+  <section class="final" id="install" style="padding-top:30px">
+    <div class="wrap">
+      <div class="reveal">
+        <h2>We check what you meant to change.<br>And what you didn't.</h2>
+        <p>One YAML block. The first verdict lands on your next pull request.</p>
+        <div class="cta" style="justify-content:center">
+          <a class="btn" href="#moment">See the check again</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="brand"><svg class="gtm" style="width:22px;height:22px" aria-hidden="true"><use href="#gt-mark"/></svg>Groundtruth</span>
+    <span class="tag">Intent verification for pull requests.</span>
+    <span class="fine">The agent explores, a deterministic runner grades.</span>
+  </div>
+</footer>
+
+<!-- hero hotspots + tooltips -->
+<div id="hotspots"></div>
+
+<div class="run-progress" id="run-progress" role="status" aria-live="polite">
+  <div class="progress-card" id="progress-card">
+    <svg class="gtm" aria-hidden="true"><use href="#gt-mark"/></svg>
+    <h2 id="progress-title">Creating verification run</h2>
+    <p id="progress-detail">Reading the pull request and extracting its intent contract.</p>
+    <div class="progress-actions">
+      <button class="btn btn-primary" type="button" id="progress-retry">Retry</button>
+      <a class="btn" id="progress-dashboard" href="/">Open dashboard</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  const $ = s => document.querySelector(s);
+
+  const runForm = $('#run-form');
+  const runError = $('#run-error');
+  const progress = $('#run-progress');
+  const progressCard = $('#progress-card');
+  const progressTitle = $('#progress-title');
+  const progressDetail = $('#progress-detail');
+  const progressRetry = $('#progress-retry');
+  const progressDashboard = $('#progress-dashboard');
+  const liveMode = new URLSearchParams(location.search).get('live') === '1';
+  const recordedPrUrl = 'https://github.com/Kyan42/fernway/pull/4';
+  let activeRunId = null;
+  let polling = false;
+
+  runForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    runError.textContent = '';
+    const button = runForm.querySelector('button');
+    button.disabled = true;
+    button.textContent = 'Running...';
+    try {
+      const submittedUrl = $('#pr-url').value.replace(/\/+$/, '');
+      if (!liveMode) {
+        if (submittedUrl.toLowerCase() !== recordedPrUrl.toLowerCase()) {
+          throw new Error('This recorded demo supports only https://github.com/Kyan42/fernway/pull/4.');
+        }
+        progress.classList.add('show');
+        setProgress('Loading completed verification',
+          'Recorded from a real Runloop execution');
+        await readResponse(await fetch('/api/recorded-runs/fernway-pr4-v1', {cache:'no-store'}));
+        await new Promise(resolve => setTimeout(resolve, 650));
+        location.assign('/runs/recorded-fernway-pr4?recorded=fernway-pr4-v1');
+        return;
+      }
+
+      const response = await fetch('/api/runs', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({prUrl:$('#pr-url').value})
+      });
+      const view = await readResponse(response);
+      activeRunId = view.run && view.run.id;
+      if (!activeRunId) throw new Error('The run was created without an ID.');
+      sessionStorage.setItem(stateKey(activeRunId), JSON.stringify({
+        approved:false, intentStarted:false, regressionStarted:false
+      }));
+      progress.classList.add('show');
+      await orchestrate(activeRunId, view.run.status);
+    } catch (error) {
+      progress.classList.remove('show');
+      runError.textContent = error instanceof Error ? error.message : 'Could not create the run.';
+      button.disabled = false;
+      button.textContent = 'Run';
+    }
+  });
+
+  progressRetry.addEventListener('click', () => {
+    if (!activeRunId || polling) return;
+    progressCard.classList.remove('error');
+    orchestrate(activeRunId);
+  });
+
+  async function orchestrate(runId, initialStatus) {
+    if (polling) return;
+    polling = true;
+    progressDashboard.href = '/runs/' + encodeURIComponent(runId);
+    let status = initialStatus;
+    try {
+      while (true) {
+        const state = loadState(runId);
+        if (!status) {
+          const view = await readResponse(await fetch('/api/runs/' + encodeURIComponent(runId), {cache:'no-store'}));
+          status = view.status;
+          if (!status) throw new Error('The run response did not include a status.');
+          if (view.blocker && ['setup_required','blocked','failed'].includes(status)) {
+            throw new Error(view.blocker.message);
+          }
+        }
+
+        if (status === 'awaiting_contract_approval') {
+          setProgress('Intent contract extracted — approving test plan',
+            'The demo flow approves the extracted contract transparently before browser verification.');
+          status = await act(runId, 'approve_intent', 'approved', state);
+        } else if (status === 'contract_approved') {
+          setProgress('Starting intent verification',
+            'Running the configured intent missions in shared browser environments.');
+          status = await act(runId, 'start_verification', 'intentStarted', state);
+        } else if (status === 'complete' && state.intentStarted && !state.regressionStarted) {
+          setProgress('Intent suite complete — starting regression',
+            'Product assertion findings are preserved while regression verification continues.');
+          status = await act(runId, 'start_regression', 'regressionStarted', state);
+        } else if (status === 'complete' && state.regressionStarted) {
+          setProgress('Verification complete', 'Opening the recorded results.');
+          location.assign('/runs/' + encodeURIComponent(runId));
+          return;
+        } else if (['setup_required','blocked','failed'].includes(status)) {
+          const view = await readResponse(await fetch('/api/runs/' + encodeURIComponent(runId), {cache:'no-store'}));
+          throw new Error(view.blocker && view.blocker.message || 'Verification stopped because its environment failed.');
+        } else {
+          setProgress(
+            status === 'verifying'
+              ? (state.regressionStarted ? 'Running regression verification' : 'Running intent verification')
+              : status === 'analyzing_intent'
+                ? 'Extracting the intent contract'
+                : 'Preparing the verification run',
+            'This phase reflects the current backend run state.'
+          );
+        }
+        status = null;
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    } catch (error) {
+      showProgressError(error instanceof Error ? error.message : 'Verification stopped unexpectedly.');
+    } finally {
+      polling = false;
+    }
+  }
+
+  async function act(runId, action, flag, state) {
+    if (state[flag]) return null;
+    state[flag] = true;
+    saveState(runId, state);
+    try {
+      const view = await readResponse(await fetch('/api/runs/' + encodeURIComponent(runId) + '/actions', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action})
+      }));
+      return view.run && view.run.status;
+    } catch (error) {
+      state[flag] = false;
+      saveState(runId, state);
+      throw error;
+    }
+  }
+
+  function setProgress(title, detail) {
+    progressTitle.textContent = title;
+    progressDetail.textContent = detail;
+  }
+
+  function showProgressError(message) {
+    progressCard.classList.add('error');
+    setProgress('Verification stopped', message);
+  }
+
+  async function readResponse(response) {
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(payload && payload.error && payload.error.message || 'The verification API request failed.');
+    }
+    return payload;
+  }
+
+  function stateKey(runId) { return 'groundtruth-orchestration:' + runId; }
+  function loadState(runId) {
+    try {
+      return JSON.parse(sessionStorage.getItem(stateKey(runId))) || {
+        approved:false, intentStarted:false, regressionStarted:false
+      };
+    } catch {
+      return {approved:false, intentStarted:false, regressionStarted:false};
+    }
+  }
+  function saveState(runId, state) {
+    sessionStorage.setItem(stateKey(runId), JSON.stringify(state));
+  }
+
+  /* ---------- nav: normal -> floating pill ---------- */
+  const nav = $('#nav');
+  let navTick = false;
+  function onScroll(){
+    if (navTick) return;
+    navTick = true;
+    requestAnimationFrame(() => {
+      nav.classList.toggle('scrolled', window.scrollY > 120);
+      navTick = false;
+    });
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  /* ---------- scroll reveals ---------- */
+  const io = new IntersectionObserver(es => {
+    es.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {threshold:.14});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  /* ---------- interactive ASCII contour terrain ---------- */
+  const pane = $('#field'), cvs = $('#topo');
+  if (!pane || !cvs) return;
+  const ctx = cvs.getContext('2d', {alpha:true});
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const CW = 12, CH = 16, LEV = 6, BAND = 0.14;
+  const CHARS = ['-','\\','|','/'];
+  let W = 0, H = 0, cols = 0, rows = 0, scrollY0 = 0;
+
+  /* hills live in world space: x across the viewport, y in viewport-heights down
+     the page, so one continuous terrain runs behind every section */
+  const hills = [
+    {x:0.62, y:0.24, s:0.17, a:1.00},
+    {x:0.87, y:0.38, s:0.19, a:0.92},
+    {x:0.70, y:0.76, s:0.19, a:0.95},
+    {x:0.97, y:0.86, s:0.14, a:0.70},
+    {x:0.44, y:0.60, s:0.14, a:0.62},
+    {x:0.14, y:1.55, s:0.22, a:0.78},
+    {x:0.86, y:1.90, s:0.26, a:0.85},
+    {x:0.48, y:2.55, s:0.28, a:0.88},
+    {x:0.08, y:3.20, s:0.22, a:0.72},
+    {x:0.92, y:3.60, s:0.24, a:0.78},
+    {x:0.42, y:4.30, s:0.30, a:0.85},
+    {x:0.88, y:5.00, s:0.24, a:0.72},
+    {x:0.18, y:5.40, s:0.26, a:0.78}
+  ];
+
+  /* cursor acts as a moving survey probe: it raises the terrain under it */
+  const probe = {x:0.5, y:0.5, tx:0.5, ty:0.5, amp:0, tamp:0};
+  /* cursor wake: expanding ripple rings + wave parting */
+  const ripples = [];
+  let lastRip = 0, mpx = -9999, mpy = -9999;
+  /* construct-in: the field surveys itself into existence on first load */
+  const boot = performance.now(), INTRO = 2200;
+
+  function hillPos(i, t){
+    const h = hills[i];
+    return {
+      x: h.x + Math.sin(t * 0.00042 + i * 1.7) * 0.085,
+      y: h.y + Math.cos(t * 0.00034 + i * 2.3) * 0.070
+    };
+  }
+
+  function field(nx, ny, t){
+    let v = 0;
+    for (let i = 0; i < hills.length; i++){
+      const h = hills[i], p = hillPos(i, t);
+      if (Math.abs(ny - p.y) > 1.1) continue;
+      const dx = nx - p.x, dy = (ny - p.y) * 0.82;
+      v += h.a * Math.exp(-(dx*dx + dy*dy) / (2 * h.s * h.s));
+    }
+    if (probe.amp > 0.003){
+      const dx = nx - probe.x, dy = (ny - probe.y) * 0.82, s = 0.19;
+      v += probe.amp * 1.1 * Math.exp(-(dx*dx + dy*dy) / (2 * s * s));
+    }
+    return v;
+  }
+
+  /* ---------- markers: claims surfacing out of the terrain ---------- */
+  const MARKERS = [
+    {hill:0, ox:0.008, oy:0.010, id:'C3', verdict:'claim failed',
+     q:'Clicking a chip filters the list to that tag',
+     why:'The URL updates and the API returns the right rows, but the list never re-renders. Clip at 0:04.'},
+    {hill:2, ox:-0.010, oy:0.008, id:'C7', verdict:'claim failed',
+     q:'The discount applies at checkout',
+     why:'It applies at cart. The checkout total never changes. Nothing crashed, no test failed.'},
+    {hill:1, ox:0.007, oy:-0.012, id:'C4', verdict:'could not verify',
+     q:'A tag keeps the same color across sessions',
+     why:'Needs a signed-in session. Honest abstention beats a hopeful pass.'}
+  ];
+
+  MARKERS.forEach((m, i) => {
+    const d = document.createElement('div');
+    d.className = 'hotspot';
+    const tip = document.createElement('div');
+    tip.className = 'tip';
+    if (m.verdict.indexOf('failed') < 0) tip.classList.add('ok');
+    tip.innerHTML = '<div class="th"><span class="tid">' + m.id + '</span><span class="tv">' + m.verdict + '</span></div>' +
+      '<q>' + m.q + '</q><div class="why">' + m.why + '</div>';
+    document.body.appendChild(tip);
+    document.body.appendChild(d);
+    m.el = d; m.tip = tip; m.hover = false; m.px = 0; m.py = 0;
+    d.addEventListener('mouseenter', () => { m.hover = true; tip.classList.add('show'); });
+    d.addEventListener('mouseleave', () => { m.hover = false; tip.classList.remove('show'); });
+    /* touch: tap toggles the card */
+    d.addEventListener('click', () => {
+      m.hover = !m.hover; tip.classList.toggle('show', m.hover);
+      MARKERS.forEach(o => { if (o !== m){ o.hover = false; o.tip.classList.remove('show'); } });
+    });
+  });
+
+  function size(){
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    cvs.width = Math.round(W * dpr); cvs.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cols = Math.ceil(W / CW); rows = Math.ceil(H / CH);
+    ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
+  }
+
+  function draw(t){
+    scrollY0 = window.scrollY;
+    ctx.clearRect(0, 0, W, H);
+    ctx.font = '11px "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
+    const introK = reduce ? 1 : Math.min(1, (t - boot) / INTRO);
+    const ox0 = W * 0.2, oy0 = H * 0.42, dMax = Math.sqrt(W * W + H * H);
+    probe.x += (probe.tx - probe.x) * 0.22;
+    probe.y += (probe.ty - probe.y) * 0.22;
+    probe.amp += (probe.tamp - probe.amp) * 0.12;
+
+    /* drop spent ripples */
+    for (let k = ripples.length - 1; k >= 0; k--){
+      if ((t - ripples[k].t0) / 1000 > 1.5) ripples.splice(k, 1);
+    }
+
+    const e = 0.006;
+    for (let r = 0; r < rows; r++){
+      const ny = (r * CH + scrollY0) / H;
+      const cyp = r * CH + CH / 2;
+      for (let c = 0; c < cols; c++){
+        const nx = (c * CW) / W;
+        const cxp = c * CW + CW / 2;
+        const v = field(nx, ny, t);
+        const b = v * LEV;
+        const f = b - Math.floor(b);
+        const dist = Math.min(f, 1 - f);
+        if (dist > BAND) continue;
+
+        const gx = field(nx + e, ny, t) - v;
+        const gy = field(nx, ny + e, t) - v;
+        let ang = Math.atan2(gy, gx) + Math.PI / 2;
+        ang = ((ang % Math.PI) + Math.PI) % Math.PI;
+        const ch = CHARS[Math.round(ang / (Math.PI / 4)) % 4];
+
+        /* wave parting: characters shear away from the cursor */
+        let ox = 0, oy = 0, boost = 0;
+        if (probe.amp > 0.02 && mpx > -999){
+          const ddx = cxp - mpx, ddy = cyp - mpy;
+          const dd = Math.sqrt(ddx * ddx + ddy * ddy) + 0.001;
+          const part = 17 * probe.amp * Math.exp(-(dd * dd) / 18050);
+          ox += (ddx / dd) * part; oy += (ddy / dd) * part;
+        }
+        /* ripple rings expanding from the cursor's wake */
+        for (let k = 0; k < ripples.length; k++){
+          const rp = ripples[k], age = (t - rp.t0) / 1000;
+          if (age < 0) continue;
+          const rr = 30 + age * 320;
+          const ddx = cxp - rp.x, ddy = (cyp + scrollY0) - rp.y;
+          const dd = Math.sqrt(ddx * ddx + ddy * ddy) + 0.001;
+          const w = Math.abs(dd - rr);
+          if (w > 38) continue;
+          const kk = (1 - w / 38) * Math.exp(-age * 2.2);
+          boost += kk;
+          ox += (ddx / dd) * kk * 9; oy += (ddy / dd) * kk * 9;
+        }
+
+        const crisp = 0.5 + 0.5 * (1 - dist / BAND);
+        /* hero: strongest on the right, soft toward the copy; below the fold it
+           relaxes into a quiet full-width field so there is no seam */
+        const kBelow = Math.min(1, Math.max(0, (ny - 0.95) / 0.5));
+        const fadeL = Math.min(1, 0.15 + nx * 2.2);
+        const spread = fadeL + (1 - fadeL) * kBelow;
+        const edge = Math.min(1, Math.abs(nx - 0.5) * 2.4);
+        const quiet = 1 - kBelow * (1 - 0.42 * (0.5 + 0.5 * edge));
+        /* brighten near the survey probe */
+        const pdx = nx - probe.x, pdy = (ny - probe.y) * 0.82;
+        const near = probe.amp * Math.exp(-(pdx*pdx + pdy*pdy) / 0.02);
+        let alpha = (0.72 + 0.28 * near + 0.5 * boost) * crisp * spread * quiet * Math.min(1, v * 1.6);
+        if (alpha < 0.015) continue;
+        if (alpha > 0.95) alpha = 0.95;
+        /* construct-in sweep radiating out from the lockup */
+        let frontier = false;
+        if (introK < 1){
+          const dx0 = cxp - ox0, dy0 = cyp - oy0;
+          const dn = Math.sqrt(dx0 * dx0 + dy0 * dy0) / dMax;
+          const jit = ((c * 73 + r * 151) % 17) / 17 * 0.16;
+          const g2 = Math.max(0, Math.min(1, (introK * 1.45 - dn - jit) * 5));
+          if (g2 <= 0) continue;
+          alpha *= g2;
+          frontier = g2 < 0.85;
+        }
+        const g = (frontier || near > 0.25 || boost > 0.4) ? '18,161,80' : '14,105,78';
+        ctx.fillStyle = 'rgba(' + g + ',' + alpha.toFixed(3) + ')';
+        ctx.fillText(ch, cxp + ox, cyp + oy);
+      }
+    }
+
+    /* markers: flagged claims surfacing in the hero terrain */
+    for (let i = 0; i < MARKERS.length; i++){
+      const m = MARKERS[i], p = hillPos(m.hill, t);
+      if (W < 900){ m.el.style.display = 'none'; continue; }
+      m.el.style.display = '';
+      /* freeze the marker while hovered so the card holds still */
+      if (!m.hover){ m.px = (p.x + m.ox) * W; m.pyW = (p.y + m.oy) * H; }
+      const px = m.px, py = m.pyW - scrollY0;
+      if (py < -80 || py > H + 80) continue;
+      const cyc = 0.5 + 0.5 * Math.sin(t * 0.0012 + i * 2.1);
+      /* markers surface only after the field has built in */
+      const mIntro = reduce ? 1 : Math.min(1, Math.max(0, (t - boot - 1300 - i * 260) / 700));
+      if (mIntro <= 0) continue;
+      const a = (m.hover ? 1 : 0.55 + 0.45 * cyc) * mIntro;
+      const tw = 258, flip = (px + tw + 44) > W;
+
+      /* pulse ring drawn in ASCII: tangential dashes expanding outward */
+      const ringR = 17 + ((t * 0.035 + i * 37) % 46) * 0.55;
+      const ringA = Math.max(0, 0.5 - ringR / 52) * a;
+      if (ringA > 0.01){
+        ctx.font = '10px "Geist Mono", ui-monospace, Menlo, monospace';
+        ctx.fillStyle = 'rgba(201,68,47,' + ringA.toFixed(3) + ')';
+        const n = 12;
+        for (let q = 0; q < n; q++){
+          const ra = (q / n) * Math.PI * 2 + i * 0.9;
+          let tang = ra + Math.PI / 2;
+          tang = ((tang % Math.PI) + Math.PI) % Math.PI;
+          const rch = CHARS[Math.round(tang / (Math.PI / 4)) % 4];
+          ctx.fillText(rch, px + Math.cos(ra) * ringR, py + Math.sin(ra) * ringR);
+        }
+      }
+      /* the marker itself is an ASCII asterisk */
+      ctx.font = '500 ' + (m.hover ? 40 : 34) + 'px "Geist Mono", ui-monospace, Menlo, monospace';
+      ctx.fillStyle = 'rgba(201,68,47,' + Math.min(1, (0.25 + a) * mIntro).toFixed(3) + ')';
+      ctx.fillText('*', px, py + (m.hover ? 13 : 11));
+
+      /* surveyor's leader line to the open card */
+      if (m.hover){
+        ctx.beginPath();
+        if (flip){ ctx.moveTo(px - 10, py); ctx.lineTo(px - 21, py); }
+        else { ctx.moveTo(px + 10, py); ctx.lineTo(px + 21, py); }
+        ctx.strokeStyle = 'rgba(22,23,23,.4)';
+        ctx.lineWidth = 1; ctx.stroke();
+      }
+
+      /* keep hotspot + tooltip glued to the marker (page coordinates) */
+      m.el.style.left = px + 'px'; m.el.style.top = m.pyW + 'px';
+      m.tip.style.left = (flip ? px - tw - 22 : px + 22) + 'px';
+      m.tip.style.top = (m.pyW - 21) + 'px';
+    }
+  }
+
+  document.addEventListener('mousemove', ev => {
+    probe.tx = ev.clientX / W;
+    probe.ty = (ev.clientY + window.scrollY) / H;
+    probe.tamp = 1;
+    mpx = ev.clientX; mpy = ev.clientY;
+    const now = performance.now();
+    if (now - lastRip > 140){
+      lastRip = now;
+      ripples.push({x: mpx, y: mpy + window.scrollY, t0: now});
+      if (ripples.length > 9) ripples.shift();
+    }
+  });
+  document.documentElement.addEventListener('mouseleave', () => { probe.tamp = 0; mpx = -9999; mpy = -9999; });
+
+  let last = 0, raf = null;
+  function loop(now){
+    if (now - last > 24){ last = now; draw(now); }
+    raf = requestAnimationFrame(loop);
+  }
+
+  size();
+  if (reduce){ draw(0); }
+  else { raf = requestAnimationFrame(loop); }
+
+  let rt = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(rt);
+    rt = setTimeout(() => { size(); if (reduce) draw(0); }, 150);
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (reduce) return;
+    if (document.hidden){ cancelAnimationFrame(raf); raf = null; }
+    else if (!raf){ last = 0; raf = requestAnimationFrame(loop); }
+  });
+})();
+</script>
+</body>
+</html>
