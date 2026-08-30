@@ -140,10 +140,10 @@ export async function loadAppConfiguration(
   }
   const intentMissions = missions.value.filter((mission) => mission.kind === "intent");
   const regressionMissions = missions.value.filter((mission) => mission.kind === "regression");
-  if (intentMissions.length !== 1) {
+  if (intentMissions.length < 1) {
     blockers.push({
-      code: "intent_mission_ambiguous",
-      message: "Exactly one trusted intent mission is required for this prototype.",
+      code: "intent_mission_missing",
+      message: "At least one trusted intent mission is required.",
     });
   }
   if (regressionMissions.length !== 1) {

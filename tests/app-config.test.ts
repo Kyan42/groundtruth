@@ -14,8 +14,14 @@ describe("trusted app configuration", () => {
       expect(result.profile.repository).toBe("Kyan42/fernway");
       expect(result.appMap.baseSha).toBe(BASE_SHA);
       expect(result.impactMap.headSha).toBe(HEAD_SHA);
-      expect(result.mission.id).toBe("intent-checkout-application-timing");
-      expect(result.missions.map((mission) => mission.kind)).toEqual(["intent", "regression"]);
+      expect(result.mission.id).toBe("intent-shopper-applies-promo");
+      expect(result.missions.map((mission) => mission.kind)).toEqual([
+        "intent",
+        "intent",
+        "intent",
+        "regression",
+      ]);
+      expect(result.missions.filter((mission) => mission.kind === "intent")).toHaveLength(3);
       const regression = result.missions.find((mission) => mission.kind === "regression");
       expect(regression?.claimIds).toEqual([]);
       expect(JSON.stringify(regression)).not.toMatch(/Monstera|38\.00|43\.99/);
@@ -33,9 +39,15 @@ describe("trusted app configuration", () => {
         ),
       ).toBe(false);
       expect(result.mission.claimIds).toEqual([]);
-      expect(result.mission.claimSourceQuote).toBe(
+      expect(
+        result.missions
+          .filter((mission) => mission.kind === "intent")
+          .map((mission) => mission.claimSourceQuote),
+      ).toEqual([
+        "Shoppers can enter a promo code and see the discount applied",
+        "Invalid codes show an inline error without clearing the field",
         "The discount is applied at checkout, so the cart total stays undiscounted until the order is placed",
-      );
+      ]);
     }
   });
 

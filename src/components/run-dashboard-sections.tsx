@@ -45,10 +45,13 @@ export function RunDashboardShell({
   onSelect,
   onAction,
 }: RunDashboardShellProps) {
-  const narrative = buildVerdictNarrative(view, selectedItem);
+  const attempt = findLatestAttemptForItem(view, selectedItem);
+  const selectedView = attempt
+    ? { ...view, journey: attempt.journey, actions: attempt.actions, network: attempt.network }
+    : view;
+  const narrative = buildVerdictNarrative(selectedView, selectedItem);
   const evidenceLinked = isEvidenceLinked(view, selectedItem);
   const mission = findMissionForItem(view, selectedItem);
-  const attempt = findLatestAttemptForItem(view, selectedItem);
   const [evidenceTarget, setEvidenceTarget] = useState<"base" | "head">("head");
   const recordingTargets = availableRecordingTargets(view, attempt);
   const selectedEvidenceTarget = recordingTargets.includes(evidenceTarget)
@@ -120,7 +123,7 @@ export function RunDashboardShell({
               </>
             ) : (
               <EvidenceEmptyStage
-                view={view}
+                view={selectedView}
                 selectedItem={selectedItem}
                 evidenceLinked={evidenceLinked}
                 busyAction={busyAction}
@@ -140,7 +143,7 @@ export function RunDashboardShell({
             {selectedItem?.kind === "regression" && attempt ? (
               <RegressionEvidencePanel attempt={attempt} />
             ) : null}
-            <DetailPanel view={view} />
+            <DetailPanel view={selectedView} />
           </div>
         </main>
       </div>
@@ -600,7 +603,7 @@ function ContractActions({
           Contract approved and recorded.
         </p>
         <ActionButton
-          action={view.run.status === "complete" ? "rerun_verification" : "start_verification"}
+          action={view.run.status === "complete" ? "rerun_verification" : "start_intent_suite"}
           busyAction={busyAction}
           onAction={onAction}
         >
@@ -608,7 +611,7 @@ function ContractActions({
             ? "Rerun browser verification"
             : view.blocker?.retryable
               ? "Retry browser verification"
-              : "Start browser verification"}
+              : "Start intent verification suite"}
         </ActionButton>
       </div>
     );
@@ -702,11 +705,11 @@ function EvidenceEmptyStage({
         <p>{detail}</p>
         {canRetry ? (
           <ActionButton
-            action="start_verification"
+            action="start_intent_suite"
             busyAction={busyAction}
             onAction={onAction}
           >
-            {view.blocker?.retryable ? "Retry browser verification" : "Start browser verification"}
+            {view.blocker?.retryable ? "Retry intent verification suite" : "Start intent verification suite"}
           </ActionButton>
         ) : null}
       </div>
@@ -842,7 +845,11 @@ function recordingForTarget(
   attempt: RunView["verificationAttempts"][number] | undefined,
   target: "base" | "head",
 ): { artifactId: string; contentType: string } | undefined {
-  const artifactId = attempt?.executions?.[target]?.evidence.videoArtifactId;
+  const artifactId =
+    attempt?.executions?.[target]?.evidence.videoArtifactId ??
+    (attempt?.execution?.target === target
+      ? attempt.execution.evidence.videoArtifactId
+      : undefined);
   if (artifactId) {
     return { artifactId, contentType: "video/webm" };
   }

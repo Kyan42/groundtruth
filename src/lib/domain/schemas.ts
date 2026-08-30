@@ -151,6 +151,7 @@ export const TestMissionSchema = z.object({
     .array(
       z.object({
         claimId: z.string().min(1),
+        claimSourceQuote: z.string().min(1).optional(),
         reason: z.string().min(1),
       }),
     )

@@ -203,6 +203,56 @@ describe("claim coverage", () => {
     ]);
   });
 
+  it("projects coverage across separate claim-specific missions", () => {
+    const secondMission: TestMission = {
+      ...mission,
+      id: "invalid-promo",
+      claimIds: ["invalid-code-error"],
+      deferredClaims: [],
+    };
+
+    expect(buildClaimCoverage(run, [mission, secondMission])).toEqual([
+      {
+        claimId: "checkout-application",
+        status: "covered",
+        missionId: "checkout-timing",
+      },
+      {
+        claimId: "invalid-code-error",
+        status: "covered",
+        missionId: "invalid-promo",
+      },
+      {
+        claimId: "discount-types",
+        status: "uncovered",
+      },
+    ]);
+  });
+
+  it("resolves deferred claims by exact source quote", () => {
+    const resolved = resolveMission(
+      {
+        ...mission,
+        deferredClaims: [
+          {
+            claimId: "unstable-placeholder",
+            claimSourceQuote: claims[2].sourceQuote,
+            reason: "Needs two fixtures.",
+          },
+        ],
+      },
+      run,
+    );
+
+    expect(resolved.deferredClaims).toEqual([
+      {
+        claimId: "discount-types",
+        claimSourceQuote: claims[2].sourceQuote,
+        reason: "Needs two fixtures.",
+      },
+    ]);
+  });
+
   it.each([
     ["failed", "non_conformant"],
     ["error", "inconclusive"],

@@ -1,6 +1,118 @@
 [
   {
     "schemaVersion": 1,
+    "id": "intent-shopper-applies-promo",
+    "title": "Shopper applies FERN10",
+    "kind": "intent",
+    "claimIds": [],
+    "claimSourceQuote": "Shoppers can enter a promo code and see the discount applied",
+    "goal": "Starting from a reset storefront, add one product, open the cart, enter FERN10, and trigger promo application. Verify the shopper sees the applied-code confirmation backed by a successful promo request.",
+    "startPath": "/",
+    "preconditions": [
+      "The application state was reset with the trusted fixture command.",
+      "The application runs at the exact pull request head SHA.",
+      "No admin identity or external credential is required."
+    ],
+    "fixtureValues": {
+      "validPromoCode": "FERN10"
+    },
+    "deferredClaims": [
+      {
+        "claimId": "resolved-from-admin-source-quote",
+        "claimSourceQuote": "Admins can create and expire promo codes from the admin page",
+        "reason": "Admin creation and expiry require an admin credential and remain unverified."
+      },
+      {
+        "claimId": "resolved-from-server-source-quote",
+        "claimSourceQuote": "Codes are validated server side against `lib/promo.ts`.",
+        "reason": "Server-side implementation provenance is not a browser-observable claim."
+      },
+      {
+        "claimId": "resolved-from-discount-types-source-quote",
+        "claimSourceQuote": "Percentage and fixed-amount codes are both supported.",
+        "reason": "Dual percentage and fixed-amount fixtures are outside this best-effort browser suite."
+      }
+    ],
+    "assertions": [
+      {
+        "kind": "dom",
+        "locator": {
+          "by": "test_id",
+          "value": "promo-applied"
+        },
+        "state": "visible"
+      },
+      {
+        "kind": "text",
+        "locator": {
+          "by": "test_id",
+          "value": "promo-applied"
+        },
+        "operator": "contains",
+        "expected": "FERN10"
+      },
+      {
+        "kind": "network",
+        "method": "POST",
+        "urlPattern": "/api/promo$",
+        "expectedStatus": 200
+      }
+    ]
+  },
+  {
+    "schemaVersion": 1,
+    "id": "intent-invalid-promo-preserves-input",
+    "title": "Invalid promo stays editable with inline error",
+    "kind": "intent",
+    "claimIds": [],
+    "claimSourceQuote": "Invalid codes show an inline error without clearing the field",
+    "goal": "Starting from a reset storefront, add one product, open the cart, enter a known-invalid promo code, and trigger validation. Verify an inline error appears and the entered code remains populated.",
+    "startPath": "/",
+    "preconditions": [
+      "The application state was reset with the trusted fixture command.",
+      "The application runs at the exact pull request head SHA.",
+      "The invalid code is a safe local fixture and requires no credential."
+    ],
+    "fixtureValues": {
+      "invalidPromoCode": "NOT-A-CODE"
+    },
+    "assertions": [
+      {
+        "kind": "dom",
+        "locator": {
+          "by": "test_id",
+          "value": "promo-error"
+        },
+        "state": "visible"
+      },
+      {
+        "kind": "text",
+        "locator": {
+          "by": "test_id",
+          "value": "promo-error"
+        },
+        "operator": "contains",
+        "expected": "isn’t valid"
+      },
+      {
+        "kind": "value",
+        "locator": {
+          "by": "test_id",
+          "value": "promo-code"
+        },
+        "operator": "equals",
+        "expected": "NOT-A-CODE"
+      },
+      {
+        "kind": "network",
+        "method": "POST",
+        "urlPattern": "/api/promo$",
+        "expectedStatus": 400
+      }
+    ]
+  },
+  {
+    "schemaVersion": 1,
     "id": "intent-checkout-application-timing",
     "title": "Cart remains undiscounted before order placement",
     "kind": "intent",
