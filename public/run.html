@@ -522,53 +522,31 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
   const $$ = s => Array.from(document.querySelectorAll(s));
 
   // run id from /runs/<id> or ?run=<id>
+  const PARAMS = new URLSearchParams(location.search);
+  const RECORDED_RUN = PARAMS.get('recorded');
   const RUN_ID = (location.pathname.match(/runs\/([^\/?#]+)/) || [])[1]
-              || new URLSearchParams(location.search).get('run')
-              || '12';
-
-
-  const DEMO = {
-    number: 12, branch: 'feature/todo-tags', duration: '1m 12s', cost: 'est. $0.03', prUrl: '#',
-    claims: [
-      { id:'C1', verdict:'p', text:'A tag can be attached while creating a todo', sub:'',
-        verdict_line:'<b>Verified.</b> Typed a tag into the new todo field and the todo was created carrying it. The POST body included the tag and the response echoed it back.',
-        dur:5, scene:'c1',
-        steps:[[0.2,'goto','opened <b>/</b>'],[1.0,'type','typed <b>Buy oat milk</b> into the new todo field'],[2.0,'type','typed tag <b>work</b>'],[2.8,'click','clicked <b>add</b>'],[3.6,'net','<b>POST /api/todos</b> body carried <b>tag: "work"</b>'],[4.4,'assert','new row rendered with the <b>work</b> chip']],
-        net:[['POST','/api/todos','201','142ms'],['GET','/api/todos','200','38ms']] },
-      { id:'C2', verdict:'p', text:'Tags render as colored chips on the todo row', sub:'',
-        verdict_line:'<b>Verified.</b> Every todo carrying a tag rendered a chip, and the same tag name produced the same color on each row.',
-        dur:3, scene:'c2',
-        steps:[[0.2,'goto','opened <b>/</b>'],[1.0,'assert','7 rows rendered, 7 chips present'],[1.9,'assert','<b>work</b> resolved to the same color on all 3 rows'],[2.6,'assert','contrast passes on the chip text']],
-        net:[['GET','/api/todos','200','41ms']] },
-      { id:'C3', verdict:'f', text:'Clicking a chip filters the list to that tag', sub:'rendered 7 rows, expected 3',
-        verdict_line:'<b>Does not match your description.</b> The click routes and the API returns the right three rows, but nothing re-renders. The list still shows all seven todos. This is not a crash, and the repository\'s existing checks did not report it. The description says the list filters, and it does not.',
-        dur:5, scene:'c3',
-        steps:[[0.3,'goto','opened <b>/</b>'],[1.4,'click','clicked the <b>work</b> chip on row 2'],[2.2,'route','url became <b>/?tag=work</b>'],[3.1,'net','<b>GET /api/todos?tag=work</b> returned <b>3</b> items'],[4.0,'assert','list still rendered <b>7</b> rows, expected 3',1]],
-        net:[['GET','/api/todos','200','39ms'],['GET','/api/todos?tag=work','200','44ms','mismatch']] },
-      { id:'C4', verdict:'u', text:'A tag keeps the same color across sessions', sub:'needs a signed-in session',
-        verdict_line:'<b>Could not verify.</b> This needs a second signed-in session and the dev box has no seeded user. I stopped rather than guess. Configure a test identity and re-run this one on its own.',
-        dur:2, scene:'c4',
-        steps:[[0.2,'goto','opened <b>/</b>'],[0.9,'assert','read the color for <b>work</b>'],[1.6,'blocked','needed a second session, no credentials available',1]],
-        net:[['GET','/api/todos','200','40ms']] },
-      { id:'C5', verdict:'p', text:'Clearing the filter brings every todo back', sub:'',
-        verdict_line:'<b>Verified.</b> You added this one in the contract edit. Filtered to <b>work</b>, cleared the filter, and all 7 rows came back with no extra network round trip.',
-        dur:4, scene:'c2',
-        steps:[[0.3,'goto','opened <b>/?tag=work</b>'],[1.2,'click','clicked <b>clear filter</b>'],[2.2,'route','url became <b>/</b>'],[3.2,'assert','list rendered all <b>7</b> rows']],
-        net:[['GET','/api/todos?tag=work','200','44ms'],['GET','/api/todos','200','37ms']] },
-      { id:'R1', verdict:'p', text:'Completing a todo still moves it to Done', sub:'',
-        verdict_line:'<b>No drift.</b> Ran the same script against a dev box built from <b>main</b> and one from this branch, three times each. Identical DOM and identical network sequence. This was not claimed in the description, I added it because the same reducer was touched.',
-        dur:4, scene:'c2',
-        steps:[[0.3,'goto','opened <b>/</b> on both boxes'],[1.2,'click','checked <b>Ship the tag PR</b> on both'],[2.3,'assert','both moved the row to Done'],[3.2,'diff','DOM and network identical across 3 replays']],
-        net:[['PATCH','/api/todos/1','200','51ms'],['PATCH','/api/todos/1','200','48ms']] }
-    ]
-  };
+              || PARAMS.get('run');
 
   let CLAIMS = [];
   let VIEW = {};
 
-  fetch('/api/runs/' + RUN_ID)
-    .then(r => r.json())
+  const source = RECORDED_RUN
+    ? fetch('/api/recorded-runs/' + encodeURIComponent(RECORDED_RUN)).then(r => {
+        if (!r.ok) throw new Error(r.status === 404
+          ? 'The recorded live-run snapshot has not been added yet.'
+          : 'Recorded run API returned ' + r.status + '.');
+        return r.json();
+      })
+    : RUN_ID
+      ? fetch('/api/runs/' + encodeURIComponent(RUN_ID)).then(r => {
+          if (!r.ok) throw new Error('Run API returned ' + r.status + '.');
+          return r.json();
+        })
+      : Promise.reject(new Error('No run ID was provided.'));
+
+  source
     .then(view => {
+      if (!view || !Array.isArray(view.claims)) throw new Error('Run payload is invalid.');
       VIEW = view;
       CLAIMS = view.claims || [];
       $('#loading').remove();
@@ -576,11 +554,19 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
       paintRunMeta();
     })
     .catch(err => {
-      console.warn('No API reachable, showing sample run.', err);
-      VIEW = DEMO; CLAIMS = DEMO.claims;
-      const l = $('#loading'); if (l) l.remove();
-      boot(); paintRunMeta();
+      const l = $('#loading');
+      if (l) {
+        l.innerHTML = '<div style="text-align:center"><b>Could not load this run.</b><br>' +
+          '<span style="display:block;margin-top:8px">' + escapeText(err.message) + '</span>' +
+          '<a href="/" style="display:inline-block;margin-top:18px;color:#0e694e">Return to Groundtruth</a></div>';
+      }
     });
+
+  function escapeText(value) {
+    const node = document.createElement('span');
+    node.textContent = value;
+    return node.innerHTML;
+  }
 
   function paintRunMeta(){
     const runid = $('.runid');

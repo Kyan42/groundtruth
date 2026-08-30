@@ -129,6 +129,7 @@ describe("buildDashboardPayload", () => {
     const payload = buildDashboardPayload(run);
 
     expect(payload.number).toBe(1);
+    expect(payload.status).toBe("complete");
     expect(payload.branch).toBe("feature");
     expect(payload.prUrl).toBe("https://github.com/Kyan42/groundtruth/pull/1");
     expect(payload.duration).toBe("5s");

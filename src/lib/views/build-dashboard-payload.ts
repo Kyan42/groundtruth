@@ -37,6 +37,8 @@ export type DashboardClaim = {
 };
 
 export type DashboardPayload = {
+  status: Run["status"];
+  blocker?: { code: string; message: string; retryable: boolean };
   number: number;
   branch: string;
   duration: string;
@@ -142,6 +144,8 @@ export function buildDashboardPayload(run: Run): DashboardPayload {
   }
 
   return {
+    status: run.status,
+    ...(run.blocker ? { blocker: run.blocker } : {}),
     number: run.pullRequest.number,
     branch: run.pullRequest.headRef,
     duration: runDuration(run, attempts),
@@ -155,7 +159,15 @@ function pickExecution(attempt: BrowserVerification | undefined): ExecutionResul
   if (!attempt) {
     return undefined;
   }
-  return attempt.executions?.head ?? attempt.execution;
+  const candidates = [
+    attempt.executions?.head,
+    attempt.execution,
+    attempt.executions?.base,
+  ];
+  return (
+    candidates.find((execution) => execution?.evidence.videoArtifactId) ??
+    candidates.find((execution) => execution !== undefined)
+  );
 }
 
 function videoUrl(execution: ExecutionResult | undefined): { videoUrl?: string } {

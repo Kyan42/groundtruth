@@ -96,6 +96,23 @@
   .tagline .gt{color:var(--forest);text-decoration:underline;text-underline-offset:5px;
     text-decoration-thickness:1px;text-decoration-color:rgba(14,105,78,.55)}
   .cta{display:flex;gap:10px;flex-wrap:wrap}
+  .run-form{display:flex;gap:10px;width:min(640px,100%);margin:30px auto 0}
+  .run-form input{flex:1;min-width:0;border:1px solid var(--line-2);border-radius:var(--r-pill);
+    background:rgba(255,255,255,.94);padding:12px 18px;font:15px var(--sans);color:var(--ink);
+    box-shadow:var(--shadow-card)}
+  .run-form .btn{justify-content:center}
+  .recorded-run{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:10px}
+  .recorded-run span{font-size:13px;color:var(--mid)}
+  .run-error{min-height:24px;margin-top:8px;text-align:center;color:var(--fail);font-size:14px}
+  .run-progress{position:fixed;inset:0;z-index:100;display:none;place-items:center;padding:24px;background:var(--sage)}
+  .run-progress.show{display:grid}
+  .progress-card{width:min(560px,100%);padding:38px;border:1px solid var(--line);border-radius:var(--r-card);
+    background:#fff;text-align:center;box-shadow:var(--shadow-float)}
+  .progress-card .gtm{width:48px;height:48px;margin-bottom:22px}
+  .progress-card h2{font-size:28px;margin-bottom:12px}
+  .progress-card p{color:var(--mid)}
+  .progress-actions{display:none;justify-content:center;gap:10px;margin-top:24px}
+  .progress-card.error .progress-actions{display:flex}
   .fade{opacity:0;animation:rise 1.6s ease forwards}
   @keyframes rise{to{opacity:1}}
   .d1{animation-delay:.15s}.d2{animation-delay:.15s}
@@ -229,6 +246,7 @@
     .hero{min-height:88vh}
     .hero-inner{padding:120px 0 12px}
   }
+  @media(max-width:620px){.run-form{flex-direction:column}.run-form .btn{width:100%}}
   @media(prefers-reduced-motion:reduce){
     *{animation:none!important;transition:none!important}
     .fade,.reveal{opacity:1;transform:none}
@@ -252,7 +270,7 @@
       <a href="#how">How it works</a>
       <a href="#why">Why now</a>
     </nav>
-    <a class="btn btn-primary" href="/runs/demo">See our demo</a>
+    <a class="btn btn-primary" href="/runs/recorded-fernway-pr4?recorded=fernway-pr4-v1">Load recorded live run</a>
   </div>
 </header>
 
@@ -268,7 +286,17 @@
           <svg class="gtm" aria-hidden="true"><use href="#gt-mark"/></svg>
           <span class="word">Groundtruth</span>
         </div>
-        <p class="tagline fade d2">Your PR says it works.<br>We check it against the <a class="gt" href="/runs/demo">ground truth</a>.</p>
+        <p class="tagline fade d2">Your PR says it works.<br>We check it against the <a class="gt" href="/runs/recorded-fernway-pr4?recorded=fernway-pr4-v1">ground truth</a>.</p>
+        <form class="run-form fade d2" id="run-form">
+          <input id="pr-url" type="url" required autocomplete="url" aria-label="Public pull request URL"
+            placeholder="https://github.com/owner/repo/pull/123">
+          <button class="btn btn-primary" type="submit">Run live</button>
+        </form>
+        <div class="recorded-run fade d2">
+          <a class="btn" href="/runs/recorded-fernway-pr4?recorded=fernway-pr4-v1">Load recorded live run</a>
+          <span>Sanitized snapshot from a completed run</span>
+        </div>
+        <p class="run-error" id="run-error" role="alert"></p>
       </div>
     </div>
   </div>
@@ -468,7 +496,7 @@
         <h2>We check what you meant to change.<br>And what you didn't.</h2>
         <p>One YAML block. The first verdict lands on your next pull request.</p>
         <div class="cta" style="justify-content:center">
-          <a class="btn btn-primary" href="/runs/demo">See our demo</a>
+          <a class="btn btn-primary" href="/runs/recorded-fernway-pr4?recorded=fernway-pr4-v1">Load recorded live run</a>
           <a class="btn" href="#moment">See the check again</a>
         </div>
       </div>
@@ -487,10 +515,172 @@
 <!-- hero hotspots + tooltips -->
 <div id="hotspots"></div>
 
+<div class="run-progress" id="run-progress" role="status" aria-live="polite">
+  <div class="progress-card" id="progress-card">
+    <svg class="gtm" aria-hidden="true"><use href="#gt-mark"/></svg>
+    <h2 id="progress-title">Creating verification run</h2>
+    <p id="progress-detail">Reading the pull request and extracting its intent contract.</p>
+    <div class="progress-actions">
+      <button class="btn btn-primary" type="button" id="progress-retry">Retry</button>
+      <a class="btn" id="progress-dashboard" href="/">Open dashboard</a>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
   'use strict';
   const $ = s => document.querySelector(s);
+
+  const runForm = $('#run-form');
+  const runError = $('#run-error');
+  const progress = $('#run-progress');
+  const progressCard = $('#progress-card');
+  const progressTitle = $('#progress-title');
+  const progressDetail = $('#progress-detail');
+  const progressRetry = $('#progress-retry');
+  const progressDashboard = $('#progress-dashboard');
+  let activeRunId = null;
+  let polling = false;
+
+  runForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    runError.textContent = '';
+    const button = runForm.querySelector('button');
+    button.disabled = true;
+    button.textContent = 'Creating run...';
+    try {
+      const response = await fetch('/api/runs', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({prUrl:$('#pr-url').value})
+      });
+      const view = await readResponse(response);
+      activeRunId = view.run && view.run.id;
+      if (!activeRunId) throw new Error('The run was created without an ID.');
+      sessionStorage.setItem(stateKey(activeRunId), JSON.stringify({
+        approved:false, intentStarted:false, regressionStarted:false
+      }));
+      progress.classList.add('show');
+      await orchestrate(activeRunId, view.run.status);
+    } catch (error) {
+      runError.textContent = error instanceof Error ? error.message : 'Could not create the run.';
+      button.disabled = false;
+      button.textContent = 'Verify PR';
+    }
+  });
+
+  progressRetry.addEventListener('click', () => {
+    if (!activeRunId || polling) return;
+    progressCard.classList.remove('error');
+    orchestrate(activeRunId);
+  });
+
+  async function orchestrate(runId, initialStatus) {
+    if (polling) return;
+    polling = true;
+    progressDashboard.href = '/runs/' + encodeURIComponent(runId);
+    let status = initialStatus;
+    try {
+      while (true) {
+        const state = loadState(runId);
+        if (!status) {
+          const view = await readResponse(await fetch('/api/runs/' + encodeURIComponent(runId), {cache:'no-store'}));
+          status = view.status;
+          if (!status) throw new Error('The run response did not include a status.');
+          if (view.blocker && ['setup_required','blocked','failed'].includes(status)) {
+            throw new Error(view.blocker.message);
+          }
+        }
+
+        if (status === 'awaiting_contract_approval') {
+          setProgress('Intent contract extracted — approving test plan',
+            'The demo flow approves the extracted contract transparently before browser verification.');
+          status = await act(runId, 'approve_intent', 'approved', state);
+        } else if (status === 'contract_approved') {
+          setProgress('Starting intent verification',
+            'Running the configured intent missions in shared browser environments.');
+          status = await act(runId, 'start_verification', 'intentStarted', state);
+        } else if (status === 'complete' && state.intentStarted && !state.regressionStarted) {
+          setProgress('Intent suite complete — starting regression',
+            'Product assertion findings are preserved while regression verification continues.');
+          status = await act(runId, 'start_regression', 'regressionStarted', state);
+        } else if (status === 'complete' && state.regressionStarted) {
+          setProgress('Verification complete', 'Opening the recorded results.');
+          location.assign('/runs/' + encodeURIComponent(runId));
+          return;
+        } else if (['setup_required','blocked','failed'].includes(status)) {
+          const view = await readResponse(await fetch('/api/runs/' + encodeURIComponent(runId), {cache:'no-store'}));
+          throw new Error(view.blocker && view.blocker.message || 'Verification stopped because its environment failed.');
+        } else {
+          setProgress(
+            status === 'verifying'
+              ? (state.regressionStarted ? 'Running regression verification' : 'Running intent verification')
+              : status === 'analyzing_intent'
+                ? 'Extracting the intent contract'
+                : 'Preparing the verification run',
+            'This phase reflects the current backend run state.'
+          );
+        }
+        status = null;
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    } catch (error) {
+      showProgressError(error instanceof Error ? error.message : 'Verification stopped unexpectedly.');
+    } finally {
+      polling = false;
+    }
+  }
+
+  async function act(runId, action, flag, state) {
+    if (state[flag]) return null;
+    state[flag] = true;
+    saveState(runId, state);
+    try {
+      const view = await readResponse(await fetch('/api/runs/' + encodeURIComponent(runId) + '/actions', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action})
+      }));
+      return view.run && view.run.status;
+    } catch (error) {
+      state[flag] = false;
+      saveState(runId, state);
+      throw error;
+    }
+  }
+
+  function setProgress(title, detail) {
+    progressTitle.textContent = title;
+    progressDetail.textContent = detail;
+  }
+
+  function showProgressError(message) {
+    progressCard.classList.add('error');
+    setProgress('Verification stopped', message);
+  }
+
+  async function readResponse(response) {
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(payload && payload.error && payload.error.message || 'The verification API request failed.');
+    }
+    return payload;
+  }
+
+  function stateKey(runId) { return 'groundtruth-orchestration:' + runId; }
+  function loadState(runId) {
+    try {
+      return JSON.parse(sessionStorage.getItem(stateKey(runId))) || {
+        approved:false, intentStarted:false, regressionStarted:false
+      };
+    } catch {
+      return {approved:false, intentStarted:false, regressionStarted:false};
+    }
+  }
+  function saveState(runId, state) {
+    sessionStorage.setItem(stateKey(runId), JSON.stringify(state));
+  }
 
   /* ---------- nav: normal -> floating pill ---------- */
   const nav = $('#nav');
