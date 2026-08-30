@@ -531,6 +531,8 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
 
   let CLAIMS = [];
   let VIEW = {};
+  let applyViewHook = null;
+  const PENDING_STATUSES = ['creating','analyzing_intent','awaiting_contract_approval','contract_approved','verifying'];
 
   const source = RECORDED_RUN
     ? fetch('/api/recorded-runs/' + encodeURIComponent(RECORDED_RUN)).then(r => {
@@ -554,6 +556,7 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
       $('#loading').remove();
       boot();
       paintRunMeta();
+      watchLiveRun(view);
     })
     .catch(err => {
       const l = $('#loading');
@@ -568,6 +571,29 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
     const node = document.createElement('span');
     node.textContent = value;
     return node.innerHTML;
+  }
+
+  // Live runs land here while the backend is still working; keep the honest
+  // pending view fresh until the run reaches a settled status.
+  function watchLiveRun(initialView){
+    if (RECORDED_RUN || !RUN_ID || !PENDING_STATUSES.includes(initialView.status)) return;
+    let lastPayload = JSON.stringify(initialView);
+    const timer = setInterval(async () => {
+      try {
+        const response = await fetch('/api/runs/' + encodeURIComponent(RUN_ID), {cache:'no-store'});
+        if (!response.ok) return;
+        const next = await response.json();
+        if (!next || !Array.isArray(next.claims)) return;
+        const payload = JSON.stringify(next);
+        if (payload !== lastPayload){
+          lastPayload = payload;
+          VIEW = next;
+          if (applyViewHook) applyViewHook(next);
+          paintRunMeta();
+        }
+        if (!PENDING_STATUSES.includes(next.status)) clearInterval(timer);
+      } catch {}
+    }, 2500);
   }
 
   function paintRunMeta(){
@@ -651,12 +677,13 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
     $('#verdictline').innerHTML = cur.verdict_line;
     $('#stepcount').textContent = cur.steps.length;
     $('#netcount').textContent = cur.net.length;
+    lastStepTs = -1; lastStepLabel = '';
 
     const st = $('#steps'); st.innerHTML = '';
     cur.steps.forEach(s => {
       const b = document.createElement('button');
       b.className = 'step' + (s[3] ? ' bad' : '');
-      b.innerHTML = '<span class="ts">0:0'+Math.floor(s[0])+'</span><span class="kind">'+s[1]+'</span><span class="txt">'+s[2]+'</span>';
+      b.innerHTML = '<span class="ts">'+fmt(s[0])+'</span><span class="kind">'+s[1]+'</span><span class="txt">'+s[2]+'</span>';
       b.onclick = () => seek(s[0]);
       b.dataset.t = s[0];
       st.appendChild(b);
@@ -672,10 +699,11 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
 
     $$('.mk').forEach(m => m.remove());
     const track = $('#track');
+    const dur = effectiveDur();
     cur.steps.forEach(s => {
       const m = document.createElement('div');
       m.className = 'mk' + (s[3] ? ' f' : '');
-      m.style.left = (s[0]/cur.dur*100)+'%';
+      m.style.left = Math.min(100, s[0]/dur*100)+'%';
       track.appendChild(m);
     });
   }
@@ -706,9 +734,31 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
 
   /* ---------- player ---------- */
   let t = 0, playing = false, raf = null, last = 0, firedClick = -1;
+  let videoActive = false, vidRaf = null, lastStepTs = -1, lastStepLabel = '';
   const videoObjectUrls = new Map();
   const videoLoads = new Map();
-  function fmt(x){ return '0:0' + Math.min(9, Math.floor(x)); }
+  function fmt(x){
+    const s = Math.max(0, Math.floor(x));
+    return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+  }
+
+  /* The recording is the source of truth for the video timeline; cur.dur is
+     the wall-clock execution span, which includes time the recording never saw. */
+  function effectiveDur(){
+    const vid = $('#stage .recording');
+    if (cur.videoUrl && vid && isFinite(vid.duration) && vid.duration > 0) return vid.duration;
+    return cur.dur;
+  }
+
+  /* While the recording plays, drive the caption/progress UI from
+     requestAnimationFrame instead of the ~4Hz timeupdate event. */
+  function vidTick(){
+    const vid = $('#stage .recording');
+    if (!vid || vid.paused){ vidRaf = null; return; }
+    t = vid.currentTime;
+    paintScene(t);
+    vidRaf = requestAnimationFrame(vidTick);
+  }
 
   function lerpCursor(time){
     const kf = SCENES[cur.scene] || SCENES.c2;
@@ -725,11 +775,15 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
     if (cur.videoUrl){
       let label = 'ready', ts = 0;
       cur.steps.forEach(s => { if (time >= s[0]) { label = s[2].replace(/<[^>]+>/g,''); ts = s[0]; } });
-      $('#captext').textContent = label;
-      $('#captime').textContent = fmt(ts);
-      $$('.step').forEach(el => el.setAttribute('aria-current', String(+el.dataset.t === ts && time > 0)));
-      $('#fill').style.width = (time/cur.dur*100)+'%';
-      $('#time').textContent = fmt(time) + ' / ' + fmt(cur.dur);
+      if (ts !== lastStepTs || label !== lastStepLabel){
+        lastStepTs = ts; lastStepLabel = label;
+        $('#captext').textContent = label;
+        $('#captime').textContent = fmt(ts);
+        $$('.step').forEach(el => el.setAttribute('aria-current', String(+el.dataset.t === ts && time > 0)));
+      }
+      const dur = effectiveDur();
+      $('#fill').style.width = Math.min(100, time/dur*100)+'%';
+      $('#time').textContent = fmt(time) + ' / ' + fmt(dur);
       return;
     }
     lerpCursor(time);
@@ -763,7 +817,7 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
     r.classList.remove('go'); void r.offsetWidth; r.classList.add('go');
   }
   function seek(x){
-    t = Math.max(0, Math.min(cur.dur, x));
+    t = Math.max(0, Math.min(effectiveDur(), x));
     firedClick = t - 0.01;
     const vid = $('#stage .recording');
     if (cur.videoUrl && vid) vid.currentTime = t;
@@ -780,8 +834,8 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
   $('#play').onclick = () => {
     const vid = $('#stage .recording');
     if (cur.videoUrl && vid && !$('#play').disabled){
-      if (vid.paused){ vid.play(); $('#playicon').textContent = '❚❚'; }
-      else { vid.pause(); $('#playicon').textContent = '▶'; }
+      if (vid.paused) vid.play();
+      else vid.pause();
       return;
     }
     if (playing){ playing = false; $('#playicon').textContent = '▶'; cancelAnimationFrame(raf); return; }
@@ -790,7 +844,7 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
   };
   $('#track').onclick = (e) => {
     const r = e.currentTarget.getBoundingClientRect();
-    seek((e.clientX - r.left)/r.width * cur.dur);
+    seek((e.clientX - r.left)/r.width * effectiveDur());
   };
 
   cur = CLAIMS.find(c => c.verdict === 'f') || CLAIMS[0];
@@ -834,7 +888,25 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
         vid.className = 'recording';
         vid.preload = 'auto';
         vid.playsInline = true;
+        /* timeupdate stays as the fallback painter for throttled/hidden tabs;
+           while visible, vidTick repaints every animation frame instead. */
         vid.addEventListener('timeupdate', () => { t = vid.currentTime; paintScene(t); });
+        vid.addEventListener('play', () => {
+          videoActive = true;
+          $('#playicon').textContent = '❚❚';
+          cancelAnimationFrame(vidRaf);
+          vidRaf = requestAnimationFrame(vidTick);
+        });
+        vid.addEventListener('pause', () => {
+          videoActive = false;
+          if (!vid.ended) $('#playicon').textContent = '▶';
+          if (!vid.hidden){ t = vid.currentTime; paintScene(t); }
+        });
+        vid.addEventListener('ended', () => {
+          videoActive = false;
+          $('#playicon').textContent = '↻';
+          if (!vid.hidden){ t = vid.currentTime; paintScene(t); }
+        });
         stage.insertBefore(vid, stage.firstChild);
       }
       vid.pause();
@@ -850,6 +922,8 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
           const state = stage.querySelector('.evidence-state');
           if (state) state.hidden = true;
           $('#play').disabled = false;
+          renderDetail(); /* re-place track markers against the real video duration */
+          paintScene(t);
         };
         const failed = () => {
           if (vid.dataset.artifactUrl !== artifactUrl) return;
@@ -890,6 +964,13 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
   }
 
   renderAll();
+
+  applyViewHook = view => {
+    CLAIMS = view.claims || [];
+    const prevId = cur && cur.id;
+    cur = CLAIMS.find(c => c.id === prevId) || CLAIMS.find(c => c.verdict === 'f') || CLAIMS[0];
+    renderAll();
+  };
 
   window.addEventListener('beforeunload', () => {
     videoObjectUrls.forEach(objectUrl => URL.revokeObjectURL(objectUrl));
@@ -966,7 +1047,8 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
 
     let last = 0, raf = null;
     function loop(now){
-      if (now - last > 33){ last = now; draw(now); }
+      /* hold the ambient animation while a recording or simulation is playing */
+      if (now - last > 33 && !videoActive && !playing){ last = now; draw(now); }
       raf = requestAnimationFrame(loop);
     }
 
