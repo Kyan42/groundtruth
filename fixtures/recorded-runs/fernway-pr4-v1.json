@@ -1,0 +1,556 @@
+{
+  "schemaVersion": 1,
+  "recorded": {
+    "label": "Recorded from a real Runloop execution",
+    "sourceRunId": "2d54ae79-6064-45ef-bbce-011fad90e56e",
+    "exportedAt": "2026-08-30T00:24:15.2720219Z"
+  },
+  "status": "complete",
+  "number": 4,
+  "branch": "feature/promo-codes",
+  "duration": "25s",
+  "cost": "n/a",
+  "prUrl": "https://github.com/Kyan42/fernway/pull/4",
+  "claims": [
+    {
+      "id": "C1",
+      "verdict": "p",
+      "text": "Shoppers can enter a promo code and see its discount applied.",
+      "sub": "",
+      "verdict_line": "<b>Verified.</b> The recorded Runloop browser execution satisfied every configured assertion.",
+      "dur": 3.5,
+      "videoUrl": "/api/artifacts/obj_34FpOUSI0fyTrVWitPwuG",
+      "steps": [
+        [
+          0.2,
+          "goto",
+          "Navigate to /"
+        ],
+        [
+          1.7,
+          "click",
+          "click"
+        ],
+        [
+          2.1,
+          "assert",
+          "wait_for"
+        ],
+        [
+          2.3,
+          "click",
+          "click"
+        ],
+        [
+          2.7,
+          "assert",
+          "wait_for"
+        ],
+        [
+          2.9,
+          "type",
+          "fill"
+        ],
+        [
+          3,
+          "click",
+          "press"
+        ]
+      ],
+      "net": [
+        [
+          "GET",
+          "/",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/css/app/layout.css",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/webpack.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/app/layout.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/app-pages-internals.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/app/page.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/main-app.js",
+          "200",
+          ""
+        ],
+        [
+          "POST",
+          "/api/cart",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/cart",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/app/cart/page.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/api/cart",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/api/cart",
+          "200",
+          ""
+        ],
+        [
+          "POST",
+          "/api/promo",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/api/cart",
+          "200",
+          ""
+        ]
+      ]
+    },
+    {
+      "id": "C2",
+      "verdict": "p",
+      "text": "Invalid promo codes display an inline error and remain in the field.",
+      "sub": "",
+      "verdict_line": "<b>Verified.</b> The recorded Runloop browser execution satisfied every configured assertion.",
+      "dur": 2.6,
+      "videoUrl": "/api/artifacts/obj_34FpR9lk0GbYJ4gyI9Fqm",
+      "steps": [
+        [
+          0.2,
+          "goto",
+          "Navigate to /"
+        ],
+        [
+          1.4,
+          "click",
+          "click"
+        ],
+        [
+          1.7,
+          "click",
+          "click"
+        ],
+        [
+          2.1,
+          "type",
+          "fill"
+        ],
+        [
+          2.3,
+          "click",
+          "press"
+        ]
+      ],
+      "net": [
+        [
+          "GET",
+          "/",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/css/app/layout.css",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/webpack.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/app-pages-internals.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/app/layout.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/app/page.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/main-app.js",
+          "200",
+          ""
+        ],
+        [
+          "POST",
+          "/api/cart",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/cart",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/app/cart/page.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/api/cart",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/api/cart",
+          "200",
+          ""
+        ],
+        [
+          "POST",
+          "/api/promo",
+          "400",
+          "",
+          "mismatch"
+        ]
+      ]
+    },
+    {
+      "id": "C3",
+      "verdict": "f",
+      "text": "The cart total remains undiscounted until the order is placed.",
+      "sub": "Mission assertion 1",
+      "verdict_line": "<b>Does not match your description.</b> Mission assertion 1",
+      "dur": 4.1,
+      "videoUrl": "/api/artifacts/obj_34FpShvQR29yVEzMwnOq0",
+      "steps": [
+        [
+          0.2,
+          "goto",
+          "Navigate to /"
+        ],
+        [
+          1.5,
+          "click",
+          "click"
+        ],
+        [
+          2,
+          "goto",
+          "Navigate to /cart"
+        ],
+        [
+          3.5,
+          "assert",
+          "wait_for"
+        ],
+        [
+          3.6,
+          "type",
+          "fill"
+        ],
+        [
+          3.7,
+          "click",
+          "press"
+        ]
+      ],
+      "net": [
+        [
+          "GET",
+          "/",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/css/app/layout.css",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/webpack.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/app/page.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/app/layout.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/app-pages-internals.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/main-app.js",
+          "200",
+          ""
+        ],
+        [
+          "POST",
+          "/api/cart",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/cart",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/css/app/layout.css",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/webpack.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/app/cart/page.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/app/layout.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/app-pages-internals.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/main-app.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/api/cart",
+          "200",
+          ""
+        ],
+        [
+          "POST",
+          "/api/promo",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/api/cart",
+          "200",
+          ""
+        ]
+      ]
+    },
+    {
+      "id": "R1",
+      "verdict": "p",
+      "text": "Existing cart quantity and subtotal remain stable",
+      "sub": "",
+      "verdict_line": "<b>No drift.</b> Head preserved every configured baseline behavior and exact observation.",
+      "dur": 10.4,
+      "videoUrl": "/api/artifacts/obj_34FpsqOBF6jgmEu334jgE",
+      "steps": [
+        [
+          0.2,
+          "goto",
+          "Navigate to /"
+        ],
+        [
+          7.1,
+          "click",
+          "click"
+        ],
+        [
+          7.8,
+          "click",
+          "click"
+        ],
+        [
+          8.4,
+          "assert",
+          "wait_for"
+        ],
+        [
+          9.3,
+          "click",
+          "click"
+        ]
+      ],
+      "net": [
+        [
+          "GET",
+          "/",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/css/app/layout.css",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/webpack.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/app/page.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/app/layout.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/app-pages-internals.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/main-app.js",
+          "200",
+          ""
+        ],
+        [
+          "POST",
+          "/api/cart",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/webpack/d05a5637cb6ce6e1.webpack.hot-update.json",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/webpack/webpack.d05a5637cb6ce6e1.hot-update.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/cart",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/webpack/20214cf88ce11294.webpack.hot-update.json",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/webpack/webpack.20214cf88ce11294.hot-update.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/_next/static/chunks/app/cart/page.js",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/api/cart",
+          "200",
+          ""
+        ],
+        [
+          "GET",
+          "/api/cart",
+          "200",
+          ""
+        ],
+        [
+          "PATCH",
+          "/api/cart",
+          "200",
+          ""
+        ]
+      ]
+    }
+  ]
+}
