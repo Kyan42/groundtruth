@@ -36,6 +36,12 @@ export const AssertionSchema = z.discriminatedUnion("kind", [
     expected: z.string().optional(),
   }),
   AssertionMetadataSchema.extend({
+    kind: z.literal("value"),
+    locator: LocatorSchema,
+    operator: z.enum(["equals", "contains"]),
+    expected: z.string(),
+  }),
+  AssertionMetadataSchema.extend({
     kind: z.literal("network"),
     method: z.string().min(1),
     urlPattern: z.string().min(1),

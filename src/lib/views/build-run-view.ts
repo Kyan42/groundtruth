@@ -9,7 +9,11 @@ export async function buildRunView(run: Run): Promise<RunView> {
     run.pullRequest.headSha,
   );
   const setupBlockers = appConfiguration.ready ? [] : appConfiguration.blockers;
-  const configuredMission = appConfiguration.ready ? appConfiguration.mission : undefined;
+  const configuredMissions = appConfiguration.ready
+    ? appConfiguration.missions
+        .filter((mission) => mission.kind === "intent")
+        .map((mission) => resolveCoverageMission(mission, run))
+    : [];
   const attempts = [
     ...(run.browserVerificationHistory ?? []),
     ...(run.browserVerification ? [run.browserVerification] : []),
@@ -29,10 +33,22 @@ export async function buildRunView(run: Run): Promise<RunView> {
     Boolean(run.intentSpec);
   const approved = Boolean(run.intentApproval);
   const browser = run.browserVerification;
-  const completedIntentMission = [...attempts]
-    .reverse()
-    .find((attempt) => attempt.attemptId && attempt.mission?.kind === "intent")?.mission;
-  const coverageMission = completedIntentMission ?? configuredMission;
+  const completedIntentMissions = attempts.flatMap((attempt) =>
+    attempt.attemptId && attempt.mission?.kind === "intent" ? [attempt.mission] : [],
+  );
+  const coverageMissions = [
+    ...new Map(
+      [...configuredMissions, ...completedIntentMissions].map((mission) => [mission.id, mission]),
+    ).values(),
+  ];
+  const displayedMissions = [
+    ...new Map(
+      [
+        ...configuredMissions,
+        ...attempts.flatMap((attempt) => (attempt.mission ? [attempt.mission] : [])),
+      ].map((mission) => [mission.id, mission]),
+    ).values(),
+  ];
   const journeyComplete = Boolean(browser?.journey);
   const executionComplete = Boolean(browser?.execution || browser?.comparison);
   const executionStatus = browser?.execution?.status;
@@ -79,7 +95,7 @@ export async function buildRunView(run: Run): Promise<RunView> {
             ? "Browser replay was blocked before it could produce a verdict."
             : downstreamDetail);
   const results = buildAllResults(attempts);
-  const claimCoverage = buildClaimCoverage(run, coverageMission);
+  const claimCoverage = buildClaimCoverage(run, coverageMissions);
   const validClaimIds = new Set(run.intentSpec?.claims.map((claim) => claim.id) ?? []);
   const selectedClaimId =
     results.intent.find(
@@ -90,10 +106,11 @@ export async function buildRunView(run: Run): Promise<RunView> {
       ? claimCoverage.find(
           (coverage) =>
             coverage.status === "covered" &&
-            coverage.missionId === coverageMission?.id &&
             validClaimIds.has(coverage.claimId),
         )?.claimId
-      : coverageMission?.claimIds.find((claimId) => validClaimIds.has(claimId))) ??
+      : coverageMissions
+          .flatMap((mission) => mission.claimIds)
+          .find((claimId) => validClaimIds.has(claimId))) ??
     run.intentSpec?.claims[0]?.id;
 
   return {
@@ -161,7 +178,7 @@ export async function buildRunView(run: Run): Promise<RunView> {
       selectedClaimId,
       claimCoverage,
     },
-    missions: attempts.flatMap((attempt) => (attempt.mission ? [attempt.mission] : [])),
+    missions: displayedMissions,
     journey: browser?.journey,
     environments: browser?.environments ?? [],
     results,
@@ -260,20 +277,34 @@ function currentRecordings(browser: Run["browserVerification"]): RunView["record
 
 export function buildClaimCoverage(
   run: Run,
-  mission: TestMission | undefined,
+  missionOrMissions: TestMission | TestMission[] | undefined,
 ): RunView["contract"]["claimCoverage"] {
-  const covered = new Set(mission?.claimIds ?? []);
+  const missions = Array.isArray(missionOrMissions)
+    ? missionOrMissions
+    : missionOrMissions
+      ? [missionOrMissions]
+      : [];
+  const coveredByClaim = new Map<string, string>();
+  for (const mission of missions) {
+    for (const claimId of mission.claimIds) {
+      coveredByClaim.set(claimId, mission.id);
+    }
+  }
   const deferred = new Map(
-    mission?.deferredClaims?.map((claim) => [claim.claimId, claim.reason]) ?? [],
+    missions.flatMap(
+      (mission) =>
+        mission.deferredClaims?.map((claim) => [claim.claimId, claim.reason] as const) ?? [],
+    ),
   );
   return (run.intentSpec?.claims ?? [])
     .filter((claim) => claim.priority === "must")
     .map((claim) => {
-      if (covered.has(claim.id)) {
+      const missionId = coveredByClaim.get(claim.id);
+      if (missionId) {
         return {
           claimId: claim.id,
           status: "covered" as const,
-          missionId: mission?.id,
+          missionId,
         };
       }
       const reason = deferred.get(claim.id);
@@ -289,4 +320,23 @@ export function buildClaimCoverage(
         status: "uncovered" as const,
       };
     });
+}
+
+function resolveCoverageMission(mission: TestMission, run: Run): TestMission {
+  const claims = run.intentSpec?.claims ?? [];
+  const claimMatch = mission.claimSourceQuote
+    ? claims.filter((claim) => claim.sourceQuote === mission.claimSourceQuote)
+    : [];
+  const deferredClaims = mission.deferredClaims?.map((deferred) => {
+    if (!deferred.claimSourceQuote) {
+      return deferred;
+    }
+    const matches = claims.filter((claim) => claim.sourceQuote === deferred.claimSourceQuote);
+    return matches.length === 1 ? { ...deferred, claimId: matches[0].id } : deferred;
+  });
+  return {
+    ...mission,
+    claimIds: claimMatch.length === 1 ? [claimMatch[0].id] : mission.claimIds,
+    deferredClaims,
+  };
 }

@@ -87,6 +87,407 @@ const RunnerOutputSchema = z.object({
 const JourneyDraftSchema = ExecutableJourneySchema.omit({ producer: true });
 
 type ProgressCallback = (state: BrowserVerification) => Promise<void>;
+type SuiteProgressCallback = (
+  state: BrowserVerification,
+  completedAttempts: BrowserVerification[],
+) => Promise<void>;
+
+export async function executeIntentVerificationSuite(
+  run: Run,
+  configuration: Extract<AppConfiguration, { ready: true }>,
+  selectedMissions: TestMission[],
+  onProgress: SuiteProgressCallback,
+): Promise<BrowserVerification[]> {
+  if (!run.coordinationAxonId || !run.intentSpec || !run.intentApproval) {
+    throw new GroundtruthError(
+      "browser_prerequisites_missing",
+      "An approved intent and coordination Axon are required for browser verification.",
+      409,
+    );
+  }
+  if (selectedMissions.length === 0 || selectedMissions.some((mission) => mission.kind !== "intent")) {
+    throw new GroundtruthError(
+      "intent_suite_empty",
+      "The intent verification suite requires at least one trusted intent mission.",
+      422,
+    );
+  }
+
+  const missions = selectedMissions.map((mission) => resolveMission(mission, run));
+  const axonId = run.coordinationAxonId;
+  const attempts: BrowserVerification[] = [];
+  let state = newIntentAttempt(missions[0]);
+  let baseBox: Devbox | undefined;
+  let headBox: Devbox | undefined;
+  let browserBox: Devbox | undefined;
+  let browserAgent: BrowserVerification["browserAgent"];
+  let environments: BrowserEnvironment[] = [];
+
+  const emit = async (next: BrowserVerification): Promise<void> => {
+    state = BrowserVerificationSchema.parse(next);
+    await onProgress(state, attempts);
+  };
+  const recordInfrastructureFailure = async (
+    mission: TestMission,
+    error: unknown,
+    current?: BrowserVerification,
+  ): Promise<BrowserVerification> => {
+    const attemptId = current?.attemptId ?? randomUUID();
+    const executionId = randomUUID();
+    const execution = failedExecution(mission.id, attemptId, executionId, "head", error);
+    const blocker = browserBlocker(error);
+    const blocked = BrowserVerificationSchema.parse({
+      ...current,
+      attemptId,
+      status: "blocked",
+      mission,
+      environments: current?.environments ?? environments,
+      execution,
+      actions: current?.actions ?? [],
+      network: current?.network ?? [],
+      browserAgent: current?.browserAgent ?? browserAgent,
+      blocker,
+    });
+    await saveMission(axonId, attemptId, run.id, mission, new Date().toISOString()).catch(
+      (saveError: unknown) => console.error("Failed to persist blocked intent mission.", saveError),
+    );
+    await saveExecution(axonId, executionId, execution, execution.endedAt).catch(
+      (saveError: unknown) => console.error("Failed to persist blocked intent execution.", saveError),
+    );
+    return blocked;
+  };
+
+  try {
+    if (configuration.profile.auth.mode !== "none") {
+      throw new GroundtruthError(
+        "browser_auth_mode_unsupported",
+        "This prototype does not yet support storage-state authentication.",
+        422,
+      );
+    }
+    await ensureBrowserTables(axonId);
+
+    const firstAttemptId = state.attemptId!;
+    baseBox = await createApplicationEnvironment(
+      run,
+      configuration.profile,
+      "base",
+      run.pullRequest.baseSha,
+    );
+    const baseUrl = await baseBox.getTunnelUrl(configuration.profile.workspace.port);
+    const baseEnvironment: BrowserEnvironment = {
+      role: "base",
+      devboxId: baseBox.id,
+      status: "running",
+      exactSha: run.pullRequest.baseSha,
+      url: baseUrl,
+      detail: "Shared intent-suite application environment at the exact base SHA.",
+    };
+    environments = [baseEnvironment];
+    await saveEnvironment(axonId, firstAttemptId, run.id, baseEnvironment, new Date().toISOString());
+    await emit({ ...state, environments });
+
+    headBox = await createApplicationEnvironment(
+      run,
+      configuration.profile,
+      "head",
+      run.pullRequest.headSha,
+    );
+    const headUrl = await headBox.getTunnelUrl(configuration.profile.workspace.port);
+    const headEnvironment: BrowserEnvironment = {
+      role: "head",
+      devboxId: headBox.id,
+      status: "running",
+      exactSha: run.pullRequest.headSha,
+      url: headUrl,
+      detail: "Shared intent-suite application environment at the exact pull request head SHA.",
+    };
+    environments = [...environments, headEnvironment];
+    await saveEnvironment(axonId, firstAttemptId, run.id, headEnvironment, new Date().toISOString());
+    await emit({ ...state, environments });
+
+    const gateway = await findOpenAiGatewayBinding();
+    browserBox = await createBrowserEnvironment(run, gateway);
+    const codexVersion = await executeText(browserBox, "codex --version");
+    const browserEnvironment: BrowserEnvironment = {
+      role: "browser",
+      devboxId: browserBox.id,
+      status: "running",
+      detail: "Shared intent-suite Codex discovery and mechanical Playwright environment.",
+    };
+    environments = [...environments, browserEnvironment];
+    browserAgent = {
+      devboxId: browserBox.id,
+      agentName: "codex",
+      transport: "agent_mount",
+      version: codexVersion,
+    };
+
+    for (let index = 0; index < missions.length; index += 1) {
+      const mission = missions[index];
+      state = index === 0 ? { ...state, mission } : newIntentAttempt(mission);
+      const attemptId = state.attemptId!;
+      if (index > 0) {
+        await Promise.all(
+          environments.map((environment) =>
+            saveEnvironment(axonId, attemptId, run.id, environment, new Date().toISOString()),
+          ),
+        );
+      } else {
+        await saveEnvironment(
+          axonId,
+          attemptId,
+          run.id,
+          browserEnvironment,
+          new Date().toISOString(),
+        );
+      }
+      state = BrowserVerificationSchema.parse({
+        ...state,
+        status: "discovering",
+        environments,
+        browserAgent,
+      });
+      await saveMission(axonId, attemptId, run.id, mission, new Date().toISOString());
+      await publishRunEvent(axonId, "mission.loaded", "EXTERNAL_EVENT", {
+        runId: run.id,
+        attemptId,
+        missionId: mission.id,
+        kind: mission.kind,
+        suiteIndex: index,
+        suiteSize: missions.length,
+      });
+      await emit(state);
+
+      try {
+        await resetFixtures(headBox, configuration.profile, "head");
+        await publishRunEvent(axonId, "fixture.reset_completed", "EXTERNAL_EVENT", {
+          runId: run.id,
+          attemptId,
+          missionId: mission.id,
+          target: "head",
+          phase: "discovery",
+        });
+        await publishRunEvent(axonId, "journey.discovery_started", "AGENT_EVENT", {
+          runId: run.id,
+          attemptId,
+          missionId: mission.id,
+          browserDevboxId: browserBox.id,
+          target: "head",
+        });
+        const journey = await discoverJourney(
+          browserBox,
+          mission,
+          configuration.profile,
+          configuration.appMap,
+          "head",
+          headUrl,
+        );
+        validateJourneyForReplay(journey, mission, configuration.profile, headUrl);
+        await saveJourney(axonId, attemptId, run.id, journey, new Date().toISOString());
+        await emit({ ...state, journey });
+        await publishRunEvent(axonId, "journey.frozen", "AGENT_EVENT", {
+          runId: run.id,
+          attemptId,
+          missionId: mission.id,
+          discoveredAgainst: "head",
+          stepCount: journey.steps.length,
+          producer: journey.producer,
+        });
+
+        await emit({ ...state, status: "executing" });
+        const executionId = randomUUID();
+        await publishRunEvent(axonId, "execution.started", "EXTERNAL_EVENT", {
+          runId: run.id,
+          attemptId,
+          missionId: mission.id,
+          executionId,
+          target: "head",
+        });
+        await resetFixtures(headBox, configuration.profile, "head");
+        await publishRunEvent(axonId, "fixture.reset_completed", "EXTERNAL_EVENT", {
+          runId: run.id,
+          attemptId,
+          missionId: mission.id,
+          target: "head",
+          phase: "replay",
+        });
+        const replay = await replayJourney(
+          browserBox,
+          mission,
+          journey,
+          configuration.profile,
+          "head",
+          headUrl,
+        );
+        const execution = await persistReplayArtifacts(
+          browserBox,
+          run,
+          mission.id,
+          attemptId,
+          executionId,
+          "head",
+          replay,
+          axonId,
+        );
+        await saveExecution(axonId, executionId, execution, execution.endedAt);
+        await publishRunEvent(axonId, "execution.completed", "EXTERNAL_EVENT", {
+          runId: run.id,
+          attemptId,
+          executionId,
+          missionId: mission.id,
+          target: "head",
+          status: execution.status,
+          assertionCount: execution.checks.length,
+          evidenceCount: countEvidence(execution),
+        });
+        const infrastructureFailure =
+          execution.status === "error" ||
+          execution.status === "blocked" ||
+          (execution.evidenceErrors?.length ?? 0) > 0;
+        await emit({
+          ...state,
+          status: infrastructureFailure ? "blocked" : "complete",
+          execution,
+          actions: replay.actions,
+          network: replay.network,
+          blocker: infrastructureFailure
+            ? {
+                code:
+                  execution.error?.code ??
+                  execution.evidenceErrors?.[0]?.code ??
+                  "intent_execution_incomplete",
+                message:
+                  execution.error?.message ??
+                  execution.evidenceErrors?.[0]?.message ??
+                  "Intent execution did not produce complete evidence.",
+                retryable: true,
+              }
+            : undefined,
+        });
+        attempts.push(state);
+        if (infrastructureFailure) {
+          for (const skippedMission of missions.slice(index + 1)) {
+            const skipped = await recordInfrastructureFailure(
+              skippedMission,
+              new GroundtruthError(
+                "intent_suite_aborted",
+                `Mission ${skippedMission.id} was not run because an earlier mission had an infrastructure failure.`,
+                503,
+                true,
+              ),
+            );
+            await onProgress(skipped, attempts);
+            attempts.push(skipped);
+            state = skipped;
+          }
+          break;
+        }
+      } catch (error) {
+        const blocked = await recordInfrastructureFailure(mission, error, state);
+        await onProgress(blocked, attempts);
+        attempts.push(blocked);
+        state = blocked;
+        for (const skippedMission of missions.slice(index + 1)) {
+          const skipped = await recordInfrastructureFailure(
+            skippedMission,
+            new GroundtruthError(
+              "intent_suite_aborted",
+              `Mission ${skippedMission.id} was not run because an earlier mission had an infrastructure failure.`,
+              503,
+              true,
+            ),
+          );
+          await onProgress(skipped, attempts);
+          attempts.push(skipped);
+          state = skipped;
+        }
+        break;
+      }
+    }
+  } catch (error) {
+    const failedMissionIndex = Math.max(
+      0,
+      missions.findIndex((mission) => mission.id === state.mission?.id),
+    );
+    const currentAlreadyRecorded = attempts.some(
+      (attempt) => attempt.attemptId === state.attemptId,
+    );
+    for (let index = failedMissionIndex; index < missions.length; index += 1) {
+      const mission = missions[index];
+      if (index === failedMissionIndex && currentAlreadyRecorded) {
+        continue;
+      }
+      const blocked = await recordInfrastructureFailure(
+        mission,
+        index === failedMissionIndex
+          ? error
+          : new GroundtruthError(
+              "intent_suite_aborted",
+              `Mission ${mission.id} was not run because an earlier mission had an infrastructure failure.`,
+              503,
+              true,
+            ),
+        index === failedMissionIndex ? state : undefined,
+      );
+      await onProgress(blocked, attempts);
+      attempts.push(blocked);
+      state = blocked;
+    }
+  } finally {
+    if (attempts.length > 0) {
+      const emitCleanup = async (next: BrowserVerification): Promise<void> => {
+        state = BrowserVerificationSchema.parse(next);
+        const finalEnvironmentById = new Map(
+          state.environments.map((environment) => [environment.devboxId, environment]),
+        );
+        for (let index = 0; index < attempts.length - 1; index += 1) {
+          attempts[index] = BrowserVerificationSchema.parse({
+            ...attempts[index],
+            environments: attempts[index].environments.map(
+              (environment) =>
+                finalEnvironmentById.get(environment.devboxId) ?? environment,
+            ),
+          });
+        }
+        attempts[attempts.length - 1] = state;
+        await onProgress(state, attempts.slice(0, -1));
+      };
+      await suspendEnvironment(browserBox, "browser", run, state.attemptId!, axonId, state, emitCleanup);
+      await suspendEnvironment(headBox, "head", run, state.attemptId!, axonId, state, emitCleanup);
+      await suspendEnvironment(baseBox, "base", run, state.attemptId!, axonId, state, emitCleanup);
+      const failedCleanup = state.environments.filter(
+        (environment) => environment.status === "failed",
+      );
+      if (failedCleanup.length > 0 && state.status === "complete") {
+        await emitCleanup({
+          ...state,
+          status: "blocked",
+          blocker: {
+            code: "devbox_cleanup_failed",
+            message: `Runloop cleanup could not be confirmed for: ${failedCleanup
+              .map((environment) => environment.role)
+              .join(", ")}.`,
+            retryable: true,
+          },
+        });
+      }
+    }
+  }
+
+  return attempts;
+}
+
+function newIntentAttempt(mission: TestMission): BrowserVerification {
+  return BrowserVerificationSchema.parse({
+    attemptId: randomUUID(),
+    status: "preparing",
+    mission,
+    environments: [],
+    actions: [],
+    network: [],
+  });
+}
 
 export async function executeBrowserVerification(
   run: Run,
@@ -478,10 +879,28 @@ export function resolveMission(configured: TestMission, run: Run): TestMission {
       422,
     );
   }
-  const deferredClaimIds = configured.deferredClaims?.map((claim) => claim.claimId) ?? [];
+  const deferredClaims = configured.deferredClaims?.map((deferred) => {
+    if (!deferred.claimSourceQuote) {
+      return deferred;
+    }
+    const matches = approvedClaims.filter(
+      (claim) => claim.sourceQuote === deferred.claimSourceQuote,
+    );
+    if (matches.length !== 1) {
+      throw new GroundtruthError(
+        matches.length === 0
+          ? "test_mission_deferral_source_quote_unmatched"
+          : "test_mission_deferral_source_quote_ambiguous",
+        "A trusted claim deferral source quote must exactly match one approved intent claim.",
+        422,
+      );
+    }
+    return { ...deferred, claimId: matches[0].id };
+  });
+  const resolvedDeferredClaimIds = deferredClaims?.map((claim) => claim.claimId) ?? [];
   if (
-    new Set(deferredClaimIds).size !== deferredClaimIds.length ||
-    deferredClaimIds.some(
+    new Set(resolvedDeferredClaimIds).size !== resolvedDeferredClaimIds.length ||
+    resolvedDeferredClaimIds.some(
       (claimId) => claimIds.includes(claimId) || !knownClaimIds.has(claimId),
     )
   ) {
@@ -506,7 +925,7 @@ export function resolveMission(configured: TestMission, run: Run): TestMission {
       422,
     );
   }
-  return { ...configured, claimIds };
+  return { ...configured, claimIds, deferredClaims };
 }
 
 export function resolveRegressionMission(
@@ -1291,6 +1710,11 @@ try {
           : assertion.operator === "equals"
             ? actual === assertion.expected
             : String(actual).includes(assertion.expected);
+      } else if (assertion.kind === "value") {
+        actual = await locator(assertion.locator).inputValue();
+        passed = assertion.operator === "equals"
+          ? actual === assertion.expected
+          : String(actual).includes(assertion.expected);
       } else if (assertion.kind === "network") {
         actual = network.filter((entry) =>
           entry.method === assertion.method && new RegExp(assertion.urlPattern).test(entry.url)

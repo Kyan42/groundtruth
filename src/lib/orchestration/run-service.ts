@@ -38,6 +38,7 @@ import {
 } from "@/lib/runloop/coordination-axon";
 import {
   executeBrowserVerification,
+  executeIntentVerificationSuite,
   resolveRegressionMission,
   resolveMission,
 } from "@/lib/runloop/browser-verification";
@@ -152,22 +153,23 @@ export class RunService {
       }));
       return buildRunView(blocked);
     }
-    const configuredMission = configuration.missions.find(
+    const configuredMissions = configuration.missions.filter(
       (candidate) => candidate.kind === missionKind,
     );
-    if (!configuredMission) {
+    if (configuredMissions.length === 0) {
       throw new GroundtruthError(
         "test_mission_missing",
         `No trusted ${missionKind} mission is configured.`,
         422,
       );
     }
-    let mission: TestMission;
+    let missions: TestMission[];
     try {
-      mission =
+      missions = configuredMissions.map((configuredMission) =>
         configuredMission.kind === "intent"
           ? resolveMission(configuredMission, run)
-          : resolveRegressionMission(configuredMission, configuration);
+          : resolveRegressionMission(configuredMission, configuration),
+      );
     } catch (error) {
       const missionError =
         error instanceof GroundtruthError
@@ -202,14 +204,18 @@ export class RunService {
         : current.browserVerificationHistory,
       browserVerification: {
         status: "preparing",
-        mission,
+        mission: missions[0],
         environments: [],
         actions: [],
         network: [],
       },
       updatedAt: new Date().toISOString(),
     }));
-    const operation = this.runBrowserVerification(preparing, configuration, mission).finally(() => {
+    const operation = (
+      missionKind === "intent"
+        ? this.runIntentVerificationSuite(preparing, configuration, missions)
+        : this.runBrowserVerification(preparing, configuration, missions[0])
+    ).finally(() => {
       verificationByRun.delete(run.id);
     });
     verificationByRun.set(run.id, operation);
@@ -221,6 +227,10 @@ export class RunService {
 
   startRegressionVerification(runId: string): Promise<RunView> {
     return this.startVerification(runId, "regression");
+  }
+
+  startIntentSuite(runId: string): Promise<RunView> {
+    return this.startVerification(runId, "intent");
   }
 
   async rerunVerification(runId: string): Promise<RunView> {
@@ -597,6 +607,46 @@ export class RunService {
         updatedAt: new Date().toISOString(),
       }));
     });
+  }
+
+  private async runIntentVerificationSuite(
+    run: Run,
+    configuration: Extract<Awaited<ReturnType<typeof loadAppConfiguration>>, { ready: true }>,
+    missions: TestMission[],
+  ): Promise<void> {
+    const priorHistory = run.browserVerificationHistory ?? [];
+    const attempts = await executeIntentVerificationSuite(
+      run,
+      configuration,
+      missions,
+      async (browserVerification, completedAttempts) => {
+        await getRunIndex().update(run.id, (current) => ({
+          ...current,
+          status: "verifying",
+          browserVerificationHistory: [...priorHistory, ...completedAttempts],
+          browserVerification,
+          blocker: browserVerification.blocker,
+          updatedAt: new Date().toISOString(),
+        }));
+      },
+    );
+    const currentAttempt = attempts.at(-1);
+    if (!currentAttempt) {
+      return;
+    }
+    await getRunIndex().update(run.id, (current) => ({
+      ...current,
+      status:
+        currentAttempt.status === "complete"
+          ? "complete"
+          : currentAttempt.status === "blocked"
+            ? "blocked"
+            : "failed",
+      browserVerificationHistory: [...priorHistory, ...attempts.slice(0, -1)],
+      browserVerification: currentAttempt,
+      blocker: currentAttempt.blocker,
+      updatedAt: new Date().toISOString(),
+    }));
   }
 
   private async provision(run: Run): Promise<Run> {
