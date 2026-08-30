@@ -101,9 +101,16 @@ export async function saveIntentContract(
   approvedAt: string,
 ): Promise<void> {
   const axon = getRunloopClient().axon.fromId(axonId);
+  // A re-provisioned run re-extracts and re-approves its contract, so a
+  // fresh approval supersedes the stored row; every approval is still
+  // recorded in the immutable Axon event log.
   await axon.sql.query({
-    sql: `INSERT OR IGNORE INTO contracts (run_id, schema_version, spec_json, approved_at)
-      VALUES (?, ?, ?, ?)`,
+    sql: `INSERT INTO contracts (run_id, schema_version, spec_json, approved_at)
+      VALUES (?, ?, ?, ?)
+      ON CONFLICT(run_id) DO UPDATE SET
+        schema_version = excluded.schema_version,
+        spec_json = excluded.spec_json,
+        approved_at = excluded.approved_at`,
     params: [runId, spec.schemaVersion, JSON.stringify(spec), approvedAt],
   });
   const verification = await axon.sql.query({
