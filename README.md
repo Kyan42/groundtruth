@@ -37,6 +37,23 @@ organization must expose a launchable Codex agent. `GITHUB_TOKEN` is optional bu
 the shared unauthenticated GitHub API quota is exhausted. A read-only token is sufficient. Secrets
 remain server-side.
 
+Setting `GITHUB_TOKEN` and `GITHUB_REPO` (`owner/repo`, must have `repo` scope and write access,
+not a fine-grained token if the repo belongs to someone else) additionally turns on GitHub sync:
+when a browser verification attempt finishes, the run posts or edits a single result comment on
+the PR (issues endpoint, tracked per PR so a rerun edits it in place) and a `groundtruth/verify`
+commit status against the PR's exact head SHA (Commit Status API, plain token auth, no GitHub App
+needed). `state` is `failure` if any claim's verdict is violated, otherwise `success`.
+`target_url` points at `DASHBOARD_URL/runs/<runId>` (`DASHBOARD_URL` falls back to
+`GROUNDTRUTH_PUBLIC_BASE_URL`, so set it to wherever the dashboard is reachable by someone clicking
+a link on GitHub, not `localhost`, unless you are the only one ever clicking it). GitHub sync is
+best-effort: it can never fail a run, and doing nothing when unconfigured is intentional.
+
+To make the check actually block merges, `groundtruth/verify` must be posted at least once (so it
+appears in GitHub's branch-protection picker) before a branch protection rule can require it, and
+enabling branch protection needs *admin* on the target repo, not just write — a collaborator will
+get a 404 from the branch-protection endpoint, which is GitHub's way of hiding that the endpoint
+exists rather than reporting 403.
+
 Browser discovery uses an account OpenAI GatewayConfig and compatible Runloop Secret. The browser
 Devbox receives only its box-bound gateway URL/token; the upstream API credential is never mounted
 into the application Devboxes. A custom browser Blueprint is optional because the prototype can use
