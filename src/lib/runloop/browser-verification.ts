@@ -1092,7 +1092,62 @@ const tracePath = path.join(artifacts, "trace.zip");
 const browser = await chromium.launch({ headless: true });
 const context = await browser.newContext({
   baseURL: applicationUrl,
-  recordVideo: { dir: path.join(artifacts, "video") },
+  viewport: { width: 960, height: 540 },
+  recordVideo: {
+    dir: path.join(artifacts, "video"),
+    size: { width: 960, height: 540 },
+  },
+});
+await context.addInitScript(() => {
+  const install = () => {
+    if (document.querySelector("[data-groundtruth-evidence-cursor]")) return;
+    const style = document.createElement("style");
+    style.textContent = [
+      "[data-groundtruth-evidence-cursor] {",
+      "position:fixed;left:0;top:0;width:18px;height:24px;z-index:2147483647;",
+      "pointer-events:none;opacity:0;transform:translate3d(-30px,-30px,0);",
+      "transition:transform 140ms ease-out,opacity 80ms linear;",
+      "filter:drop-shadow(0 1px 2px rgba(0,0,0,.65));",
+      "}",
+      "[data-groundtruth-evidence-cursor]::before {",
+      "content:'';display:block;width:100%;height:100%;background:white;",
+      "clip-path:polygon(0 0,0 100%,5px 75%,9px 98%,13px 96%,9px 72%,18px 72%);",
+      "}",
+      "[data-groundtruth-evidence-ripple] {",
+      "position:fixed;z-index:2147483646;width:10px;height:10px;margin:-5px;",
+      "border:2px solid rgba(37,99,235,.9);border-radius:50%;pointer-events:none;",
+      "animation:groundtruth-ripple 320ms ease-out forwards;",
+      "}",
+      "@keyframes groundtruth-ripple { to { transform:scale(4);opacity:0; } }",
+    ].join("");
+    const cursor = document.createElement("div");
+    cursor.setAttribute("data-groundtruth-evidence-cursor", "");
+    document.documentElement.append(style, cursor);
+    window.__groundtruthEvidenceCursor = {
+      moveTo(x, y) {
+        cursor.style.opacity = "1";
+        cursor.style.transform = "translate3d(" + x + "px, " + y + "px, 0)";
+        return new Promise((resolve) => {
+          const done = () => {
+            cursor.removeEventListener("transitionend", done);
+            resolve();
+          };
+          cursor.addEventListener("transitionend", done, { once: true });
+          setTimeout(done, 180);
+        });
+      },
+      ripple(x, y) {
+        const ripple = document.createElement("div");
+        ripple.setAttribute("data-groundtruth-evidence-ripple", "");
+        ripple.style.left = x + "px";
+        ripple.style.top = y + "px";
+        document.documentElement.append(ripple);
+        ripple.addEventListener("animationend", () => ripple.remove(), { once: true });
+      },
+    };
+  };
+  if (document.documentElement) install();
+  else document.addEventListener("DOMContentLoaded", install, { once: true });
 });
 await context.tracing.start({ screenshots: true, snapshots: true, sources: false });
 function isAllowedHost(hostname, patterns) {
@@ -1146,6 +1201,29 @@ function locator(spec) {
   return page.locator(spec.value);
 }
 
+async function targetPoint(targetLocator) {
+  try {
+    const box = await targetLocator.boundingBox();
+    if (!box) return;
+    const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+    await page.evaluate(
+      (nextPoint) => window.__groundtruthEvidenceCursor?.moveTo(nextPoint.x, nextPoint.y),
+      point,
+    );
+    return point;
+  } catch {
+    return;
+  }
+}
+
+async function showClick(point) {
+  if (!point) return;
+  await page.evaluate(
+    (clickPoint) => window.__groundtruthEvidenceCursor?.ripple(clickPoint.x, clickPoint.y),
+    point,
+  ).catch(() => undefined);
+}
+
 try {
   for (let index = 0; index < journey.steps.length; index += 1) {
     const step = journey.steps[index];
@@ -1153,15 +1231,26 @@ try {
     const summary = step.action === "goto" ? "Navigate to " + step.path : step.action;
     try {
       if (step.action === "goto") await page.goto(step.path, { waitUntil: "networkidle" });
-      else if (step.action === "click") await locator(step.locator).click();
+      else if (step.action === "click") {
+        const targetLocator = locator(step.locator);
+        const point = await targetPoint(targetLocator);
+        await targetLocator.click();
+        await showClick(point);
+      }
       else if (step.action === "fill") {
         const fixture = mission.fixtureValues?.[step.fixtureValueKey];
         if (typeof fixture !== "string") throw new Error("Unknown fixture key: " + step.fixtureValueKey);
-        await locator(step.locator).fill(fixture);
-      } else if (step.action === "press") await locator(step.locator).press(step.key);
+        const targetLocator = locator(step.locator);
+        await targetPoint(targetLocator);
+        await targetLocator.fill(fixture);
+      } else if (step.action === "press") {
+        const targetLocator = locator(step.locator);
+        await targetPoint(targetLocator);
+        await targetLocator.press(step.key);
+      }
       else if (step.action === "wait_for") await locator(step.locator).waitFor({ state: step.state });
       const screenshot = path.join(artifacts, "step-" + index + ".png");
-      await page.screenshot({ path: screenshot, fullPage: true });
+      await page.screenshot({ path: screenshot });
       screenshotFiles.push(screenshot);
       steps.push({ index, status: "passed", at, summary });
       actions.push({ at, target, summary, status: "passed" });
@@ -1170,7 +1259,7 @@ try {
       productFailure = true;
       const message = cause instanceof Error ? cause.message : "Step failed.";
       const screenshot = path.join(artifacts, "step-" + index + "-failed.png");
-      await page.screenshot({ path: screenshot, fullPage: true }).then(
+      await page.screenshot({ path: screenshot }).then(
         () => screenshotFiles.push(screenshot),
         () => undefined,
       );
