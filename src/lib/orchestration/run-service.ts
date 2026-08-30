@@ -4,6 +4,7 @@ import {
   initialAgentLiveness,
   isTurnEndEventType,
   reduceAgentLiveness,
+  ReflexSocket,
   type AgentLivenessState,
   type ReflexStreamEvent,
 } from "@runloop/reflex-client";
@@ -21,6 +22,7 @@ import {
 import { fetchPublicPullRequest } from "@/lib/github/public-pr-client";
 import { syncPullRequestResult } from "@/lib/github/pr-sync";
 import { getRunIndex } from "@/lib/persistence/json-run-index";
+import { configureReflexServer } from "@/lib/reflex/client";
 import {
   createIntentAgent,
   interruptIntentAgent,
@@ -51,6 +53,7 @@ const seenEventIdsByRun = new Map<string, Set<string>>();
 const eventQueuesByRun = new Map<string, Promise<RunView>>();
 const provisioningByRun = new Map<string, Promise<Run>>();
 const verificationByRun = new Map<string, Promise<void>>();
+const intentPumpByRun = new Map<string, () => void>();
 
 export class RunService {
   async create(prUrl: string): Promise<RunView> {
@@ -278,7 +281,6 @@ export class RunService {
     let run = await this.get(runId);
     if (
       run.status !== "awaiting_contract_approval" ||
-      run.intentApproval ||
       !run.intentSpec ||
       !run.coordinationAxonId
     ) {
@@ -385,6 +387,7 @@ export class RunService {
         runId: updated.id,
       });
     }
+    void this.ensureIntentPump(updated.id);
     return buildRunView(updated);
   }
 
@@ -520,6 +523,10 @@ export class RunService {
         ...run,
         status: "awaiting_contract_approval",
         intentSpec,
+        // A re-extracted contract supersedes any approval granted for a
+        // previous extraction; the run must be approved again.
+        intentApproval: undefined,
+        intentApprovalAttempt: undefined,
         blocker: undefined,
         reflexIntent: run.reflexIntent
           ? { ...run.reflexIntent, ...sequenceUpdate, status: "complete" }
@@ -558,6 +565,63 @@ export class RunService {
       updatedAt: now,
     }));
     return buildRunView(running);
+  }
+
+  /**
+   * Server-side consumer of the Reflex intent stream. The run can only leave
+   * `analyzing_intent` when someone processes stream events; without this pump
+   * that only happened while a dashboard SSE connection stayed open, so
+   * unattended runs stalled forever. The Reflex socket replays stream history
+   * on subscribe, so attaching the pump to an already-stranded run recovers it.
+   */
+  async ensureIntentPump(runId: string): Promise<void> {
+    if (intentPumpByRun.has(runId)) {
+      return;
+    }
+    let teardown = () => {};
+    let stopped = false;
+    const stop = () => {
+      if (stopped) {
+        return;
+      }
+      stopped = true;
+      if (intentPumpByRun.get(runId) === stop) {
+        intentPumpByRun.delete(runId);
+      }
+      teardown();
+    };
+    // Reserve the slot before any await so concurrent kicks cannot double-subscribe.
+    intentPumpByRun.set(runId, stop);
+    try {
+      const run = await this.get(runId);
+      if (!run.reflexIntent || run.status !== "analyzing_intent") {
+        stop();
+        return;
+      }
+      configureReflexServer();
+      const socket = new ReflexSocket();
+      const unsubscribe = socket.subscribe(run.reflexIntent.streamId, (event) => {
+        this.enqueueIntentEvent(runId, event)
+          .then((view) => {
+            if (view.run.status !== "analyzing_intent") {
+              stop();
+            }
+          })
+          .catch((error: unknown) => {
+            console.error("Intent pump failed to process a Reflex event.", error);
+          });
+      });
+      teardown = () => {
+        unsubscribe();
+        socket.close();
+      };
+      if (stopped) {
+        teardown();
+      }
+    } catch (error) {
+      stop();
+      console.error("Failed to attach the intent event pump.", error);
+    }
   }
 
   enqueueIntentEvent(runId: string, event: ReflexStreamEvent): Promise<RunView> {
@@ -715,6 +779,7 @@ export class RunService {
           updatedAt: new Date().toISOString(),
         }));
       }
+      void this.ensureIntentPump(current.id);
       return current;
     } catch (error) {
       const blocker = blockerFromError(error);
