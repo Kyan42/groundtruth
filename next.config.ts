@@ -4,7 +4,10 @@ const nextConfig: NextConfig = {
   agentRules: false,
   reactStrictMode: true,
   async rewrites() {
-    return [{ source: "/runs/:runId", destination: "/run.html" }];
+    return [
+      { source: "/", destination: "/landing.html" },
+      { source: "/runs/:runId", destination: "/run.html" },
+    ];
   },
 };
 
