@@ -13,7 +13,14 @@ export async function GET(
 ): Promise<NextResponse> {
   try {
     const { runId } = await context.params;
-    return NextResponse.json(buildDashboardPayload(await getRunService().get(runId)));
+    const service = getRunService();
+    const run = await service.get(runId);
+    if (run.status === "analyzing_intent") {
+      // Self-heal: viewing a run re-attaches the server-side intent pump after
+      // a restart; Reflex replays stream history, so stranded runs catch up.
+      void service.ensureIntentPump(runId);
+    }
+    return NextResponse.json(buildDashboardPayload(run));
   } catch (error) {
     const response = toErrorResponse(error);
     return NextResponse.json(response.body, { status: response.status });

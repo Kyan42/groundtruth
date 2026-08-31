@@ -1508,7 +1508,14 @@ let status = "passed";
 let productFailure = false;
 let videoPath;
 const tracePath = path.join(artifacts, "trace.zip");
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({
+  headless: true,
+  // Keep the browser window the same size as the viewport and recording.
+  // Mismatched sizes make Chromium's screencast emit frames at the window
+  // size during navigations, which Playwright letterboxes with gray bars —
+  // the "screen adjusting" artifact in earlier evidence videos.
+  args: ["--window-size=960,540"],
+});
 const context = await browser.newContext({
   baseURL: applicationUrl,
   viewport: { width: 960, height: 540 },
@@ -1518,55 +1525,58 @@ const context = await browser.newContext({
   },
 });
 await context.addInitScript(() => {
+  // A cursor dot that follows REAL mousemove events. Combined with stepped
+  // page.mouse.move() glides this records continuous motion, which is what
+  // makes the evidence video look smooth: the screencast only captures
+  // frames when pixels change, so teleporting actions record as jump cuts.
   const install = () => {
     if (document.querySelector("[data-groundtruth-evidence-cursor]")) return;
     const style = document.createElement("style");
     style.textContent = [
       "[data-groundtruth-evidence-cursor] {",
-      "position:fixed;left:0;top:0;width:18px;height:24px;z-index:2147483647;",
-      "pointer-events:none;opacity:0;transform:translate3d(-30px,-30px,0);",
-      "transition:transform 140ms ease-out,opacity 80ms linear;",
-      "filter:drop-shadow(0 1px 2px rgba(0,0,0,.65));",
+      "position:fixed;width:20px;height:20px;border-radius:50%;",
+      "background:radial-gradient(circle at 35% 35%,#fff,#2c4f33 70%);",
+      "border:2px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.4),0 0 0 1px rgba(0,0,0,.15);",
+      "pointer-events:none;z-index:2147483647;left:-100px;top:-100px;",
+      "transform:translate(-50%,-50%);transition:transform .08s ease;",
       "}",
-      "[data-groundtruth-evidence-cursor]::before {",
-      "content:'';display:block;width:100%;height:100%;background:white;",
-      "clip-path:polygon(0 0,0 100%,5px 75%,9px 98%,13px 96%,9px 72%,18px 72%);",
+      "[data-groundtruth-evidence-cursor].click { transform:translate(-50%,-50%) scale(.65); }",
+      "[data-groundtruth-evidence-flash] {",
+      "position:fixed;pointer-events:none;z-index:2147483646;border-radius:8px;",
+      "box-shadow:0 0 0 3px #e0a83a,0 0 0 6px rgba(224,168,58,.25);",
+      "opacity:0;transition:opacity .3s ease;",
       "}",
-      "[data-groundtruth-evidence-ripple] {",
-      "position:fixed;z-index:2147483646;width:10px;height:10px;margin:-5px;",
-      "border:2px solid rgba(37,99,235,.9);border-radius:50%;pointer-events:none;",
-      "animation:groundtruth-ripple 320ms ease-out forwards;",
-      "}",
-      "@keyframes groundtruth-ripple { to { transform:scale(4);opacity:0; } }",
     ].join("");
     const cursor = document.createElement("div");
     cursor.setAttribute("data-groundtruth-evidence-cursor", "");
-    document.documentElement.append(style, cursor);
-    window.__groundtruthEvidenceCursor = {
-      moveTo(x, y) {
-        cursor.style.opacity = "1";
-        cursor.style.transform = "translate3d(" + x + "px, " + y + "px, 0)";
-        return new Promise((resolve) => {
-          const done = () => {
-            cursor.removeEventListener("transitionend", done);
-            resolve();
-          };
-          cursor.addEventListener("transitionend", done, { once: true });
-          setTimeout(done, 180);
-        });
+    const flash = document.createElement("div");
+    flash.setAttribute("data-groundtruth-evidence-flash", "");
+    (document.body || document.documentElement).append(style, cursor, flash);
+    window.addEventListener("mousemove", (event) => {
+      cursor.style.left = event.clientX + "px";
+      cursor.style.top = event.clientY + "px";
+    });
+    window.__groundtruthEvidence = {
+      pressed(down) {
+        cursor.classList.toggle("click", !!down);
       },
-      ripple(x, y) {
-        const ripple = document.createElement("div");
-        ripple.setAttribute("data-groundtruth-evidence-ripple", "");
-        ripple.style.left = x + "px";
-        ripple.style.top = y + "px";
-        document.documentElement.append(ripple);
-        ripple.addEventListener("animationend", () => ripple.remove(), { once: true });
+      flashNode(node) {
+        if (!node || !node.getBoundingClientRect) return;
+        const rect = node.getBoundingClientRect();
+        flash.style.left = rect.left - 6 + "px";
+        flash.style.top = rect.top - 4 + "px";
+        flash.style.width = rect.width + 12 + "px";
+        flash.style.height = rect.height + 8 + "px";
+        flash.style.opacity = "1";
+        setTimeout(() => { flash.style.opacity = "0"; }, 950);
       },
     };
   };
-  if (document.documentElement) install();
-  else document.addEventListener("DOMContentLoaded", install, { once: true });
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", install, { once: true });
+  } else {
+    install();
+  }
 });
 await context.tracing.start({ screenshots: true, snapshots: true, sources: false });
 function isAllowedHost(hostname, patterns) {
@@ -1620,27 +1630,40 @@ function locator(spec) {
   return page.locator(spec.value);
 }
 
-async function targetPoint(targetLocator) {
+// Glide the REAL mouse to the target in steps; the injected dot follows the
+// mousemove events, so the screencast records continuous motion.
+async function glideTo(targetLocator) {
   try {
+    await targetLocator.scrollIntoViewIfNeeded();
     const box = await targetLocator.boundingBox();
     if (!box) return;
     const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
-    await page.evaluate(
-      (nextPoint) => window.__groundtruthEvidenceCursor?.moveTo(nextPoint.x, nextPoint.y),
-      point,
-    );
+    await page.mouse.move(point.x, point.y, { steps: 28 });
     return point;
   } catch {
     return;
   }
 }
 
-async function showClick(point) {
-  if (!point) return;
-  await page.evaluate(
-    (clickPoint) => window.__groundtruthEvidenceCursor?.ripple(clickPoint.x, clickPoint.y),
-    point,
-  ).catch(() => undefined);
+async function pressedCursor(down) {
+  await page
+    .evaluate((state) => window.__groundtruthEvidence?.pressed(state), down)
+    .catch(() => undefined);
+}
+
+async function flashTarget(targetLocator) {
+  try {
+    const handle = await targetLocator.elementHandle({ timeout: 1000 });
+    if (!handle) return;
+    await page.evaluate((node) => window.__groundtruthEvidence?.flashNode(node), handle);
+    await handle.dispose();
+  } catch {
+    return;
+  }
+}
+
+function beat(ms) {
+  return page.waitForTimeout(ms);
 }
 
 try {
@@ -1649,25 +1672,40 @@ try {
     const at = new Date().toISOString();
     const summary = step.action === "goto" ? "Navigate to " + step.path : step.action;
     try {
-      if (step.action === "goto") await page.goto(step.path, { waitUntil: "networkidle" });
-      else if (step.action === "click") {
+      if (step.action === "goto") {
+        await page.goto(step.path, { waitUntil: "networkidle" });
+        await beat(400);
+      } else if (step.action === "click") {
         const targetLocator = locator(step.locator);
-        const point = await targetPoint(targetLocator);
+        await glideTo(targetLocator);
+        await pressedCursor(true);
         await targetLocator.click();
-        await showClick(point);
-      }
-      else if (step.action === "fill") {
+        await beat(90);
+        await pressedCursor(false);
+        await beat(300);
+      } else if (step.action === "fill") {
         const fixture = mission.fixtureValues?.[step.fixtureValueKey];
         if (typeof fixture !== "string") throw new Error("Unknown fixture key: " + step.fixtureValueKey);
         const targetLocator = locator(step.locator);
-        await targetPoint(targetLocator);
-        await targetLocator.fill(fixture);
+        await glideTo(targetLocator);
+        await pressedCursor(true);
+        await targetLocator.click();
+        await beat(90);
+        await pressedCursor(false);
+        await targetLocator.fill("");
+        await targetLocator.pressSequentially(fixture, { delay: 60 });
+        await beat(300);
       } else if (step.action === "press") {
         const targetLocator = locator(step.locator);
-        await targetPoint(targetLocator);
+        await glideTo(targetLocator);
         await targetLocator.press(step.key);
+        await beat(300);
+      } else if (step.action === "wait_for") {
+        const targetLocator = locator(step.locator);
+        await targetLocator.waitFor({ state: step.state });
+        if (step.state === "visible") await flashTarget(targetLocator);
+        await beat(250);
       }
-      else if (step.action === "wait_for") await locator(step.locator).waitFor({ state: step.state });
       const screenshot = path.join(artifacts, "step-" + index + ".png");
       await page.screenshot({ path: screenshot });
       screenshotFiles.push(screenshot);
@@ -1752,6 +1790,8 @@ try {
   };
   if (!productFailure) status = "error";
 } finally {
+  // Hold the final frame briefly so the recording doesn't cut abruptly.
+  await page.waitForTimeout(900).catch(() => undefined);
   await context.tracing.stop({ path: tracePath }).catch(() => undefined);
   await context.close();
   videoPath = await video?.path().catch(() => undefined);

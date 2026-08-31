@@ -96,11 +96,11 @@
   .tagline .gt{color:var(--forest);text-decoration:underline;text-underline-offset:5px;
     text-decoration-thickness:1px;text-decoration-color:rgba(14,105,78,.55)}
   .cta{display:flex;gap:10px;flex-wrap:wrap}
-  .run-form{display:flex;gap:10px;width:min(640px,100%);margin:30px auto 0}
+  .run-form{display:flex;gap:10px;width:min(720px,100%);margin:30px auto 0}
   .run-form input{flex:1;min-width:0;border:1px solid var(--line-2);border-radius:var(--r-pill);
     background:rgba(255,255,255,.94);padding:12px 18px;font:15px var(--sans);color:var(--ink);
     box-shadow:var(--shadow-card)}
-  .run-form .btn{flex:1;justify-content:center}
+  .run-form .btn{flex:none;justify-content:center;white-space:nowrap}
   .run-error{min-height:24px;margin-top:8px;text-align:center;color:var(--fail);font-size:14px}
   .run-progress{position:fixed;inset:0;z-index:100;display:none;place-items:center;padding:24px;background:var(--sage)}
   .run-progress.show{display:grid}
@@ -284,10 +284,13 @@
           <span class="word">Groundtruth</span>
         </div>
         <p class="tagline fade d2">Your PR says it works.<br>We check it against the <a class="gt" href="#moment">ground truth</a>.</p>
-        <div class="run-form fade d2" id="run-form">
-          <a class="btn btn-primary" href="/new">Run live</a>
+        <form class="run-form fade d2" id="run-form">
+          <input id="pr-url" type="url" required autocomplete="url" aria-label="Public pull request URL"
+            placeholder="https://github.com/owner/repo/pull/123"
+            value="https://github.com/Kyan42/fernway/pull/4">
+          <button class="btn btn-primary" type="submit">Run live</button>
           <a class="btn" href="/runs/recorded-fernway-pr4?recorded=fernway-pr4-v1">View cached demo</a>
-        </div>
+        </form>
         <p class="run-error" id="run-error" role="alert"></p>
       </div>
     </div>
@@ -531,8 +534,6 @@
   const progressDetail = $('#progress-detail');
   const progressRetry = $('#progress-retry');
   const progressDashboard = $('#progress-dashboard');
-  const liveMode = new URLSearchParams(location.search).get('live') === '1';
-  const recordedPrUrl = 'https://github.com/Kyan42/fernway/pull/4';
   let activeRunId = null;
   let polling = false;
 
@@ -543,20 +544,6 @@
     button.disabled = true;
     button.textContent = 'Running...';
     try {
-      const submittedUrl = $('#pr-url').value.replace(/\/+$/, '');
-      if (!liveMode) {
-        if (submittedUrl.toLowerCase() !== recordedPrUrl.toLowerCase()) {
-          throw new Error('This recorded demo supports only https://github.com/Kyan42/fernway/pull/4.');
-        }
-        progress.classList.add('show');
-        setProgress('Loading completed verification',
-          'Recorded from a real Runloop execution');
-        await readResponse(await fetch('/api/recorded-runs/fernway-pr4-v1', {cache:'no-store'}));
-        await new Promise(resolve => setTimeout(resolve, 650));
-        location.assign('/runs/recorded-fernway-pr4?recorded=fernway-pr4-v1');
-        return;
-      }
-
       const response = await fetch('/api/runs', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
@@ -574,7 +561,7 @@
       progress.classList.remove('show');
       runError.textContent = error instanceof Error ? error.message : 'Could not create the run.';
       button.disabled = false;
-      button.textContent = 'Run';
+      button.textContent = 'Run live';
     }
   });
 
@@ -603,7 +590,7 @@
 
         if (status === 'awaiting_contract_approval') {
           setProgress('Intent contract extracted — approving test plan',
-            'The demo flow approves the extracted contract transparently before browser verification.');
+            'Groundtruth approves the extracted contract before browser verification begins.');
           status = await act(runId, 'approve_intent', 'approved', state);
         } else if (status === 'contract_approved') {
           setProgress('Starting intent verification',
@@ -612,9 +599,16 @@
         } else if (status === 'complete' && state.intentStarted && !state.regressionStarted) {
           setProgress('Intent suite complete — starting regression',
             'Product assertion findings are preserved while regression verification continues.');
-          status = await act(runId, 'start_regression', 'regressionStarted', state);
+          try {
+            status = await act(runId, 'start_regression', 'regressionStarted', state);
+          } catch (error) {
+            if (!error || error.code !== 'test_mission_missing') throw error;
+            state.regressionStarted = true;
+            saveState(runId, state);
+            status = 'complete';
+          }
         } else if (status === 'complete' && state.regressionStarted) {
-          setProgress('Verification complete', 'Opening the recorded results.');
+          setProgress('Verification complete', 'Opening the results.');
           location.assign('/runs/' + encodeURIComponent(runId));
           return;
         } else if (['setup_required','blocked','failed'].includes(status)) {
@@ -671,7 +665,9 @@
   async function readResponse(response) {
     const payload = await response.json().catch(() => null);
     if (!response.ok) {
-      throw new Error(payload && payload.error && payload.error.message || 'The verification API request failed.');
+      const error = new Error(payload && payload.error && payload.error.message || 'The verification API request failed.');
+      error.code = payload && payload.error && payload.error.code;
+      throw error;
     }
     return payload;
   }
