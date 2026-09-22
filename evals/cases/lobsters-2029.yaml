@@ -2,6 +2,7 @@ id: lobsters-2029
 pr: lobsters/lobsters#2029
 title: Add minlength to title input in submit story page
 type: vague
+split: dev    # used when changing the prompt
 tags: [human-written, empty-description]   # the description is only the unfilled PR template
 
 snapshot:

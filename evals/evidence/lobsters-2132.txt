@@ -1,0 +1,22 @@
+<pull_request repo="lobsters/lobsters" number="2132" author="Zurtar" base="main">
+
+<title>Disable Story Byline Buttons when Previewing</title>
+
+<description>
+Fixes: #2109. 
+
+Pretty straight forward, just disables the two forms or removes the link/href from the byline buttons when previewing.
+</description>
+
+</pull_request>
+
+<linked_issues>
+<issue number="2109">
+<title>Story submit previews render broken save and hide buttons, and comments link</title>
+When previewing a story to submit, the buttons "save" and "hide" are enabled but, as expected, return a error 400 when submitted. A links to comment appears too but points to an invalid url.
+</issue>
+</linked_issues>
+
+<commits>
+- disable story byline buttons when previewing
+</commits>

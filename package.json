@@ -7,16 +7,22 @@
     "dev": "tsx watch --env-file=.env src/index.ts",
     "start": "tsx --env-file=.env src/index.ts",
     "evidence": "tsx src/cli/evidence.ts",
+    "evals:snapshot": "tsx src/cli/snapshot.ts",
+    "evals": "tsx --env-file-if-exists=.env src/cli/eval.ts",
+    "extract": "tsx --env-file-if-exists=.env src/cli/extract.ts",
     "typecheck": "tsc --noEmit"
   },
   "engines": {
     "node": ">=22"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
     "@octokit/app": "^16.1.4",
     "@octokit/core": "^7.0.8",
     "@octokit/webhooks": "^14.2.0",
-    "smee-client": "^5.0.0"
+    "smee-client": "^5.0.0",
+    "yaml": "^2.9.1",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/node": "^26.6.2",

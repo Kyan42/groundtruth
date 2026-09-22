@@ -2,6 +2,7 @@ id: actual-8780
 pr: actualbudget/actual#8780
 title: Add option to show transfers in Sankey chart Spent view
 type: new-feature
+split: dev    # used when changing the prompt
 tags: [ai-assisted]   # description says "Development aided by OpenCode / GPT-5 Mini"
 
 # What extraction sees: evidence as it was when the PR was opened.

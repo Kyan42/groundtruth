@@ -1,0 +1,17 @@
+<pull_request repo="lobsters/lobsters" number="2029" author="fedemp" base="main">
+
+<title>Add minlength to title input in submit story page</title>
+
+<description>
+(empty)
+</description>
+
+</pull_request>
+
+<linked_issues>
+(none)
+</linked_issues>
+
+<commits>
+- Add minlength to title input in submit story page
+</commits>

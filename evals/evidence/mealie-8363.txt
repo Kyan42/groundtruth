@@ -1,0 +1,95 @@
+<pull_request repo="mealie-recipes/mealie" number="8363" author="Luna-81" base="mealie-next">
+
+<title>fix: prevent creating shopping lists with empty names and disable submit button</title>
+
+<description>
+## What this PR does / why we need it:
+
+This PR fixes the issue where users could create a shopping list with an empty or whitespace-only name.
+
+- Modified `frontend/app/pages/shopping-lists/index.vue`.
+- Added a computed property `isCreateNameValid` to check if the trimmed input is non-empty.
+- Bound `:submit-disabled` to keep the create button greyed out (disabled) when the input is invalid, and green when valid.
+- Applied `v-model.trim` to the input field and added a guard clause in `createOne` to prevent empty names from being submitted to the API.
+
+## Which issue(s) this PR fixes:
+
+Fixes #8362 
+
+## Testing
+
+Tested locally in the browser. Verified that:
+1. The create button remains disabled (grayed out) when the input is empty or contains only spaces.
+2. The create button becomes enabled (green) once valid text is entered.
+3. Pressing Enter does not submit an empty shopping list.
+
+ **1.Disabled state (Empty/Whitespace-only input)**
+<img width="786" height="336" alt="image" src="https://github.com/user-attachments/assets/c783c2e0-0202-45bc-a1cb-e28ab0c1758f" />
+
+ **2.Enabled state (Valid input)**
+<img width="786" height="345" alt="image" src="https://github.com/user-attachments/assets/e425e8ff-f8a8-4076-989e-986fc3910eee" />
+
+ **3.Creation Result**
+<img width="865" height="534" alt="image" src="https://github.com/user-attachments/assets/695f8915-282d-439f-ab88-34d72661a658" />
+
+
+## AI / LLM Assistance
+
+NA
+</description>
+
+</pull_request>
+
+<linked_issues>
+<issue number="8362">
+<title>[BUG] - Shopping list name can be created with empty/whitespace-only input</title>
+### First Check
+
+- [x] This is not a feature request.
+- [x] I added a very descriptive title to this issue (title field is above this).
+- [x] I used the GitHub search to find a similar issue and didn't find it.
+- [x] I searched the Mealie documentation, with the integrated search.
+- [x] I already read the docs and didn't find an answer.
+- [x] This issue can be replicated on the demo site (https://demo.mealie.io/).
+
+### What is the issue you are experiencing?
+
+When creating a new shopping list, the name field is not validated. Users can submit the form with an empty name or a name consisting only of whitespace. This results in a blank shopping list being created in the UI . Related to #8293 
+
+### Steps to Reproduce
+
+1. Log in to your Mealie instance.
+2. Navigate to the "Shopping Lists" page.
+3. Click the "+ Create" button.
+4. Leave the "Shopping List Name" input field completely empty (or enter only spaces).
+5. Click the create/save button.
+6.  Observe that a new shopping list is successfully created without any name.
+
+### Please provide relevant logs
+
+NO
+
+### Mealie Version
+
+Public demo site running the nightly build (tested 2026-09-11).
+
+### Deployment
+
+Docker (Windows)
+
+### Additional Deployment Details
+
+**Actual behavior**
+A shopping list can be created with an empty or whitespace-only name and is displayed as a blank entry in the shopping list overview.
+
+**Expected behavior**
+The name field should be validated before submission. The create button should remain disabled when the trimmed value is empty, and the API should reject empty or whitespace-only list names.
+
+**Picture:**
+<img width="860" height="716" alt="Image" src="https://github.com/user-attachments/assets/3f47ebf0-1357-435e-b977-877f2ab9724a" />
+</issue>
+</linked_issues>
+
+<commits>
+- fix: prevent empty shopping list names and disable submit button
+</commits>

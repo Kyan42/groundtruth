@@ -2,9 +2,26 @@
 
 Golden cases for Groundtruth, one YAML file per PR in `cases/`. Candidate PRs are listed in [docs/eval-candidates.md](../docs/eval-candidates.md).
 
+## Running
+
+1. `npm run evals:snapshot` freezes each case's evidence, as it was when the PR was opened, into `evidence/<id>.txt`. That file is exactly what the extractor sees. Re-run it after adding a case.
+2. `npm run evals` runs extraction on every case (3 runs each by default), has the judge map the output onto the reference, and writes `runs/<timestamp>/report.md` plus `results.json`. Needs `ANTHROPIC_API_KEY` in `.env`.
+   Options: `--runs 1`, `--case lobsters-2132`, `--split test`, `--model claude-sonnet-5` (extractor), `--judge-model ...`.
+
+Metrics, pooled across cases (partial matches count half):
+
+- **Precision**: extracted claims that correspond to a reference claim. The headline metric.
+- **Intent recall**: `intent` reference claims found.
+- **Lures taken**: claims made from `not_testable` statements, plus any claim on a `no-claims` case.
+- **Unmatched claims**: claims matching nothing. Either invented or a gap in the reference; review each one and either accept the penalty or add it to the case.
+- **Question coverage**: reference questions, plus `discussion` and `diff-only` claims, covered by the extractor's questions (or claims).
+- **App-context question coverage**: the same, for questions marked `needs: app-context`.
+- **Ungrounded sources**: claims whose `source` quote isn't found in the evidence (checked in code, no judge).
+
 ## Case fields
 
 - `type`: what kind of PR this is: `new-feature`, `behavior-change`, `bugfix`, `ui-only`, `no-claims`, `vague`. Assigned by whoever writes the case, and used to break down scores (e.g. "we do badly on behavior changes"). For `no-claims`, the expected output is zero claims.
+- `split`: `dev` or `test`. Dev cases are the ones we look at when changing the extractor prompt. Test cases are held out: we only compare their scores, and the report hides their claim-level details (they're still in `results.json`). If a prompt change helps dev but not test, it's overfitting.
 - `tags`: optional free-form labels for slicing results, e.g. `ai-assisted` when the PR says it was written with AI tools.
 - `snapshot`: the evidence as it was when the PR was **opened**, which is when Groundtruth runs. Descriptions get edited, bots append to them, and commits land after opening; none of that should be visible to extraction.
 - `setup`: what a tester needs (feature flags, data) to check the claims.

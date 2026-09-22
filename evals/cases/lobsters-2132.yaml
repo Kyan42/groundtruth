@@ -2,6 +2,7 @@ id: lobsters-2132
 pr: lobsters/lobsters#2132
 title: Disable Story Byline Buttons when Previewing
 type: behavior-change
+split: dev    # used when changing the prompt
 tags: [human-written, intent-in-issue]   # Lobsters forbids LLM-written code; the description is one line
 
 snapshot:

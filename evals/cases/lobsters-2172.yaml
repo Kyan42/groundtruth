@@ -2,6 +2,7 @@ id: lobsters-2172
 pr: lobsters/lobsters#2172
 title: Remove unreferenced dead code
 type: no-claims
+split: dev    # used when changing the prompt
 tags: [human-written, lures]   # lists user-facing-sounding behaviors that this PR does not change
 
 snapshot:

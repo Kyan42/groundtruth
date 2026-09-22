@@ -1,0 +1,72 @@
+id: mealie-8363
+pr: mealie-recipes/mealie#8363
+title: "fix: prevent creating shopping lists with empty names and disable submit button"
+type: behavior-change
+split: test   # held out: never look at extraction output for this case when changing the prompt
+tags: [issue-broader-than-pr]   # the issue also asks for API validation; the PR is front-end only
+
+snapshot:
+  opened_at: 2026-09-11T10:56:36Z
+  head: 33d71a7            # the only commit
+  commits_visible:
+    - "fix: prevent empty shopping list names and disable submit button"
+  known_gaps:
+    - Three screenshots (disabled, enabled, result) carry intent but are images.
+
+setup:
+  - A logged-in user. The public demo (https://demo.mealie.io, nightly build) has the fix; sign-up is open.
+  - The Shopping Lists page, then "+ Create".
+
+expected:
+  claims:
+    - id: c1
+      when: on the Shopping Lists page, open the create dialog and leave the name empty
+      then: { kind: state, what: the create button is disabled }
+      derivable: intent
+      source: 'description: "The create button remains disabled (grayed out) when the input is empty or contains only spaces"'
+
+    - id: c2
+      when: on the Shopping Lists page, open the create dialog and type only spaces as the name
+      then: { kind: state, what: the create button is disabled }
+      derivable: intent
+      source: same as c1
+
+    - id: c3
+      when: on the Shopping Lists page, open the create dialog and type a name with visible characters
+      then: { kind: state, what: the create button is enabled }
+      derivable: intent
+      source: 'description: "The create button becomes enabled (green) once valid text is entered"'
+
+    - id: c4
+      when: on the Shopping Lists page, open the create dialog, leave the name empty, and press Enter
+      then: { kind: network, what: no request to create a shopping list is sent }
+      derivable: intent
+      source: 'description: "Pressing Enter does not submit an empty shopping list"'
+      note: an equivalent user-level check is that no new (blank) list appears in the overview.
+
+  not_testable:
+    - text: 'the issue''s "the API should reject empty or whitespace-only list names"'
+      why: not part of this PR (it only changes the front end), and not observable through the UI
+    - text: 'implementation bullets ("computed property isCreateNameValid", "v-model.trim", "guard clause in createOne")'
+      why: describe the code, not behavior
+    - text: '"Tested locally in the browser" and "AI / LLM Assistance: NA"'
+      why: describe how the work was done
+
+  regression_hints:
+    - Creating a shopping list with a valid name still works, and the new list appears in the overview.
+
+  questions:
+    - The issue also asks the API to reject empty or whitespace-only names. Is that in scope for this PR, or front-end only?
+    - Are names trimmed when saved (e.g. "  Groceries  " saved as "Groceries")?
+    - { text: "Do other places that create or rename a shopping list get the same validation?", needs: app-context }
+
+checkpoints: []
+regressions: []
+
+review:
+  status: reviewed
+  drafted_by: claude
+  reviewed_by: Kyan42
+  notes: >-
+    The diff matches the description: one front-end file (disable the submit button, trim the input, and guard the
+    submit handler). Reviewed with a single "LGTM". Not clicked through.

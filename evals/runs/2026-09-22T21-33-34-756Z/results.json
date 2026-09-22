@@ -1,0 +1,575 @@
+{
+  "model": "claude-opus-5",
+  "judgeModel": "claude-opus-5-5",
+  "runs": 1,
+  "results": [
+    {
+      "caseId": "actual-8780",
+      "run": 1,
+      "extraction": {
+        "claims": [
+          {
+            "when": "Open a Sankey chart report and open its options/settings",
+            "then": {
+              "kind": "visible",
+              "what": "A toggle option to show transfers is shown"
+            },
+            "source": "Adds an optional toggle in the Sankey chart to show transfers."
+          },
+          {
+            "when": "On a Sankey chart in the Spent view, enable the show transfers toggle",
+            "then": {
+              "kind": "visible",
+              "what": "Transfer flows appear as links/nodes in the Sankey diagram"
+            },
+            "source": "Add transfers as option to Spent view"
+          },
+          {
+            "when": "On a Sankey chart in the Spent view with the show transfers toggle enabled, where income lands in one account and spending happens from another (e.g. credit card)",
+            "then": {
+              "kind": "visible",
+              "what": "The chart renders as a connected graph instead of disconnected parts"
+            },
+            "source": "which would previously resulted in a disconnected graph"
+          },
+          {
+            "when": "On a Sankey chart with the show transfers toggle disabled",
+            "then": {
+              "kind": "hidden",
+              "what": "No transfer flows are shown in the diagram"
+            },
+            "source": "With option off:"
+          },
+          {
+            "when": "Enable the show transfers toggle on a Sankey chart and reload the page",
+            "then": {
+              "kind": "persisted",
+              "what": "The show transfers toggle is still enabled and transfers are still shown"
+            },
+            "source": "Adds an optional toggle in the Sankey chart to show transfers."
+          },
+          {
+            "when": "Enable the show transfers toggle on a Sankey chart for a budget that has transfers to off-budget accounts",
+            "then": {
+              "kind": "hidden",
+              "what": "Transfers to off-budget accounts are not shown as flows in the chart"
+            },
+            "source": "Filter out transfers to off-budget accounts"
+          }
+        ],
+        "not_testable": [
+          {
+            "text": "Development aided by OpenCode / GPT-5 Mini.",
+            "why": "Process note, not user-visible behavior"
+          },
+          {
+            "text": "Manual testing with a specifically crafted tested budget and the full history of my own budget.",
+            "why": "Describes how the change was tested"
+          },
+          {
+            "text": "Fix recursion error happening in otherGrouping",
+            "why": "Internal code fix; no stated user-visible symptom"
+          },
+          {
+            "text": "Add release note",
+            "why": "Repository/tooling change, not observable in the app"
+          },
+          {
+            "text": "Relates to #1919, where it has been requested multiple times.",
+            "why": "Context/reference, no specific behavior stated"
+          },
+          {
+            "text": "Self-review has been performed - I have read every line of this diff and can explain what each change does and why it is needed",
+            "why": "Checklist item, not user-visible behavior"
+          }
+        ],
+        "regression_hints": [
+          "With the transfers option off, the Sankey chart behaves exactly as before the change",
+          "Existing Sankey views other than Spent are unaffected",
+          "Other report charts and their options continue to work unchanged"
+        ],
+        "questions": [
+          "What is the exact label of the new toggle in the UI (e.g. 'Show transfers')?",
+          "Where does the toggle appear - in the report's header menu, sidebar options, or chart settings?",
+          "Is the toggle only available in the Spent view, and is it hidden/disabled in other Sankey views?",
+          "Is the toggle's default state off?",
+          "Is the toggle setting saved with a saved report / persisted across reloads?",
+          "How are transfer nodes labeled in the chart (account names?)"
+        ]
+      },
+      "judgment": {
+        "claims": [
+          {
+            "model_claim": "m1",
+            "reference": "c1",
+            "label": "partial",
+            "reason": "Same options-menu check for a show-transfers option, but it doesn't specify the Spent view, which matters if the option only appears there."
+          },
+          {
+            "model_claim": "m2",
+            "reference": "c2",
+            "label": "partial",
+            "reason": "Aimed at transfer flows appearing, but lacks the income/spending setup and the specific flow between the two accounts."
+          },
+          {
+            "model_claim": "m3",
+            "reference": "c2",
+            "label": "match",
+            "reason": "Same setup with income in one account and spending from another; a connected graph amounts to a transfer flow linking the accounts."
+          },
+          {
+            "model_claim": "m4",
+            "reference": "c3",
+            "label": "match",
+            "reason": "With the toggle off, no transfer flows are shown."
+          },
+          {
+            "model_claim": "m5",
+            "reference": "c7",
+            "label": "partial",
+            "reason": "Persistence across reload rather than the reference's save-to-dashboard-then-reload, a different action."
+          },
+          {
+            "model_claim": "m6",
+            "reference": "c5",
+            "label": "match",
+            "reason": "Transfers involving off-budget accounts are not drawn as flows."
+          }
+        ],
+        "questions": [
+          {
+            "model_question": "q1",
+            "covers": [
+              "c1"
+            ],
+            "reason": "Asks for the toggle's label, which c1 specifies."
+          },
+          {
+            "model_question": "q2",
+            "covers": [
+              "c1"
+            ],
+            "reason": "Asks where the toggle appears; c1 places it in the Options menu."
+          },
+          {
+            "model_question": "q3",
+            "covers": [
+              "rq3"
+            ],
+            "reason": "Asks whether the option is limited to the Spent view."
+          },
+          {
+            "model_question": "q4",
+            "covers": [
+              "rq1",
+              "c4"
+            ],
+            "reason": "Asks whether the option is off by default."
+          },
+          {
+            "model_question": "q5",
+            "covers": [
+              "rq2",
+              "c7"
+            ],
+            "reason": "Asks whether the setting persists with a saved report or across reloads."
+          },
+          {
+            "model_question": "q6",
+            "covers": [],
+            "reason": "No reference item addresses how transfer nodes are labeled."
+          }
+        ]
+      },
+      "score": {
+        "claims": 6,
+        "intentRecall": {
+          "num": 3.5,
+          "den": 4
+        },
+        "precision": {
+          "num": 4.5,
+          "den": 6
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "questionCoverage": {
+          "num": 5,
+          "den": 10
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 1
+        },
+        "ungrounded": 0
+      },
+      "cost": 0.068752
+    },
+    {
+      "caseId": "lobsters-2029",
+      "run": 1,
+      "extraction": {
+        "claims": [
+          {
+            "when": "On the submit story page, enter a title shorter than the allowed minimum length (e.g. one character), fill in the URL/text, and click the submit button",
+            "then": {
+              "kind": "network",
+              "what": "No story-submission request is sent to the server; the page stays on the submit form"
+            },
+            "source": "Add minlength to title input in submit story page"
+          },
+          {
+            "when": "On the submit story page, enter a title shorter than the allowed minimum length and attempt to submit",
+            "then": {
+              "kind": "state",
+              "what": "The title input is marked invalid by the browser's built-in form validation (minlength constraint)"
+            },
+            "source": "Add minlength to title input in submit story page"
+          },
+          {
+            "when": "On the submit story page, enter a title that meets the minimum length along with the other required fields and submit",
+            "then": {
+              "kind": "state",
+              "what": "The title input is not flagged as invalid and the form submits normally"
+            },
+            "source": "Add minlength to title input in submit story page"
+          }
+        ],
+        "not_testable": [
+          {
+            "text": "Add minlength to title input in submit story page",
+            "why": "The presence of the HTML minlength attribute itself is a markup/implementation detail; only the resulting browser validation behavior is observable to a user."
+          }
+        ],
+        "regression_hints": [
+          "Submitting a story with a valid-length title still works and creates the story as before.",
+          "Existing server-side validation messages for title length continue to apply for cases that bypass client-side validation.",
+          "Other fields on the submit story page (URL, description, tags) keep their current validation behavior."
+        ],
+        "questions": [
+          "What exact minimum length value was set on the title input (e.g. 3 characters)?",
+          "Does the change also apply to the edit story page / story title field elsewhere, or only the new-story submission form?",
+          "Should the browser-side message match the existing server-side title length error wording, or is the default browser message acceptable?"
+        ]
+      },
+      "judgment": {
+        "claims": [
+          {
+            "model_claim": "m1",
+            "reference": "c1",
+            "label": "match",
+            "reason": "Same action (submit with a too-short title) and same network result (no request sent); staying on the form is a harmless addition."
+          },
+          {
+            "model_claim": "m2",
+            "reference": "c2",
+            "label": "match",
+            "reason": "Same action, and the same result: the title field is marked invalid for being too short."
+          },
+          {
+            "model_claim": "m3",
+            "reference": "c3",
+            "label": "partial",
+            "reason": "Aims at valid titles being submitted, but it does not test the 3-character boundary and bundles a state check with submission."
+          }
+        ],
+        "questions": [
+          {
+            "model_question": "q1",
+            "covers": [
+              "rq1",
+              "c3"
+            ],
+            "reason": "Asks for the minimum title length, including whether it is 3 characters, which relates to the 3-character acceptance claim."
+          },
+          {
+            "model_question": "q2",
+            "covers": [
+              "rq4",
+              "c4"
+            ],
+            "reason": "Asks whether the rule also applies to editing a story, which matches rq4 and the edit-page claim."
+          },
+          {
+            "model_question": "q3",
+            "covers": [
+              "rq2"
+            ],
+            "reason": "Asks whether the user should see the browser's default message or a custom one."
+          }
+        ]
+      },
+      "score": {
+        "claims": 3,
+        "intentRecall": {
+          "num": 2,
+          "den": 2
+        },
+        "precision": {
+          "num": 2.5,
+          "den": 3
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "questionCoverage": {
+          "num": 4,
+          "den": 5
+        },
+        "appContextCoverage": {
+          "num": 1,
+          "den": 1
+        },
+        "ungrounded": 0
+      },
+      "cost": 0.053501999999999994
+    },
+    {
+      "caseId": "lobsters-2132",
+      "run": 1,
+      "extraction": {
+        "claims": [
+          {
+            "when": "Submit a new story (fill in the form) and click Preview on the story submission page",
+            "then": {
+              "kind": "state",
+              "what": "The \"save\" button in the previewed story's byline is disabled"
+            },
+            "source": "just disables the two forms or removes the link/href from the byline buttons when previewing"
+          },
+          {
+            "when": "Submit a new story (fill in the form) and click Preview on the story submission page",
+            "then": {
+              "kind": "state",
+              "what": "The \"hide\" button in the previewed story's byline is disabled"
+            },
+            "source": "the buttons \"save\" and \"hide\" are enabled but, as expected, return a error 400 when submitted"
+          },
+          {
+            "when": "On the story submission preview, click the comments link in the previewed story's byline",
+            "then": {
+              "kind": "url",
+              "what": "The browser stays on the story submission preview page (no navigation to an invalid URL)"
+            },
+            "source": "A links to comment appears too but points to an invalid url."
+          },
+          {
+            "when": "On the story submission preview, attempt to activate the \"save\" button in the byline",
+            "then": {
+              "kind": "network",
+              "what": "No save request is sent (no 400 error response)"
+            },
+            "source": "return a error 400 when submitted"
+          }
+        ],
+        "not_testable": [
+          {
+            "text": "Pretty straight forward, just disables the two forms or removes the link/href from the byline buttons",
+            "why": "Describes the implementation approach (forms/href) rather than an observable user outcome on its own"
+          }
+        ],
+        "regression_hints": [
+          "Previewing a story still renders the story byline with its save/hide controls and comments text visible",
+          "Submitting the story after previewing still works normally",
+          "On real story pages (not previews), save, hide and the comments link remain functional"
+        ],
+        "questions": [
+          "Should the save/hide controls appear disabled (greyed-out button present) or be removed entirely from the preview?",
+          "Should the comments text still be displayed as plain text when the href is removed, or hidden?",
+          "Does this also apply to the preview shown when editing an existing story, or only to new story submissions?",
+          "Are there other byline actions (e.g. upvote/flag) that should also be disabled in preview?"
+        ]
+      },
+      "judgment": {
+        "claims": [
+          {
+            "model_claim": "m1",
+            "reference": "c1",
+            "label": "match",
+            "reason": "Same action and same result: the save button in the preview byline is disabled."
+          },
+          {
+            "model_claim": "m2",
+            "reference": "c2",
+            "label": "match",
+            "reason": "Same action and same result: the hide button in the preview byline is disabled."
+          },
+          {
+            "model_claim": "m3",
+            "reference": "c3",
+            "label": "partial",
+            "reason": "It targets the comments label no longer linking, but it checks that clicking causes no navigation rather than that the label is plain text."
+          },
+          {
+            "model_claim": "m4",
+            "reference": "c1",
+            "label": "partial",
+            "reason": "It relates to the disabled save button, but it checks for no network request rather than the button's disabled state."
+          }
+        ],
+        "questions": [
+          {
+            "model_question": "q1",
+            "covers": [
+              "rq1",
+              "c1",
+              "c2"
+            ],
+            "reason": "It asks whether save/hide should be shown disabled or removed, the same as rq1."
+          },
+          {
+            "model_question": "q2",
+            "covers": [
+              "rq3",
+              "c3"
+            ],
+            "reason": "It asks whether the comments label should be plain text or hidden, the same as rq3."
+          },
+          {
+            "model_question": "q3",
+            "covers": [],
+            "reason": "No reference item addresses the edit-story preview."
+          },
+          {
+            "model_question": "q4",
+            "covers": [
+              "rq2"
+            ],
+            "reason": "It asks whether other byline actions should also be handled in preview, which substantially matches rq2."
+          }
+        ]
+      },
+      "score": {
+        "claims": 4,
+        "intentRecall": {
+          "num": 2.5,
+          "den": 3
+        },
+        "precision": {
+          "num": 3,
+          "den": 4
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "questionCoverage": {
+          "num": 2,
+          "den": 3
+        },
+        "appContextCoverage": {
+          "num": 1,
+          "den": 1
+        },
+        "ungrounded": 0
+      },
+      "cost": 0.053677
+    },
+    {
+      "caseId": "lobsters-2172",
+      "run": 1,
+      "extraction": {
+        "claims": [],
+        "not_testable": [
+          {
+            "text": "Remove unreferenced dead code",
+            "why": "Pure internal cleanup; removing code that has no callers produces no user-visible change in the browser."
+          },
+          {
+            "text": "`TrafficHelper::CACHE_FOR` became unused after e334ae41 stopped using time-based traffic cache keys.",
+            "why": "Describes an internal constant removal; the behavior change happened in an earlier commit (e334ae41), not this PR."
+          },
+          {
+            "text": "`Keystore.find_or_create_key_for_update` became unused after b45d1750 switched the remaining code to `upsert`.",
+            "why": "Internal method removal with no callers; not observable in a browser."
+          },
+          {
+            "text": "`Keystore.decrement_value_for` and `decremented_value_for` came over in the initial Rails conversion (093747b7) and don't seem to have ever had callers.",
+            "why": "Unreferenced internal methods; no user-facing behavior."
+          },
+          {
+            "text": "`Story#domain_search_url` became unused after f718da18 switched domain links to `for_domain_url`.",
+            "why": "Domain link behavior was changed by an earlier commit (f718da18); this PR only deletes the dead method."
+          },
+          {
+            "text": "`Story#update_availability` was added in 9c73c87d but never used.",
+            "why": "Method never had callers, so removing it changes nothing observable."
+          },
+          {
+            "text": "`User#undelete!` became unused after 6fb659f8 stopped automatically reactivating deleted users on login.",
+            "why": "The login behavior change belongs to an earlier commit (6fb659f8); this PR only removes the unused method."
+          },
+          {
+            "text": "`User#mastodon_acct` became unused after f1a253c1 started building the Mastodon author URL directly.",
+            "why": "Mastodon URL behavior was changed by an earlier commit (f1a253c1); no new user-visible change here."
+          },
+          {
+            "text": "`Vote#on_comment?` was added in bb5e53e9 but never used.",
+            "why": "Unreferenced internal predicate; not observable."
+          },
+          {
+            "text": "`Vote.comment_votes_by_user_for_story_hash` became unused after c05d00ad moved comment vote loading into `CommentVoteHydrator`.",
+            "why": "Comment vote loading was moved in an earlier commit (c05d00ad); this PR only deletes dead code."
+          },
+          {
+            "text": "`Github.oauth_consumer` was added in fcb24439 but the GitHub flow used `Sponge` directly, so it was never used.",
+            "why": "Never-called method; the GitHub flow is unchanged by this PR."
+          },
+          {
+            "text": "Found these leftovers using [rubydex](https://github.com/shopify/rubydex)",
+            "why": "Describes the tooling used to find the code, not a behavior change."
+          }
+        ],
+        "regression_hints": [
+          "Story pages continue to show domain links that navigate to the domain listing (via for_domain_url).",
+          "Comment voting (upvote/downvote on comments) continues to display the current user's existing votes correctly on story pages.",
+          "Story voting and vote counts continue to work as before.",
+          "Logging in as a deleted user continues to behave as it did (no automatic reactivation).",
+          "Mastodon author links on stories continue to render and point to the correct profile.",
+          "GitHub OAuth connect/login flow continues to work.",
+          "Traffic/cache-driven pages (e.g. front page ordering and traffic-based data) continue to render normally.",
+          "Keystore-backed counters (e.g. user karma, comment/story counts) continue to display correct values."
+        ],
+        "questions": [
+          "Is this PR intended to be purely non-functional (no user-visible change at all), or is any of the removed code expected to alter behavior on some page?",
+          "Are there any admin, moderation, or API endpoints that exercised any of these methods and might now behave differently?"
+        ]
+      },
+      "judgment": {
+        "claims": [],
+        "questions": [
+          {
+            "model_question": "q1",
+            "covers": [],
+            "reason": "No reference questions or claims exist to cover."
+          },
+          {
+            "model_question": "q2",
+            "covers": [],
+            "reason": "No reference questions or claims exist to cover."
+          }
+        ]
+      },
+      "score": {
+        "claims": 0,
+        "intentRecall": {
+          "num": 0,
+          "den": 0
+        },
+        "precision": {
+          "num": 0,
+          "den": 0
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "questionCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "ungrounded": 0
+      },
+      "cost": 0.049425000000000004
+    }
+  ]
+}

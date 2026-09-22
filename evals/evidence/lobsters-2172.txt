@@ -1,0 +1,28 @@
+<pull_request repo="lobsters/lobsters" number="2172" author="nvasilevski" base="main">
+
+<title>Remove unreferenced dead code</title>
+
+<description>
+Found these leftovers using [rubydex](https://github.com/shopify/rubydex)
+
+- `TrafficHelper::CACHE_FOR` became unused after e334ae41 stopped using time-based traffic cache keys.
+- `Keystore.find_or_create_key_for_update` became unused after b45d1750 switched the remaining code to `upsert`.
+- `Keystore.decrement_value_for` and `decremented_value_for` came over in the initial Rails conversion (093747b7) and don't seem to have ever had callers.
+- `Story#domain_search_url` became unused after f718da18 switched domain links to `for_domain_url`.
+- `Story#update_availability` was added in 9c73c87d but never used.
+- `User#undelete!` became unused after 6fb659f8 stopped automatically reactivating deleted users on login.
+- `User#mastodon_acct` became unused after f1a253c1 started building the Mastodon author URL directly.
+- `Vote#on_comment?` was added in bb5e53e9 but never used.
+- `Vote.comment_votes_by_user_for_story_hash` became unused after c05d00ad moved comment vote loading into `CommentVoteHydrator`.
+- `Github.oauth_consumer` was added in fcb24439 but the GitHub flow used `Sponge` directly, so it was never used.
+</description>
+
+</pull_request>
+
+<linked_issues>
+(none)
+</linked_issues>
+
+<commits>
+- Remove unreferenced dead code
+</commits>

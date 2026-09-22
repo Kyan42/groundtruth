@@ -1,0 +1,44 @@
+<pull_request repo="actualbudget/actual" number="8780" author="emiltb" base="master">
+
+<title>Add option to show transfers in Sankey chart Spent view</title>
+
+<description>
+## Description
+
+Adds an optional toggle in the Sankey chart to show transfers. This can better represent the flow of money, e.g. if the user receives money in one account, but have most of their spending from credit cards, which would previously resulted in a disconnected graph.
+
+With option off:
+<img width="949" height="285" alt="2026-08-23T21:18:18,811583869+02:00" src="https://github.com/user-attachments/assets/7d3b5af2-8586-40f6-9075-8d94f2070a04" />
+
+With option on: 
+<img width="954" height="294" alt="2026-08-23T21:18:03,410472516+02:00" src="https://github.com/user-attachments/assets/a361915a-5413-4bc7-9422-f2ededa378bf" />
+
+Development aided by OpenCode / GPT-5 Mini. 
+
+## Related issue(s)
+
+Relates to #1919, where it has been requested multiple times. 
+
+## Testing
+
+Manual testing with a specifically crafted tested budget and the full history of my own budget.
+
+## Checklist
+
+- [X] Release notes added (see link above)
+- [X] No obvious regressions in affected areas
+- [X] Self-review has been performed - I have read every line of this diff and can explain what each change does and why it is needed
+</description>
+
+</pull_request>
+
+<linked_issues>
+(none)
+</linked_issues>
+
+<commits>
+- Add transfers as option to Spent view
+- Fix recursion error happening in otherGrouping
+- Filter out transfers to off-budget accounts
+- Add release note
+</commits>

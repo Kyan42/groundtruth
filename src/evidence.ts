@@ -39,24 +39,56 @@ export async function listAll<T>(fetchPage: (page: number) => Promise<T[]>): Pro
   }
 }
 
-export async function buildEvidence(octokit: Octokit, { owner, repo, number }: PrRef): Promise<Evidence> {
+type PrGraph = {
+  repository: {
+    pullRequest: {
+      closingIssuesReferences: { nodes: { number: number; title: string; body: string }[] };
+      userContentEdits: { nodes: { editedAt: string; diff: string | null }[] };
+    };
+  };
+};
+
+// `asOf` rebuilds the evidence as it was at that moment (e.g. when the PR was opened):
+// the description version current then, and only commits made by then.
+// Linked issues and the title are taken as they are now.
+export async function buildEvidence(
+  octokit: Octokit,
+  { owner, repo, number }: PrRef,
+  { asOf }: { asOf?: string } = {},
+): Promise<Evidence> {
   const params = { owner, repo, pull_number: number };
-  const [{ data: pr }, commits, linked] = await Promise.all([
+  const [{ data: pr }, allCommits, graph] = await Promise.all([
     octokit.request("GET /repos/{owner}/{repo}/pulls/{pull_number}", params),
     listAll((page) =>
       octokit.request("GET /repos/{owner}/{repo}/pulls/{pull_number}/commits", { ...params, per_page: 100, page })
         .then((r) => r.data)),
-    octokit.graphql<{ repository: { pullRequest: { closingIssuesReferences: { nodes: { number: number; title: string; body: string }[] } } } }>(
+    octokit.graphql<PrGraph>(
       `query($owner: String!, $repo: String!, $number: Int!) {
         repository(owner: $owner, name: $repo) {
           pullRequest(number: $number) {
             closingIssuesReferences(first: 10) { nodes { number title body } }
+            userContentEdits(first: 100) { nodes { editedAt diff } }
           }
         }
       }`,
       { owner, repo, number },
     ),
   ]);
+  const { closingIssuesReferences, userContentEdits } = graph.repository.pullRequest;
+
+  let body = pr.body ?? "";
+  let commits = allCommits;
+  if (asOf) {
+    // Each edit's `diff` holds the full description as of that edit.
+    const version = userContentEdits.nodes
+      .filter((e) => e.editedAt <= asOf && e.diff !== null)
+      .sort((a, b) => a.editedAt.localeCompare(b.editedAt))
+      .at(-1);
+    if (version) body = version.diff!;
+    // Commit dates can postdate the opening if the author force-pushed a replacement
+    // (lobsters#2029), and a PR always has at least one commit, so keep the first regardless.
+    commits = allCommits.filter((c, i) => i === 0 || (c.commit.committer?.date ?? "") <= asOf);
+  }
 
   return {
     repo: `${owner}/${repo}`,
@@ -64,10 +96,10 @@ export async function buildEvidence(octokit: Octokit, { owner, repo, number }: P
     url: pr.html_url,
     title: pr.title,
     author: pr.user?.login ?? "unknown",
-    body: stripComments(pr.body ?? ""),
+    body: stripComments(body),
     baseRef: pr.base.ref,
-    headSha: pr.head.sha,
-    linkedIssues: linked.repository.pullRequest.closingIssuesReferences.nodes.map((i) => ({
+    headSha: asOf ? (commits.at(-1)?.sha ?? pr.head.sha) : pr.head.sha,
+    linkedIssues: closingIssuesReferences.nodes.map((i) => ({
       number: i.number,
       title: i.title,
       body: truncate(stripComments(i.body ?? ""), MAX_ISSUE_BODY_CHARS),
