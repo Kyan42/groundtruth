@@ -1,0 +1,79 @@
+id: lobsters-2132
+pr: lobsters/lobsters#2132
+title: Disable Story Byline Buttons when Previewing
+type: behavior-change
+tags: [human-written, intent-in-issue]   # Lobsters forbids LLM-written code; the description is one line
+
+snapshot:
+  opened_at: 2026-07-10T17:32:33Z
+  head: 5bfe8a0            # only the first commit existed when the PR was opened
+  commits_visible:
+    - disable story byline buttons when previewing
+  known_gaps:
+    - >-
+      The maintainer decided the approach in an issue comment before the PR existed ("Let's render them, disabled.").
+      The evidence tool reads the issue body but not its comments, so extraction doesn't see this.
+
+setup:
+  - A logged-in user. Lobsters is invite-only, so this needs a local instance (Rails + SQLite, seeded with fake data), not the live site.
+  - The story submit page (/stories/new) with a URL and title filled in, then Preview.
+  - For c4, a moderator account.
+
+expected:
+  claims:
+    - id: c1
+      when: fill in the story submit form and click Preview
+      then: { kind: state, what: 'the "save" button in the preview''s byline is disabled' }
+      derivable: intent
+      source: 'issue: "the buttons save and hide are enabled but ... return a error 400 when submitted"; description: "disables the two forms"'
+
+    - id: c2
+      when: fill in the story submit form and click Preview
+      then: { kind: state, what: 'the "hide" button in the preview''s byline is disabled' }
+      derivable: intent
+      source: same as c1
+
+    - id: c3
+      when: fill in the story submit form and click Preview
+      then: { kind: state, what: 'the comments label in the preview''s byline is plain text, not a link' }
+      derivable: intent
+      source: 'issue: "A links to comment appears too but points to an invalid url"; description: "removes the link/href from the byline buttons"'
+
+    - id: c4
+      when: as a moderator, fill in the story submit form and click Preview
+      then: { kind: hidden, what: 'the "mod edit" link does not appear in the preview''s byline' }
+      derivable: discussion
+      source: >-
+        not in the evidence at open. The first commit turned "mod edit" into plain text; the reviewer suggested
+        "Let's just hide it, mods won't notice", and two commits after opening did that.
+
+  not_testable:
+    - text: "Pretty straight forward"
+      why: commentary, not behavior
+
+  regression_hints:
+    - On a published story (not a preview), "save" and "hide" are enabled and work.
+    - On a published story, the comments label is still a link to the comments, with the same text as before.
+    - Moderators still see "mod edit" on published stories.
+
+  questions:
+    - In preview, should save and hide be shown disabled, or removed entirely? (The maintainer answered in the issue thread - "render them, disabled" - but extraction doesn't see issue comments.)
+    - { text: 'Should other byline links in preview be handled too (e.g. moderators'' "mod edit")? (This is what review ended up changing.)', needs: app-context }
+    - In preview, should the comments label be plain text or removed?
+
+checkpoints: []
+
+# Layer 3 material: behavior this PR changed that nobody asked for
+regressions:
+  - what: 'On a published story''s own page, the zero-comments label changed from "no comments" to "no comment".'
+    cause: 'the PR rewrote the label as `zero? ? "no comment" : ...`; before, it rendered "no" + "comments".'
+    status: live on lobste.rs as of 2026-09-22 (story pages say "no comment"; the front page still says "no comments")
+    caught_by: the second regression hint, if a stored journey checks that label's text
+
+review:
+  status: reviewed
+  drafted_by: claude
+  reviewed_by: Kyan42
+  notes: >-
+    Not clicked through (no Lobsters account; would need a local instance). The diff is one view file,
+    so the claims are checked against the code and the review thread.

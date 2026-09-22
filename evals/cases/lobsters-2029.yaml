@@ -1,0 +1,73 @@
+id: lobsters-2029
+pr: lobsters/lobsters#2029
+title: Add minlength to title input in submit story page
+type: vague
+tags: [human-written, empty-description]   # the description is only the unfilled PR template
+
+snapshot:
+  opened_at: 2026-05-26T21:44:54Z
+  head: 95ce9b9            # the only commit
+  commits_visible:
+    - Add minlength to title input in submit story page
+  known_gaps: []
+  # The whole evidence is the title plus an identical commit message, about 80 tokens.
+
+setup:
+  - A logged-in user. Lobsters is invite-only (/stories/new redirects to /login), so this needs a local instance.
+  - The story submit page, /stories/new.
+
+expected:
+  claims:
+    - id: c1
+      when: on the story submit page, enter a title that is too short and submit
+      then: { kind: network, what: no request is sent to the server }
+      derivable: intent
+      source: 'title: "Add minlength to title input in submit story page"'
+      note: >-
+        The server already rejected titles under 3 characters before this PR, so "a short title is rejected" would
+        pass on main as well. What's new is that the browser blocks the submit before any request is made,
+        so the claim has to check that.
+
+    - id: c2
+      when: on the story submit page, enter a title that is too short and submit
+      then: { kind: state, what: the title field is marked invalid for being too short }
+      derivable: intent
+      source: same as c1
+
+    - id: c3
+      when: on the story submit page, enter a 3-character title (other fields valid) and submit
+      then: { kind: network, what: the form is sent to the server }
+      derivable: diff-only
+      source: 'the minimum comes from the model validation (`length: {in: 3..150}`), which the form now reads'
+      note: the boundary. c1 and c2 cover the other side once the tester knows the minimum is 3 (a 2-character title).
+
+    - id: c4
+      when: edit an existing story, shorten its title below the minimum, and save
+      then: { kind: network, what: no request is sent to the server }
+      derivable: diff-only
+      source: 'the changed partial (stories/_form) is also rendered by the edit-story, suggest-edit and mod-edit pages'
+      note: a side effect of where the change was made, not stated intent. Kept because it's direct, not speculative.
+
+  not_testable: []
+
+  regression_hints:
+    - The title is still required, and the maximum length (150) is still enforced.
+    - Submitting a story with a valid title still works.
+    - A too-short title that somehow reaches the server (e.g. JavaScript disabled) is still rejected by the server with an error.
+
+  questions:
+    - What is the minimum title length?
+    - What should the user see for a too-short title - the browser's built-in warning or a custom message?
+    - Is this a new rule, or moving an existing server-side rule into the form? (It's the latter; that changes what a test must check.)
+    - { text: "Does this apply only to submitting a new story, or also to editing a story and suggesting a title?", needs: app-context }
+
+checkpoints: []
+regressions: []
+
+review:
+  status: reviewed
+  drafted_by: claude
+  reviewed_by: Kyan42
+  notes: >-
+    Not clicked through (needs a Lobsters account). The change is one HTML attribute, and the minimum (3) is
+    checked in the model. Expected extractor behavior: one claim from the title, the rest as questions.

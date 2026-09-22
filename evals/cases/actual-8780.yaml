@@ -1,0 +1,122 @@
+id: actual-8780
+pr: actualbudget/actual#8780
+title: Add option to show transfers in Sankey chart Spent view
+type: new-feature
+tags: [ai-assisted]   # description says "Development aided by OpenCode / GPT-5 Mini"
+
+# What extraction sees: evidence as it was when the PR was opened.
+# Later edits don't count: the author swapped the "option on" screenshot the next day,
+# a bot appended Bundle Stats 6 times, and 8 more commits landed after opening.
+snapshot:
+  opened_at: 2026-08-23T19:32:25Z
+  head: ac8d2a6            # 4th commit; the first 4 were pushed before opening
+  commits_visible:
+    - Add transfers as option to Spent view
+    - Fix recursion error happening in otherGrouping
+    - Filter out transfers to off-budget accounts
+    - Add release note
+  known_gaps:
+    - Screenshots (off vs on) carry intent but are images; extraction only reads text today.
+    - >-
+      Issue 1919 is referenced as "Relates to", not linked as closing, so the evidence tool misses it.
+      It's an 89-comment feedback thread about the Sankey report in general, so not much is lost.
+
+# Things the tester needs set up (for later layers; useful for extraction's "needs" hints too)
+setup:
+  - The Sankey report is experimental. Enable it in Settings > Show advanced settings > Experimental features > "Sankey report".
+  - A budget with a transfer between two on-budget accounts in the report's date range.
+    The demo budget has none, so you have to add one.
+  - For c5: a transfer between an on-budget and an off-budget account (the demo has off-budget accounts).
+
+expected:
+  claims:
+    - id: c1
+      when: open the Sankey report in Spent view and open its Options menu
+      then: { kind: visible, what: 'there is an option to show transfers (shipped label: "Show transfers in Spent view")' }
+      derivable: intent
+      source: 'description: "Adds an optional toggle in the Sankey chart to show transfers"; title: "...Spent view"'
+
+    - id: c2
+      when: turn on the show-transfers option, with income arriving in one account and spending made from another account that was funded by a transfer
+      then: { kind: visible, what: a transfer flow is drawn between the two accounts }
+      derivable: intent
+      source: 'description: "e.g. if the user receives money in one account, but have most of their spending from credit cards, which would previously resulted in a disconnected graph"'
+
+    - id: c3
+      when: turn the show-transfers option back off
+      then: { kind: hidden, what: no transfer flows are drawn between accounts }
+      derivable: intent
+      source: 'description: "optional toggle"; screenshot labeled "With option off"'
+
+    - id: c4
+      when: open a fresh Sankey report in Spent view
+      then: { kind: state, what: the show-transfers option is off by default }
+      derivable: discussion
+      source: 'not stated at open ("optional" hints at it). Reviewers agreed on off-by-default; the code defaults to false.'
+
+    - id: c5
+      when: turn on show transfers with a transfer between an on-budget and an off-budget account in range
+      then: { kind: hidden, what: that transfer is not drawn as a flow }
+      derivable: intent
+      source: 'commit at open: "Filter out transfers to off-budget accounts"'
+
+    - id: c6
+      when: turn on show transfers, with unequal transfers in both directions between the same two accounts in range
+      then: { kind: visible, what: 'a single flow between them, sized to the net amount' }
+      derivable: diff-only
+      source: 'commit after opening: "Aggregate transfers to get net result and avoid cycles"; test "nets reciprocal transfers and omits zero-value pairs"'
+
+    - id: c6b
+      when: turn on show transfers, with equal transfers in both directions between the same two accounts in range
+      then: { kind: hidden, what: no flow is drawn between them }
+      derivable: diff-only
+      source: same as c6
+
+    - id: c7
+      when: turn on show transfers, save the report to the dashboard, and reload
+      then: { kind: persisted, what: the dashboard Sankey card still shows transfer flows }
+      derivable: diff-only
+      source: 'diff: showTransfers is stored in the widget settings and read by SankeyCard'
+
+    - id: c8
+      when: turn on show transfers with transfers forming a cycle (A → B → C → A) in range
+      then: { kind: visible, what: 'the chart renders (before the fix: "This widget has failed to load")' }
+      derivable: discussion
+      source: 'reviewer redge76 reported "This widget has failed to load" (a RangeError: maximum call stack size exceeded) on a complex budget; fixed by the later commit "Prevent infinite recursion in layer number resolution"'
+      note: >-
+        Kept despite being an edge case: the PR itself fixed it after a reviewer hit it, which makes it intended.
+        The first candidate for a layer-2 "fails before the fix, passes after" checkpoint.
+
+  not_testable:
+    - text: "Development aided by OpenCode / GPT-5 Mini"
+      why: describes how it was built, not how it behaves
+    - text: "Manual testing with a specifically crafted tested budget and the full history of my own budget"
+      why: describes how it was tested
+    - text: 'commit "Fix recursion error happening in otherGrouping"'
+      why: internal fix with no user-visible symptom described
+
+  regression_hints:
+    - The Budgeted view of the Sankey report is unchanged (the feature is scoped to the Spent view).
+    - The other Spent-view options ("Show percentages", "Group accounts in Spent view") still work, including combined with show transfers.
+    - The Spent view with the option off looks exactly as it did before this PR.
+
+  # What a good extractor should ask the developer, given only the evidence at open
+  questions:
+    - Is the show-transfers option off by default? ("optional" suggests so, but it isn't stated.)
+    - Is the choice remembered (for a saved dashboard widget, or across reloads)?
+    - Does the option apply only to the Spent view, or to the Budgeted view as well?
+    - When money moves both ways between two accounts, should that be two flows or one net flow?
+    - Which transfers count? Off-budget ones are excluded per the commit; what about other cases?
+    - { text: 'How does the option interact with "Group accounts in Spent view"?', needs: app-context }
+
+# Layer 2 (verification), filled in later
+checkpoints: []
+
+review:
+  status: reviewed
+  drafted_by: claude
+  reviewed_by: Kyan42
+  notes: >
+    Checked on the PR's deploy preview (demo budget): c1 confirmed (label "Show transfers in Spent view");
+    c4 confirmed (unchecked by default). The demo budget has no on-budget transfers in the default range,
+    so toggling made no visible difference (25 flows either way). c2/c3 were not seen working.
