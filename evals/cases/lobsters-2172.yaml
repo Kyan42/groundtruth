@@ -1,0 +1,55 @@
+id: lobsters-2172
+pr: lobsters/lobsters#2172
+title: Remove unreferenced dead code
+type: no-claims
+tags: [human-written, lures]   # lists user-facing-sounding behaviors that this PR does not change
+
+snapshot:
+  opened_at: 2026-07-22T16:39:17Z
+  head: 7424b6c            # the only commit
+  commits_visible:
+    - Remove unreferenced dead code
+  known_gaps: []
+
+setup: []
+
+# The right output is zero claims. The description is a list of methods that nothing calls,
+# each with the older commit that made it unused. Several mention user-visible behavior
+# ("stopped automatically reactivating deleted users on login", "switched domain links",
+# "building the Mastodon author URL"), but that behavior changed in those older commits, not here.
+# An extractor that turns them into claims is testing history, not this PR.
+expected:
+  claims: []
+
+  not_testable:
+    - text: "Remove unreferenced dead code (the whole list)"
+      why: removing code that nothing calls changes no behavior
+    - text: '"User#undelete! became unused after 6fb659f8 stopped automatically reactivating deleted users on login"'
+      why: describes a behavior change from an older commit, not this PR
+    - text: '"Story#domain_search_url became unused after f718da18 switched domain links to for_domain_url"'
+      why: describes a behavior change from an older commit, not this PR
+    - text: '"User#mastodon_acct became unused after f1a253c1 started building the Mastodon author URL directly"'
+      why: describes a behavior change from an older commit, not this PR
+
+  # The removed code sat next to these features. If a removal was wrong, this is where it would show.
+  regression_hints:
+    - Links from a story to its domain still work.
+    - A user's Mastodon author link on stories still works.
+    - A deleted user logging in is still not reactivated.
+    - Voting on comments, and seeing your own votes on a story's comments, still work.
+    - 'The header logo still reflects current traffic (its style, and its "Current traffic: N%" tooltip).'
+    - Linking a GitHub account still works.
+
+  questions: []
+
+checkpoints: []
+regressions: []   # checked: no later commit repairs anything this PR removed (as of 2026-09-22)
+
+review:
+  status: reviewed
+  drafted_by: claude
+  reviewed_by: Kyan42
+  notes: >-
+    Merged 2026-09-14 after sitting open for ~7 weeks, and the maintainer approved it as-is. The same-day commit
+    "fix vote hydration on non-form comment searches" (03295f3) looks related but isn't: it changes search
+    parameter handling and never references the removed method.
