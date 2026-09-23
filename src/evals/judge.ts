@@ -24,21 +24,21 @@ const JudgmentSchema = z.object({
 
 export type Judgment = z.infer<typeof JudgmentSchema>;
 
-const JUDGE_PROMPT = `You compare a claim extractor's output against a hand-written reference for the same pull request. You only decide correspondences; you don't score.
+export const JUDGE_PROMPT = `You compare a claim extractor's output against a hand-written reference for the same pull request. You only decide correspondences; you don't score.
 
 Claims and assumptions both describe browser-checkable behavior as an action (when) and one observable result (then); assumptions are the extractor's guesses about decisions the evidence leaves open. Map every extracted claim (m1, m2, ...) and every extracted assumption (s1, s2, ...) the same way:
 - reference: the id of the single best-corresponding reference claim (c...) or reference assumption (a...), or of a not-testable item (nt...) if the item restates that statement, or null if nothing corresponds.
 - label:
-  - match: same user action and same observable result, even if worded differently or more or less specific in harmless ways.
-  - partial: clearly aimed at the same reference item but materially off: the action is vague or different, it bundles several results, the result is weaker or stronger than the reference, or the kind is wrong in a way that changes what would be checked.
+  - match: checks the same intended behavior in the same situation, with an observable result that would fail if that behavior were missing. The observable may differ from the reference's when it verifies the same thing equally well: "the save button is disabled" and "clicking save sends no request" both verify that save doesn't work.
+  - partial: aimed at the same reference item but materially off: the action is vague or a different situation; it bundles several results; or its result would also hold without the intended behavior (for example, it was already true before this PR; reference notes say when that applies), so it wouldn't catch a broken change. That can't happen when the action itself needs the new feature (e.g. turning a new option on or off), since the check couldn't even be run without it.
   - none: nothing corresponds (use this with reference null, or with an nt... id).
 Several extracted items may point at the same reference item. Ignore whether an assumption is checked or unchecked; only match its content.
 
-Judge meaning, not wording. Be strict about the observable result: an item that checks something different from the reference is not a match even if the topic is the same.`;
+Judge meaning, not wording. The question for each item is whether it tests the same intended behavior as well as the reference does, not whether it uses the same observable.`;
 
 function renderReference(c: EvalCase): string {
   const claims = c.expected.claims.map((r) =>
-    `${r.id} [${r.derivable}] when: ${r.when} | then (${r.then.kind}): ${r.then.what}`);
+    `${r.id} [${r.derivable}] when: ${r.when} | then (${r.then.kind}): ${r.then.what}${r.note ? ` | note: ${r.note}` : ""}`);
   // Assumptions with same_as are represented by their claim.
   const assumptions = c.expected.assumptions.filter((a) => !a.same_as).map((a) =>
     `${a.id} when: ${a.when} | then (${a.then!.kind}): ${a.then!.what}`);

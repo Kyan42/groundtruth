@@ -12,6 +12,7 @@ export type RefClaim = {
   then: { kind: string; what: string };
   derivable: Derivable;
   source: string;
+  note?: string;
 };
 
 // A decision the evidence leaves open, with the checkbox default a good extractor should pick.

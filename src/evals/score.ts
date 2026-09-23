@@ -13,6 +13,7 @@ export type CaseScore = {
   precision: Ratio;           // extracted claims that correspond to any reference claim
   lures: number;              // claims made from not-testable statements, or any claim on a case expecting none
   unmatched: number;          // claims matching nothing: invented, or a gap in the reference (adjudicate)
+  duplicates: number;         // claims matching a reference claim that an earlier claim already matched
   ungrounded: number;         // claims whose source quote isn't in the evidence
   assumptions: number;
   assumptionCoverage: Ratio;  // open decisions (reference assumptions, discussion/diff-only claims) raised
@@ -76,6 +77,9 @@ export function scoreRun(c: EvalCase, e: Extraction, j: Judgment, evidenceText: 
     },
     lures: noClaimsCase ? e.claims.length : claimVerdicts.filter((v) => v?.reference?.startsWith("nt")).length,
     unmatched: claimVerdicts.filter((v) => !v || (!isRefClaim(v.reference) && !v.reference?.startsWith("nt"))).length,
+    duplicates: claimVerdicts.filter((v, i) =>
+      v && v.label !== "none" && isRefClaim(v.reference) &&
+      claimVerdicts.slice(0, i).some((w) => w && w.label !== "none" && w.reference === v.reference)).length,
     ungrounded: e.claims.filter((m) => !isGrounded(m.source, evidenceText)).length,
     assumptions: e.assumptions.length,
     assumptionCoverage: { num: coverTargets.filter((id) => raised.has(id)).length, den: coverTargets.length },

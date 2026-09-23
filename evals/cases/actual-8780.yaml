@@ -111,8 +111,8 @@ expected:
       default: any
     - id: a3
       when: turn on show transfers, then switch the report to the Budgeted view
-      then: { kind: visible, what: transfer flows are drawn in the Budgeted view }
-      default: false       # the title scopes it to the Spent view
+      then: { kind: hidden, what: no transfer flows are drawn (the option only affects the Spent view) }
+      default: true        # the title scopes it to the Spent view
     - id: a4
       same_as: c6          # money both ways between two accounts shows as one net flow
       default: any

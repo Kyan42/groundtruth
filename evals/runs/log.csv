@@ -1,0 +1,6 @@
+run,mode,extract_model,extract_prompt,judge_model,judge_prompt,runs,cases,dev_precision,dev_recall,test_precision,test_recall,extract_usd_per_pr,judge_usd_per_pr,spent_usd
+2026-09-23T01-08-36-960Z,rejudge,claude-opus-5,unknown,claude-opus-5-5,9b1faa42,3,8,0.902,0.833,0.626,0.641,0.0000,0.0146,0.35
+2026-09-23T01-09-34-422Z,rejudge,claude-opus-5,unknown,claude-opus-5-5,9b1faa42,3,8,0.887,0.815,0.629,0.641,NaN,0.0138,0.33
+2026-09-23T01-23-55-941Z,full,claude-opus-5,97c3dd65,claude-opus-5-5,9b1faa42,3,8,0.896,0.741,0.783,0.577,0.0400,0.0126,1.26
+2026-09-23T01-31-24-399Z,rejudge,claude-opus-5,97c3dd65,claude-opus-5-5,200d5b36,3,8,0.917,0.813,0.783,0.577,0.0400,0.0122,0.29
+2026-09-23T01-32-04-466Z,rejudge,claude-opus-5,unknown,claude-opus-5-5,200d5b36,3,8,0.902,0.813,0.629,0.641,NaN,0.0152,0.36

@@ -9,6 +9,7 @@
     "evidence": "tsx src/cli/evidence.ts",
     "evals:snapshot": "tsx src/cli/snapshot.ts",
     "evals": "tsx --env-file-if-exists=.env src/cli/eval.ts",
+    "evals:compare": "tsx src/cli/compare.ts",
     "extract": "tsx --env-file-if-exists=.env src/cli/extract.ts",
     "typecheck": "tsc --noEmit"
   },

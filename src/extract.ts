@@ -48,11 +48,13 @@ claims - testable statements of intended behavior. Each has:
 - when: the user action(s) that lead to the check, in user terms (pages, buttons, forms), not code terms.
 - then: exactly one observable result, with a kind:
   visible (something is shown), hidden (something is not shown), text (specific text), url (navigation or address), count (a number or quantity), state (an element's state: enabled/disabled, checked, selected, expanded, invalid), clipboard, network (a request is or isn't sent, or its response), persisted (survives a reload or a new session).
-  If one action leads to several results, write several claims with the same when.
+  If one action leads to several results, write several claims with the same when; never join two results in one then.
 - source: a short quote copied word for word from the evidence that states this intent.
 
 Rules for claims:
 - Only intent the evidence states or clearly implies. Don't imagine edge cases or failure modes the author didn't raise.
+- One claim per intended behavior, using the most direct check. Don't add a second claim that checks the same behavior another way (e.g. "the button is disabled" and "clicking it sends nothing").
+- If the evidence names a change without saying what it does for users (e.g. only "fix login issue"), don't guess at it: make no claims for it.
 - Be exactly as specific as the evidence. Don't invent labels, messages or numbers; the tester reads those from the running app. If whether a behavior is intended at all is uncertain (a default, the scope), make it an assumption instead of a claim.
 - A claim should fail on the app as it was before this PR. If the old app already behaved that way, the claim tests nothing; say what is actually new.
 - Changes that are not observable in a browser (refactors, performance, internals, tooling) produce no claims. Zero claims is the right answer for a PR with no user-visible change.
@@ -61,7 +63,7 @@ not_testable - statements in the evidence that shouldn't become claims, each wit
 
 regression_hints - existing behavior the evidence says, or clearly implies, should stay the same.
 
-assumptions - at most ${MAX_ASSUMPTIONS}, most important first. Decisions about intended behavior that the evidence leaves open, written as claims (when / then) with your best guess in checked: true if you think the author intends it, false if not (e.g. something the linked issue asks for that this PR may not do). The developer sees them as checkboxes set to your guesses and clicks only to correct one, so guess well and keep them few. Only include decisions that change what gets tested and that the running app can't answer: whether a default or a scope is intended, yes; exact labels, values or where a control sits, no - the tester will see those. None is fine when the evidence is clear.
+assumptions - at most ${MAX_ASSUMPTIONS}, most important first. Decisions about intended behavior that the evidence leaves open, written as claims (when / then) with your best guess in checked: true if you think the author intends it, false if not (e.g. something the linked issue asks for that this PR may not do). The developer sees them as checkboxes set to your guesses and clicks only to correct one, so guess well and keep them few. Only include decisions that change what gets tested and that the running app can't answer: whether a default or a scope is intended, yes; exact labels, values or where a control sits, no - the tester will see those. They are about new behavior this PR may intend; existing behavior that should keep working goes in regression_hints. None is fine when the evidence is clear.
 
 Return all four lists: claims, assumptions, not_testable, regression_hints.`;
 
