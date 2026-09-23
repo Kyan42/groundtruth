@@ -1,0 +1,3336 @@
+{
+  "model": "claude-opus-5",
+  "judgeModel": "claude-opus-5-5",
+  "runs": 3,
+  "extractPrompt": "97c3dd65",
+  "judgePrompt": "e16b6c74",
+  "rejudgeOf": "evals/runs/2026-09-23T01-23-55-941Z",
+  "results": [
+    {
+      "caseId": "actual-8780",
+      "run": 1,
+      "extractCost": 0.036605,
+      "judgeCost": 0.031532,
+      "extraction": {
+        "claims": [
+          {
+            "when": "Open a Sankey chart report and view its options/menu",
+            "then": {
+              "kind": "visible",
+              "what": "A toggle option to show transfers is available"
+            },
+            "source": "Adds an optional toggle in the Sankey chart to show transfers."
+          },
+          {
+            "when": "On a Sankey chart report, enable the show-transfers toggle",
+            "then": {
+              "kind": "state",
+              "what": "The toggle appears checked/enabled"
+            },
+            "source": "Adds an optional toggle in the Sankey chart to show transfers."
+          },
+          {
+            "when": "On a Sankey chart with the show-transfers toggle enabled, view the chart",
+            "then": {
+              "kind": "visible",
+              "what": "Transfer flows between accounts are drawn in the Sankey diagram"
+            },
+            "source": "This can better represent the flow of money"
+          },
+          {
+            "when": "On a Sankey chart with the show-transfers toggle off, view the chart",
+            "then": {
+              "kind": "hidden",
+              "what": "No transfer flows are shown in the Sankey diagram"
+            },
+            "source": "With option off:"
+          }
+        ],
+        "assumptions": [
+          {
+            "when": "Enable the show-transfers toggle, then reload the page",
+            "then": {
+              "kind": "persisted",
+              "what": "The toggle remains enabled"
+            },
+            "checked": true,
+            "reason": "Other Actual report options persist with the report; evidence is silent."
+          },
+          {
+            "when": "Enable the show-transfers toggle on a Sankey chart that includes off-budget accounts",
+            "then": {
+              "kind": "hidden",
+              "what": "Transfers to off-budget accounts are not drawn"
+            },
+            "checked": true,
+            "reason": "A commit says transfers to off-budget accounts are filtered out, but it may be internal."
+          },
+          {
+            "when": "Open a Sankey chart in a view other than Spent (e.g. income/other view)",
+            "then": {
+              "kind": "hidden",
+              "what": "The show-transfers toggle is not offered"
+            },
+            "checked": false,
+            "reason": "Title mentions Spent view only, but toggle placement/scope is unclear."
+          }
+        ],
+        "not_testable": [
+          {
+            "text": "Development aided by OpenCode / GPT-5 Mini.",
+            "why": "Process note, not user-visible behavior."
+          },
+          {
+            "text": "Manual testing with a specifically crafted tested budget and the full history of my own budget.",
+            "why": "Describes how testing was done."
+          },
+          {
+            "text": "Fix recursion error happening in otherGrouping",
+            "why": "Internal fix to new code introduced in this PR; no stated user-facing symptom."
+          },
+          {
+            "text": "Add release note",
+            "why": "Repository metadata, not observable in the app."
+          },
+          {
+            "text": "Relates to #1919, where it has been requested multiple times.",
+            "why": "Reference to an issue, not a specific behavior statement."
+          }
+        ],
+        "regression_hints": [
+          "The Sankey chart continues to render spending flows correctly when the transfers option is off, as before.",
+          "Existing Sankey chart views and groupings remain functional."
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 2731,
+        "output_tokens": 918
+      },
+      "judgment": {
+        "claims": [
+          {
+            "item": "m1",
+            "reference": "c1",
+            "label": "match",
+            "reason": "Both check that the Sankey options menu offers a show-transfers option; omitting the Spent view is just where to find the control."
+          },
+          {
+            "item": "m2",
+            "reference": null,
+            "label": "none",
+            "reason": "No reference item checks only that the toggle shows as checked after enabling it."
+          },
+          {
+            "item": "m3",
+            "reference": "c2",
+            "label": "match",
+            "reason": "Both check that transfer flows are drawn between accounts when the option is on; the account and transfer setup is a precondition any tester would supply."
+          },
+          {
+            "item": "m4",
+            "reference": "c3",
+            "label": "partial",
+            "reason": "It checks the off state without ever turning the toggle on and back off, so it could pass even when turning the option off is broken."
+          }
+        ],
+        "assumptions": [
+          {
+            "item": "s1",
+            "reference": "c7",
+            "label": "partial",
+            "reason": "It checks that the toggle stays checked after a page reload, whereas the reference saves to the dashboard and checks that the card still draws transfer flows."
+          },
+          {
+            "item": "s2",
+            "reference": "c5",
+            "label": "match",
+            "reason": "Both check that transfers involving off-budget accounts are not drawn when show transfers is on."
+          },
+          {
+            "item": "s3",
+            "reference": "a3",
+            "label": "partial",
+            "reason": "Both concern the option applying only to the Spent view, but s3 checks that the toggle is hidden while the reference checks that no transfer flows are drawn in the Budgeted view."
+          }
+        ]
+      },
+      "judgeUsage": {
+        "input_tokens": 3178,
+        "output_tokens": 941
+      },
+      "score": {
+        "claims": 4,
+        "intentRecall": {
+          "num": 2.5,
+          "den": 4
+        },
+        "precision": {
+          "num": 2.5,
+          "den": 4
+        },
+        "lures": 0,
+        "unmatched": 1,
+        "duplicates": 0,
+        "ungrounded": 0,
+        "assumptions": 3,
+        "assumptionCoverage": {
+          "num": 2,
+          "den": 6
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 1
+        },
+        "defaultAccuracy": {
+          "num": 1,
+          "den": 2
+        },
+        "offTopicAssumptions": 0
+      }
+    },
+    {
+      "caseId": "actual-8780",
+      "run": 2,
+      "extractCost": 0.050155,
+      "judgeCost": 0.027572,
+      "extraction": {
+        "claims": [
+          {
+            "when": "Open the Sankey chart report in Reports",
+            "then": {
+              "kind": "visible",
+              "what": "An option/toggle to show transfers is shown in the chart's options"
+            },
+            "source": "Adds an optional toggle in the Sankey chart to show transfers."
+          },
+          {
+            "when": "In the Sankey chart's Spent view, turn on the show transfers option",
+            "then": {
+              "kind": "visible",
+              "what": "Transfer flows between accounts appear as links/nodes in the Sankey diagram"
+            },
+            "source": "Add transfers as option to Spent view"
+          },
+          {
+            "when": "With the show transfers option turned on, view a budget that has transfers to an off-budget account",
+            "then": {
+              "kind": "hidden",
+              "what": "No flow for the transfer to the off-budget account is shown in the diagram"
+            },
+            "source": "Filter out transfers to off-budget accounts"
+          }
+        ],
+        "assumptions": [
+          {
+            "when": "Open the Sankey chart for the first time",
+            "then": {
+              "kind": "state",
+              "what": "The show transfers option is off by default"
+            },
+            "checked": true,
+            "reason": "Screenshots present 'With option off' as the existing/base appearance, but default is not stated."
+          },
+          {
+            "when": "Turn on the show transfers option and reload the page",
+            "then": {
+              "kind": "persisted",
+              "what": "The show transfers option is still on"
+            },
+            "checked": true,
+            "reason": "Report options in Actual are usually saved, but the evidence doesn't say."
+          },
+          {
+            "when": "Switch the Sankey chart away from the Spent view",
+            "then": {
+              "kind": "hidden",
+              "what": "The show transfers option has no effect outside the Spent view"
+            },
+            "checked": true,
+            "reason": "Commit says 'Add transfers as option to Spent view', scope to other views unclear."
+          }
+        ],
+        "not_testable": [
+          {
+            "text": "Development aided by OpenCode / GPT-5 Mini.",
+            "why": "Statement about how the work was done, not user-visible behavior."
+          },
+          {
+            "text": "Manual testing with a specifically crafted tested budget and the full history of my own budget.",
+            "why": "Describes testing process, not intended behavior."
+          },
+          {
+            "text": "Fix recursion error happening in otherGrouping",
+            "why": "Internal fix within the new code; no described user-facing symptom."
+          },
+          {
+            "text": "Add release note",
+            "why": "Repository housekeeping, not observable in the app."
+          },
+          {
+            "text": "No obvious regressions in affected areas / Self-review has been performed",
+            "why": "Checklist items about process."
+          }
+        ],
+        "regression_hints": [
+          "With the show transfers option off, the Sankey chart renders exactly as before (income and spending flows only).",
+          "Other Sankey views and existing report charts continue to render and function normally."
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 2731,
+        "output_tokens": 1460
+      },
+      "judgment": {
+        "claims": [
+          {
+            "item": "m1",
+            "reference": "c1",
+            "label": "match",
+            "reason": "Both check that a show-transfers option appears in the Sankey report's options; the Spent view and menu location are harmless navigation details."
+          },
+          {
+            "item": "m2",
+            "reference": "c2",
+            "label": "match",
+            "reason": "Both check that turning on the option in Spent view draws transfer flows between accounts; the need for a transfer to exist is setup a tester would supply anyway."
+          },
+          {
+            "item": "m3",
+            "reference": "c5",
+            "label": "match",
+            "reason": "Both check that, with show transfers on, a transfer to an off-budget account is not drawn as a flow."
+          }
+        ],
+        "assumptions": [
+          {
+            "item": "s1",
+            "reference": "c4",
+            "label": "match",
+            "reason": "Both check that the show-transfers option is off by default on a fresh Sankey report."
+          },
+          {
+            "item": "s2",
+            "reference": "c7",
+            "label": "partial",
+            "reason": "It checks that the option stays on after a page reload, rather than that the saved dashboard card still shows transfer flows after reload."
+          },
+          {
+            "item": "s3",
+            "reference": "a3",
+            "label": "partial",
+            "reason": "It targets the option having no effect outside Spent view, but never turns the option on first, so the check could pass even if the option wrongly affected other views."
+          }
+        ]
+      },
+      "judgeUsage": {
+        "input_tokens": 3113,
+        "output_tokens": 756
+      },
+      "score": {
+        "claims": 3,
+        "intentRecall": {
+          "num": 3,
+          "den": 4
+        },
+        "precision": {
+          "num": 3,
+          "den": 3
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "duplicates": 0,
+        "ungrounded": 0,
+        "assumptions": 3,
+        "assumptionCoverage": {
+          "num": 3,
+          "den": 6
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 1
+        },
+        "defaultAccuracy": {
+          "num": 2,
+          "den": 2
+        },
+        "offTopicAssumptions": 0
+      }
+    },
+    {
+      "caseId": "actual-8780",
+      "run": 3,
+      "extractCost": 0.046005,
+      "judgeCost": 0.027064,
+      "extraction": {
+        "claims": [
+          {
+            "when": "Open the Sankey chart report",
+            "then": {
+              "kind": "visible",
+              "what": "A toggle option to show transfers is shown in the chart's options"
+            },
+            "source": "Adds an optional toggle in the Sankey chart to show transfers."
+          },
+          {
+            "when": "In the Sankey chart Spent view, enable the show transfers option",
+            "then": {
+              "kind": "visible",
+              "what": "Transfer flows between accounts appear in the Sankey diagram"
+            },
+            "source": "Add option to show transfers in Sankey chart Spent view"
+          },
+          {
+            "when": "In the Sankey chart Spent view with the show transfers option enabled, in a budget that has transfers to an off-budget account",
+            "then": {
+              "kind": "hidden",
+              "what": "No flow representing a transfer to an off-budget account is shown"
+            },
+            "source": "Filter out transfers to off-budget accounts"
+          }
+        ],
+        "assumptions": [
+          {
+            "when": "Open the Sankey chart report without changing anything",
+            "then": {
+              "kind": "state",
+              "what": "The show transfers option is off by default"
+            },
+            "checked": true,
+            "reason": "Screenshots show 'With option off' as the baseline, but the default is never stated."
+          },
+          {
+            "when": "Switch the Sankey chart away from the Spent view (e.g. another grouping/view)",
+            "then": {
+              "kind": "hidden",
+              "what": "The show transfers option is not shown"
+            },
+            "checked": false,
+            "reason": "Title scopes the feature to the Spent view, but it's unclear if the toggle is hidden elsewhere."
+          },
+          {
+            "when": "Enable the show transfers option and reload the page",
+            "then": {
+              "kind": "persisted",
+              "what": "The show transfers option is still enabled"
+            },
+            "checked": false,
+            "reason": "Evidence says nothing about saving/persisting this chart setting."
+          }
+        ],
+        "not_testable": [
+          {
+            "text": "Fix recursion error happening in otherGrouping",
+            "why": "Internal code fix with no described user-visible outcome"
+          },
+          {
+            "text": "Add release note",
+            "why": "Repository metadata, not observable in the app"
+          },
+          {
+            "text": "Manual testing with a specifically crafted tested budget and the full history of my own budget.",
+            "why": "Describes how the work was tested"
+          },
+          {
+            "text": "Development aided by OpenCode / GPT-5 Mini.",
+            "why": "Process note, not app behavior"
+          },
+          {
+            "text": "Self-review has been performed - I have read every line of this diff",
+            "why": "Checklist item, not observable behavior"
+          }
+        ],
+        "regression_hints": [
+          "With the show transfers option off, the Sankey chart renders as before (income/spending flows without transfers)",
+          "Other Sankey chart views and groupings continue to render without errors"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 2731,
+        "output_tokens": 1294
+      },
+      "judgment": {
+        "claims": [
+          {
+            "item": "m1",
+            "reference": "c1",
+            "label": "match",
+            "reason": "Both check that a show-transfers option appears in the Sankey report's options; the Spent view is the harmless default context."
+          },
+          {
+            "item": "m2",
+            "reference": "c2",
+            "label": "match",
+            "reason": "Enabling show transfers and seeing transfer flows between accounts is the same observable, with the transfer setup a harmless precondition."
+          },
+          {
+            "item": "m3",
+            "reference": "c5",
+            "label": "match",
+            "reason": "Both check that a transfer to an off-budget account is not drawn when show transfers is on."
+          }
+        ],
+        "assumptions": [
+          {
+            "item": "s1",
+            "reference": "c4",
+            "label": "match",
+            "reason": "Both check that the show-transfers option is off by default on a fresh report."
+          },
+          {
+            "item": "s2",
+            "reference": "a3",
+            "label": "partial",
+            "reason": "Both concern the option being limited to the Spent view, but s2 checks that the option is hidden while a3 checks that no transfer flows are drawn."
+          },
+          {
+            "item": "s3",
+            "reference": "c7",
+            "label": "partial",
+            "reason": "Both concern persistence, but s3 checks that the option stays enabled after a page reload, while c7 checks that a saved dashboard card still shows transfer flows."
+          }
+        ]
+      },
+      "judgeUsage": {
+        "input_tokens": 3116,
+        "output_tokens": 730
+      },
+      "score": {
+        "claims": 3,
+        "intentRecall": {
+          "num": 3,
+          "den": 4
+        },
+        "precision": {
+          "num": 3,
+          "den": 3
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "duplicates": 0,
+        "ungrounded": 0,
+        "assumptions": 3,
+        "assumptionCoverage": {
+          "num": 3,
+          "den": 6
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 1
+        },
+        "defaultAccuracy": {
+          "num": 1,
+          "den": 2
+        },
+        "offTopicAssumptions": 0
+      }
+    },
+    {
+      "caseId": "lobsters-2029",
+      "run": 1,
+      "extractCost": 0.02967,
+      "judgeCost": 0.019592,
+      "extraction": {
+        "claims": [
+          {
+            "when": "On the submit story page, fill in a title shorter than the minimum allowed length (plus a URL/description) and click the submit button",
+            "then": {
+              "kind": "state",
+              "what": "The title field is flagged invalid by the browser and the page is not submitted"
+            },
+            "source": "Add minlength to title input in submit story page"
+          }
+        ],
+        "assumptions": [
+          {
+            "when": "On the submit story page, enter a title of normal length and submit",
+            "then": {
+              "kind": "url",
+              "what": "The story is created and the browser navigates away from the submit form"
+            },
+            "checked": true,
+            "reason": "Evidence doesn't state the minlength value; assuming it matches the existing server-side minimum so ordinary titles still submit"
+          },
+          {
+            "when": "On the edit story page, enter a title shorter than the minimum and submit",
+            "then": {
+              "kind": "state",
+              "what": "The title field is flagged invalid by the browser"
+            },
+            "checked": false,
+            "reason": "Title says 'submit story page' only; unclear whether a shared form makes it apply to edit too"
+          }
+        ],
+        "not_testable": [],
+        "regression_hints": [
+          "Submitting a story with a valid title still works and creates the story",
+          "Server-side validation of title length still applies (e.g. when client-side validation is bypassed)"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 2279,
+        "output_tokens": 731
+      },
+      "judgment": {
+        "claims": [
+          {
+            "item": "m1",
+            "reference": "c1",
+            "label": "match",
+            "reason": "Both check that the browser flags the title field as invalid when a too-short title is submitted on the submit page; the added 'not submitted' follows from the browser's validation."
+          }
+        ],
+        "assumptions": [
+          {
+            "item": "s1",
+            "reference": "c3",
+            "label": "partial",
+            "reason": "A normal-length title is not the 3-character boundary, so it would miss a minimum set too high."
+          },
+          {
+            "item": "s2",
+            "reference": "c4",
+            "label": "match",
+            "reason": "Same check: on the edit story page, a title below the minimum is flagged invalid by the browser."
+          }
+        ]
+      },
+      "judgeUsage": {
+        "input_tokens": 2073,
+        "output_tokens": 565
+      },
+      "score": {
+        "claims": 1,
+        "intentRecall": {
+          "num": 1,
+          "den": 1
+        },
+        "precision": {
+          "num": 1,
+          "den": 1
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "duplicates": 0,
+        "ungrounded": 0,
+        "assumptions": 2,
+        "assumptionCoverage": {
+          "num": 1,
+          "den": 1
+        },
+        "appContextCoverage": {
+          "num": 1,
+          "den": 1
+        },
+        "defaultAccuracy": {
+          "num": 1,
+          "den": 1
+        },
+        "offTopicAssumptions": 0
+      }
+    },
+    {
+      "caseId": "lobsters-2029",
+      "run": 2,
+      "extractCost": 0.03277,
+      "judgeCost": 0.01474,
+      "extraction": {
+        "claims": [
+          {
+            "when": "On the submit story page, enter a very short title (e.g. one or two characters) along with a URL and click the submit button",
+            "then": {
+              "kind": "state",
+              "what": "The title field is reported as invalid (browser validation blocks submission)"
+            },
+            "source": "Add minlength to title input in submit story page"
+          }
+        ],
+        "assumptions": [
+          {
+            "when": "Open the edit page of an existing story and shorten the title to one or two characters, then save",
+            "then": {
+              "kind": "state",
+              "what": "The title field is reported as invalid there too"
+            },
+            "checked": true,
+            "reason": "Submit and edit story pages typically share the same form markup, but the title only mentions the submit page"
+          },
+          {
+            "when": "On the submit story page, enter a title of normal length and submit",
+            "then": {
+              "kind": "url",
+              "what": "The story is created and the browser navigates away from the submit form"
+            },
+            "checked": true,
+            "reason": "Evidence implies only short titles are blocked; normal submission should be unaffected"
+          }
+        ],
+        "not_testable": [
+          {
+            "text": "Add minlength to title input",
+            "why": "The attribute itself is markup/internal; only the resulting validation behavior is observable"
+          }
+        ],
+        "regression_hints": [
+          "Submitting a story with an acceptable-length title still works",
+          "Existing server-side title length validation and its error message still apply"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 2279,
+        "output_tokens": 855
+      },
+      "judgment": {
+        "claims": [
+          {
+            "item": "m1",
+            "reference": "c1",
+            "label": "match",
+            "reason": "Both check that the browser flags the title field as invalid/too short when a too-short title is submitted on the submit page."
+          }
+        ],
+        "assumptions": [
+          {
+            "item": "s1",
+            "reference": "c4",
+            "label": "match",
+            "reason": "Both check that editing an existing story and shortening its title below the minimum causes the browser to flag the title field."
+          },
+          {
+            "item": "s2",
+            "reference": "c3",
+            "label": "partial",
+            "reason": "It checks that a valid title submits, but uses a normal-length title rather than the 3-character boundary, so it would miss a minimum set too high."
+          }
+        ]
+      },
+      "judgeUsage": {
+        "input_tokens": 2070,
+        "output_tokens": 323
+      },
+      "score": {
+        "claims": 1,
+        "intentRecall": {
+          "num": 1,
+          "den": 1
+        },
+        "precision": {
+          "num": 1,
+          "den": 1
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "duplicates": 0,
+        "ungrounded": 0,
+        "assumptions": 2,
+        "assumptionCoverage": {
+          "num": 1,
+          "den": 1
+        },
+        "appContextCoverage": {
+          "num": 1,
+          "den": 1
+        },
+        "defaultAccuracy": {
+          "num": 1,
+          "den": 1
+        },
+        "offTopicAssumptions": 0
+      }
+    },
+    {
+      "caseId": "lobsters-2029",
+      "run": 3,
+      "extractCost": 0.03877,
+      "judgeCost": 0.013464,
+      "extraction": {
+        "claims": [
+          {
+            "when": "On the submit story page, enter a very short title (e.g. one character) along with a URL/description and click the submit button",
+            "then": {
+              "kind": "state",
+              "what": "The title input is flagged invalid by the browser's form validation (minimum length not met)"
+            },
+            "source": "Add minlength to title input in submit story page"
+          },
+          {
+            "when": "On the submit story page, enter a very short title (e.g. one character) and click the submit button",
+            "then": {
+              "kind": "network",
+              "what": "No story-creation request is sent to the server"
+            },
+            "source": "Add minlength to title input in submit story page"
+          }
+        ],
+        "assumptions": [
+          {
+            "when": "On the submit story page, enter a title that meets the server's minimum accepted title length",
+            "then": {
+              "kind": "network",
+              "what": "The story-creation request is sent and the story is created"
+            },
+            "checked": true,
+            "reason": "Evidence doesn't state the minlength value; assumed it matches the server-side minimum so valid titles still submit"
+          },
+          {
+            "when": "On the edit story page for an existing story, clear the title to a very short value and save",
+            "then": {
+              "kind": "state",
+              "what": "The title input is flagged invalid by the browser's form validation"
+            },
+            "checked": false,
+            "reason": "PR mentions only the submit story page, though the same form may be shared with editing"
+          }
+        ],
+        "not_testable": [
+          {
+            "text": "Add minlength to title input in submit story page",
+            "why": "The attribute itself is markup/internal; only its resulting validation behavior is observable, which is captured in the claims"
+          }
+        ],
+        "regression_hints": [
+          "Submitting a story with a normal, valid title still works and creates the story",
+          "Other submit-form validations (e.g. required title, URL handling) continue to behave as before"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 2279,
+        "output_tokens": 1095
+      },
+      "judgment": {
+        "claims": [
+          {
+            "item": "m1",
+            "reference": "c1",
+            "label": "match",
+            "reason": "Same situation and same observable: browser flags title as too short on submit page."
+          },
+          {
+            "item": "m2",
+            "reference": "c1",
+            "label": "partial",
+            "reason": "Checks that no request is sent, a weaker observable the reference note explicitly distinguishes from the field being flagged."
+          }
+        ],
+        "assumptions": [
+          {
+            "item": "s1",
+            "reference": "c3",
+            "label": "partial",
+            "reason": "Targets the boundary where a title at the minimum is sent, but doesn't pin the exact 3-character boundary and bundles story creation."
+          },
+          {
+            "item": "s2",
+            "reference": "c4",
+            "label": "match",
+            "reason": "Same edit-page situation with a too-short title and the browser flagging the field."
+          }
+        ]
+      },
+      "judgeUsage": {
+        "input_tokens": 2131,
+        "output_tokens": 247
+      },
+      "score": {
+        "claims": 2,
+        "intentRecall": {
+          "num": 1,
+          "den": 1
+        },
+        "precision": {
+          "num": 1.5,
+          "den": 2
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "duplicates": 1,
+        "ungrounded": 0,
+        "assumptions": 2,
+        "assumptionCoverage": {
+          "num": 1,
+          "den": 1
+        },
+        "appContextCoverage": {
+          "num": 1,
+          "den": 1
+        },
+        "defaultAccuracy": {
+          "num": 1,
+          "den": 1
+        },
+        "offTopicAssumptions": 0
+      }
+    },
+    {
+      "caseId": "lobsters-2132",
+      "run": 1,
+      "extractCost": 0.037745,
+      "judgeCost": 0.016756,
+      "extraction": {
+        "claims": [
+          {
+            "when": "On the story submission page, fill in a story URL and title and click Preview",
+            "then": {
+              "kind": "state",
+              "what": "The \"save\" button in the previewed story's byline is disabled"
+            },
+            "source": "just disables the two forms or removes the link/href from the byline buttons when previewing"
+          },
+          {
+            "when": "On the story submission page, fill in a story URL and title and click Preview",
+            "then": {
+              "kind": "state",
+              "what": "The \"hide\" button in the previewed story's byline is disabled"
+            },
+            "source": "the buttons \"save\" and \"hide\" are enabled but, as expected, return a error 400 when submitted"
+          },
+          {
+            "when": "On the story submission page, fill in a story URL and title and click Preview",
+            "then": {
+              "kind": "hidden",
+              "what": "The comments text in the previewed story's byline is not a clickable link (no href)"
+            },
+            "source": "removes the link/href from the byline buttons when previewing"
+          }
+        ],
+        "assumptions": [
+          {
+            "when": "On the story submission page, click Preview",
+            "then": {
+              "kind": "visible",
+              "what": "The save and hide controls are still shown in the preview byline, just non-functional"
+            },
+            "checked": true,
+            "reason": "Author says \"disables\" rather than removes, but hiding them entirely is an alternative fix"
+          },
+          {
+            "when": "Edit an existing story and click Preview",
+            "then": {
+              "kind": "state",
+              "what": "The save and hide buttons in the preview byline are disabled"
+            },
+            "checked": true,
+            "reason": "Issue mentions only submit preview; edit preview likely shares the same view"
+          }
+        ],
+        "not_testable": [
+          {
+            "text": "Pretty straight forward, just disables the two forms",
+            "why": "Describes how the change was implemented rather than a distinct user-observable outcome"
+          }
+        ],
+        "regression_hints": [
+          "Previewing a story still renders the story preview (title, URL, tags) and allows submitting the story",
+          "On real story listings and story pages, the save and hide buttons remain enabled and functional",
+          "On real story listings, the comments link still navigates to the story's comments page"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 2424,
+        "output_tokens": 1025
+      },
+      "judgment": {
+        "claims": [
+          {
+            "item": "m1",
+            "reference": "c1",
+            "label": "match",
+            "reason": "Same action and same disabled-state check on the save button in the preview byline."
+          },
+          {
+            "item": "m2",
+            "reference": "c2",
+            "label": "match",
+            "reason": "Same action and same disabled-state check on the hide button in the preview byline."
+          },
+          {
+            "item": "m3",
+            "reference": "c3",
+            "label": "match",
+            "reason": "Both check that the comments label in the preview byline is not a link."
+          }
+        ],
+        "assumptions": [
+          {
+            "item": "s1",
+            "reference": "c1",
+            "label": "partial",
+            "reason": "It bundles save and hide and checks that they remain visible rather than specifically disabled, so it would catch different failures."
+          },
+          {
+            "item": "s2",
+            "reference": "c1",
+            "label": "partial",
+            "reason": "It checks the disabled buttons when editing an existing story, a different situation from the submit form, and it bundles save and hide."
+          }
+        ]
+      },
+      "judgeUsage": {
+        "input_tokens": 2179,
+        "output_tokens": 402
+      },
+      "score": {
+        "claims": 3,
+        "intentRecall": {
+          "num": 3,
+          "den": 3
+        },
+        "precision": {
+          "num": 3,
+          "den": 3
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "duplicates": 2,
+        "ungrounded": 0,
+        "assumptions": 2,
+        "assumptionCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 1
+        },
+        "defaultAccuracy": {
+          "num": 2,
+          "den": 2
+        },
+        "offTopicAssumptions": 0
+      }
+    },
+    {
+      "caseId": "lobsters-2132",
+      "run": 2,
+      "extractCost": 0.04172,
+      "judgeCost": 0.014428,
+      "extraction": {
+        "claims": [
+          {
+            "when": "On the submit story page, fill in a title and URL and click Preview",
+            "then": {
+              "kind": "state",
+              "what": "the \"save\" button in the previewed story's byline is disabled"
+            },
+            "source": "just disables the two forms or removes the link/href from the byline buttons when previewing"
+          },
+          {
+            "when": "On the submit story page, fill in a title and URL and click Preview",
+            "then": {
+              "kind": "state",
+              "what": "the \"hide\" button in the previewed story's byline is disabled"
+            },
+            "source": "the buttons \"save\" and \"hide\" are enabled but, as expected, return a error 400 when submitted"
+          },
+          {
+            "when": "On the submit story page, fill in a title and URL and click Preview",
+            "then": {
+              "kind": "hidden",
+              "what": "the comments entry in the previewed story's byline is not a clickable link (no href)"
+            },
+            "source": "A links to comment appears too but points to an invalid url."
+          }
+        ],
+        "assumptions": [
+          {
+            "when": "On the submit story page, click Preview",
+            "then": {
+              "kind": "visible",
+              "what": "the save and hide controls are still shown in the byline, just non-functional"
+            },
+            "checked": true,
+            "reason": "Evidence says \"disables\" rather than removes, but it also mentions removing the link/href"
+          },
+          {
+            "when": "On the edit page of an existing story, click Preview",
+            "then": {
+              "kind": "state",
+              "what": "the byline save/hide buttons are likewise disabled"
+            },
+            "checked": true,
+            "reason": "Issue only mentions submit previews; the same preview partial likely covers edit"
+          }
+        ],
+        "not_testable": [
+          {
+            "text": "Pretty straight forward",
+            "why": "Comment on implementation effort, not user-observable behavior"
+          }
+        ],
+        "regression_hints": [
+          "Save and hide buttons on real story pages (front page, story page) continue to work normally",
+          "The story preview still renders the story title, URL and byline"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 2424,
+        "output_tokens": 1184
+      },
+      "judgment": {
+        "claims": [
+          {
+            "item": "m1",
+            "reference": "c1",
+            "label": "match",
+            "reason": "Both check that the save button in the preview byline is disabled after clicking Preview."
+          },
+          {
+            "item": "m2",
+            "reference": "c2",
+            "label": "match",
+            "reason": "Both check that the hide button in the preview byline is disabled after clicking Preview."
+          },
+          {
+            "item": "m3",
+            "reference": "c3",
+            "label": "match",
+            "reason": "Both check that the comments entry in the preview byline is not a link."
+          }
+        ],
+        "assumptions": [
+          {
+            "item": "s1",
+            "reference": "c1",
+            "label": "partial",
+            "reason": "It checks that the save/hide controls are still visible, which is a different observable than disabled, and it bundles both buttons into one check."
+          },
+          {
+            "item": "s2",
+            "reference": "c1",
+            "label": "partial",
+            "reason": "It checks the edit-page preview rather than the submit-page preview and bundles save and hide together."
+          }
+        ]
+      },
+      "judgeUsage": {
+        "input_tokens": 2177,
+        "output_tokens": 286
+      },
+      "score": {
+        "claims": 3,
+        "intentRecall": {
+          "num": 3,
+          "den": 3
+        },
+        "precision": {
+          "num": 3,
+          "den": 3
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "duplicates": 2,
+        "ungrounded": 0,
+        "assumptions": 2,
+        "assumptionCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 1
+        },
+        "defaultAccuracy": {
+          "num": 2,
+          "den": 2
+        },
+        "offTopicAssumptions": 0
+      }
+    },
+    {
+      "caseId": "lobsters-2132",
+      "run": 3,
+      "extractCost": 0.03942,
+      "judgeCost": 0.017868,
+      "extraction": {
+        "claims": [
+          {
+            "when": "On the story submission page, fill in a story and click Preview",
+            "then": {
+              "kind": "state",
+              "what": "The \"save\" button in the previewed story's byline is disabled"
+            },
+            "source": "just disables the two forms or removes the link/href from the byline buttons when previewing"
+          },
+          {
+            "when": "On the story submission page, fill in a story and click Preview",
+            "then": {
+              "kind": "state",
+              "what": "The \"hide\" button in the previewed story's byline is disabled"
+            },
+            "source": "the buttons \"save\" and \"hide\" are enabled but, as expected, return a error 400 when submitted"
+          },
+          {
+            "when": "On the story submission page, fill in a story and click Preview",
+            "then": {
+              "kind": "hidden",
+              "what": "The comments item in the previewed story's byline is not a clickable link (no href)"
+            },
+            "source": "A links to comment appears too but points to an invalid url."
+          }
+        ],
+        "assumptions": [
+          {
+            "when": "Preview an existing story from the story edit page",
+            "then": {
+              "kind": "state",
+              "what": "The byline save/hide buttons are disabled and the comments item is not a link"
+            },
+            "checked": true,
+            "reason": "Evidence says \"when previewing\" generally; unclear if edit-preview is in scope"
+          },
+          {
+            "when": "On the story submission page, click Preview",
+            "then": {
+              "kind": "visible",
+              "what": "The save and hide buttons are still shown in the preview byline (disabled, not removed)"
+            },
+            "checked": true,
+            "reason": "Description says \"disables the two forms\", implying they remain visible"
+          }
+        ],
+        "not_testable": [
+          {
+            "text": "just disables the two forms or removes the link/href",
+            "why": "Describes the implementation approach rather than an observable outcome"
+          },
+          {
+            "text": "return a error 400 when submitted",
+            "why": "Describes the pre-PR broken behavior, not the intended new behavior"
+          }
+        ],
+        "regression_hints": [
+          "On a real (already submitted) story listing or page, the save and hide buttons still work",
+          "On a real story, the comments link still navigates to the story's comments page",
+          "Previewing a story still renders the story preview with its byline"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 2424,
+        "output_tokens": 1092
+      },
+      "judgment": {
+        "claims": [
+          {
+            "item": "m1",
+            "reference": "c1",
+            "label": "match",
+            "reason": "Same action and same observable: the save button in the preview byline is disabled."
+          },
+          {
+            "item": "m2",
+            "reference": "c2",
+            "label": "match",
+            "reason": "Same action and same observable: the hide button in the preview byline is disabled."
+          },
+          {
+            "item": "m3",
+            "reference": "c3",
+            "label": "match",
+            "reason": "Both check that the comments item in the preview byline is not a link."
+          }
+        ],
+        "assumptions": [
+          {
+            "item": "s1",
+            "reference": "c1",
+            "label": "partial",
+            "reason": "Previews from the story edit page rather than the submit page, and bundles the save, hide and comments checks into one."
+          },
+          {
+            "item": "s2",
+            "reference": "c1",
+            "label": "partial",
+            "reason": "Checks that the save and hide buttons remain visible, bundled together, rather than checking the disabled state itself."
+          }
+        ]
+      },
+      "judgeUsage": {
+        "input_tokens": 2177,
+        "output_tokens": 458
+      },
+      "score": {
+        "claims": 3,
+        "intentRecall": {
+          "num": 3,
+          "den": 3
+        },
+        "precision": {
+          "num": 3,
+          "den": 3
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "duplicates": 2,
+        "ungrounded": 0,
+        "assumptions": 2,
+        "assumptionCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 1
+        },
+        "defaultAccuracy": {
+          "num": 2,
+          "den": 2
+        },
+        "offTopicAssumptions": 0
+      }
+    },
+    {
+      "caseId": "lobsters-2172",
+      "run": 1,
+      "extractCost": 0.03674,
+      "judgeCost": 0,
+      "extraction": {
+        "claims": [],
+        "assumptions": [],
+        "not_testable": [
+          {
+            "text": "Remove unreferenced dead code",
+            "why": "Pure internal code removal; no user-visible behavior change in the browser."
+          },
+          {
+            "text": "Found these leftovers using rubydex",
+            "why": "Describes how the work was done, not a behavior."
+          },
+          {
+            "text": "`TrafficHelper::CACHE_FOR` became unused after e334ae41 stopped using time-based traffic cache keys.",
+            "why": "Removal of an unused constant; the behavior change happened in an earlier commit."
+          },
+          {
+            "text": "`Keystore.find_or_create_key_for_update` became unused after b45d1750 switched the remaining code to `upsert`.",
+            "why": "Internal method removal, not observable in a browser."
+          },
+          {
+            "text": "`Keystore.decrement_value_for` and `decremented_value_for` came over in the initial Rails conversion (093747b7) and don't seem to have ever had callers.",
+            "why": "Methods never called; removing them has no user-visible effect."
+          },
+          {
+            "text": "`Story#domain_search_url` became unused after f718da18 switched domain links to `for_domain_url`.",
+            "why": "Behavior was changed by an earlier commit; this PR only deletes unused code."
+          },
+          {
+            "text": "`Story#update_availability` was added in 9c73c87d but never used.",
+            "why": "Unused method removal; no observable result."
+          },
+          {
+            "text": "`User#undelete!` became unused after 6fb659f8 stopped automatically reactivating deleted users on login.",
+            "why": "The login behavior change came from an earlier commit, not this PR."
+          },
+          {
+            "text": "`User#mastodon_acct` became unused after f1a253c1 started building the Mastodon author URL directly.",
+            "why": "Behavior was changed by an earlier commit; this PR only deletes unused code."
+          },
+          {
+            "text": "`Vote#on_comment?` was added in bb5e53e9 but never used.",
+            "why": "Unused method removal; no observable result."
+          },
+          {
+            "text": "`Vote.comment_votes_by_user_for_story_hash` became unused after c05d00ad moved comment vote loading into `CommentVoteHydrator`.",
+            "why": "Behavior was moved in an earlier commit; removal is internal."
+          },
+          {
+            "text": "`Github.oauth_consumer` was added in fcb24439 but the GitHub flow used `Sponge` directly, so it was never used.",
+            "why": "Unused method removal; the GitHub flow is unchanged."
+          }
+        ],
+        "regression_hints": [
+          "Story domain links continue to work and point to the domain listing page",
+          "Comment voting on story pages continues to work and shows the user's existing votes",
+          "Login/authentication continues to work, including deleted users not being silently reactivated",
+          "Mastodon author links on stories still render correctly",
+          "GitHub OAuth connect/login flow still works",
+          "Traffic-based caching/homepage rendering still works"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 2718,
+        "output_tokens": 926
+      },
+      "judgment": {
+        "claims": [],
+        "assumptions": []
+      },
+      "judgeUsage": {
+        "input_tokens": 0,
+        "output_tokens": 0
+      },
+      "score": {
+        "claims": 0,
+        "intentRecall": {
+          "num": 0,
+          "den": 0
+        },
+        "precision": {
+          "num": 0,
+          "den": 0
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "duplicates": 0,
+        "ungrounded": 0,
+        "assumptions": 0,
+        "assumptionCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "defaultAccuracy": {
+          "num": 0,
+          "den": 0
+        },
+        "offTopicAssumptions": 0
+      }
+    },
+    {
+      "caseId": "lobsters-2172",
+      "run": 2,
+      "extractCost": 0.037215,
+      "judgeCost": 0,
+      "extraction": {
+        "claims": [],
+        "assumptions": [],
+        "not_testable": [
+          {
+            "text": "Remove unreferenced dead code",
+            "why": "Internal code removal with no user-visible change in the browser"
+          },
+          {
+            "text": "Found these leftovers using rubydex",
+            "why": "Describes how the work was done, not observable behavior"
+          },
+          {
+            "text": "`TrafficHelper::CACHE_FOR` became unused after e334ae41 stopped using time-based traffic cache keys.",
+            "why": "Refers to behavior changed by an earlier commit; the removal itself is internal"
+          },
+          {
+            "text": "`Keystore.find_or_create_key_for_update` became unused after b45d1750 switched the remaining code to `upsert`.",
+            "why": "Internal method removal, not observable in a browser"
+          },
+          {
+            "text": "`Keystore.decrement_value_for` and `decremented_value_for` came over in the initial Rails conversion (093747b7) and don't seem to have ever had callers.",
+            "why": "Unreferenced internal methods; no user-facing effect"
+          },
+          {
+            "text": "`Story#domain_search_url` became unused after f718da18 switched domain links to `for_domain_url`.",
+            "why": "Domain link behavior was changed by an earlier commit, not this PR"
+          },
+          {
+            "text": "`Story#update_availability` was added in 9c73c87d but never used.",
+            "why": "Unreferenced internal method; no user-facing effect"
+          },
+          {
+            "text": "`User#undelete!` became unused after 6fb659f8 stopped automatically reactivating deleted users on login.",
+            "why": "Login reactivation behavior was changed by an earlier commit, not this PR"
+          },
+          {
+            "text": "`User#mastodon_acct` became unused after f1a253c1 started building the Mastodon author URL directly.",
+            "why": "Mastodon URL behavior was changed by an earlier commit, not this PR"
+          },
+          {
+            "text": "`Vote#on_comment?` was added in bb5e53e9 but never used.",
+            "why": "Unreferenced internal method; no user-facing effect"
+          },
+          {
+            "text": "`Vote.comment_votes_by_user_for_story_hash` became unused after c05d00ad moved comment vote loading into `CommentVoteHydrator`.",
+            "why": "Internal refactor completed in an earlier commit"
+          },
+          {
+            "text": "`Github.oauth_consumer` was added in fcb24439 but the GitHub flow used `Sponge` directly, so it was never used.",
+            "why": "Unused internal constant; the GitHub flow is unchanged"
+          }
+        ],
+        "regression_hints": [
+          "Story domain links continue to work and lead to the domain listing page",
+          "Login for deleted/active users continues to behave as before (no automatic reactivation)",
+          "Comment and story voting continue to work, with existing votes shown correctly on story pages",
+          "GitHub account connect/authentication flow continues to work",
+          "Mastodon author links on stories continue to render correctly",
+          "Traffic/frontpage caching pages continue to load normally"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 2718,
+        "output_tokens": 945
+      },
+      "judgment": {
+        "claims": [],
+        "assumptions": []
+      },
+      "judgeUsage": {
+        "input_tokens": 0,
+        "output_tokens": 0
+      },
+      "score": {
+        "claims": 0,
+        "intentRecall": {
+          "num": 0,
+          "den": 0
+        },
+        "precision": {
+          "num": 0,
+          "den": 0
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "duplicates": 0,
+        "ungrounded": 0,
+        "assumptions": 0,
+        "assumptionCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "defaultAccuracy": {
+          "num": 0,
+          "den": 0
+        },
+        "offTopicAssumptions": 0
+      }
+    },
+    {
+      "caseId": "lobsters-2172",
+      "run": 3,
+      "extractCost": 0.03669,
+      "judgeCost": 0,
+      "extraction": {
+        "claims": [],
+        "assumptions": [],
+        "not_testable": [
+          {
+            "text": "Remove unreferenced dead code",
+            "why": "Pure code removal of unreferenced methods/constants; no user-visible behavior change in a browser."
+          },
+          {
+            "text": "Found these leftovers using rubydex",
+            "why": "Describes the tooling used to find the code, not app behavior."
+          },
+          {
+            "text": "`TrafficHelper::CACHE_FOR` became unused after e334ae41 stopped using time-based traffic cache keys.",
+            "why": "Behavior was changed by an earlier commit, not this PR; the constant is unreferenced."
+          },
+          {
+            "text": "`Keystore.find_or_create_key_for_update` became unused after b45d1750 switched the remaining code to `upsert`.",
+            "why": "Internal method removal; behavior changed by an earlier commit."
+          },
+          {
+            "text": "`Keystore.decrement_value_for` and `decremented_value_for` ... don't seem to have ever had callers.",
+            "why": "Never-called internal methods; no observable effect."
+          },
+          {
+            "text": "`Story#domain_search_url` became unused after f718da18 switched domain links to `for_domain_url`.",
+            "why": "Behavior changed by an earlier commit; removal is internal."
+          },
+          {
+            "text": "`Story#update_availability` was added in 9c73c87d but never used.",
+            "why": "Never-called internal method."
+          },
+          {
+            "text": "`User#undelete!` became unused after 6fb659f8 stopped automatically reactivating deleted users on login.",
+            "why": "Login reactivation was already removed by an earlier commit."
+          },
+          {
+            "text": "`User#mastodon_acct` became unused after f1a253c1 started building the Mastodon author URL directly.",
+            "why": "Behavior changed by an earlier commit; removal is internal."
+          },
+          {
+            "text": "`Vote#on_comment?` was added in bb5e53e9 but never used.",
+            "why": "Never-called internal method."
+          },
+          {
+            "text": "`Vote.comment_votes_by_user_for_story_hash` became unused after c05d00ad moved comment vote loading into `CommentVoteHydrator`.",
+            "why": "Behavior changed by an earlier commit; removal is internal."
+          },
+          {
+            "text": "`Github.oauth_consumer` was added in fcb24439 but the GitHub flow used `Sponge` directly, so it was never used.",
+            "why": "Never-called internal method; GitHub flow unaffected."
+          }
+        ],
+        "regression_hints": [
+          "Story domain links still work and lead to the domain page (for_domain_url)",
+          "Comment vote state still loads and displays correctly on story pages",
+          "Mastodon author links on stories still render correctly",
+          "GitHub account connect/authentication flow still works",
+          "Traffic-based caching / homepage rendering still works",
+          "Keystore-backed counters (e.g. karma, counts) still update correctly",
+          "Deleted users are still not automatically reactivated on login"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 2718,
+        "output_tokens": 924
+      },
+      "judgment": {
+        "claims": [],
+        "assumptions": []
+      },
+      "judgeUsage": {
+        "input_tokens": 0,
+        "output_tokens": 0
+      },
+      "score": {
+        "claims": 0,
+        "intentRecall": {
+          "num": 0,
+          "den": 0
+        },
+        "precision": {
+          "num": 0,
+          "den": 0
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "duplicates": 0,
+        "ungrounded": 0,
+        "assumptions": 0,
+        "assumptionCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "defaultAccuracy": {
+          "num": 0,
+          "den": 0
+        },
+        "offTopicAssumptions": 0
+      }
+    },
+    {
+      "caseId": "mealie-8363",
+      "run": 1,
+      "extractCost": 0.04832,
+      "judgeCost": 0.0202,
+      "extraction": {
+        "claims": [
+          {
+            "when": "On the Shopping Lists page, click \"+ Create\" and leave the shopping list name input empty",
+            "then": {
+              "kind": "state",
+              "what": "The create/submit button in the dialog is disabled"
+            },
+            "source": "The create button remains disabled (grayed out) when the input is empty"
+          },
+          {
+            "when": "On the Shopping Lists page, open the create dialog and type only spaces into the name input",
+            "then": {
+              "kind": "state",
+              "what": "The create/submit button stays disabled"
+            },
+            "source": "remains disabled (grayed out) when the input is empty or contains only spaces"
+          },
+          {
+            "when": "On the Shopping Lists page, open the create dialog and type a non-empty name into the input",
+            "then": {
+              "kind": "state",
+              "what": "The create/submit button becomes enabled"
+            },
+            "source": "The create button becomes enabled (green) once valid text is entered."
+          },
+          {
+            "when": "On the Shopping Lists page, open the create dialog, leave the name empty (or spaces only) and press Enter in the input",
+            "then": {
+              "kind": "network",
+              "what": "No shopping list creation request is sent"
+            },
+            "source": "Pressing Enter does not submit an empty shopping list."
+          }
+        ],
+        "assumptions": [
+          {
+            "when": "Create a shopping list typing a name with leading/trailing spaces",
+            "then": {
+              "kind": "text",
+              "what": "The new list appears in the overview with the name trimmed of surrounding spaces"
+            },
+            "checked": true,
+            "reason": "v-model.trim is mentioned but the visible result of trimming is not stated explicitly"
+          },
+          {
+            "when": "Send a shopping list creation request with a whitespace-only name directly to the API",
+            "then": {
+              "kind": "network",
+              "what": "The API rejects the request with an error response"
+            },
+            "checked": false,
+            "reason": "The issue asks for API validation but the PR describes frontend-only changes"
+          }
+        ],
+        "not_testable": [
+          {
+            "text": "Modified `frontend/app/pages/shopping-lists/index.vue`.",
+            "why": "Code-level change, not observable in a browser"
+          },
+          {
+            "text": "Added a computed property `isCreateNameValid` to check if the trimmed input is non-empty.",
+            "why": "Internal implementation detail"
+          },
+          {
+            "text": "Bound `:submit-disabled` ... and added a guard clause in `createOne`",
+            "why": "Implementation detail; the user-visible effect is covered by other claims"
+          },
+          {
+            "text": "Tested locally in the browser.",
+            "why": "Describes how the author tested, not intended behavior"
+          }
+        ],
+        "regression_hints": [
+          "Entering a valid name and submitting still creates the shopping list and shows it in the shopping lists overview",
+          "The create dialog can still be opened from the \"+ Create\" button on the Shopping Lists page",
+          "Pressing Enter with a valid name still submits the form and creates the list"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 3504,
+        "output_tokens": 1232
+      },
+      "judgment": {
+        "claims": [
+          {
+            "item": "m1",
+            "reference": "c1",
+            "label": "match",
+            "reason": "Same situation and same disabled-button observable."
+          },
+          {
+            "item": "m2",
+            "reference": "c2",
+            "label": "match",
+            "reason": "Spaces-only input with disabled button matches."
+          },
+          {
+            "item": "m3",
+            "reference": "c3",
+            "label": "match",
+            "reason": "Non-empty name enabling the button matches."
+          },
+          {
+            "item": "m4",
+            "reference": "c4",
+            "label": "match",
+            "reason": "Empty name plus Enter with no creation request matches; the added spaces-only variant doesn't weaken the check."
+          }
+        ],
+        "assumptions": [
+          {
+            "item": "s1",
+            "reference": "a2",
+            "label": "match",
+            "reason": "Both check that surrounding spaces are trimmed from the created list's name."
+          },
+          {
+            "item": "s2",
+            "reference": "a1",
+            "label": "match",
+            "reason": "Both check that the API rejects a direct blank-name creation request."
+          }
+        ]
+      },
+      "judgeUsage": {
+        "input_tokens": 3600,
+        "output_tokens": 290
+      },
+      "score": {
+        "claims": 4,
+        "intentRecall": {
+          "num": 4,
+          "den": 4
+        },
+        "precision": {
+          "num": 4,
+          "den": 4
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "duplicates": 0,
+        "ungrounded": 0,
+        "assumptions": 2,
+        "assumptionCoverage": {
+          "num": 2,
+          "den": 2
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 1
+        },
+        "defaultAccuracy": {
+          "num": 2,
+          "den": 2
+        },
+        "offTopicAssumptions": 0
+      }
+    },
+    {
+      "caseId": "mealie-8363",
+      "run": 2,
+      "extractCost": 0.043895,
+      "judgeCost": 0.030108,
+      "extraction": {
+        "claims": [
+          {
+            "when": "On the Shopping Lists page, click the Create button and leave the shopping list name input empty",
+            "then": {
+              "kind": "state",
+              "what": "The create/submit button in the dialog is disabled"
+            },
+            "source": "keep the create button greyed out (disabled) when the input is invalid"
+          },
+          {
+            "when": "On the Shopping Lists page, open the create dialog and type only spaces into the name field",
+            "then": {
+              "kind": "state",
+              "what": "The create/submit button remains disabled"
+            },
+            "source": "The create button remains disabled (grayed out) when the input is empty or contains only spaces."
+          },
+          {
+            "when": "On the Shopping Lists page, open the create dialog and type a valid (non-whitespace) name",
+            "then": {
+              "kind": "state",
+              "what": "The create/submit button becomes enabled"
+            },
+            "source": "The create button becomes enabled (green) once valid text is entered."
+          },
+          {
+            "when": "On the Shopping Lists page, open the create dialog, type only spaces in the name field and press Enter",
+            "then": {
+              "kind": "network",
+              "what": "No shopping list creation request is sent"
+            },
+            "source": "Pressing Enter does not submit an empty shopping list."
+          },
+          {
+            "when": "On the Shopping Lists page, open the create dialog, enter only spaces, attempt to submit, then reload the page",
+            "then": {
+              "kind": "count",
+              "what": "The number of shopping lists is unchanged (no blank list created)"
+            },
+            "source": "added a guard clause in `createOne` to prevent empty names from being submitted to the API"
+          },
+          {
+            "when": "On the Shopping Lists page, open the create dialog, enter a name with leading/trailing spaces and create it",
+            "then": {
+              "kind": "text",
+              "what": "The new shopping list is listed with the trimmed name"
+            },
+            "source": "Applied `v-model.trim` to the input field"
+          }
+        ],
+        "assumptions": [
+          {
+            "when": "Submit an empty/whitespace-only shopping list name directly to the API (bypassing the UI)",
+            "then": {
+              "kind": "network",
+              "what": "The API rejects the request with an error"
+            },
+            "checked": false,
+            "reason": "Issue asks for API validation but PR only mentions frontend changes"
+          },
+          {
+            "when": "Create shopping lists from other places in the app (e.g. a shopping list selector dialog)",
+            "then": {
+              "kind": "state",
+              "what": "The create button is also disabled for empty names"
+            },
+            "checked": false,
+            "reason": "PR states only the shopping-lists index page was modified"
+          }
+        ],
+        "not_testable": [
+          {
+            "text": "Modified `frontend/app/pages/shopping-lists/index.vue`.",
+            "why": "Internal code change, not observable in a browser"
+          },
+          {
+            "text": "Added a computed property `isCreateNameValid` to check if the trimmed input is non-empty.",
+            "why": "Implementation detail"
+          },
+          {
+            "text": "Bound `:submit-disabled` to keep the create button greyed out",
+            "why": "Implementation detail; the observable outcome is covered by the disabled-state claims"
+          },
+          {
+            "text": "Tested locally in the browser.",
+            "why": "Describes how the work was verified, not intended behavior"
+          }
+        ],
+        "regression_hints": [
+          "Creating a shopping list with a valid name still works and the list appears in the overview",
+          "Existing shopping lists remain accessible and unchanged on the Shopping Lists page",
+          "Pressing Enter with a valid name still submits and creates the list"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 3504,
+        "output_tokens": 1055
+      },
+      "judgment": {
+        "claims": [
+          {
+            "item": "m1",
+            "reference": "c1",
+            "label": "match",
+            "reason": "Both check that the create button is disabled when the name is left empty."
+          },
+          {
+            "item": "m2",
+            "reference": "c2",
+            "label": "match",
+            "reason": "Both check that the create button is disabled for a whitespace-only name."
+          },
+          {
+            "item": "m3",
+            "reference": "c3",
+            "label": "match",
+            "reason": "Both check that the create button is enabled once a name with visible characters is typed."
+          },
+          {
+            "item": "m4",
+            "reference": "c4",
+            "label": "partial",
+            "reason": "Same network check on pressing Enter, but with a whitespace-only name instead of an empty one, so the situation differs."
+          },
+          {
+            "item": "m5",
+            "reference": "c4",
+            "label": "partial",
+            "reason": "It checks that no blank list is created, which the note calls equivalent, but the submit method is vague and it uses a whitespace-only name instead of pressing Enter on an empty name."
+          },
+          {
+            "item": "m6",
+            "reference": "a2",
+            "label": "match",
+            "reason": "Both check that a name with surrounding spaces is saved in trimmed form."
+          }
+        ],
+        "assumptions": [
+          {
+            "item": "s1",
+            "reference": "a1",
+            "label": "match",
+            "reason": "Both expect the API to reject a blank name submitted directly."
+          },
+          {
+            "item": "s2",
+            "reference": null,
+            "label": "none",
+            "reason": "No reference item covers create flows elsewhere in the app."
+          }
+        ]
+      },
+      "judgeUsage": {
+        "input_tokens": 3727,
+        "output_tokens": 760
+      },
+      "score": {
+        "claims": 6,
+        "intentRecall": {
+          "num": 3.5,
+          "den": 4
+        },
+        "precision": {
+          "num": 4,
+          "den": 6
+        },
+        "lures": 0,
+        "unmatched": 1,
+        "duplicates": 1,
+        "ungrounded": 0,
+        "assumptions": 2,
+        "assumptionCoverage": {
+          "num": 2,
+          "den": 2
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 1
+        },
+        "defaultAccuracy": {
+          "num": 1,
+          "den": 1
+        },
+        "offTopicAssumptions": 1
+      }
+    },
+    {
+      "caseId": "mealie-8363",
+      "run": 3,
+      "extractCost": 0.052195,
+      "judgeCost": 0.02592,
+      "extraction": {
+        "claims": [
+          {
+            "when": "On the Shopping Lists page, click \"+ Create\" and leave the shopping list name field empty",
+            "then": {
+              "kind": "state",
+              "what": "The create/submit button is disabled (greyed out)"
+            },
+            "source": "keep the create button greyed out (disabled) when the input is invalid"
+          },
+          {
+            "when": "On the Shopping Lists page, open the create dialog and type only spaces into the name field",
+            "then": {
+              "kind": "state",
+              "what": "The create/submit button is disabled (greyed out)"
+            },
+            "source": "The create button remains disabled (grayed out) when the input is empty or contains only spaces."
+          },
+          {
+            "when": "On the Shopping Lists page, open the create dialog and type a non-empty name into the name field",
+            "then": {
+              "kind": "state",
+              "what": "The create/submit button becomes enabled"
+            },
+            "source": "The create button becomes enabled (green) once valid text is entered."
+          },
+          {
+            "when": "On the Shopping Lists page, open the create dialog, leave the name empty (or only spaces) and press Enter",
+            "then": {
+              "kind": "network",
+              "what": "No request to create a shopping list is sent"
+            },
+            "source": "Pressing Enter does not submit an empty shopping list."
+          },
+          {
+            "when": "On the Shopping Lists page, open the create dialog, leave the name empty (or only spaces) and press Enter",
+            "then": {
+              "kind": "count",
+              "what": "The number of shopping lists shown is unchanged (no blank list added)"
+            },
+            "source": "prevent empty names from being submitted to the API"
+          }
+        ],
+        "assumptions": [
+          {
+            "when": "Create a shopping list typing a name with leading/trailing spaces",
+            "then": {
+              "kind": "text",
+              "what": "The created list's name is shown trimmed of surrounding whitespace"
+            },
+            "checked": true,
+            "reason": "v-model.trim is mentioned but the PR doesn't explicitly state the saved name is trimmed"
+          },
+          {
+            "when": "Send a shopping list creation request with a whitespace-only name directly to the API",
+            "then": {
+              "kind": "network",
+              "what": "The API rejects the request with an error"
+            },
+            "checked": false,
+            "reason": "The issue asks for API validation but the PR only describes frontend changes"
+          }
+        ],
+        "not_testable": [
+          {
+            "text": "Modified `frontend/app/pages/shopping-lists/index.vue`.",
+            "why": "Internal code change, not observable in a browser"
+          },
+          {
+            "text": "Added a computed property `isCreateNameValid` to check if the trimmed input is non-empty.",
+            "why": "Implementation detail"
+          },
+          {
+            "text": "Applied `v-model.trim` to the input field and added a guard clause in `createOne`",
+            "why": "Implementation detail"
+          },
+          {
+            "text": "Tested locally in the browser.",
+            "why": "Describes how the author tested, not intended behavior"
+          }
+        ],
+        "regression_hints": [
+          "Creating a shopping list with a valid non-empty name still works and the new list appears in the shopping lists overview",
+          "The create dialog still opens from the \"+ Create\" button on the Shopping Lists page",
+          "Pressing Enter with a valid name still submits the create form"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 3504,
+        "output_tokens": 1387
+      },
+      "judgment": {
+        "claims": [
+          {
+            "item": "m1",
+            "reference": "c1",
+            "label": "match",
+            "reason": "Same situation (empty name in create dialog) and same observable (create button disabled)."
+          },
+          {
+            "item": "m2",
+            "reference": "c2",
+            "label": "match",
+            "reason": "Same whitespace-only situation with the create button disabled."
+          },
+          {
+            "item": "m3",
+            "reference": "c3",
+            "label": "match",
+            "reason": "Typing a non-empty name enables the create button, as in the reference."
+          },
+          {
+            "item": "m4",
+            "reference": "c4",
+            "label": "match",
+            "reason": "Pressing Enter with an empty name sends no create request, the same check as the reference; the added whitespace case doesn't change it."
+          },
+          {
+            "item": "m5",
+            "reference": "c4",
+            "label": "match",
+            "reason": "The reference note names 'no new blank list appears' as an equivalent user-level check for the Enter case."
+          }
+        ],
+        "assumptions": [
+          {
+            "item": "s1",
+            "reference": "a2",
+            "label": "match",
+            "reason": "A name with surrounding spaces is shown trimmed, the same as the reference assumption."
+          },
+          {
+            "item": "s2",
+            "reference": "a1",
+            "label": "match",
+            "reason": "A direct API call with a blank/whitespace name is rejected, the same as the reference assumption."
+          }
+        ]
+      },
+      "judgeUsage": {
+        "input_tokens": 3670,
+        "output_tokens": 562
+      },
+      "score": {
+        "claims": 5,
+        "intentRecall": {
+          "num": 4,
+          "den": 4
+        },
+        "precision": {
+          "num": 5,
+          "den": 5
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "duplicates": 1,
+        "ungrounded": 0,
+        "assumptions": 2,
+        "assumptionCoverage": {
+          "num": 2,
+          "den": 2
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 1
+        },
+        "defaultAccuracy": {
+          "num": 2,
+          "den": 2
+        },
+        "offTopicAssumptions": 0
+      }
+    },
+    {
+      "caseId": "memos-6187",
+      "run": 1,
+      "extractCost": 0.01683,
+      "judgeCost": 0,
+      "extraction": {
+        "claims": [],
+        "assumptions": [],
+        "not_testable": [
+          {
+            "text": "refactor: replace Split in loops with more efficient SplitSeq",
+            "why": "Internal code refactor with no user-visible behavior change"
+          },
+          {
+            "text": "It significantly reduces memory allocations and can improve performance for long strings.",
+            "why": "Performance/memory characteristics are not observable in a browser end-to-end test"
+          }
+        ],
+        "regression_hints": [
+          "All features relying on string splitting (e.g. search/filter parsing, tag handling, memo content rendering) should continue to work exactly as before"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 2426,
+        "output_tokens": 188
+      },
+      "judgment": {
+        "claims": [],
+        "assumptions": []
+      },
+      "judgeUsage": {
+        "input_tokens": 0,
+        "output_tokens": 0
+      },
+      "score": {
+        "claims": 0,
+        "intentRecall": {
+          "num": 0,
+          "den": 0
+        },
+        "precision": {
+          "num": 0,
+          "den": 0
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "duplicates": 0,
+        "ungrounded": 0,
+        "assumptions": 0,
+        "assumptionCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "defaultAccuracy": {
+          "num": 0,
+          "den": 0
+        },
+        "offTopicAssumptions": 0
+      }
+    },
+    {
+      "caseId": "memos-6187",
+      "run": 2,
+      "extractCost": 0.016805,
+      "judgeCost": 0,
+      "extraction": {
+        "claims": [],
+        "assumptions": [],
+        "not_testable": [
+          {
+            "text": "refactor: replace Split in loops with more efficient SplitSeq",
+            "why": "Internal code refactor with no user-visible change in the browser"
+          },
+          {
+            "text": "It significantly reduces memory allocations and can improve performance for long strings.",
+            "why": "Performance/memory characteristic, not observable as a specific browser behavior"
+          }
+        ],
+        "regression_hints": [
+          "All features that parse or split strings (e.g. tag/filter parsing, memo content rendering, search) should continue to behave exactly as before"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 2426,
+        "output_tokens": 187
+      },
+      "judgment": {
+        "claims": [],
+        "assumptions": []
+      },
+      "judgeUsage": {
+        "input_tokens": 0,
+        "output_tokens": 0
+      },
+      "score": {
+        "claims": 0,
+        "intentRecall": {
+          "num": 0,
+          "den": 0
+        },
+        "precision": {
+          "num": 0,
+          "den": 0
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "duplicates": 0,
+        "ungrounded": 0,
+        "assumptions": 0,
+        "assumptionCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "defaultAccuracy": {
+          "num": 0,
+          "den": 0
+        },
+        "offTopicAssumptions": 0
+      }
+    },
+    {
+      "caseId": "memos-6187",
+      "run": 3,
+      "extractCost": 0.01933,
+      "judgeCost": 0,
+      "extraction": {
+        "claims": [],
+        "assumptions": [],
+        "not_testable": [
+          {
+            "text": "refactor: replace Split in loops with more efficient SplitSeq",
+            "why": "Internal code refactor with no user-visible behavior change"
+          },
+          {
+            "text": "It significantly reduces memory allocations and can improve performance for long strings.",
+            "why": "Performance/memory characteristics are not observable in a browser end-to-end test"
+          },
+          {
+            "text": "strings.SplitSeq (introduced in Go 1.23) returns a lazy sequence (strings.Seq), allowing gopher to iterate over tokens one by one without creating an intermediate slice.",
+            "why": "Describes an implementation detail of the backend, not user-facing behavior"
+          }
+        ],
+        "regression_hints": [
+          "All existing functionality that parses or splits strings (e.g. tags, filters, search queries, memo content rendering) must continue to produce identical results"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 2426,
+        "output_tokens": 288
+      },
+      "judgment": {
+        "claims": [],
+        "assumptions": []
+      },
+      "judgeUsage": {
+        "input_tokens": 0,
+        "output_tokens": 0
+      },
+      "score": {
+        "claims": 0,
+        "intentRecall": {
+          "num": 0,
+          "den": 0
+        },
+        "precision": {
+          "num": 0,
+          "den": 0
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "duplicates": 0,
+        "ungrounded": 0,
+        "assumptions": 0,
+        "assumptionCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "defaultAccuracy": {
+          "num": 0,
+          "den": 0
+        },
+        "offTopicAssumptions": 0
+      }
+    },
+    {
+      "caseId": "memos-6335",
+      "run": 1,
+      "extractCost": 0.068825,
+      "judgeCost": 0.032276,
+      "extraction": {
+        "claims": [
+          {
+            "when": "On the memo feed, type a word that appears in a memo's content into the sidebar search box",
+            "then": {
+              "kind": "visible",
+              "what": "The matching word is visually highlighted inside the rendered memo content"
+            },
+            "source": "This paints every hit of the active search in rendered memo content."
+          },
+          {
+            "when": "Search for a term using different letter casing than it appears in the memo (e.g. search lowercase for a capitalized word)",
+            "then": {
+              "kind": "visible",
+              "what": "The differently-cased occurrence in the memo content is highlighted"
+            },
+            "source": "locates terms the way the server's `content.contains` filter does: case-folded substring"
+          },
+          {
+            "when": "Search for a word that occurs several times in one memo",
+            "then": {
+              "kind": "count",
+              "what": "Every occurrence of the word in that memo's content is highlighted, not just the first"
+            },
+            "source": "This paints every hit of the active search in rendered memo content."
+          },
+          {
+            "when": "Clear the active search term from the sidebar search",
+            "then": {
+              "kind": "hidden",
+              "what": "No highlighted text remains in the memo content"
+            },
+            "source": "`MemoFilterContext` exposes the active `contentSearch` words via `useContentSearchTerms`"
+          },
+          {
+            "when": "Search for a term on the Explore page",
+            "then": {
+              "kind": "visible",
+              "what": "Matching text in the listed memos is highlighted"
+            },
+            "source": "Every memo body on a searched page is covered: feed, explore, detail, calendar drawer, previews."
+          },
+          {
+            "when": "With a search active, open a matching memo's detail page",
+            "then": {
+              "kind": "visible",
+              "what": "The matching text in the memo detail content is highlighted"
+            },
+            "source": "Every memo body on a searched page is covered: feed, explore, detail, calendar drawer, previews."
+          }
+        ],
+        "assumptions": [
+          {
+            "when": "Search with two or more words in the search box",
+            "then": {
+              "kind": "visible",
+              "what": "Each of the searched words is highlighted in the memo content"
+            },
+            "checked": true,
+            "reason": "Evidence says 'contentSearch words' (plural) but never shows a multi-term example"
+          },
+          {
+            "when": "Search for a term that also appears inside a rendered math (KaTeX) formula in a memo",
+            "then": {
+              "kind": "hidden",
+              "what": "The occurrence inside the math formula is not highlighted"
+            },
+            "checked": true,
+            "reason": "'skipping KaTeX and SVG subtrees' implies intentional exclusion, but it may just be an implementation guard"
+          },
+          {
+            "when": "Search for a term that appears inside a fenced code block in a memo",
+            "then": {
+              "kind": "visible",
+              "what": "The occurrence inside the code block is highlighted"
+            },
+            "checked": true,
+            "reason": "Only code colorizing re-renders are mentioned; whether code text is in scope is unstated"
+          }
+        ],
+        "not_testable": [
+          {
+            "text": "Built on the CSS Custom Highlight API (`CSS.highlights` + `::highlight()`), so the browser paints the matches and the rendered markdown tree is never mutated: no `<mark>` injection, no sanitize-schema change",
+            "why": "Implementation mechanism, not user-observable behavior"
+          },
+          {
+            "text": "Folding runs per code point with an offset map, so a hit never splits a character whose fold changes length",
+            "why": "Internal algorithm detail; no stated user-facing outcome"
+          },
+          {
+            "text": "Ranges are rebuilt on subtree mutations, coalesced per animation frame",
+            "why": "Internal rendering/performance detail"
+          },
+          {
+            "text": "Each body removes only its own ranges on unmount.",
+            "why": "Internal lifecycle/cleanup detail not observable in the browser"
+          },
+          {
+            "text": "Browsers without the API render unhighlighted, which is today's behavior.",
+            "why": "Explicitly unchanged behavior and depends on an unsupported browser environment"
+          },
+          {
+            "text": "New tests cover folding, offset mapping, overlap merging, skipped subtrees, mutation rebuilds, term changes, shared-highlight cleanup, and the no-API path.",
+            "why": "Describes how the work was tested"
+          },
+          {
+            "text": "Full web suite, `tsc`, and `biome check` pass.",
+            "why": "Tooling/CI, not user-visible"
+          },
+          {
+            "text": "Checked in the browser against a local backend in both light and dark themes.",
+            "why": "Describes manual verification performed by the author"
+          }
+        ],
+        "regression_hints": [
+          "Searching from the sidebar still filters the memo list to matching memos",
+          "Memo markdown content still renders correctly (text keeps its own color, no layout or content changes)",
+          "Memos display normally when no search term is active"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 3365,
+        "output_tokens": 2080
+      },
+      "judgment": {
+        "claims": [
+          {
+            "item": "m1",
+            "reference": "c1",
+            "label": "match",
+            "reason": "Both check that a sidebar search on the home feed highlights the word inside the rendered memo content."
+          },
+          {
+            "item": "m2",
+            "reference": "c5",
+            "label": "match",
+            "reason": "Both check that a search using different casing still highlights the differently-cased occurrence."
+          },
+          {
+            "item": "m3",
+            "reference": "c1",
+            "label": "partial",
+            "reason": "It is aimed at the basic highlighting behavior but narrows the check to counting multiple occurrences in one memo, so it catches different failures."
+          },
+          {
+            "item": "m4",
+            "reference": null,
+            "label": "none",
+            "reason": "No reference item covers highlights disappearing after the search is cleared."
+          },
+          {
+            "item": "m5",
+            "reference": "c2",
+            "label": "match",
+            "reason": "Both check that searching on the Explore page highlights matches in the listed memos."
+          },
+          {
+            "item": "m6",
+            "reference": "c3",
+            "label": "match",
+            "reason": "Both check that opening a matching memo's detail page with a search active shows the matches highlighted."
+          }
+        ],
+        "assumptions": [
+          {
+            "item": "s1",
+            "reference": "a1",
+            "label": "match",
+            "reason": "Both check that each word of a multi-word search is highlighted."
+          },
+          {
+            "item": "s2",
+            "reference": "c8",
+            "label": "match",
+            "reason": "Both check that no highlight is drawn inside a rendered math formula."
+          },
+          {
+            "item": "s3",
+            "reference": "c9",
+            "label": "match",
+            "reason": "Both check that a match inside a code block ends up highlighted."
+          }
+        ]
+      },
+      "judgeUsage": {
+        "input_tokens": 3974,
+        "output_tokens": 819
+      },
+      "score": {
+        "claims": 6,
+        "intentRecall": {
+          "num": 4,
+          "den": 9
+        },
+        "precision": {
+          "num": 4.5,
+          "den": 6
+        },
+        "lures": 0,
+        "unmatched": 1,
+        "duplicates": 1,
+        "ungrounded": 0,
+        "assumptions": 3,
+        "assumptionCoverage": {
+          "num": 1,
+          "den": 2
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "defaultAccuracy": {
+          "num": 3,
+          "den": 3
+        },
+        "offTopicAssumptions": 0
+      }
+    },
+    {
+      "caseId": "memos-6335",
+      "run": 2,
+      "extractCost": 0.0832,
+      "judgeCost": 0.030832,
+      "extraction": {
+        "claims": [
+          {
+            "when": "Type a term that appears in a memo's body into the sidebar search and view the memo list",
+            "then": {
+              "kind": "visible",
+              "what": "The matching text inside the rendered memo content appears visually highlighted"
+            },
+            "source": "This paints every hit of the active search in rendered memo content."
+          },
+          {
+            "when": "Search for a term that occurs several times inside one memo's content",
+            "then": {
+              "kind": "count",
+              "what": "Every occurrence of the term in that memo's content is highlighted, not just the first"
+            },
+            "source": "Paint every hit"
+          },
+          {
+            "when": "Search using a different letter case than the text in the memo (e.g. lowercase query against capitalized text)",
+            "then": {
+              "kind": "visible",
+              "what": "The differently-cased occurrences in memo content are still highlighted"
+            },
+            "source": "case-folded substring"
+          },
+          {
+            "when": "Search for a term and then open a matching memo's detail page (or the explore page) with the search still active",
+            "then": {
+              "kind": "visible",
+              "what": "The matching text is highlighted in the memo body on that page too"
+            },
+            "source": "Every memo body on a searched page is covered: feed, explore, detail, calendar drawer, previews."
+          },
+          {
+            "when": "Clear the sidebar search term after matches were highlighted",
+            "then": {
+              "kind": "hidden",
+              "what": "No highlighted text remains in the memo content"
+            },
+            "source": "the active search"
+          }
+        ],
+        "assumptions": [
+          {
+            "when": "Search using several words at once from the sidebar",
+            "then": {
+              "kind": "visible",
+              "what": "Each of the search words is highlighted in memo content"
+            },
+            "checked": true,
+            "reason": "Evidence says 'contentSearch words' (plural) but never states multi-term behavior explicitly"
+          },
+          {
+            "when": "Search for text that also appears inside a rendered math (KaTeX) formula or an SVG in a memo",
+            "then": {
+              "kind": "hidden",
+              "what": "That occurrence inside the math/SVG subtree is not highlighted"
+            },
+            "checked": true,
+            "reason": "'skipping KaTeX and SVG subtrees' is stated as intent but is an implementation detail"
+          },
+          {
+            "when": "Search for a term matching text inside a code block that is syntax-colorized asynchronously",
+            "then": {
+              "kind": "visible",
+              "what": "The match stays highlighted after the code block finishes rendering"
+            },
+            "checked": true,
+            "reason": "Mutation-rebuild intent is stated, but whether it is verifiable in-browser is uncertain"
+          }
+        ],
+        "not_testable": [
+          {
+            "text": "Built on the CSS Custom Highlight API (`CSS.highlights` + `::highlight()`), so the browser paints the matches and the rendered markdown tree is never mutated",
+            "why": "Implementation mechanism, not observable user behavior"
+          },
+          {
+            "text": "`web/src/utils/search-match.ts` locates terms ... Folding runs per code point with an offset map",
+            "why": "Internal utility implementation detail"
+          },
+          {
+            "text": "`MemoFilterContext` exposes the active `contentSearch` words via `useContentSearchTerms`, safe outside the provider (share previews, tests).",
+            "why": "Internal API/context change with no stated user-facing result"
+          },
+          {
+            "text": "Ranges are rebuilt on subtree mutations, coalesced per animation frame",
+            "why": "Internal rendering/performance mechanism"
+          },
+          {
+            "text": "Each body removes only its own ranges on unmount.",
+            "why": "Internal lifecycle cleanup, not directly observable"
+          },
+          {
+            "text": "New tests cover folding, offset mapping, overlap merging, skipped subtrees, mutation rebuilds, term changes, shared-highlight cleanup, and the no-API path.",
+            "why": "Describes test coverage, not user behavior"
+          },
+          {
+            "text": "Full web suite, `tsc`, and `biome check` pass.",
+            "why": "Tooling/CI, not browser-observable"
+          },
+          {
+            "text": "Checked in the browser against a local backend in both light and dark themes.",
+            "why": "Describes how the author verified the change"
+          },
+          {
+            "text": "Browsers without the API render unhighlighted, which is today's behavior.",
+            "why": "Explicitly unchanged behavior / environment-dependent"
+          },
+          {
+            "text": "`::highlight(memo-search-match)` paints a translucent wash of the theme's warning color",
+            "why": "Styling detail; exact color not reliably checkable as a distinct behavior"
+          }
+        ],
+        "regression_hints": [
+          "Sidebar search continues to filter the memo list to matching memos",
+          "Memo content (markdown, code blocks, math, links) renders normally and unchanged when highlighting is active",
+          "Text in memo content keeps its own color and remains readable in both light and dark themes",
+          "Memos viewed without an active search show no highlighting"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 3365,
+        "output_tokens": 2655
+      },
+      "judgment": {
+        "claims": [
+          {
+            "item": "m1",
+            "reference": "c1",
+            "label": "match",
+            "reason": "Both check that search terms entered in the sidebar are highlighted in the listed memos' content on the default feed."
+          },
+          {
+            "item": "m2",
+            "reference": "c1",
+            "label": "partial",
+            "reason": "It targets the same general highlighting but checks a specific situation, multiple occurrences within one memo, that no reference item singles out."
+          },
+          {
+            "item": "m3",
+            "reference": "c5",
+            "label": "match",
+            "reason": "Both check that a case-insensitive match against differently-cased text is highlighted."
+          },
+          {
+            "item": "m4",
+            "reference": "c3",
+            "label": "partial",
+            "reason": "It bundles the detail page with the Explore page as alternatives, so a test could pass on one page while the other is broken."
+          },
+          {
+            "item": "m5",
+            "reference": null,
+            "label": "none",
+            "reason": "No reference item covers highlights disappearing after the search is cleared."
+          }
+        ],
+        "assumptions": [
+          {
+            "item": "s1",
+            "reference": "a1",
+            "label": "match",
+            "reason": "Both check that each word of a multi-word search is highlighted."
+          },
+          {
+            "item": "s2",
+            "reference": "c8",
+            "label": "match",
+            "reason": "Both check that matches inside rendered math formulas or diagrams (SVG) are not highlighted."
+          },
+          {
+            "item": "s3",
+            "reference": "c9",
+            "label": "match",
+            "reason": "Both check that a match inside a code block is highlighted after asynchronous syntax colouring completes."
+          }
+        ]
+      },
+      "judgeUsage": {
+        "input_tokens": 3973,
+        "output_tokens": 747
+      },
+      "score": {
+        "claims": 5,
+        "intentRecall": {
+          "num": 2.5,
+          "den": 9
+        },
+        "precision": {
+          "num": 3,
+          "den": 5
+        },
+        "lures": 0,
+        "unmatched": 1,
+        "duplicates": 1,
+        "ungrounded": 0,
+        "assumptions": 3,
+        "assumptionCoverage": {
+          "num": 1,
+          "den": 2
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "defaultAccuracy": {
+          "num": 3,
+          "den": 3
+        },
+        "offTopicAssumptions": 0
+      }
+    },
+    {
+      "caseId": "memos-6335",
+      "run": 3,
+      "extractCost": 0.07735,
+      "judgeCost": 0.024164,
+      "extraction": {
+        "claims": [
+          {
+            "when": "On the memo feed, type a word that appears in a memo's content into the sidebar search box",
+            "then": {
+              "kind": "visible",
+              "what": "Every occurrence of that word in the rendered memo content is visually highlighted"
+            },
+            "source": "This paints every hit of the active search in rendered memo content."
+          },
+          {
+            "when": "Search from the sidebar using a term whose letter case differs from the text in the memo (e.g. search lowercase for a capitalized word)",
+            "then": {
+              "kind": "visible",
+              "what": "The differently-cased occurrences in the memo content are highlighted too"
+            },
+            "source": "locates terms the way the server's `content.contains` filter does: case-folded substring"
+          },
+          {
+            "when": "After searching and seeing highlighted matches, clear the search term from the sidebar search box",
+            "then": {
+              "kind": "hidden",
+              "what": "No highlighting remains on the memo content"
+            },
+            "source": "`MemoFilterContext` exposes the active `contentSearch` words via `useContentSearchTerms`"
+          },
+          {
+            "when": "With an active search term, open a matching memo's detail page",
+            "then": {
+              "kind": "visible",
+              "what": "The matching term is highlighted in the memo body on the detail page"
+            },
+            "source": "Every memo body on a searched page is covered: feed, explore, detail, calendar drawer, previews."
+          },
+          {
+            "when": "Search for a term on the Explore page",
+            "then": {
+              "kind": "visible",
+              "what": "Matching text in the listed memos is highlighted"
+            },
+            "source": "Every memo body on a searched page is covered: feed, explore, detail, calendar drawer, previews."
+          },
+          {
+            "when": "Search for a term that appears inside a memo's code block or other asynchronously rendered content",
+            "then": {
+              "kind": "visible",
+              "what": "The match is highlighted after the content finishes rendering"
+            },
+            "source": "so async renderers (code colorizing, lazy math, link cards) stay highlighted"
+          }
+        ],
+        "assumptions": [
+          {
+            "when": "Enter a search containing two words that both appear in a memo",
+            "then": {
+              "kind": "visible",
+              "what": "Both words are highlighted in the memo content"
+            },
+            "checked": true,
+            "reason": "Evidence says 'contentSearch words' (plural) but never states multi-term behavior explicitly"
+          },
+          {
+            "when": "Search for a term and reload the page with the search still active",
+            "then": {
+              "kind": "visible",
+              "what": "Matches are highlighted again after the reload"
+            },
+            "checked": true,
+            "reason": "Search state persistence across reload is not discussed in the evidence"
+          },
+          {
+            "when": "Search for a term that also appears in a memo's tag or other UI chrome",
+            "then": {
+              "kind": "hidden",
+              "what": "The occurrence outside rendered memo content is not highlighted"
+            },
+            "checked": true,
+            "reason": "Evidence scopes highlighting to 'memo body', but non-content areas are never mentioned"
+          }
+        ],
+        "not_testable": [
+          {
+            "text": "Built on the CSS Custom Highlight API (`CSS.highlights` + `::highlight()`), so the browser paints the matches and the rendered markdown tree is never mutated",
+            "why": "Implementation approach, not a user-observable behavior"
+          },
+          {
+            "text": "Browsers without the API render unhighlighted, which is today's behavior.",
+            "why": "Describes unchanged fallback behavior and requires a browser lacking the API"
+          },
+          {
+            "text": "Folding runs per code point with an offset map, so a hit never splits a character whose fold changes length (`ß` → `ss`)",
+            "why": "Internal algorithm detail; not stated as a distinct user-facing outcome"
+          },
+          {
+            "text": "Ranges are rebuilt on subtree mutations, coalesced per animation frame",
+            "why": "Internal implementation/performance detail"
+          },
+          {
+            "text": "Each body removes only its own ranges on unmount.",
+            "why": "Internal lifecycle cleanup, not observable in the UI"
+          },
+          {
+            "text": "New tests cover folding, offset mapping, overlap merging, skipped subtrees, mutation rebuilds, term changes, shared-highlight cleanup, and the no-API path.",
+            "why": "Describes how the change was tested"
+          },
+          {
+            "text": "Full web suite, `tsc`, and `biome check` pass.",
+            "why": "Tooling/CI result, not browser-observable"
+          },
+          {
+            "text": "Checked in the browser against a local backend in both light and dark themes.",
+            "why": "Describes manual verification performed by the author"
+          },
+          {
+            "text": "`MemoFilterContext` exposes the active `contentSearch` words via `useContentSearchTerms`, safe outside the provider (share previews, tests).",
+            "why": "Internal API/context change"
+          }
+        ],
+        "regression_hints": [
+          "Searching from the sidebar still filters the memo list to matching memos",
+          "Memo markdown content (code blocks, KaTeX math, links, SVG icons) still renders correctly while a search is active",
+          "Text in memo content keeps its normal color and readability in both light and dark themes",
+          "Browsing without any active search shows memo content with no highlighting"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 3365,
+        "output_tokens": 2421
+      },
+      "judgment": {
+        "claims": [
+          {
+            "item": "m1",
+            "reference": "c1",
+            "label": "match",
+            "reason": "Same home feed sidebar search with occurrences highlighted in memo content."
+          },
+          {
+            "item": "m2",
+            "reference": "c5",
+            "label": "match",
+            "reason": "Case-insensitive highlighting of differently-cased occurrence."
+          },
+          {
+            "item": "m3",
+            "reference": null,
+            "label": "none",
+            "reason": "Clearing search removing highlights has no reference counterpart."
+          },
+          {
+            "item": "m4",
+            "reference": "c3",
+            "label": "match",
+            "reason": "Same detail page highlighting after search."
+          },
+          {
+            "item": "m5",
+            "reference": "c2",
+            "label": "match",
+            "reason": "Same Explore page highlighting."
+          },
+          {
+            "item": "m6",
+            "reference": "c9",
+            "label": "match",
+            "reason": "Same code block highlighting after async rendering completes."
+          }
+        ],
+        "assumptions": [
+          {
+            "item": "s1",
+            "reference": "a1",
+            "label": "match",
+            "reason": "Two-word search highlights each word."
+          },
+          {
+            "item": "s2",
+            "reference": null,
+            "label": "none",
+            "reason": "Reload persistence not in reference."
+          },
+          {
+            "item": "s3",
+            "reference": null,
+            "label": "none",
+            "reason": "Non-highlighting of tags or UI chrome does not correspond to any reference item; a2 concerns tag filtering highlighting."
+          }
+        ]
+      },
+      "judgeUsage": {
+        "input_tokens": 3996,
+        "output_tokens": 409
+      },
+      "score": {
+        "claims": 6,
+        "intentRecall": {
+          "num": 5,
+          "den": 9
+        },
+        "precision": {
+          "num": 5,
+          "den": 6
+        },
+        "lures": 0,
+        "unmatched": 1,
+        "duplicates": 0,
+        "ungrounded": 0,
+        "assumptions": 3,
+        "assumptionCoverage": {
+          "num": 1,
+          "den": 2
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "defaultAccuracy": {
+          "num": 1,
+          "den": 1
+        },
+        "offTopicAssumptions": 2
+      }
+    },
+    {
+      "caseId": "uptime-kuma-7855",
+      "run": 1,
+      "extractCost": 0.02348,
+      "judgeCost": 0.011252,
+      "extraction": {
+        "claims": [],
+        "assumptions": [
+          {
+            "when": "On a fresh install with no admin account, open the app and complete the initial setup/registration form",
+            "then": {
+              "kind": "visible",
+              "what": "The account is created and the user reaches the dashboard without an error"
+            },
+            "checked": true,
+            "reason": "Title says 'better auth register issue' but gives no detail; registration succeeding is the most likely intent."
+          },
+          {
+            "when": "When an admin account already exists, visit the setup/registration page",
+            "then": {
+              "kind": "url",
+              "what": "The user is redirected to the login page instead of the registration form"
+            },
+            "checked": false,
+            "reason": "Evidence does not state this scope; guessing it is out of scope for this fix."
+          }
+        ],
+        "not_testable": [
+          {
+            "text": "Very stupid mistake.",
+            "why": "Describes the nature of the code mistake, not an observable user behavior."
+          },
+          {
+            "text": "fix: better auth register issue",
+            "why": "Names a fix without stating what changes for the user, so no specific behavior can be derived."
+          },
+          {
+            "text": "Please follow this checklist to avoid unnecessary back and forth",
+            "why": "PR template/process checklist, not product behavior."
+          }
+        ],
+        "regression_hints": [
+          "Existing users can still log in with their credentials",
+          "Normal login/session behavior and redirects after authentication remain unchanged"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 2641,
+        "output_tokens": 411
+      },
+      "judgment": {
+        "claims": [],
+        "assumptions": [
+          {
+            "item": "s1",
+            "reference": null,
+            "label": "none",
+            "reason": "The reference has no claims or assumptions, so this guess about successful initial registration has nothing to correspond to."
+          },
+          {
+            "item": "s2",
+            "reference": null,
+            "label": "none",
+            "reason": "The reference has no claims or assumptions, so this guess about redirecting away from setup has nothing to correspond to."
+          }
+        ]
+      },
+      "judgeUsage": {
+        "input_tokens": 2133,
+        "output_tokens": 136
+      },
+      "score": {
+        "claims": 0,
+        "intentRecall": {
+          "num": 0,
+          "den": 0
+        },
+        "precision": {
+          "num": 0,
+          "den": 0
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "duplicates": 0,
+        "ungrounded": 0,
+        "assumptions": 2,
+        "assumptionCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "defaultAccuracy": {
+          "num": 0,
+          "den": 0
+        },
+        "offTopicAssumptions": 2
+      }
+    },
+    {
+      "caseId": "uptime-kuma-7855",
+      "run": 2,
+      "extractCost": 0.02363,
+      "judgeCost": 0.011124,
+      "extraction": {
+        "claims": [],
+        "assumptions": [
+          {
+            "when": "On a fresh install with no user, open the app and complete the initial setup/registration form",
+            "then": {
+              "kind": "visible",
+              "what": "Registration succeeds and the dashboard is shown"
+            },
+            "checked": true,
+            "reason": "Title mentions a 'register issue' fix, but the evidence never states the symptom or expected result"
+          },
+          {
+            "when": "With authentication disabled (no-auth mode), load the app",
+            "then": {
+              "kind": "hidden",
+              "what": "No setup/registration prompt is shown"
+            },
+            "checked": false,
+            "reason": "Guessing the fix relates to auth-disabled registration prompts; evidence gives no detail"
+          }
+        ],
+        "not_testable": [
+          {
+            "text": "fix: better auth register issue",
+            "why": "Names a fix without stating what changes for the user; no observable behavior can be derived"
+          },
+          {
+            "text": "Very stupid mistake.",
+            "why": "Author commentary, not a statement of user-visible behavior"
+          },
+          {
+            "text": "Please follow this checklist to avoid unnecessary back and forth",
+            "why": "PR template checklist about process/testing, not app behavior"
+          }
+        ],
+        "regression_hints": [
+          "Existing users can still log in with correct credentials",
+          "Login with wrong credentials is still rejected",
+          "Setup/registration is still not offered once a user account exists"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 2641,
+        "output_tokens": 417
+      },
+      "judgment": {
+        "claims": [],
+        "assumptions": [
+          {
+            "item": "s1",
+            "reference": null,
+            "label": "none",
+            "reason": "The reference has no claims or assumptions, so nothing corresponds to this guess about registration succeeding."
+          },
+          {
+            "item": "s2",
+            "reference": null,
+            "label": "none",
+            "reason": "The reference has no claims or assumptions, so nothing corresponds to this no-auth mode guess."
+          }
+        ]
+      },
+      "judgeUsage": {
+        "input_tokens": 2126,
+        "output_tokens": 131
+      },
+      "score": {
+        "claims": 0,
+        "intentRecall": {
+          "num": 0,
+          "den": 0
+        },
+        "precision": {
+          "num": 0,
+          "den": 0
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "duplicates": 0,
+        "ungrounded": 0,
+        "assumptions": 2,
+        "assumptionCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "defaultAccuracy": {
+          "num": 0,
+          "den": 0
+        },
+        "offTopicAssumptions": 2
+      }
+    },
+    {
+      "caseId": "uptime-kuma-7855",
+      "run": 3,
+      "extractCost": 0.02263,
+      "judgeCost": 0.010984,
+      "extraction": {
+        "claims": [],
+        "assumptions": [
+          {
+            "when": "On a fresh install with no user, open the app and complete the initial setup/register form",
+            "then": {
+              "kind": "visible",
+              "what": "The account is created and the user reaches the dashboard"
+            },
+            "checked": true,
+            "reason": "Title mentions 'auth register issue' but no description of the actual symptom or fix"
+          },
+          {
+            "when": "With authentication disabled (or 'better auth' enabled) load the app",
+            "then": {
+              "kind": "hidden",
+              "what": "No registration/setup form is shown"
+            },
+            "checked": false,
+            "reason": "Evidence gives no detail on which register path was broken or how"
+          }
+        ],
+        "not_testable": [
+          {
+            "text": "fix: better auth register issue",
+            "why": "Names a fix without stating the observable symptom or the intended user-visible behavior"
+          },
+          {
+            "text": "Very stupid mistake.",
+            "why": "Author commentary, not a description of behavior"
+          },
+          {
+            "text": "Please follow this checklist to avoid unnecessary back and forth",
+            "why": "PR template checklist about process, not app behavior"
+          }
+        ],
+        "regression_hints": [
+          "Existing users can still log in with their credentials",
+          "After registering/logging in, the session persists across a page reload"
+        ]
+      },
+      "overCap": 0,
+      "extractUsage": {
+        "input_tokens": 2641,
+        "output_tokens": 377
+      },
+      "judgment": {
+        "claims": [],
+        "assumptions": [
+          {
+            "item": "s1",
+            "reference": null,
+            "label": "none",
+            "reason": "The reference has no claims or assumptions, so there is nothing for s1 to correspond to."
+          },
+          {
+            "item": "s2",
+            "reference": null,
+            "label": "none",
+            "reason": "The reference has no claims or assumptions, so there is nothing for s2 to correspond to."
+          }
+        ]
+      },
+      "judgeUsage": {
+        "input_tokens": 2126,
+        "output_tokens": 124
+      },
+      "score": {
+        "claims": 0,
+        "intentRecall": {
+          "num": 0,
+          "den": 0
+        },
+        "precision": {
+          "num": 0,
+          "den": 0
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "duplicates": 0,
+        "ungrounded": 0,
+        "assumptions": 2,
+        "assumptionCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "appContextCoverage": {
+          "num": 0,
+          "den": 0
+        },
+        "defaultAccuracy": {
+          "num": 0,
+          "den": 0
+        },
+        "offTopicAssumptions": 2
+      }
+    }
+  ]
+}

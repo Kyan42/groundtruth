@@ -13,7 +13,7 @@ export type CaseScore = {
   precision: Ratio;           // extracted claims that correspond to any reference claim
   lures: number;              // claims made from not-testable statements, or any claim on a case expecting none
   unmatched: number;          // claims matching nothing: invented, or a gap in the reference (adjudicate)
-  duplicates: number;         // claims matching a reference claim that an earlier claim already matched
+  duplicates: number;         // claims or assumptions matching a reference item an earlier one already matched
   ungrounded: number;         // claims whose source quote isn't in the evidence
   assumptions: number;
   assumptionCoverage: Ratio;  // open decisions (reference assumptions, discussion/diff-only claims) raised
@@ -77,9 +77,17 @@ export function scoreRun(c: EvalCase, e: Extraction, j: Judgment, evidenceText: 
     },
     lures: noClaimsCase ? e.claims.length : claimVerdicts.filter((v) => v?.reference?.startsWith("nt")).length,
     unmatched: claimVerdicts.filter((v) => !v || (!isRefClaim(v.reference) && !v.reference?.startsWith("nt"))).length,
-    duplicates: claimVerdicts.filter((v, i) =>
-      v && v.label !== "none" && isRefClaim(v.reference) &&
-      claimVerdicts.slice(0, i).some((w) => w && w.label !== "none" && w.reference === v.reference)).length,
+    // Claims, then assumptions, in order: any item hitting a reference claim or assumption already hit.
+    duplicates: (() => {
+      const seen = new Set<string>();
+      let n = 0;
+      for (const v of [...claimVerdicts, ...assumptionVerdicts]) {
+        if (!v || v.label === "none" || !v.reference || v.reference.startsWith("nt")) continue;
+        if (seen.has(v.reference)) n++;
+        seen.add(v.reference);
+      }
+      return n;
+    })(),
     ungrounded: e.claims.filter((m) => !isGrounded(m.source, evidenceText)).length,
     assumptions: e.assumptions.length,
     assumptionCoverage: { num: coverTargets.filter((id) => raised.has(id)).length, den: coverTargets.length },

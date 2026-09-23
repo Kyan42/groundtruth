@@ -24,17 +24,17 @@ const JudgmentSchema = z.object({
 
 export type Judgment = z.infer<typeof JudgmentSchema>;
 
-export const JUDGE_PROMPT = `You compare a claim extractor's output against a hand-written reference for the same pull request. You only decide correspondences; you don't score.
+export const JUDGE_PROMPT = `You compare a claim extractor's output against a hand-written reference for the same pull request. You only decide correspondences; you don't score. The PR's evidence (what the extractor read) is included for context.
 
 Claims and assumptions both describe browser-checkable behavior as an action (when) and one observable result (then); assumptions are the extractor's guesses about decisions the evidence leaves open. Map every extracted claim (m1, m2, ...) and every extracted assumption (s1, s2, ...) the same way:
 - reference: the id of the single best-corresponding reference claim (c...) or reference assumption (a...), or of a not-testable item (nt...) if the item restates that statement, or null if nothing corresponds.
-- label:
-  - match: checks the same intended behavior in the same situation, with an observable result that would fail if that behavior were missing. The observable may differ from the reference's when it verifies the same thing equally well: "the save button is disabled" and "clicking save sends no request" both verify that save doesn't work.
-  - partial: aimed at the same reference item but materially off: the action is vague or a different situation; it bundles several results; or its result would also hold without the intended behavior (for example, it was already true before this PR; reference notes say when that applies), so it wouldn't catch a broken change. That can't happen when the action itself needs the new feature (e.g. turning a new option on or off), since the check couldn't even be run without it.
+- label: match, partial or none, by one test: would a browser test built from the extracted item catch the same broken implementations as one built from the reference? A claim must say what to check; it may leave out how to get there.
+  - What to check (then) must be the same observable result. When the evidence specifies how the behavior shows up (e.g. buttons are "disabled", not removed; a length limit on an input field), a different observable is not the same, because it would miss an implementation that got that wrong. When the evidence states only the goal, any observable that proves the goal is the same.
+  - How to get there (when) may leave out preconditions a competent tester would supply anyway because the check can't be run without them (e.g. a transfer must exist for a transfer flow to appear), and where to find a control.
+  - match: same observable result, in the same situation, with any omitted setup of the harmless kind above.
+  - partial: aimed at the same reference item but would catch different failures: a different observable (per the rule above); a different situation (e.g. editing an existing item instead of creating one, another page or view); omitted setup that lets the check pass even when the feature is broken (e.g. checking a toggle's off state without ever turning it on); several results bundled into one; or a result that would also hold without the change (e.g. already true before this PR; reference notes say when). The last can't apply when the action itself needs the new feature.
   - none: nothing corresponds (use this with reference null, or with an nt... id).
-Several extracted items may point at the same reference item. Ignore whether an assumption is checked or unchecked; only match its content.
-
-Judge meaning, not wording. The question for each item is whether it tests the same intended behavior as well as the reference does, not whether it uses the same observable.`;
+Several extracted items may point at the same reference item. Ignore whether an assumption is checked or unchecked; only match its content. Judge meaning, not wording.`;
 
 function renderReference(c: EvalCase): string {
   const claims = c.expected.claims.map((r) =>
@@ -59,6 +59,7 @@ function renderExtraction(e: Extraction): string {
 export async function judge(
   c: EvalCase,
   e: Extraction,
+  evidenceText: string,
   opts: { model?: string; client?: Anthropic } = {},
 ): Promise<{ judgment: Judgment; usage: { input_tokens: number; output_tokens: number } }> {
   // Nothing to match: skip the call.
@@ -71,7 +72,10 @@ export async function judge(
     max_tokens: 16000,
     output_config: { effort: "high", format: betaZodOutputFormat(JudgmentSchema) },
     system: JUDGE_PROMPT,
-    messages: [{ role: "user", content: `${renderReference(c)}\n\n---\n\n${renderExtraction(e)}` }],
+    messages: [{
+      role: "user",
+      content: `<evidence>\n${evidenceText}\n</evidence>\n\n${renderReference(c)}\n\n---\n\n${renderExtraction(e)}`,
+    }],
   });
   if (response.stop_reason === "refusal") {
     throw new Error(`Judge refused (${response.stop_details?.category ?? "no category"})`);

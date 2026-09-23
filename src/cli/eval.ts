@@ -81,7 +81,7 @@ async function runJob({ c, run }: { c: EvalCase; run: number }): Promise<RunResu
       Object.assign(result, { extraction: ex.extraction, overCap: ex.overCap, extractUsage: ex.usage,
         extractCost: cost(model, ex.usage) });
     }
-    const jd = await judge(c, result.extraction!, { model: judgeModel, client });
+    const jd = await judge(c, result.extraction!, evidence, { model: judgeModel, client });
     result.judgment = jd.judgment;
     result.judgeUsage = jd.usage;
     result.judgeCost = cost(judgeModel, jd.usage);

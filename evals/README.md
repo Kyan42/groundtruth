@@ -13,12 +13,22 @@ Metrics, pooled across cases (partial matches count half):
 - **Precision**: extracted claims that correspond to a reference claim. The headline metric.
 - **Intent recall**: `intent` reference claims found.
 - **Lures taken**: claims made from `not_testable` statements, plus any claim on a case whose reference has no claims (`no-claims` PRs, and vague ones where only the diff would tell what changed).
+- **Duplicates**: claims or assumptions matching a reference item an earlier one already matched (e.g. an assumption repeating a claim).
 - **Unmatched claims**: claims matching nothing. Either invented or a gap in the reference; review each one and either accept the penalty or add it to the case.
 - **Assumption coverage**: open decisions (standalone reference assumptions, plus `discussion` and `diff-only` claims) that the extractor raised as an assumption or a claim.
 - **App-context coverage**: the same, for assumptions marked `needs: app-context`.
 - **Default accuracy**: of the extractor's assumptions that match something, the share whose checkbox default is right. Matching a reference claim means it should be checked; matching a `not_testable` item means unchecked; `default: any` isn't scored.
 - **Off-topic assumptions**: assumptions matching nothing in the reference.
 - **Ungrounded sources**: claims whose `source` quote isn't found in the evidence (checked in code, no judge).
+
+## Judging
+
+The judge labels each extracted item match / partial / none by one test: **would a browser test built from it catch the same broken implementations as one built from the reference?** A claim must say *what* to check; it may leave out *how* to get there.
+
+- **What to check** must be the same observable. When the evidence specifies how the behavior shows up (buttons "disabled" rather than removed; a length limit on an input), a different observable is partial. When the evidence only states the goal, any observable that proves it matches.
+- **How to get there** can omit preconditions a competent tester supplies anyway (a transfer must exist to see a transfer flow) and where controls are. It's partial when the omission lets the check pass on a broken feature (checking a toggle's off state without ever turning it on) or when it's a different situation (editing an existing story instead of creating one).
+
+Calibrated against human spot checks in `spotchecks/` (`npm run evals:spotcheck -- <run> [count] [exclude.key.json ...]`).
 
 ## Case fields
 

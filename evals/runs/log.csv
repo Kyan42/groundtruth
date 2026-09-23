@@ -4,3 +4,4 @@ run,mode,extract_model,extract_prompt,judge_model,judge_prompt,runs,cases,dev_pr
 2026-09-23T01-23-55-941Z,full,claude-opus-5,97c3dd65,claude-opus-5-5,9b1faa42,3,8,0.896,0.741,0.783,0.577,0.0400,0.0126,1.26
 2026-09-23T01-31-24-399Z,rejudge,claude-opus-5,97c3dd65,claude-opus-5-5,200d5b36,3,8,0.917,0.813,0.783,0.577,0.0400,0.0122,0.29
 2026-09-23T01-32-04-466Z,rejudge,claude-opus-5,unknown,claude-opus-5-5,200d5b36,3,8,0.902,0.813,0.629,0.641,NaN,0.0152,0.36
+2026-09-23T02-31-14-727Z,rejudge,claude-opus-5,97c3dd65,claude-opus-5-5,e16b6c74,3,8,0.917,0.854,0.798,0.590,0.0400,0.0158,0.38

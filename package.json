@@ -10,6 +10,7 @@
     "evals:snapshot": "tsx src/cli/snapshot.ts",
     "evals": "tsx --env-file-if-exists=.env src/cli/eval.ts",
     "evals:compare": "tsx src/cli/compare.ts",
+    "evals:spotcheck": "tsx src/cli/spotcheck.ts",
     "extract": "tsx --env-file-if-exists=.env src/cli/extract.ts",
     "typecheck": "tsc --noEmit"
   },

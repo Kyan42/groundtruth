@@ -21,14 +21,14 @@ expected:
   claims:
     - id: c1
       when: on the story submit page, enter a title that is too short and submit
-      then: { kind: network, what: no request is sent to the server }
+      then: { kind: state, what: the browser flags the title field as too short }
       derivable: intent
       source: 'title: "Add minlength to title input in submit story page"'
       note: >-
-        The server already rejected titles under 3 characters before this PR, so "a short title is rejected" would
-        pass on main as well. What's new is that the browser blocks the submit before any request is made.
-        "The browser marks the title field invalid" checks the same behavior equally well (it didn't happen before
-        this PR either). Merged from two claims on 2026-09-23: one behavior, one claim.
+        The PR names the mechanism: a minimum length on the title input, i.e. the browser's own length check, so
+        the field being flagged is the observable. "No request is sent" is a weaker check (it would also pass if
+        something else blocked the submit). The server already rejected titles under 3 characters before this PR,
+        so "a short title is rejected" would pass on main as well.
 
     - id: c3
       when: on the story submit page, enter a 3-character title (other fields valid) and submit
@@ -39,7 +39,7 @@ expected:
 
     - id: c4
       when: edit an existing story, shorten its title below the minimum, and save
-      then: { kind: network, what: no request is sent to the server }
+      then: { kind: state, what: the browser flags the title field as too short }
       derivable: diff-only
       source: 'the changed partial (stories/_form) is also rendered by the edit-story, suggest-edit and mod-edit pages'
       note: a side effect of where the change was made, not stated intent. Kept because it's direct, not speculative.

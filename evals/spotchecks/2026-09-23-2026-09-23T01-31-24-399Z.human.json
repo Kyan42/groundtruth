@@ -1,0 +1,21 @@
+{
+  "labeler": "Kyan42",
+  "agreement_with_judge": "9/15",
+  "labels": [
+    { "n": 1, "label": "match", "note": "correctly identifies the hide button is disabled; 'disabled' is vague but so is the PR, and the browser agent can determine it" },
+    { "n": 2, "label": "partial", "note": "goes further than the reference by also checking the story was created (open-ended)" },
+    { "n": 3, "label": "partial", "note": "goes further: story created and browser navigates away" },
+    { "n": 4, "label": "partial/none", "note": "about previewing existing stories; the reference is about a new story" },
+    { "n": 5, "label": "match" },
+    { "n": 6, "label": "match" },
+    { "n": 7, "label": "match", "note": "seems redundant with the previous item" },
+    { "n": 8, "label": "match", "note": "reference has more specific prerequisites, but the extracted claim is technically complete" },
+    { "n": 9, "label": "match", "note": "reference slightly more specific; extracted is reasonable" },
+    { "n": 10, "label": "match" },
+    { "n": 11, "label": "match", "note": "slightly more detailed but functionally the same" },
+    { "n": 12, "label": "match" },
+    { "n": 13, "label": "partial", "note": "same setup, different stated consequence (browser flag vs no network request); both could be right" },
+    { "n": 14, "label": "match", "note": "two ways of checking the same thing; functionally aimed at the same thing" },
+    { "n": 15, "label": "partial", "note": "same as 13" }
+  ]
+}
