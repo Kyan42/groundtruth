@@ -2,59 +2,58 @@ import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import * as z from "zod/v4";
 import type { Extraction } from "../extract.js";
-import { type EvalCase, questionText } from "./cases.js";
+import type { EvalCase } from "./cases.js";
 
-// LLM judge: maps each extracted claim and question onto the reference case.
+// LLM judge: maps each extracted claim and assumption onto the reference case.
 // It only matches; all scoring happens in score.ts.
 
 export const DEFAULT_JUDGE_MODEL = "claude-opus-5-5";
 
+const Mapping = z.object({
+  item: z.string().describe("Id of the extracted item, e.g. m1 or s1"),
+  reference: z.string().nullable()
+    .describe("Id of the best reference claim (c…), reference assumption (a…) or not-testable item (nt…), or null"),
+  label: z.enum(["match", "partial", "none"]),
+  reason: z.string().describe("One sentence"),
+});
+
 const JudgmentSchema = z.object({
-  claims: z.array(z.object({
-    model_claim: z.string().describe("Id of the extracted claim, e.g. m1"),
-    reference: z.string().nullable().describe("Id of the best reference claim (c…) or not-testable item (nt…), or null"),
-    label: z.enum(["match", "partial", "none"]),
-    reason: z.string().describe("One sentence"),
-  })),
-  questions: z.array(z.object({
-    model_question: z.string().describe("Id of the extracted question, e.g. q1"),
-    covers: z.array(z.string()).describe("Ids of reference questions (rq…) and reference claims (c…) this question covers"),
-    reason: z.string().describe("One sentence"),
-  })),
+  claims: z.array(Mapping),
+  assumptions: z.array(Mapping),
 });
 
 export type Judgment = z.infer<typeof JudgmentSchema>;
 
 const JUDGE_PROMPT = `You compare a claim extractor's output against a hand-written reference for the same pull request. You only decide correspondences; you don't score.
 
-Claims describe browser-checkable behavior as an action (when) and one observable result (then). For each extracted claim (m1, m2, ...):
-- reference: the id of the single best-corresponding reference claim (c...), or of a not-testable item (nt...) if the extractor turned that statement into a claim, or null if nothing corresponds.
+Claims and assumptions both describe browser-checkable behavior as an action (when) and one observable result (then); assumptions are the extractor's guesses about decisions the evidence leaves open. Map every extracted claim (m1, m2, ...) and every extracted assumption (s1, s2, ...) the same way:
+- reference: the id of the single best-corresponding reference claim (c...) or reference assumption (a...), or of a not-testable item (nt...) if the item restates that statement, or null if nothing corresponds.
 - label:
   - match: same user action and same observable result, even if worded differently or more or less specific in harmless ways.
-  - partial: clearly aimed at the same reference claim but materially off: the action is vague or different, it bundles several results, the result is weaker or stronger than the reference, or the kind is wrong in a way that changes what would be checked.
-  - none: no reference claim corresponds (use this with reference null, or with an nt... id).
-Several extracted claims may point at the same reference claim.
+  - partial: clearly aimed at the same reference item but materially off: the action is vague or different, it bundles several results, the result is weaker or stronger than the reference, or the kind is wrong in a way that changes what would be checked.
+  - none: nothing corresponds (use this with reference null, or with an nt... id).
+Several extracted items may point at the same reference item. Ignore whether an assumption is checked or unchecked; only match its content.
 
-For each extracted question (q1, q2, ...), list what it covers: reference questions (rq...) asking substantially the same thing, and reference claims (c...) whose content the question asks about (e.g. asking "is it off by default?" covers a claim that it is off by default). Use an empty list if it covers nothing.
-
-Judge meaning, not wording. Be strict about the observable result: a claim that checks something different from the reference is not a match even if the topic is the same.`;
+Judge meaning, not wording. Be strict about the observable result: an item that checks something different from the reference is not a match even if the topic is the same.`;
 
 function renderReference(c: EvalCase): string {
   const claims = c.expected.claims.map((r) =>
     `${r.id} [${r.derivable}] when: ${r.when} | then (${r.then.kind}): ${r.then.what}`);
+  // Assumptions with same_as are represented by their claim.
+  const assumptions = c.expected.assumptions.filter((a) => !a.same_as).map((a) =>
+    `${a.id} when: ${a.when} | then (${a.then!.kind}): ${a.then!.what}`);
   const nt = c.expected.not_testable.map((n, i) => `nt${i + 1}: ${n.text} (${n.why})`);
-  const qs = c.expected.questions.map((q, i) => `rq${i + 1}: ${questionText(q)}`);
   return [
     `Reference claims:\n${claims.join("\n") || "(none: this PR should produce zero claims)"}`,
+    `Reference assumptions:\n${assumptions.join("\n") || "(none)"}`,
     `Reference not-testable statements:\n${nt.join("\n") || "(none)"}`,
-    `Reference questions:\n${qs.join("\n") || "(none)"}`,
   ].join("\n\n");
 }
 
 function renderExtraction(e: Extraction): string {
   const claims = e.claims.map((m, i) => `m${i + 1} when: ${m.when} | then (${m.then.kind}): ${m.then.what}`);
-  const qs = e.questions.map((q, i) => `q${i + 1}: ${q}`);
-  return `Extracted claims:\n${claims.join("\n") || "(none)"}\n\nExtracted questions:\n${qs.join("\n") || "(none)"}`;
+  const assumptions = e.assumptions.map((a, i) => `s${i + 1} when: ${a.when} | then (${a.then.kind}): ${a.then.what}`);
+  return `Extracted claims:\n${claims.join("\n") || "(none)"}\n\nExtracted assumptions:\n${assumptions.join("\n") || "(none)"}`;
 }
 
 export async function judge(
@@ -63,8 +62,8 @@ export async function judge(
   opts: { model?: string; client?: Anthropic } = {},
 ): Promise<{ judgment: Judgment; usage: { input_tokens: number; output_tokens: number } }> {
   // Nothing to match: skip the call.
-  if (e.claims.length === 0 && e.questions.length === 0) {
-    return { judgment: { claims: [], questions: [] }, usage: { input_tokens: 0, output_tokens: 0 } };
+  if (e.claims.length === 0 && e.assumptions.length === 0) {
+    return { judgment: { claims: [], assumptions: [] }, usage: { input_tokens: 0, output_tokens: 0 } };
   }
   const client = opts.client ?? new Anthropic();
   const response = await client.beta.messages.parse({

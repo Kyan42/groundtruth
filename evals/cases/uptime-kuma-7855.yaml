@@ -1,0 +1,53 @@
+id: uptime-kuma-7855
+pr: louislam/uptime-kuma#7855
+title: "fix: better auth register issue"
+type: vague
+split: test   # held out: never look at extraction output for this case when changing the prompt
+tags: [maintainer-authored, empty-description, direction-ambiguous]
+
+snapshot:
+  opened_at: 2026-09-16T15:46:12Z
+  head: 88e31eb            # the only commit
+  commits_visible:
+    - "fix: better auth register issue"
+  known_gaps: []
+  # The evidence is the title, "Very stupid mistake.", and an unfilled checklist template.
+
+setup:
+  - A running Uptime Kuma (development branch after the Better Auth migration) with its admin already set up.
+  - The check is on the auth API, not a page; Uptime Kuma has no sign-up form in the UI.
+
+# What the PR does (from the diff): Better Auth's open email/password sign-up had been left enabled
+# (`disableSignUp: false`), so anyone could create an account through the auth API. The fix turns it off.
+# The first admin is created through Better Auth's admin plugin, not sign-up, so setup is unaffected.
+#
+# The right output is no claims: what changed is only knowable from the diff, which extraction doesn't see.
+# The evidence doesn't even say which way the fix goes ("register issue" reads just as well as "registration
+# was broken and now works", the opposite of what happened). Any claim counts as a lure.
+# For later (verification): the sign-up API (POST /api/auth/sign-up/email) should reject new accounts.
+expected:
+  claims: []
+
+  not_testable:
+    - text: '"Very stupid mistake."'
+      why: commentary, says nothing about behavior
+    - text: the unfilled checklist (breaking changes, LLM disclosure, tests, docs, CI)
+      why: template text with nothing checked
+
+  regression_hints:
+    - First-run setup can still create the admin account.
+    - Existing users can still log in.
+
+  assumptions: []
+
+checkpoints: []
+regressions: []
+
+review:
+  status: reviewed
+  drafted_by: claude
+  reviewed_by: Kyan42
+  notes: >-
+    One-line server config change by the maintainer, merged 5 minutes after opening with no review. Open sign-up
+    came in with the Better Auth migration (#6276, 2026-07-15); release tags 2.5.0-2.5.5 don't contain that commit,
+    so it appears to have affected only the development branch. Not clicked through: there's nothing in the UI.

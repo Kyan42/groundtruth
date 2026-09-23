@@ -101,14 +101,26 @@ expected:
     - The other Spent-view options ("Show percentages", "Group accounts in Spent view") still work, including combined with show transfers.
     - The Spent view with the option off looks exactly as it did before this PR.
 
-  # What a good extractor should ask the developer, given only the evidence at open
-  questions:
-    - Is the show-transfers option off by default? ("optional" suggests so, but it isn't stated.)
-    - Is the choice remembered (for a saved dashboard widget, or across reloads)?
-    - Does the option apply only to the Spent view, or to the Budgeted view as well?
-    - When money moves both ways between two accounts, should that be two flows or one net flow?
-    - Which transfers count? Off-budget ones are excluded per the commit; what about other cases?
-    - { text: 'How does the option interact with "Group accounts in Spent view"?', needs: app-context }
+  # Decisions the evidence at open leaves open, with the checkbox default a good extractor should pick.
+  assumptions:
+    - id: a1
+      same_as: c4          # off by default: "optional" points to it
+      default: true
+    - id: a2
+      same_as: c7          # remembered on a saved report
+      default: any
+    - id: a3
+      when: turn on show transfers, then switch the report to the Budgeted view
+      then: { kind: visible, what: transfer flows are drawn in the Budgeted view }
+      default: false       # the title scopes it to the Spent view
+    - id: a4
+      same_as: c6          # money both ways between two accounts shows as one net flow
+      default: any
+    - id: a5
+      when: turn on both "Group accounts in Spent view" and show transfers
+      then: { kind: visible, what: transfer flows are drawn between the account groups }
+      default: any
+      needs: app-context
 
 # Layer 2 (verification), filled in later
 checkpoints: []

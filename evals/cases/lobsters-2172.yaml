@@ -41,7 +41,7 @@ expected:
     - 'The header logo still reflects current traffic (its style, and its "Current traffic: N%" tooltip).'
     - Linking a GitHub account still works.
 
-  questions: []
+  assumptions: []
 
 checkpoints: []
 regressions: []   # checked: no later commit repairs anything this PR removed (as of 2026-09-22)

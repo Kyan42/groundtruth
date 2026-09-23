@@ -57,10 +57,11 @@ expected:
     - On a published story, the comments label is still a link to the comments, with the same text as before.
     - Moderators still see "mod edit" on published stories.
 
-  questions:
-    - In preview, should save and hide be shown disabled, or removed entirely? (The maintainer answered in the issue thread - "render them, disabled" - but extraction doesn't see issue comments.)
-    - { text: 'Should other byline links in preview be handled too (e.g. moderators'' "mod edit")? (This is what review ended up changing.)', needs: app-context }
-    - In preview, should the comments label be plain text or removed?
+  assumptions:
+    - id: a1
+      same_as: c4          # other byline links (moderators' "mod edit") handled too
+      default: any
+      needs: app-context
 
 checkpoints: []
 

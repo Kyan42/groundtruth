@@ -1,0 +1,136 @@
+{
+  "model": "claude-opus-5",
+  "judgeModel": "claude-opus-5-5",
+  "runs": 1,
+  "results": [
+    {
+      "caseId": "lobsters-2029",
+      "run": 1,
+      "extraction": {
+        "claims": [
+          {
+            "when": "On the submit story page, type a single character in the Title field and submit the form",
+            "then": {
+              "kind": "state",
+              "what": "The title field is reported invalid by the browser and the form is not submitted"
+            },
+            "source": "Add minlength to title input in submit story page"
+          },
+          {
+            "when": "On the submit story page, type a single character in the Title field and submit the form",
+            "then": {
+              "kind": "url",
+              "what": "The browser stays on the submit story page instead of navigating to a created story"
+            },
+            "source": "Add minlength to title input in submit story page"
+          },
+          {
+            "when": "On the submit story page, type a title long enough to meet the minimum length and submit the form with a valid URL",
+            "then": {
+              "kind": "state",
+              "what": "The title field is not reported invalid and the form submission proceeds"
+            },
+            "source": "Add minlength to title input in submit story page"
+          }
+        ],
+        "assumptions": [
+          {
+            "when": "On the story edit page, entering a too-short title and submitting",
+            "then": {
+              "kind": "state",
+              "what": "The browser blocks submission the same way"
+            },
+            "checked": false,
+            "reason": "Title mentions only the submit story page; edit page may share or not share the form"
+          },
+          {
+            "when": "On the submit story page, entering a 2-character title and submitting",
+            "then": {
+              "kind": "state",
+              "what": "The title field is reported invalid"
+            },
+            "checked": true,
+            "reason": "Evidence gives no number; guessing the minimum matches the app's existing server-side title length rule (3)"
+          }
+        ],
+        "not_testable": [
+          {
+            "text": "Add minlength to title input in submit story page",
+            "why": "The presence of an HTML attribute itself is an implementation detail; only the resulting validation behavior is observable"
+          }
+        ],
+        "regression_hints": [
+          "Submitting a story with a valid title and URL still works and creates the story",
+          "Server-side validation errors for other fields (e.g. missing or duplicate URL) still display as before",
+          "The title field still accepts and preserves normal-length titles, including any auto-fetched title"
+        ]
+      },
+      "overCap": 0,
+      "judgment": {
+        "claims": [
+          {
+            "item": "m1",
+            "reference": "c2",
+            "label": "partial",
+            "reason": "It bundles the title field being marked invalid (c2) with the form not being submitted (c1)."
+          },
+          {
+            "item": "m2",
+            "reference": "c1",
+            "label": "partial",
+            "reason": "Staying on the page is a weaker check than confirming no request reaches the server."
+          },
+          {
+            "item": "m3",
+            "reference": "c3",
+            "label": "partial",
+            "reason": "It targets valid-length submission going through but does not test the 3-character boundary, and it observes state rather than the network request."
+          }
+        ],
+        "assumptions": [
+          {
+            "item": "s1",
+            "reference": "c4",
+            "label": "match",
+            "reason": "Both check that editing a story with a too-short title blocks submission."
+          },
+          {
+            "item": "s2",
+            "reference": "c2",
+            "label": "match",
+            "reason": "A 2-character title is too short, and the result is the title field being marked invalid."
+          }
+        ]
+      },
+      "score": {
+        "claims": 3,
+        "intentRecall": {
+          "num": 1,
+          "den": 2
+        },
+        "precision": {
+          "num": 1.5,
+          "den": 3
+        },
+        "lures": 0,
+        "unmatched": 0,
+        "ungrounded": 0,
+        "assumptions": 2,
+        "assumptionCoverage": {
+          "num": 1,
+          "den": 1
+        },
+        "appContextCoverage": {
+          "num": 1,
+          "den": 1
+        },
+        "defaultAccuracy": {
+          "num": 1,
+          "den": 1
+        },
+        "offTopicAssumptions": 0
+      },
+      "cost": 0.051351999999999995
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+<pull_request repo="usememos/memos" number="6335" author="bluedbird" base="main">
+
+<title>feat(web): highlight search matches in memo content</title>
+
+<description>
+Searching from the sidebar filters memos correctly but gives no visual cue where the terms occur, so long memos still need a manual find-in-page pass. This paints every hit of the active search in rendered memo content.
+
+## Approach
+
+Built on the CSS Custom Highlight API (`CSS.highlights` + `::highlight()`), so the browser paints the matches and the rendered markdown tree is never mutated: no `<mark>` injection, no sanitize-schema change, nothing for React reconciliation to fight.
+
+- `web/src/utils/search-match.ts` locates terms the way the server's `content.contains` filter does: case-folded substring. Folding runs per code point with an offset map, so a hit never splits a character whose fold changes length (`ß` → `ss`), and overlapping hits merge into one range.
+- `useSearchMatchHighlight` registers each memo body's ranges on one shared highlight, skipping KaTeX and SVG subtrees. Ranges are rebuilt on subtree mutations, coalesced per animation frame, so async renderers (code colorizing, lazy math, link cards) stay highlighted. Each body removes only its own ranges on unmount. Browsers without the API render unhighlighted, which is today's behavior.
+- `MemoFilterContext` exposes the active `contentSearch` words via `useContentSearchTerms`, safe outside the provider (share previews, tests).
+- `::highlight(memo-search-match)` paints a translucent wash of the theme's warning color, so text keeps its own color on every theme.
+
+Every memo body on a searched page is covered: feed, explore, detail, calendar drawer, previews.
+
+## Verification
+
+- New tests cover folding, offset mapping, overlap merging, skipped subtrees, mutation rebuilds, term changes, shared-highlight cleanup, and the no-API path.
+- Full web suite, `tsc`, and `biome check` pass.
+- Checked in the browser against a local backend in both light and dark themes.
+
+Closes https://github.com/orgs/usememos/discussions/6329
+</description>
+
+</pull_request>
+
+<linked_issues>
+(none)
+</linked_issues>
+
+<commits>
+- feat(web): highlight search matches in memo content
+  
+  Searching from the sidebar filters memos but gave no visual cue where
+  the terms occur, which makes long memos hard to scan. Paint every hit
+  with the CSS Custom Highlight API instead of altering the rendered tree.
+  
+  - search-match.ts locates terms the way the server's content.contains
+    does: case-folded substring. Folding runs per code point with an
+    offset map, so a hit never splits a character whose fold changes
+    length (ß → ss), and overlapping hits merge into one range.
+  - useSearchMatchHighlight registers the ranges of each memo body on one
+    shared highlight named memo-search-match, skipping KaTeX and SVG
+    subtrees. Ranges are rebuilt on subtree mutations, coalesced per
+    animation frame, so async renderers (code colorizing, lazy math, link
+    cards) stay highlighted. Each body removes only its own ranges on
+    unmount. Browsers without the API render unhighlighted.
+  - MemoFilterContext exposes the active contentSearch words through
+    useContentSearchTerms, safe outside the provider.
+  - ::highlight(memo-search-match) paints a translucent wash of the theme
+    warning color, so text keeps its own color on every theme.
+</commits>

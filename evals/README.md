@@ -12,10 +12,12 @@ Metrics, pooled across cases (partial matches count half):
 
 - **Precision**: extracted claims that correspond to a reference claim. The headline metric.
 - **Intent recall**: `intent` reference claims found.
-- **Lures taken**: claims made from `not_testable` statements, plus any claim on a `no-claims` case.
+- **Lures taken**: claims made from `not_testable` statements, plus any claim on a case whose reference has no claims (`no-claims` PRs, and vague ones where only the diff would tell what changed).
 - **Unmatched claims**: claims matching nothing. Either invented or a gap in the reference; review each one and either accept the penalty or add it to the case.
-- **Question coverage**: reference questions, plus `discussion` and `diff-only` claims, covered by the extractor's questions (or claims).
-- **App-context question coverage**: the same, for questions marked `needs: app-context`.
+- **Assumption coverage**: open decisions (standalone reference assumptions, plus `discussion` and `diff-only` claims) that the extractor raised as an assumption or a claim.
+- **App-context coverage**: the same, for assumptions marked `needs: app-context`.
+- **Default accuracy**: of the extractor's assumptions that match something, the share whose checkbox default is right. Matching a reference claim means it should be checked; matching a `not_testable` item means unchecked; `default: any` isn't scored.
+- **Off-topic assumptions**: assumptions matching nothing in the reference.
 - **Ungrounded sources**: claims whose `source` quote isn't found in the evidence (checked in code, no judge).
 
 ## Case fields
@@ -28,17 +30,17 @@ Metrics, pooled across cases (partial matches count half):
 - `expected`: the reference output for claim extraction.
   - `claims`: each has `when` (the user action), `then` (`kind` + `what`), a `source`, and `derivable`:
     - `intent`: follows from the evidence at open. Extraction is expected to produce it.
-    - `discussion`: only known from later review comments. Extraction should raise it as a question instead.
-    - `diff-only`: only visible in the code. Extraction should raise it as a question, or miss it without penalty.
+    - `discussion`: only known from later review comments. Extraction should raise it as an assumption instead.
+    - `diff-only`: only visible in the code. Extraction should raise it as an assumption, or miss it without penalty.
   - `not_testable`: statements in the evidence that shouldn't become claims, with the reason.
   - `regression_hints`: existing behavior that should be unchanged (used by the regression step).
-  - `questions`: what a good extractor should ask the developer. Questions marked `needs: app-context` require knowing what else exists in the app (not in the PR's evidence). They're scored separately, and are the test for adding summaries of base-branch pages later.
+  - `assumptions`: decisions the evidence leaves open, which the extractor should raise as yes/no checkboxes (at most 3 per PR) with a default: `default: true` (checked, test it), `false` (unchecked), or `any` (the evidence gives no basis for a guess; only coverage is scored). `same_as: c4` points at a reference claim instead of restating it. Only decisions the running app can't answer belong here: whether a default or scope is intended, not exact labels or values. Assumptions marked `needs: app-context` require knowing what else exists in the app; they're scored separately, and are the test for adding summaries of base-branch pages later.
 - `checkpoints`: (later) expected claim statuses at specific commits, for verification.
 - `regressions`: (later) behavior the PR changed that nobody asked for, for evaluating the regression step.
+- `review`: draft/reviewed status and notes.
 
 ## Writing claims
 
 - **One claim, one check.** `when` can be a sequence of actions, but it ends in exactly one observable result. Several results after the same action become several claims with the same `when`; the test builder can group them into one journey step. Status is per claim, so a claim with two results is ambiguous when one holds and the other doesn't.
 - **Guard checks aren't claims.** A check like "the page still renders", which stops a `hidden` claim passing on a blank page, is added by the verifier, not written into the claim.
 - **No speculative edge cases.** Claims come from intent, not from imagining what could break. An edge case becomes a claim only when the PR itself deals with it: a fix commit or review discussion during the PR. Otherwise it belongs to the future PR that fixes it, where it's that PR's intent. The same rule applies to what the extractor should produce.
-- `review`: draft/reviewed status and notes.

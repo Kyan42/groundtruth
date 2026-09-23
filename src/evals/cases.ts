@@ -14,7 +14,17 @@ export type RefClaim = {
   source: string;
 };
 
-export type RefQuestion = string | { text: string; needs?: "app-context" };
+// A decision the evidence leaves open, with the checkbox default a good extractor should pick.
+// `same_as` points at a reference claim instead of restating it. `default: any` means the evidence
+// gives no basis for a guess, so only coverage is scored, not the default.
+export type RefAssumption = {
+  id: string;
+  same_as?: string;
+  when?: string;
+  then?: { kind: string; what: string };
+  default: boolean | "any";
+  needs?: "app-context";
+};
 
 export type EvalCase = {
   id: string;
@@ -27,7 +37,7 @@ export type EvalCase = {
     claims: RefClaim[];
     not_testable: { text: string; why: string }[];
     regression_hints: string[];
-    questions: RefQuestion[];
+    assumptions: RefAssumption[];
   };
 };
 
@@ -46,6 +56,9 @@ export function evidencePath(caseId: string): string {
   return path.join(EVIDENCE_DIR, `${caseId}.txt`);
 }
 
-export function questionText(q: RefQuestion): string {
-  return typeof q === "string" ? q : q.text;
+// An assumption's when/then, resolving same_as.
+export function assumptionCheck(c: EvalCase, a: RefAssumption): { when: string; then: { kind: string; what: string } } {
+  const claim = a.same_as ? c.expected.claims.find((r) => r.id === a.same_as) : undefined;
+  if (a.same_as && !claim) throw new Error(`${c.id} ${a.id}: same_as ${a.same_as} not found`);
+  return claim ?? { when: a.when!, then: a.then! };
 }

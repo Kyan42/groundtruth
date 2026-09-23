@@ -1,0 +1,121 @@
+id: memos-6335
+pr: usememos/memos#6335
+title: "feat(web): highlight search matches in memo content"
+type: new-feature
+split: test   # held out: never look at extraction output for this case when changing the prompt
+tags: [implementation-heavy, stated-edge-cases]
+
+snapshot:
+  opened_at: 2026-09-16T15:42:30Z
+  head: a7cf6eb            # the only commit
+  commits_visible:
+    - "feat(web): highlight search matches in memo content"
+  known_gaps:
+    - >-
+      The PR closes a GitHub Discussion (usememos/memos discussion 6329), not an issue, so the evidence tool misses it.
+      The discussion adds the user's goal ("move from word location to word location") and says highlighting existed
+      before (added in PR 514) and was lost in a later frontend rewrite, i.e. this restores a lost feature.
+
+setup:
+  - Memos with several memos containing a common word. The public demo (https://demo.usememos.com, v0.31.0) includes
+    this PR, and its Explore page works without logging in.
+  - Search from the sidebar search box (the URL gets ?filter=contentSearch:<word>).
+
+expected:
+  claims:
+    - id: c1
+      when: search for a word from the sidebar on the home feed
+      then: { kind: visible, what: occurrences of the word inside the listed memos' content are highlighted }
+      derivable: intent
+      source: 'description: "This paints every hit of the active search in rendered memo content"'
+
+    - id: c2
+      when: search for a word from the sidebar on the Explore page
+      then: { kind: visible, what: occurrences of the word inside the listed memos' content are highlighted }
+      derivable: intent
+      source: 'description: "Every memo body on a searched page is covered: feed, explore, detail, calendar drawer, previews."'
+
+    - id: c3
+      when: search for a word, then open a matching memo's detail page
+      then: { kind: visible, what: occurrences of the word in the memo are highlighted }
+      derivable: intent
+      source: same as c2
+
+    - id: c4
+      when: search for a word, then open the calendar drawer for a day with a matching memo
+      then: { kind: visible, what: occurrences of the word in that memo are highlighted }
+      derivable: intent
+      source: same as c2
+
+    - id: c5
+      when: search for a word in lowercase that appears capitalized in a memo (e.g. search "memo", content has "Memo")
+      then: { kind: visible, what: the capitalized occurrence is highlighted }
+      derivable: intent
+      source: 'description: "locates terms the way the server''s content.contains filter does: case-folded substring"'
+
+    - id: c6
+      when: search for part of a word (e.g. "mem" where a memo contains "memory")
+      then: { kind: visible, what: the matching part inside the longer word is highlighted }
+      derivable: intent
+      source: same as c5
+
+    - id: c7
+      when: search for "strasse" where a memo contains "Straße"
+      then: { kind: visible, what: '"Straße" is highlighted as a match' }
+      derivable: intent
+      source: 'description: "a hit never splits a character whose fold changes length (ß → ss)"'
+      note: an edge case the author stated (in the Approach section), so it's intended.
+
+    - id: c8
+      when: search for a word that appears inside a rendered math formula or diagram in a memo
+      then: { kind: hidden, what: no highlight is drawn inside the formula or diagram }
+      derivable: intent
+      source: 'description: "skipping KaTeX and SVG subtrees"'
+      note: an edge case the author stated (in the Approach section), so it's intended.
+
+    - id: c9
+      when: search for a word that appears inside a code block in a memo
+      then: { kind: visible, what: the match inside the code block is highlighted after the code's syntax colouring loads }
+      derivable: intent
+      source: 'description: "async renderers (code colorizing, lazy math, link cards) stay highlighted"'
+      note: an edge case the author stated (in the Approach section), so it's intended.
+
+  not_testable:
+    - text: '"Built on the CSS Custom Highlight API ... no <mark> injection, no sanitize-schema change"'
+      why: how it's implemented
+    - text: '"overlapping hits merge into one range"'
+      why: internal; merged and unmerged highlights look the same
+    - text: '"Browsers without the API render unhighlighted"'
+      why: needs a browser without the API; not what a standard test browser does
+    - text: '"paints a translucent wash of the theme''s warning color, so text keeps its own color on every theme"'
+      why: styling detail; the claims check that matches are highlighted
+    - text: '"New tests cover ...", "Full web suite, tsc, and biome check pass", "Checked in the browser ..."'
+      why: describe how it was tested
+
+  regression_hints:
+    - Without an active search, memos render as before, with nothing highlighted. (Not a claim; it was already true before this PR.)
+    - Search still filters memos the same way; highlighting only marks what the filter matched.
+    - Memo rendering (markdown, code blocks, math, link cards) is otherwise unchanged.
+
+  assumptions:
+    - id: a1
+      when: search for two words and view matching memos
+      then: { kind: visible, what: each word is highlighted wherever it appears }
+      default: true        # "every hit of the active search", "contentSearch words"
+    - id: a2
+      when: filter memos by a tag (not a text search)
+      then: { kind: visible, what: the tag is highlighted in memo content }
+      default: false       # the description is about text search only
+
+checkpoints: []
+regressions: []
+
+review:
+  status: reviewed
+  drafted_by: claude
+  reviewed_by: Kyan42
+  notes: >-
+    Checked on the demo (v0.31.0): searching "memo" on Explore registered 36 highlighted ranges, including "Memo"
+    (c2 and c5 seen working); clearing the search removed them. Not checked: detail page, calendar drawer, c6-c9.
+    GitHub's API shows the new hook file as "+0/-0, no patch" (likely treated as binary), but the file is complete
+    at the PR head (3,857 bytes); not a bug in Memos. Merged 6 minutes after opening with only an automated review.

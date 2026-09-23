@@ -1,0 +1,23 @@
+<pull_request repo="usememos/memos" number="6187" author="questfever" base="main">
+
+<title>refactor: replace Split in loops with more efficient SplitSeq</title>
+
+<description>
+strings.SplitSeq (introduced in Go 1.23)  returns a lazy sequence (strings.Seq), allowing gopher to iterate over tokens one by one without creating an intermediate slice.
+
+It significantly reduces memory allocations and can improve performance for long strings.
+
+More info: https://github.com/golang/go/issues/61901
+</description>
+
+</pull_request>
+
+<linked_issues>
+(none)
+</linked_issues>
+
+<commits>
+- refactor: replace Split in loops with more efficient SplitSeq
+  
+  Signed-off-by: questfever <questfever@outlook.com>
+</commits>

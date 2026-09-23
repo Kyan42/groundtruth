@@ -1,0 +1,47 @@
+id: memos-6187
+pr: usememos/memos#6187
+title: "refactor: replace Split in loops with more efficient SplitSeq"
+type: no-claims
+split: test   # held out: never look at extraction output for this case when changing the prompt
+tags: [performance-lure]   # "reduces memory allocations", "improve performance"
+
+snapshot:
+  opened_at: 2026-08-13T18:49:31Z
+  head: 4282a80            # the only commit
+  commits_visible:
+    - "refactor: replace Split in loops with more efficient SplitSeq"
+  known_gaps: []
+
+setup: []
+
+# A Go refactor: strings.Split / strings.Fields in four loops become the lazy SplitSeq / FieldsSeq, which
+# iterate the same parts without building a slice. Two of the four files are tests. No behavior changes.
+# The lure is the performance language: "improve performance for long strings" isn't something a browser
+# test can check, and the change is far too small for users to notice.
+expected:
+  claims: []
+
+  not_testable:
+    - text: '"It significantly reduces memory allocations and can improve performance for long strings."'
+      why: a performance/internal claim, not observable in a browser
+    - text: '"strings.SplitSeq (introduced in Go 1.23) returns a lazy sequence ... without creating an intermediate slice"'
+      why: describes the implementation
+
+  # From the diff (the evidence names no areas): the touched production code decides whether a request
+  # came over HTTPS behind a proxy (for the session cookie) and parses emoji data.
+  regression_hints:
+    - Logging in still works, including behind an HTTPS reverse proxy.
+    - Emoji in memos still render as before.
+
+  assumptions: []
+
+checkpoints: []
+regressions: []
+
+review:
+  status: reviewed
+  drafted_by: claude
+  reviewed_by: Kyan42
+  notes: >-
+    Four one-line changes, two in test files. Split/SplitSeq and Fields/FieldsSeq yield the same parts in a
+    range loop, so behavior is identical. Approved "LGTM, thanks" by the maintainer, plus automated reviews.

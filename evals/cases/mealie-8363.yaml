@@ -55,10 +55,20 @@ expected:
   regression_hints:
     - Creating a shopping list with a valid name still works, and the new list appears in the overview.
 
-  questions:
-    - The issue also asks the API to reject empty or whitespace-only names. Is that in scope for this PR, or front-end only?
-    - Are names trimmed when saved (e.g. "  Groceries  " saved as "Groceries")?
-    - { text: "Do other places that create or rename a shopping list get the same validation?", needs: app-context }
+  assumptions:
+    - id: a1
+      when: create a shopping list with a blank name by calling the API directly
+      then: { kind: network, what: the API rejects the request }
+      default: false       # the issue asks for it, but this PR only changes the page
+    - id: a2
+      when: create a shopping list named "  Groceries  " (with surrounding spaces)
+      then: { kind: text, what: the list is named "Groceries" }
+      default: true        # the description mentions trimming the input
+    - id: a3
+      when: rename an existing shopping list to a blank name
+      then: { kind: state, what: saving is blocked }
+      default: any
+      needs: app-context
 
 checkpoints: []
 regressions: []

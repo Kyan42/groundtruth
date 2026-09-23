@@ -9,53 +9,79 @@ export type Ratio = { num: number; den: number };
 
 export type CaseScore = {
   claims: number;
-  intentRecall: Ratio;      // intent reference claims found
-  precision: Ratio;         // extracted claims that correspond to any reference claim
-  lures: number;            // claims made from not-testable statements, or any claim on a no-claims case
-  unmatched: number;        // claims matching nothing: invented, or a gap in the reference (adjudicate)
-  questionCoverage: Ratio;  // reference questions + discussion/diff-only claims covered by questions
-  appContextCoverage: Ratio; // the subset of reference questions marked needs: app-context
-  ungrounded: number;       // claims whose source quote isn't in the evidence
+  intentRecall: Ratio;        // intent reference claims found by claims
+  precision: Ratio;           // extracted claims that correspond to any reference claim
+  lures: number;              // claims made from not-testable statements, or any claim on a case expecting none
+  unmatched: number;          // claims matching nothing: invented, or a gap in the reference (adjudicate)
+  ungrounded: number;         // claims whose source quote isn't in the evidence
+  assumptions: number;
+  assumptionCoverage: Ratio;  // open decisions (reference assumptions, discussion/diff-only claims) raised
+  appContextCoverage: Ratio;  // the subset marked needs: app-context
+  defaultAccuracy: Ratio;     // matched assumptions whose checkbox default is right (where the reference has one)
+  offTopicAssumptions: number; // assumptions matching nothing in the reference
 };
 
+type Verdict = Judgment["claims"][number];
 const credit = (label: string) => (label === "match" ? 1 : label === "partial" ? 0.5 : 0);
 
 export function scoreRun(c: EvalCase, e: Extraction, j: Judgment, evidenceText: string): CaseScore {
   const refClaims = c.expected.claims;
-  const byModelClaim = new Map(j.claims.map((x) => [x.model_claim, x]));
-  const verdicts = e.claims.map((_, i) => byModelClaim.get(`m${i + 1}`));
+  const refAssumptions = c.expected.assumptions;
   const isRefClaim = (id: string | null | undefined) => !!id && refClaims.some((r) => r.id === id);
+  const lookup = (list: Verdict[], prefix: string, n: number) =>
+    Array.from({ length: n }, (_, i) => list.find((v) => v.item === `${prefix}${i + 1}`));
+  const claimVerdicts = lookup(j.claims, "m", e.claims.length);
+  const assumptionVerdicts = lookup(j.assumptions, "s", e.assumptions.length);
 
   // Best credit each reference claim received from any extracted claim.
   const best = new Map<string, number>();
-  for (const v of verdicts) {
+  for (const v of claimVerdicts) {
     if (v && isRefClaim(v.reference)) best.set(v.reference!, Math.max(best.get(v.reference!) ?? 0, credit(v.label)));
   }
   const intent = refClaims.filter((r) => r.derivable === "intent");
 
-  const covered = new Set(j.questions.flatMap((q) => q.covers));
-  const optionalClaims = refClaims.filter((r) => r.derivable !== "intent").map((r) => r.id);
-  const refQuestionIds = c.expected.questions.map((_, i) => `rq${i + 1}`);
-  const appContextIds = c.expected.questions
-    .map((q, i) => (typeof q !== "string" && q.needs === "app-context" ? `rq${i + 1}` : null))
-    .filter((x): x is string => x !== null);
-  // An optional claim counts as covered if a question asks about it or a claim states it.
-  const coverTargets = [...refQuestionIds.filter((id) => !appContextIds.includes(id)), ...optionalClaims];
-  const isCovered = (id: string) => covered.has(id) || (best.get(id) ?? 0) > 0;
+  // Open decisions: discussion/diff-only claims plus standalone reference assumptions.
+  // Raised if any extracted claim or assumption corresponds to one.
+  const appContextIds = refAssumptions.filter((a) => a.needs === "app-context").map((a) => a.same_as ?? a.id);
+  const openIds = [
+    ...refClaims.filter((r) => r.derivable !== "intent").map((r) => r.id),
+    ...refAssumptions.filter((a) => !a.same_as).map((a) => a.id),
+  ];
+  const raised = new Set(
+    [...claimVerdicts, ...assumptionVerdicts].filter((v) => v && v.label !== "none" && v.reference).map((v) => v!.reference!),
+  );
+  const coverTargets = openIds.filter((id) => !appContextIds.includes(id));
 
-  const noClaimsCase = c.type === "no-claims";
+  // The checkbox default a good extractor should pick for whatever an assumption matched.
+  const expectedDefault = (ref: string): boolean | "any" => {
+    if (ref.startsWith("nt")) return false;
+    const a = refAssumptions.find((x) => x.id === ref || x.same_as === ref);
+    if (a) return a.default;
+    return isRefClaim(ref); // an actual reference claim is intended
+  };
+  const graded = e.assumptions
+    .map((a, i) => ({ a, v: assumptionVerdicts[i] }))
+    .filter(({ v }) => v?.reference && (v.label !== "none" || v.reference.startsWith("nt")))
+    .map(({ a, v }) => ({ checked: a.checked, expected: expectedDefault(v!.reference!) }))
+    .filter((x) => x.expected !== "any");
+
+  // Any claim is a lure when the reference expects none (no-claims PRs, and vague ones with nothing to go on).
+  const noClaimsCase = refClaims.length === 0;
   return {
     claims: e.claims.length,
     intentRecall: { num: intent.reduce((s, r) => s + (best.get(r.id) ?? 0), 0), den: intent.length },
     precision: {
-      num: verdicts.reduce((s, v) => s + (v && isRefClaim(v.reference) ? credit(v.label) : 0), 0),
+      num: claimVerdicts.reduce((s, v) => s + (v && isRefClaim(v.reference) ? credit(v.label) : 0), 0),
       den: e.claims.length,
     },
-    lures: noClaimsCase ? e.claims.length : verdicts.filter((v) => v?.reference?.startsWith("nt")).length,
-    unmatched: verdicts.filter((v) => !v || (!isRefClaim(v.reference) && !v.reference?.startsWith("nt"))).length,
-    questionCoverage: { num: coverTargets.filter(isCovered).length, den: coverTargets.length },
-    appContextCoverage: { num: appContextIds.filter((id) => covered.has(id)).length, den: appContextIds.length },
+    lures: noClaimsCase ? e.claims.length : claimVerdicts.filter((v) => v?.reference?.startsWith("nt")).length,
+    unmatched: claimVerdicts.filter((v) => !v || (!isRefClaim(v.reference) && !v.reference?.startsWith("nt"))).length,
     ungrounded: e.claims.filter((m) => !isGrounded(m.source, evidenceText)).length,
+    assumptions: e.assumptions.length,
+    assumptionCoverage: { num: coverTargets.filter((id) => raised.has(id)).length, den: coverTargets.length },
+    appContextCoverage: { num: appContextIds.filter((id) => raised.has(id)).length, den: appContextIds.length },
+    defaultAccuracy: { num: graded.filter((x) => x.checked === x.expected).length, den: graded.length },
+    offTopicAssumptions: assumptionVerdicts.filter((v) => !v?.reference).length,
   };
 }
 

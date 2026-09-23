@@ -20,5 +20,5 @@ const { extraction, model, usage } = await extractClaims(evidence, { model: valu
 const ungrounded = extraction.claims.filter((c) => !isGrounded(c.source, evidence));
 
 console.log(JSON.stringify(extraction, null, 2));
-console.error(`\n${model}: ${extraction.claims.length} claims, ${extraction.questions.length} questions, ` +
+console.error(`\n${model}: ${extraction.claims.length} claims, ${extraction.assumptions.length} assumptions, ` +
   `${ungrounded.length} ungrounded · ${usage.input_tokens} in / ${usage.output_tokens} out tokens`);

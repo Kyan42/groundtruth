@@ -56,11 +56,11 @@ expected:
     - Submitting a story with a valid title still works.
     - A too-short title that somehow reaches the server (e.g. JavaScript disabled) is still rejected by the server with an error.
 
-  questions:
-    - What is the minimum title length?
-    - What should the user see for a too-short title - the browser's built-in warning or a custom message?
-    - Is this a new rule, or moving an existing server-side rule into the form? (It's the latter; that changes what a test must check.)
-    - { text: "Does this apply only to submitting a new story, or also to editing a story and suggesting a title?", needs: app-context }
+  assumptions:
+    - id: a1
+      same_as: c4          # the edit-story page gets the same check
+      default: any
+      needs: app-context
 
 checkpoints: []
 regressions: []

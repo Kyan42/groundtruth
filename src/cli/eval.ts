@@ -6,7 +6,7 @@ import path from "node:path";
 import { parseArgs } from "node:util";
 import Anthropic from "@anthropic-ai/sdk";
 import { DEFAULT_EXTRACT_MODEL, type Extraction, extractClaims, isGrounded } from "../extract.js";
-import { type EvalCase, evidencePath, loadCases, questionText } from "../evals/cases.js";
+import { assumptionCheck, type EvalCase, evidencePath, loadCases } from "../evals/cases.js";
 import { DEFAULT_JUDGE_MODEL, type Judgment, judge } from "../evals/judge.js";
 import { type CaseScore, type Ratio, pct, pool, scoreRun } from "../evals/score.js";
 
@@ -38,6 +38,7 @@ type RunResult = {
   caseId: string;
   run: number;
   extraction?: Extraction;
+  overCap?: number;
   judgment?: Judgment;
   score?: CaseScore;
   cost: number;
@@ -58,8 +59,9 @@ async function runJob({ c, run }: { c: EvalCase; run: number }): Promise<RunResu
     const jd = await judge(c, ex.extraction, { model: judgeModel, client });
     spent += cost(judgeModel, jd.usage);
     const score = scoreRun(c, ex.extraction, jd.judgment, evidence);
-    console.log(`  ${c.id} #${run}: ${score.claims} claims, recall ${pct(score.intentRecall)}, precision ${pct(score.precision)}`);
-    return { caseId: c.id, run, extraction: ex.extraction, judgment: jd.judgment, score, cost: spent };
+    console.log(`  ${c.id} #${run}: ${score.claims} claims, ${score.assumptions} assumptions, ` +
+      `precision ${pct(score.precision)}, recall ${pct(score.intentRecall)}`);
+    return { caseId: c.id, run, extraction: ex.extraction, overCap: ex.overCap, judgment: jd.judgment, score, cost: spent };
   } catch (err) {
     console.error(`  ${c.id} #${run}: ERROR ${err instanceof Error ? err.message : err}`);
     return { caseId: c.id, run, cost: spent, error: String(err) };
@@ -105,6 +107,20 @@ function summaryRow(label: string, pick: (s: CaseScore) => Ratio | number, isRat
   return `| ${label} | ${cells.join(" | ")} |`;
 }
 
+const summary = [
+  `| Metric | ${splits.map((s) => `${s} (${cases.filter((c) => c.split === s).length} cases)`).join(" | ")} |`,
+  `|---|${splits.map(() => "---").join("|")}|`,
+  summaryRow("**Precision**", (s) => s.precision, true),
+  summaryRow("Intent recall", (s) => s.intentRecall, true),
+  summaryRow("Lures taken (count)", (s) => s.lures, false),
+  summaryRow("Unmatched claims (count, adjudicate)", (s) => s.unmatched, false),
+  summaryRow("Ungrounded sources (count)", (s) => s.ungrounded, false),
+  summaryRow("Assumption coverage", (s) => s.assumptionCoverage, true),
+  summaryRow("App-context coverage", (s) => s.appContextCoverage, true),
+  summaryRow("Default accuracy", (s) => s.defaultAccuracy, true),
+  summaryRow("Off-topic assumptions (count)", (s) => s.offTopicAssumptions, false),
+];
+
 const cell = (s: string) => s.replace(/\|/g, "\\|").replace(/\n/g, " ");
 const lines: string[] = [
   `# Eval run ${new Date().toISOString()}`,
@@ -115,49 +131,43 @@ const lines: string[] = [
   "## Summary",
   "",
   "Pooled across cases per run; mean over runs (min–max). Partial matches count half. " +
-    "Test cases are held out from prompt tuning, so their claim-level details are only in results.json.",
+    "Test cases are held out from prompt tuning, so their details are only in results.json.",
   "",
-  `| Metric | ${splits.map((s) => `${s} (${cases.filter((c) => c.split === s).length} cases)`).join(" | ")} |`,
-  `|---|${splits.map(() => "---").join("|")}|`,
-  summaryRow("Precision", (s) => s.precision, true),
-  summaryRow("Intent recall", (s) => s.intentRecall, true),
-  summaryRow("Lures taken (count)", (s) => s.lures, false),
-  summaryRow("Unmatched claims (count, adjudicate)", (s) => s.unmatched, false),
-  summaryRow("Question coverage", (s) => s.questionCoverage, true),
-  summaryRow("App-context question coverage", (s) => s.appContextCoverage, true),
-  summaryRow("Ungrounded sources (count)", (s) => s.ungrounded, false),
+  ...summary,
   "",
 ];
 
 for (const c of cases) {
   const rows = results.filter((r) => r.caseId === c.id);
   lines.push(`## ${c.id} (${c.type}, ${c.split})`, "", `${c.pr} · ${c.expected.claims.length} reference claims, ` +
-    `${c.expected.claims.filter((r) => r.derivable === "intent").length} intent`, "",
-    "| Run | Claims | Precision | Intent recall | Lures | Unmatched | Questions | App-context | Ungrounded |",
-    "|---|---|---|---|---|---|---|---|---|");
+    `${c.expected.claims.filter((r) => r.derivable === "intent").length} intent, ${c.expected.assumptions.length} assumptions`, "",
+    "| Run | Claims | Precision | Intent recall | Lures | Unmatched | Ungrounded | Assumptions | Coverage | Defaults | App-context |",
+    "|---|---|---|---|---|---|---|---|---|---|---|");
   for (const r of rows) {
     const s = r.score;
     lines.push(s
-      ? `| ${r.run} | ${s.claims} | ${pct(s.precision)} | ${pct(s.intentRecall)} | ${s.lures} | ${s.unmatched} | ${pct(s.questionCoverage)} | ${pct(s.appContextCoverage)} | ${s.ungrounded} |`
-      : `| ${r.run} | error: ${cell(r.error ?? "")} ||||||||`);
+      ? `| ${r.run} | ${s.claims} | ${pct(s.precision)} | ${pct(s.intentRecall)} | ${s.lures} | ${s.unmatched} | ${s.ungrounded} | ` +
+        `${s.assumptions}${r.overCap ? ` (+${r.overCap} over cap)` : ""} | ${pct(s.assumptionCoverage)} | ${pct(s.defaultAccuracy)} | ${pct(s.appContextCoverage)} |`
+      : `| ${r.run} | error: ${cell(r.error ?? "")} ||||||||||`);
   }
   lines.push("");
   if (c.split === "test") continue; // held out: scores only
   const evidence = readFileSync(evidencePath(c.id), "utf8");
   for (const r of rows.filter((x) => x.extraction)) {
     const e = r.extraction!, j = r.judgment!;
-    lines.push(`<details><summary>Run ${r.run}: ${e.claims.length} claims, ${e.questions.length} questions</summary>`, "",
+    lines.push(`<details><summary>Run ${r.run}: ${e.claims.length} claims, ${e.assumptions.length} assumptions</summary>`, "",
       "| # | Claim | Ref | Label | Grounded | Judge |", "|---|---|---|---|---|---|");
     e.claims.forEach((m, i) => {
-      const v = j.claims.find((x) => x.model_claim === `m${i + 1}`);
+      const v = j.claims.find((x) => x.item === `m${i + 1}`);
       lines.push(`| m${i + 1} | ${cell(`${m.when} → (${m.then.kind}) ${m.then.what}`)} | ${v?.reference ?? "—"} | ${v?.label ?? "—"} | ` +
         `${isGrounded(m.source, evidence) ? "yes" : `**no**: "${cell(m.source)}"`} | ${cell(v?.reason ?? "")} |`);
     });
-    if (e.questions.length) {
-      lines.push("", "Questions:", "");
-      e.questions.forEach((q, i) => {
-        const v = j.questions.find((x) => x.model_question === `q${i + 1}`);
-        lines.push(`- q${i + 1}: ${q} → covers ${v?.covers.length ? v.covers.join(", ") : "nothing"}`);
+    if (e.assumptions.length) {
+      lines.push("", "| # | Assumption | Ref | Label | Judge |", "|---|---|---|---|---|");
+      e.assumptions.forEach((a, i) => {
+        const v = j.assumptions.find((x) => x.item === `s${i + 1}`);
+        lines.push(`| s${i + 1} | ${a.checked ? "☑" : "☐"} ${cell(`${a.when} → (${a.then.kind}) ${a.then.what}`)} — _${cell(a.reason)}_ | ` +
+          `${v?.reference ?? "—"} | ${v?.label ?? "—"} | ${cell(v?.reason ?? "")} |`);
       });
     }
     if (e.not_testable.length) {
@@ -168,12 +178,17 @@ for (const c of cases) {
     }
     lines.push("", "</details>", "");
   }
-  lines.push("Reference:", "", ...c.expected.claims.map((r) => `- ${r.id} [${r.derivable}] ${r.when} → (${r.then.kind}) ${r.then.what}`),
-    ...c.expected.questions.map((q, i) => `- rq${i + 1}: ${questionText(q)}`), "");
+  lines.push("Reference:", "",
+    ...c.expected.claims.map((r) => `- ${r.id} [${r.derivable}] ${r.when} → (${r.then.kind}) ${r.then.what}`),
+    ...c.expected.assumptions.map((a) => {
+      const chk = assumptionCheck(c, a);
+      const box = a.default === "any" ? "☐/☑" : a.default ? "☑" : "☐";
+      return `- ${a.id} ${box}${a.same_as ? ` (= ${a.same_as})` : ""} ${chk.when} → (${chk.then.kind}) ${chk.then.what}${a.needs ? ` [${a.needs}]` : ""}`;
+    }), "");
 }
 
 const outDir = path.join("evals/runs", new Date().toISOString().replace(/[:.]/g, "-"));
 mkdirSync(outDir, { recursive: true });
 writeFileSync(path.join(outDir, "results.json"), JSON.stringify({ model, judgeModel, runs, results }, null, 2));
 writeFileSync(path.join(outDir, "report.md"), lines.join("\n"));
-console.log(`\n${lines.slice(6, 17).join("\n")}\n\nReport: ${path.join(outDir, "report.md")} · est. cost $${totalCost.toFixed(2)}`);
+console.log(`\n${summary.join("\n")}\n\nReport: ${path.join(outDir, "report.md")} · est. cost $${totalCost.toFixed(2)}`);
