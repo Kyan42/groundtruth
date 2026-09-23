@@ -10,8 +10,25 @@ const STATE_PREFIX = "<!-- groundtruth-state:";
 export type CommentState = {
   version: 1;
   pr: string;       // owner/repo#number
-  headSha: string;
+  headSha: string;  // the commit the claims were read at
   extraction: Extraction;
+  approval?: Approval;
+};
+
+// One claim the developer approved for testing: a checked claim or a checked assumption,
+// with their wording if they edited it. `kind` always comes from the original extraction.
+export type ApprovedClaim = {
+  id: string;       // c1, c2, ... for claims; s1, s2, ... for assumptions
+  when: string;
+  then: { kind: string; what: string };
+  edited: boolean;
+};
+
+export type Approval = {
+  by: string;
+  at: string;
+  testedSha: string; // the PR head when approved, which testing will run against
+  claims: ApprovedClaim[];
 };
 
 const HEADER = "### 🧪 Groundtruth: what this PR should do";
@@ -69,9 +86,12 @@ export function renderClaimsComment(state: CommentState): string {
   if (claims.length || assumptions.length) {
     out.push("- [ ] **Approve and start testing** <!-- gt:approve -->", "");
   }
-  out.push(`${STATE_PREFIX}${Buffer.from(JSON.stringify(state)).toString("base64")} -->`);
+  out.push(encodeState(state));
   return out.join("\n");
 }
+
+const encodeState = (state: CommentState) =>
+  `${STATE_PREFIX}${Buffer.from(JSON.stringify(state)).toString("base64")} -->`;
 
 // Reads the hidden state back out of a comment body (undefined if it has none yet, e.g. the placeholder).
 export function readState(body: string): CommentState | undefined {
@@ -79,4 +99,55 @@ export function readState(body: string): CommentState | undefined {
   if (start === -1) return undefined;
   const end = body.indexOf(" -->", start);
   return JSON.parse(Buffer.from(body.slice(start + STATE_PREFIX.length, end), "base64").toString("utf8"));
+}
+
+// ---------- reading the developer's review ----------
+
+export type ReviewedComment = {
+  approveChecked: boolean;
+  lines: Map<string, { checked: boolean; text: string }>; // by marker id: c1, s2, ...
+};
+
+// Finds each checkbox line by its hidden marker, so reordering or rewording lines doesn't lose them.
+export function parseReview(body: string): ReviewedComment {
+  const lines = new Map<string, { checked: boolean; text: string }>();
+  let approveChecked = false;
+  for (const m of body.matchAll(/^- \[([ xX])\] (.*?)\s*<!-- gt:(c\d+|s\d+|approve) -->\s*$/gm)) {
+    const checked = m[1] !== " ";
+    if (m[3] === "approve") approveChecked = checked;
+    else lines.set(m[3], { checked, text: m[2].replace(/^\*\*\d+\.\*\*\s*/, "").trim() });
+  }
+  return { approveChecked, lines };
+}
+
+// The approved claims: checked lines, using the developer's wording where it differs from ours.
+// A line without "→" is taken as the result, with no setup.
+export function approvedClaims(state: CommentState, review: ReviewedComment): ApprovedClaim[] {
+  const out: ApprovedClaim[] = [];
+  const items = [
+    ...state.extraction.claims.map((c, i) => ({ id: `c${i + 1}`, c })),
+    ...state.extraction.assumptions.map((c, i) => ({ id: `s${i + 1}`, c })),
+  ];
+  for (const { id, c } of items) {
+    const reviewed = review.lines.get(id);
+    if (!reviewed?.checked) continue;
+    const edited = reviewed.text !== line(c.when, c.then.what);
+    const arrow = reviewed.text.indexOf(" → ");
+    const [when, what] = !edited ? [c.when, c.then.what]
+      : arrow === -1 ? ["", reviewed.text]
+      : [reviewed.text.slice(0, arrow).trim(), reviewed.text.slice(arrow + 3).trim()];
+    out.push({ id, when, then: { kind: c.then.kind, what }, edited });
+  }
+  return out;
+}
+
+// Marks the comment approved while keeping the developer's edits: adds a banner under the header
+// and updates the hidden state. Everything else in the body is left as they left it.
+export function markApproved(body: string, state: CommentState): string {
+  const n = state.approval!.claims.length;
+  const banner = `✅ **Approved by @${state.approval!.by}: ${n} check${n === 1 ? "" : "s"} will be tested.** ` +
+    "Testing isn't built yet. Edits after approval are ignored; reopen the PR to start over.";
+  const start = body.indexOf(STATE_PREFIX);
+  const end = body.indexOf(" -->", start) + " -->".length;
+  return (body.slice(0, start) + encodeState(state) + body.slice(end)).replace(HEADER, `${HEADER}\n\n${banner}`);
 }
