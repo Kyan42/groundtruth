@@ -13,6 +13,9 @@ export const config = {
   // Read by the Anthropic SDK itself; required here so a missing key fails at startup, not mid-PR.
   anthropicApiKey: required("ANTHROPIC_API_KEY"),
   extractConcurrency: Number(process.env.EXTRACT_CONCURRENCY ?? 4),
+  // Read by the Runloop SDK itself; required so boots don't fail mid-PR.
+  runloopApiKey: required("RUNLOOP_API_KEY"),
+  bootConcurrency: Number(process.env.BOOT_CONCURRENCY ?? 2),
   port: Number(process.env.PORT ?? 3000),
   // Optional: when set, forward webhooks from this smee.io channel to the local server.
   smeeUrl: process.env.SMEE_URL,

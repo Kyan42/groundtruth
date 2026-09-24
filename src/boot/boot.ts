@@ -23,6 +23,7 @@ export type BootResult = {
 };
 
 export type BootOptions = {
+  sha?: string;              // commit to boot; defaults to the PR's current head
   expectSelector?: string;   // an element the home page should show once the app is up
   screenshotPath: string;
   keep?: boolean;            // leave the sandbox running afterwards (it still shuts itself down when idle)
@@ -36,7 +37,8 @@ export async function bootPr(octokit: Octokit, ref: PrRef, opts: BootOptions): P
   const { data: pr } = await octokit.request("GET /repos/{owner}/{repo}/pulls/{pull_number}", {
     owner: ref.owner, repo: ref.repo, pull_number: ref.number,
   });
-  const result: BootResult = { pr: `${ref.owner}/${ref.repo}#${ref.number}`, sha: pr.head.sha, phases: [], ok: false };
+  const sha = opts.sha ?? pr.head.sha;
+  const result: BootResult = { pr: `${ref.owner}/${ref.repo}#${ref.number}`, sha, phases: [], ok: false };
   const secrets: string[] = [];
   const redact = (s: string) => secrets.reduce((acc, x) => acc.split(x).join("***"), s);
 
@@ -63,7 +65,7 @@ export async function bootPr(octokit: Octokit, ref: PrRef, opts: BootOptions): P
     const { config } = await phase("read .groundtruth.yml", () => loadBootConfig(octokit, ref.owner, ref.repo),
       ({ ref: branch }) => `from ${branch}`);
     sandbox = await phase("create sandbox", () => createSandbox({
-      name: `groundtruth-boot-${ref.repo}-${ref.number}-${pr.head.sha.slice(0, 7)}`,
+      name: `groundtruth-boot-${ref.repo}-${ref.number}-${sha.slice(0, 7)}`,
       idleShutdownSeconds: 600,
     }), (s) => s.id);
     result.sandboxId = sandbox.id;
@@ -92,7 +94,7 @@ export async function bootPr(octokit: Octokit, ref: PrRef, opts: BootOptions): P
         // of this one fetch, never written to the checkout's git config.
         return await mustRun([
           `git init -q ${REPO_DIR}`, `cd ${REPO_DIR}`,
-          `git fetch -q --depth 1 https://x-access-token:${token}@github.com/${ref.owner}/${ref.repo}.git ${pr.head.sha}`,
+          `git fetch -q --depth 1 https://x-access-token:${token}@github.com/${ref.owner}/${ref.repo}.git ${sha}`,
           "git checkout -q FETCH_HEAD", "git log -1 --format='%h %s'",
         ].join(" && "), 300);
       } finally {
