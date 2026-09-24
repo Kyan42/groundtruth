@@ -9,6 +9,8 @@ const BootConfigSchema = z.object({
   version: z.literal(1),
   runtime: z.object({ node: z.string().optional() }).optional(),
   workdir: z.string().default("."),
+  // Environment variables for every install, setup and start command.
+  env: z.record(z.string(), z.coerce.string()).default({}),
   install: z.string().optional(),
   setup: z.array(z.string()).default([]),
   start: z.string(),
@@ -34,7 +36,11 @@ export async function loadBootConfig(octokit: Octokit, owner: string, repo: stri
     throw new Error(`No ${CONFIG_PATH} on ${owner}/${repo}@${ref}: add one describing how to install and start the app ` +
       `(${err instanceof Error ? err.message : err})`);
   }
+  return { config: parseBootConfig(text), ref };
+}
+
+export function parseBootConfig(text: string): BootConfig {
   const parsed = BootConfigSchema.safeParse(YAML.parse(text));
   if (!parsed.success) throw new Error(`Invalid ${CONFIG_PATH}: ${z.prettifyError(parsed.error)}`);
-  return { config: parsed.data, ref };
+  return parsed.data;
 }

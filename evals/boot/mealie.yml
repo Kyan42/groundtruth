@@ -1,0 +1,29 @@
+# Mealie (mealie-recipes/mealie): FastAPI backend (Python 3.12, uv) + Nuxt frontend (pnpm).
+# Written from the repo's Taskfile (setup:py, setup:ui, py, ui) and .devcontainer. Defaults to SQLite.
+version: 1
+runtime:
+  node: "22"
+workdir: .
+env:
+  # Runloop points uv/pip at its own package mirror, which omits upload dates; Mealie's
+  # exclude-newer cooling period then filters out every package. Use PyPI directly.
+  UV_DEFAULT_INDEX: https://pypi.org/simple
+  # Mealie defaults to production (data in /app/data, which a non-root user can't create).
+  # Developers set this in an untracked .env; dev mode keeps data in dev/data inside the repo.
+  PRODUCTION: "false"
+setup:
+  # Build deps for packages compiled from source (python-ldap, psycopg), as in docker/Dockerfile,
+  # plus libsqlite3-0: the image's Python needs it for sqlite3 but the image lacks it.
+  - sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends build-essential libpq-dev libwebp-dev libsasl2-dev libldap2-dev libssl-dev libsqlite3-0
+  - sudo npm install -g pnpm@11                           # not in the default image
+  - curl -LsSf https://astral.sh/uv/install.sh | sh       # not in the default image
+  - ~/.local/bin/uv sync --frozen                         # exactly the lockfile; re-resolving trips over exclude-newer
+  - cd frontend && pnpm install --frozen-lockfile
+# Two processes: backend on :9000 in the background, frontend (the page a browser loads) on :3000.
+start: |
+  ~/.local/bin/uv run python mealie/app.py &
+  cd frontend && pnpm dev --host 0.0.0.0 --port 3000
+port: 3000
+ready:
+  path: /api/app/about    # proxied by the frontend to the backend: 200 only when both are up
+  timeout_seconds: 600

@@ -33,12 +33,36 @@ export type BootOptions = {
 const REPO_DIR = "$HOME/repo";
 const APP_LOG = "$HOME/app.log";
 
+// What to boot: a commit, where its config comes from, and how to authenticate the clone.
+export type BootTarget = {
+  owner: string;
+  repo: string;
+  sha: string;
+  label: string;                                            // e.g. owner/repo#123, for names and reports
+  loadConfig: () => Promise<{ config: BootConfig; source: string }>;
+  cloneToken?: () => Promise<string>;                       // omit for public repos (anonymous clone)
+  revokeCloneToken?: (token: string) => Promise<void>;
+};
+
+// Boots a PR of an installed repo: its config from the default branch, cloned with a scoped app token.
 export async function bootPr(octokit: Octokit, ref: PrRef, opts: BootOptions): Promise<BootResult> {
   const { data: pr } = await octokit.request("GET /repos/{owner}/{repo}/pulls/{pull_number}", {
     owner: ref.owner, repo: ref.repo, pull_number: ref.number,
   });
-  const sha = opts.sha ?? pr.head.sha;
-  const result: BootResult = { pr: `${ref.owner}/${ref.repo}#${ref.number}`, sha, phases: [], ok: false };
+  return bootCommit({
+    owner: ref.owner, repo: ref.repo, sha: opts.sha ?? pr.head.sha, label: `${ref.owner}/${ref.repo}#${ref.number}`,
+    loadConfig: async () => {
+      const { config, ref: branch } = await loadBootConfig(octokit, ref.owner, ref.repo);
+      return { config, source: `from ${branch}` };
+    },
+    cloneToken: () => readOnlyRepoToken(ref.owner, ref.repo),
+    revokeCloneToken: revokeToken,
+  }, opts);
+}
+
+export async function bootCommit(target: BootTarget, opts: BootOptions): Promise<BootResult> {
+  const { sha } = target;
+  const result: BootResult = { pr: target.label, sha, phases: [], ok: false };
   const secrets: string[] = [];
   const redact = (s: string) => secrets.reduce((acc, x) => acc.split(x).join("***"), s);
 
@@ -62,15 +86,15 @@ export async function bootPr(octokit: Octokit, ref: PrRef, opts: BootOptions): P
 
   let sandbox: Sandbox | undefined;
   try {
-    const { config } = await phase("read .groundtruth.yml", () => loadBootConfig(octokit, ref.owner, ref.repo),
-      ({ ref: branch }) => `from ${branch}`);
+    const { config } = await phase("read .groundtruth.yml", target.loadConfig, ({ source }) => source);
     sandbox = await phase("create sandbox", () => createSandbox({
-      name: `groundtruth-boot-${ref.repo}-${ref.number}-${sha.slice(0, 7)}`,
+      name: `groundtruth-boot-${target.label.replace(/[^a-zA-Z0-9-]+/g, "-")}-${sha.slice(0, 7)}`,
       idleShutdownSeconds: 600,
     }), (s) => s.id);
     result.sandboxId = sandbox.id;
     const sb = sandbox;
-    const inRepo = (cmd: string) => `cd ${REPO_DIR}/${config.workdir} && ${cmd}`;
+    const exports = envExports(config);
+    const inRepo = (cmd: string) => `${exports}cd ${REPO_DIR}/${config.workdir} && ${cmd}`;
     const mustRun = async (cmd: string, timeoutSeconds?: number) => {
       const r = await sb.run(cmd, { timeoutSeconds });
       if (r.exitCode !== 0) throw new Error(`exit ${r.exitCode}: ${tail(r.stderr || r.stdout, 20)}`);
@@ -86,20 +110,21 @@ export async function bootPr(octokit: Octokit, ref: PrRef, opts: BootOptions): P
       return node;
     }, (v) => `node ${v}`);
 
-    await phase("clone PR commit", async () => {
-      const token = await readOnlyRepoToken(ref.owner, ref.repo);
-      secrets.push(token);
+    await phase("clone commit", async () => {
+      const token = await target.cloneToken?.();
+      if (token) secrets.push(token);
       try {
-        // Fetch the exact commit by SHA (works for fork PRs too). The token is only in the URL
+        // Fetch the exact commit by SHA (works for fork PRs too). A token is only in the URL
         // of this one fetch, never written to the checkout's git config.
+        const auth = token ? `x-access-token:${token}@` : "";
         return await mustRun([
           `git init -q ${REPO_DIR}`, `cd ${REPO_DIR}`,
-          `git fetch -q --depth 1 https://x-access-token:${token}@github.com/${ref.owner}/${ref.repo}.git ${sha}`,
+          `git fetch -q --depth 1 https://${auth}github.com/${target.owner}/${target.repo}.git ${sha}`,
           "git checkout -q FETCH_HEAD", "git log -1 --format='%h %s'",
         ].join(" && "), 300);
       } finally {
         // Revoke before any repo code runs.
-        await revokeToken(token);
+        if (token) await target.revokeCloneToken?.(token);
       }
     }, (v) => v);
 
@@ -108,7 +133,7 @@ export async function bootPr(octokit: Octokit, ref: PrRef, opts: BootOptions): P
 
     await phase("start app", () => mustRun([
       // Written to a script so the start command needs no quoting; setsid + nohup detach it from this command.
-      `cat > $HOME/start.sh <<'GROUNDTRUTH_EOF'\ncd ${REPO_DIR}/${config.workdir}\n${config.start}\nGROUNDTRUTH_EOF`,
+      `cat > $HOME/start.sh <<'GROUNDTRUTH_EOF'\n${exports}cd ${REPO_DIR}/${config.workdir}\n${config.start}\nGROUNDTRUTH_EOF`,
       `setsid nohup sh $HOME/start.sh > ${APP_LOG} 2>&1 < /dev/null &`,
       "echo started",
     ].join("\n")), () => config.start);
@@ -131,9 +156,13 @@ export async function bootPr(octokit: Octokit, ref: PrRef, opts: BootOptions): P
     result.browser = await phase("browser check", async () => {
       const b = await checkInBrowser({ url: exposed.url, headers: exposed.headers, expectSelector: opts.expectSelector, screenshotPath: opts.screenshotPath });
       if (b.status === null || b.status >= 400) throw new Error(`home page returned HTTP ${b.status}`);
+      if (!b.rendered) throw new Error(`the page stayed blank for 90s (HTTP ${b.status}, title "${b.title}")`);
+      // A rendered error page is not a booted app: any server error from the app during load fails the check.
+      const serverErrors = b.failedRequests.filter((r) => r.startsWith(exposed.url) && / \(HTTP 5\d\d\)$/.test(r));
+      if (serverErrors.length) throw new Error(`the app returned server errors while loading: ${serverErrors.slice(0, 3).join(", ")}`);
       if (b.found === false) throw new Error(`"${opts.expectSelector}" never appeared (page title: "${b.title}")`);
       return b;
-    }, (b) => `HTTP ${b.status}, "${b.title}"${b.found ? `, found ${opts.expectSelector}` : ""}`);
+    }, (b) => `HTTP ${b.status}, "${b.title}", shows "${b.textSample.slice(0, 50)}"${b.found ? `, found ${opts.expectSelector}` : ""}`);
 
     result.ok = true;
   } catch (err) {
@@ -151,6 +180,11 @@ export async function bootPr(octokit: Octokit, ref: PrRef, opts: BootOptions): P
 
 class BootError extends Error {
   constructor(readonly phase: string, message: string) { super(message); }
+}
+
+// `export K='v'; ` for each config env var, single-quoted so values are taken literally.
+function envExports(config: BootConfig): string {
+  return Object.entries(config.env).map(([k, v]) => `export ${k}='${v.replace(/'/g, "'\\''")}'; `).join("");
 }
 
 // One round trip: poll the ready URL inside the sandbox until it returns 200 or time runs out.
