@@ -1,4 +1,3 @@
-import { App } from "@octokit/app";
 import type { Octokit } from "@octokit/core";
 import {
   approvedClaims, COMMENT_MARKER, markApproved, parseReview, readState, renderClaimsComment, renderError,
@@ -7,14 +6,11 @@ import {
 import { config } from "./config.js";
 import { buildEvidence, listAll, type PrRef, renderEvidence } from "./evidence.js";
 import { extractClaims } from "./extract.js";
+import { githubApp } from "./github.js";
 import { createLimiter } from "./limit.js";
 import { startTesting } from "./testing.js";
 
-export const app = new App({
-  appId: config.appId,
-  privateKey: config.privateKey,
-  webhooks: { secret: config.webhookSecret },
-});
+export const app = githubApp;
 
 // Caps concurrent claim extractions so a burst of PRs doesn't exceed Claude API rate limits.
 const extractions = createLimiter(config.extractConcurrency);

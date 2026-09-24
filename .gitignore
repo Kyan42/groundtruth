@@ -1,3 +1,5 @@
 node_modules/
 .env
 *.pem
+boot-runs/
+src/_tmp/
