@@ -70,8 +70,11 @@ const boot = await bootPr(octokit, ref, {
         onEvent: (e) => {
           if (e.type === "thinking") console.log(`  💭 ${e.text.replace(/\s+/g, " ").slice(0, 220)}`);
           else if (e.type === "tool") console.log(`  ${e.ok ? "→" : "✗"} ${e.name} ${e.summary}`.slice(0, 220));
-          else console.log(`  ■ ${e.result.claimId} ${e.result.status.toUpperCase()}: ${e.result.evidence}` +
-            (e.result.check ? `\n      check: ${e.result.check.locator} expected "${e.result.check.expected}", observed "${e.result.check.observed}"` : ""));
+          else if (e.type === "check") {
+            const k = e.check;
+            console.log(`  ${k.passed ? "✓" : "✗"} ${k.id} [${k.claimIds.join(", ")}] ${k.locator ? `${k.locator} ` : ""}${k.assert}${k.expected ? ` "${k.expected}"` : ""} · observed ${k.observed}`.slice(0, 260));
+          } else console.log(`  ■ ${e.result.claimId} ${e.result.status.toUpperCase()} (${e.result.basis}${e.result.checkIds.length ? `: ${e.result.checkIds.join(", ")}` : ""}): ${e.result.evidence}` +
+            (e.result.uncheckedReason ? `\n      unchecked: ${e.result.uncheckedReason}` : ""));
         },
       });
     } finally {
@@ -90,8 +93,14 @@ console.log(`\nDone in ${Math.round((Date.now() - started) / 1000)}s (${r.turns}
 for (const j of r.journeys) {
   const steps = r.steps.filter((s) => s.journey === j.id);
   console.log(`\n  ${j.id} "${j.name}" · ${steps.length} steps${j.resetData ? " · data reset" : ""}${j.video ? ` · ${path.basename(j.video)}` : ""}`);
-  for (const res of r.results.filter((x) => x.journey === j.id)) console.log(`    ${res.claimId}: ${res.status}`);
+  for (const res of r.results.filter((x) => x.journey === j.id)) {
+    const checks = res.checkIds.map((id) => r.checks.find((k) => k.id === id)).filter((k) => k !== undefined);
+    console.log(`    ${res.claimId}: ${res.status} (${res.basis})`);
+    for (const k of checks) console.log(`      ${k.passed ? "✓" : "✗"} ${k.id} ${k.locator ? `${k.locator} ` : ""}${k.assert}${k.expected ? ` "${k.expected}"` : ""}`);
+  }
 }
+const retried = r.checks.filter((k) => !r.results.some((res) => res.checkIds.includes(k.id)));
+if (retried.length) console.log(`\n  Checks not cited by any status: ${retried.map((k) => `${k.id}${k.passed ? "" : " (failed)"}`).join(", ")}`);
 const missing = claims.filter((c) => !r.results.some((x) => x.claimId === c.id));
 if (missing.length) console.log(`\n  No status: ${missing.map((c) => c.id).join(", ")}`);
 console.log(`\nCost: $${r.costUsd.toFixed(3)} (${r.usage.input} in, ${r.usage.cacheWrite} cache write, ${r.usage.cacheRead} cache read, ${r.usage.output} out)`);

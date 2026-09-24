@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { ApprovedClaim } from "../comment.js";
-import type { ExplorerBrowser, Journey, Step } from "./browser.js";
+import type { CheckTarget, ExplorerBrowser, Journey, Step } from "./browser.js";
+import { ASSERTIONS, type Assertion, type Check, NEEDS_EXPECTED, PAGE_ASSERTIONS, type RequestRecord } from "./checks.js";
 
 // The exploring agent: Claude drives the browser through tools, one request at a time, until every
 // claim has a status. It never touches the browser itself; it sees snapshots and tool results.
@@ -13,21 +14,26 @@ export type ClaimResult = {
   claimId: string;
   status: ClaimStatus;
   evidence: string;
-  check?: { locator: string; expected: string; observed: string };  // what Step 3 turns into an assertion
-  journey: string;                                                    // journey the claim was checked in
-  t: number;                                                          // seconds into the journey's video
-  atStep: number;                                                     // trace step the claim was checked at
+  checkIds: string[];          // the checks the status rests on; Step 3 turns these into assertions
+  basis: "checks" | "observation" | "none";   // observation: no check could express it; the agent's judgment
+  uncheckedReason?: string;
+  journey: string;             // journey the claim was checked in
+  t: number;                   // seconds into the journey's video
+  atStep: number;              // trace step the claim was checked at
 };
 
 export type ExploreEvent =
   | { type: "thinking"; text: string }
   | { type: "tool"; name: string; input: Record<string, unknown>; ok: boolean; summary: string }
+  | { type: "check"; check: Check }
   | { type: "status"; result: ClaimResult };
 
 export type ExploreResult = {
   results: ClaimResult[];
   journeys: Journey[];
   steps: Step[];
+  checks: Check[];
+  requests: RequestRecord[];
   turns: number;
   stoppedBecause: "all claims have a status" | "step budget" | "model stopped" | "refusal";
   usage: { input: number; cacheWrite: number; cacheRead: number; output: number };
@@ -41,8 +47,22 @@ You see the page as an accessibility snapshot: each element's role, name and sta
 How to work:
 - Start from the snapshot you're given. Find the path to each claim's starting point, perform its actions, then check its result.
 - Supply whatever a claim needs but doesn't spell out, like a competent tester would (e.g. pick an item that is in stock). Note what you chose in the evidence.
-- Check results by observation: compare what the page shows before and after the action (e.g. a count going from 0 to 1). Pages may update a moment after an action; use wait_for when something should appear.
-- When you have checked a claim, call record_status once for it, citing concrete observations, and include check: the ref of the element whose content or state you checked, what the claim expected, and what you observed.
+- Each action waits for the page to finish reacting (requests and updates) before returning its snapshot. Use wait_for only when something appears later than that.
+- When a claim offers alternatives (e.g. "reload or start a new session"), test the most demanding one it names.
+- Persisted claims: when the claim says the result survives a new session, check it in a new journey without reset_data (log in again as the same user if the app needs it). When it only says it survives a reload, navigate to the same path again.
+
+Checking results:
+- Decide every result with the check tool, not by reading the snapshot. A check runs a real assertion in the browser (retrying for a few seconds), is shown in the video, and becomes a line of the claim's test script.
+- Check while the element is on the page: right after the action, before navigating elsewhere.
+- A check must fail if the claim were false. Pick the assertion that matches the claim's result, not something nearby that passes anyway (for "the badge goes up to 1", check the badge's text contains "1", not that the badge is visible).
+- When the claim is about a change, check the before state too if it's cheap (the badge contains "0" before adding).
+- Use as many checks as the claim needs ("one line with quantity 2" is a count of lines equal to 1, plus the line contains "Qty 2").
+- Prefer contains_text unless the whole text matters. Avoid expected values that change between runs (dates, generated ids).
+- To check that something is absent or hidden, or to count elements, target them by role (and name) or by text, optionally within a container ref.
+- Request checks look at requests since your last action; expected is like "POST /api/cart" (a path prefix, method optional).
+- If a check failed because you targeted the wrong element or gave a wrong expected value, fix it and check again, and say so in the evidence.
+- If no assertion can express the claim's result (e.g. a colour, a chart's shape), don't force one. Take a screenshot, judge it yourself, and record the status with unchecked_reason. It will be shown as your judgment, not as a check.
+- Then call record_status once per claim, citing the check ids it rests on: verified needs passing checks, failed needs the check that failed.
 
 Journeys:
 - Before acting, plan journeys: group claims that share a path and starting state into one journey, and keep each journey short. Each journey becomes one repeatable test script and one video.
@@ -93,19 +113,34 @@ const TOOLS: Anthropic.Tool[] = [
     input_schema: { type: "object", properties: { text: { type: "string" }, seconds: { type: "number" } }, required: ["text"], additionalProperties: false } },
   { name: "screenshot", description: "See the page as an image. Only when the snapshot can't answer the question.",
     input_schema: { type: "object", properties: {}, additionalProperties: false } },
+  { name: "check",
+    description: `Assert something about the page now, as a real browser assertion that retries for a few seconds. Returns whether it passed and what the page actually showed.
+Assertions on an element (needs a target): visible, hidden, contains_text, has_text (expected: text), count (expected: a whole number), value (expected: a form field's value), disabled, enabled, checked, unchecked, expanded, collapsed, selected, invalid (the browser's form validation rejects the field).
+Assertions on the page (no target): url (expected: path and query, e.g. /cart), request_sent, request_not_sent (expected: e.g. "POST /api/cart"; requests since your last action).
+Target: ref (an element in the latest snapshot), or role with optional name, or text; either can be scoped with within (a container's ref).`,
+    input_schema: {
+      type: "object",
+      properties: {
+        claim_ids: { type: "array", items: { type: "string" }, description: "The claims this check is evidence for" },
+        assert: { type: "string", enum: [...ASSERTIONS] },
+        ref: { type: "string" },
+        role: { type: "string", description: "ARIA role, e.g. listitem, button, link, heading" },
+        name: { type: "string", description: "Accessible name, with role" },
+        text: { type: "string" },
+        within: { type: "string", description: "Ref of a container to search inside, with role or text" },
+        expected: { type: "string" },
+      },
+      required: ["claim_ids", "assert"], additionalProperties: false,
+    } },
   { name: "record_status", description: "Record the result for one claim, once, when you have checked it.",
     input_schema: {
       type: "object",
       properties: {
         claim_id: { type: "string" },
         status: { type: "string", enum: ["verified", "failed", "blocked", "unreachable", "error"] },
-        evidence: { type: "string", description: "Concrete observations: what you did and what the page showed, before and after." },
-        check: {
-          type: "object",
-          description: "The element whose content or state you checked (verified or failed only).",
-          properties: { ref: { type: "string" }, expected: { type: "string" }, observed: { type: "string" } },
-          required: ["ref", "expected", "observed"], additionalProperties: false,
-        },
+        evidence: { type: "string", description: "What you did and what the checks showed, before and after." },
+        check_ids: { type: "array", items: { type: "string" }, description: "Checks this status rests on, e.g. [\"k2\", \"k3\"]" },
+        unchecked_reason: { type: "string", description: "Only when no assertion could express the claim's result: why, and what you judged from the page instead" },
       },
       required: ["claim_id", "status", "evidence"], additionalProperties: false,
     } },
@@ -169,7 +204,7 @@ export async function explore(opts: {
       try {
         const content = await runTool(use.name, input, browser, results, opts.claims, opts.onEvent, opts.resetApp);
         toolResults.push({ type: "tool_result", tool_use_id: use.id, content });
-        if (use.name !== "record_status") {
+        if (use.name !== "record_status" && use.name !== "check") {
           const summary = use.name === "start_journey" ? `${browser.journey.id} "${input.name}" (${(input.claim_ids as unknown as string[]).join(", ")})${input.reset_data ? ", data reset" : ""}`
             : browser.steps.at(-1)?.locator ?? input.path ?? input.key ?? input.text ?? "";
           opts.onEvent?.({ type: "tool", name: use.name, input, ok: true, summary });
@@ -187,7 +222,7 @@ export async function explore(opts: {
 
   const [inPrice, outPrice] = PRICES[model] ?? [NaN, NaN];
   const costUsd = (usage.input * inPrice + usage.cacheWrite * inPrice * 1.25 + usage.cacheRead * inPrice * 0.1 + usage.output * outPrice) / 1e6;
-  return { results, journeys: browser.journeys, steps: browser.steps, turns, stoppedBecause, usage, costUsd };
+  return { results, journeys: browser.journeys, steps: browser.steps, checks: browser.checks, requests: browser.requests, turns, stoppedBecause, usage, costUsd };
 }
 
 async function runTool(
@@ -213,16 +248,43 @@ async function runTool(
     case "wait_for": return browser.waitFor(input.text, Number(input.seconds ?? 10));
     case "screenshot":
       return [{ type: "image", source: { type: "base64", media_type: "image/png", data: await browser.screenshot() } }];
+    case "check": {
+      const assert = input.assert as Assertion;
+      if (!ASSERTIONS.includes(assert)) throw new Error(`Unknown assertion ${assert}`);
+      if (NEEDS_EXPECTED.includes(assert) && !input.expected) throw new Error(`${assert} needs expected`);
+      const target: CheckTarget | undefined = PAGE_ASSERTIONS.includes(assert) ? undefined
+        : { ref: input.ref, role: input.role, name: input.name, text: input.text, within: input.within };
+      const check = await browser.check({ assert, target, expected: input.expected, claimIds: (input.claim_ids as unknown as string[]) ?? [] });
+      onEvent?.({ type: "check", check });
+      return `${check.id} ${check.passed ? "PASSED" : "FAILED"}: ${check.locator ? `${check.locator} ` : ""}${assert}${check.expected ? ` "${check.expected}"` : ""}. Observed: ${check.observed}`;
+    }
     case "record_status": {
       if (!claims.some((c) => c.id === input.claim_id)) throw new Error(`Unknown claim ${input.claim_id}`);
       if (results.some((r) => r.claimId === input.claim_id)) throw new Error(`${input.claim_id} already has a status`);
-      const check = input.check as unknown as { ref: string; expected: string; observed: string } | undefined;
+      const status = input.status as ClaimStatus;
+      const checkIds = (input.check_ids as unknown as string[] | undefined) ?? [];
+      const cited = checkIds.map((id) => {
+        const c = browser.checks.find((x) => x.id === id);
+        if (!c) throw new Error(`No check ${id}`);
+        return c;
+      });
+      const uncheckedReason = input.unchecked_reason?.trim() || undefined;
+      // A verdict rests on checks unless the agent says why none could express it.
+      if (status === "verified" && !uncheckedReason) {
+        if (!cited.length) throw new Error("verified needs check_ids of passing checks (or unchecked_reason if no assertion can express the result)");
+        const failing = cited.filter((c) => !c.passed);
+        if (failing.length) throw new Error(`Can't be verified on failing checks: ${failing.map((c) => c.id).join(", ")}`);
+      }
+      if (status === "failed" && !uncheckedReason && !cited.some((c) => !c.passed)) {
+        throw new Error("failed needs the check that failed in check_ids (or unchecked_reason if no assertion can express the result)");
+      }
       const result: ClaimResult = {
         claimId: input.claim_id,
-        status: input.status as ClaimStatus,
+        status,
         evidence: input.evidence,
-        // Record the checked element as a stable locator, not a ref.
-        check: check ? { locator: await browser.describe(check.ref).catch(() => `(${check.ref}, no longer on the page)`), expected: check.expected, observed: check.observed } : undefined,
+        checkIds,
+        basis: uncheckedReason ? "observation" : cited.length ? "checks" : "none",
+        uncheckedReason,
         journey: browser.journey.id,
         t: browser.elapsed,
         atStep: browser.steps.length,
