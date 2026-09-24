@@ -3,3 +3,4 @@ node_modules/
 *.pem
 boot-runs/
 src/_tmp/
+explore-runs/

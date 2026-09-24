@@ -13,7 +13,8 @@
     "evals:spotcheck": "tsx src/cli/spotcheck.ts",
     "extract": "tsx --env-file-if-exists=.env src/cli/extract.ts",
     "typecheck": "tsc --noEmit",
-    "boot": "tsx --env-file=.env src/cli/boot.ts"
+    "boot": "tsx --env-file=.env src/cli/boot.ts",
+    "explore": "tsx --env-file=.env src/cli/explore.ts"
   },
   "engines": {
     "node": ">=22"

@@ -27,6 +27,8 @@ export type BootOptions = {
   expectSelector?: string;   // an element the home page should show once the app is up
   screenshotPath: string;
   keep?: boolean;            // leave the sandbox running afterwards (it still shuts itself down when idle)
+  // Runs once the app is up and verified, before the sandbox shuts down (e.g. exploration).
+  afterBoot?: (app: { url: string; headers: Record<string, string>; sandbox: Sandbox }) => Promise<void>;
   onPhase?: (p: Phase) => void;
 };
 
@@ -165,6 +167,7 @@ export async function bootCommit(target: BootTarget, opts: BootOptions): Promise
     }, (b) => `HTTP ${b.status}, "${b.title}", shows "${b.textSample.slice(0, 50)}"${b.found ? `, found ${opts.expectSelector}` : ""}`);
 
     result.ok = true;
+    if (opts.afterBoot) await opts.afterBoot({ url: exposed.url, headers: exposed.headers, sandbox: sb });
   } catch (err) {
     result.error = err instanceof BootError ? `${err.phase}: ${err.message}` : redact(String(err));
   } finally {
