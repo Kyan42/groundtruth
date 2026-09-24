@@ -56,18 +56,17 @@ const outDir = path.join("explore-runs", `${ref.repo}-${ref.number}-${new Date()
 mkdirSync(outDir, { recursive: true });
 const started = Date.now();
 let explored: ExploreResult | undefined;
-let video: string | undefined;
 
 console.log(`\nBooting ${ref.owner}/${ref.repo}#${ref.number}…`);
 const boot = await bootPr(octokit, ref, {
   screenshotPath: path.join(outDir, "boot.png"),
   onPhase: (p) => { if (!p.ok || p.name === "browser check") console.log(`  ${p.ok ? "✓" : "✗"} ${p.name} (${p.seconds.toFixed(0)}s)`); },
-  afterBoot: async ({ url, headers }) => {
+  afterBoot: async ({ url, headers, resetApp }) => {
     console.log(`\nExploring with ${values.model}…`);
     const browser = await ExplorerBrowser.open(url, headers, outDir);
     try {
       explored = await explore({
-        claims, browser, model: values.model, maxTurns: Number(values["max-turns"]),
+        claims, browser, resetApp, model: values.model, maxTurns: Number(values["max-turns"]),
         onEvent: (e) => {
           if (e.type === "thinking") console.log(`  💭 ${e.text.replace(/\s+/g, " ").slice(0, 220)}`);
           else if (e.type === "tool") console.log(`  ${e.ok ? "→" : "✗"} ${e.name} ${e.summary}`.slice(0, 220));
@@ -76,7 +75,7 @@ const boot = await bootPr(octokit, ref, {
         },
       });
     } finally {
-      video = await browser.close();
+      await browser.close();   // finalizes each journey's video
     }
   },
 });
@@ -88,9 +87,12 @@ if (!boot.ok) {
 const r = explored!;
 writeFileSync(path.join(outDir, "trace.json"), JSON.stringify({ pr: `${ref.owner}/${ref.repo}#${ref.number}`, sha: boot.sha, claims, ...r }, null, 2));
 console.log(`\nDone in ${Math.round((Date.now() - started) / 1000)}s (${r.turns} turns, ${r.steps.length} browser steps, stopped: ${r.stoppedBecause})`);
-for (const c of claims) {
-  const res = r.results.find((x) => x.claimId === c.id);
-  console.log(`  ${c.id}: ${res ? res.status : "no status"}`);
+for (const j of r.journeys) {
+  const steps = r.steps.filter((s) => s.journey === j.id);
+  console.log(`\n  ${j.id} "${j.name}" · ${steps.length} steps${j.resetData ? " · data reset" : ""}${j.video ? ` · ${path.basename(j.video)}` : ""}`);
+  for (const res of r.results.filter((x) => x.journey === j.id)) console.log(`    ${res.claimId}: ${res.status}`);
 }
-console.log(`Cost: $${r.costUsd.toFixed(3)} (${r.usage.input} in, ${r.usage.cacheWrite} cache write, ${r.usage.cacheRead} cache read, ${r.usage.output} out)`);
-console.log(`Trace: ${path.join(outDir, "trace.json")}${video ? ` · video: ${video}` : ""}`);
+const missing = claims.filter((c) => !r.results.some((x) => x.claimId === c.id));
+if (missing.length) console.log(`\n  No status: ${missing.map((c) => c.id).join(", ")}`);
+console.log(`\nCost: $${r.costUsd.toFixed(3)} (${r.usage.input} in, ${r.usage.cacheWrite} cache write, ${r.usage.cacheRead} cache read, ${r.usage.output} out)`);
+console.log(`Trace and videos: ${outDir}`);

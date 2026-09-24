@@ -28,7 +28,10 @@ export type BootOptions = {
   screenshotPath: string;
   keep?: boolean;            // leave the sandbox running afterwards (it still shuts itself down when idle)
   // Runs once the app is up and verified, before the sandbox shuts down (e.g. exploration).
-  afterBoot?: (app: { url: string; headers: Record<string, string>; sandbox: Sandbox }) => Promise<void>;
+  afterBoot?: (app: {
+    url: string; headers: Record<string, string>; sandbox: Sandbox;
+    resetApp?: () => Promise<void>;        // runs the config's `reset` command, if it has one
+  }) => Promise<void>;
   onPhase?: (p: Phase) => void;
 };
 
@@ -167,7 +170,13 @@ export async function bootCommit(target: BootTarget, opts: BootOptions): Promise
     }, (b) => `HTTP ${b.status}, "${b.title}", shows "${b.textSample.slice(0, 50)}"${b.found ? `, found ${opts.expectSelector}` : ""}`);
 
     result.ok = true;
-    if (opts.afterBoot) await opts.afterBoot({ url: exposed.url, headers: exposed.headers, sandbox: sb });
+    if (opts.afterBoot) {
+      const reset = config.reset;
+      await opts.afterBoot({
+        url: exposed.url, headers: exposed.headers, sandbox: sb,
+        resetApp: reset ? async () => { await mustRun(inRepo(reset), 120); } : undefined,
+      });
+    }
   } catch (err) {
     result.error = err instanceof BootError ? `${err.phase}: ${err.message}` : redact(String(err));
   } finally {

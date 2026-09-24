@@ -14,6 +14,8 @@ const BootConfigSchema = z.object({
   install: z.string().optional(),
   setup: z.array(z.string()).default([]),
   start: z.string(),
+  // Optional: restores the app's starting data while it runs (e.g. re-seed), so a journey can start clean.
+  reset: z.string().optional(),
   port: z.number().int(),
   ready: z.object({
     path: z.string().default("/"),
