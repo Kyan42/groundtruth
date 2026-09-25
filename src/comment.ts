@@ -31,7 +31,7 @@ export type Approval = {
   claims: ApprovedClaim[];
 };
 
-const HEADER = "### 🧪 Groundtruth: what this PR should do";
+const HEADER = "### Groundtruth · what I'll verify";
 
 export function renderPlaceholder(): string {
   return [COMMENT_MARKER, HEADER, "", "Reading this PR… (usually under a minute)"].join("\n");
@@ -44,7 +44,11 @@ export function renderError(message: string): string {
 
 const line = (when: string, what: string) => `${when.replace(/\.$/, "")} → ${what.replace(/\.$/, "")}`;
 const sub = (text: string) => `<sub>${text.replace(/\s+/g, " ").trim()}</sub>`;
+const cell = (text: string) => text.replace(/\|/g, "\\|").replace(/\s+/g, " ").trim();
+const clip = (text: string, max = 90) => (text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text);
 
+// Claims are a table (one row per claim: the result, a quote of where it came from, and the action);
+// the developer rewords or deletes rows to change them. Assumptions are yes/no, so they stay checkboxes.
 export function renderClaimsComment(state: CommentState): string {
   const { claims, assumptions, not_testable, regression_hints } = state.extraction;
   const out = [COMMENT_MARKER, HEADER, ""];
@@ -53,23 +57,23 @@ export function renderClaimsComment(state: CommentState): string {
     out.push("Found no user-visible change to test in the PR description and commits.",
       "If this PR does change behavior, describe it in the PR description and reopen the PR.", "");
   } else {
-    out.push("Read from the PR description, linked issues and commits. **Nothing is tested until you approve.**",
-      "Uncheck anything that's wrong, or edit the wording directly.", "");
+    out.push("I read the PR description, linked issues and commits. This is what I'll check in a live browser. " +
+      "**Nothing runs until you approve.**", "");
   }
 
   if (claims.length) {
-    out.push("**Claims**: tested as written", "");
+    out.push("| ID | Claim | When |", "|:--|:--|:--|");
     claims.forEach((c, i) => {
-      out.push(`- [x] **${i + 1}.** ${line(c.when, c.then.what)} <!-- gt:c${i + 1} -->`,
-        `  ${sub(`from the evidence: "${c.source}"`)}`);
+      out.push(`| \`C${i + 1}\` | **${cell(c.then.what)}**<br><sub>from the description: "${cell(clip(c.source))}"</sub> ` +
+        `| ${cell(c.when)} <!-- gt:c${i + 1} --> |`);
     });
     out.push("");
   }
 
   if (assumptions.length) {
-    out.push("**Please confirm**: our guesses where the PR doesn't say (checked = intended, test it)", "");
+    out.push("#### Please confirm", "Where the PR doesn't say, these are my guesses. Tick the ones you intend and I'll test them too.", "");
     assumptions.forEach((a, i) => {
-      out.push(`- [${a.checked ? "x" : " "}] ${line(a.when, a.then.what)} <!-- gt:s${i + 1} -->`, `  ${sub(a.reason)}`);
+      out.push(`- [${a.checked ? "x" : " "}] \`A${i + 1}\` ${line(a.when, a.then.what)} <!-- gt:s${i + 1} -->`, `  ${sub(a.reason)}`);
     });
     out.push("");
   }
@@ -79,12 +83,13 @@ export function renderClaimsComment(state: CommentState): string {
       ...not_testable.map((n) => `- "${n.text}": ${n.why}`), "", "</details>", "");
   }
   if (regression_hints.length) {
-    out.push(`<details><summary>Existing behavior to re-check (${regression_hints.length})</summary>`, "",
+    out.push(`<details><summary>Existing behavior to re-check later (${regression_hints.length})</summary>`, "",
       ...regression_hints.map((h) => `- ${h}`), "", "</details>", "");
   }
 
   if (claims.length || assumptions.length) {
-    out.push("- [ ] **Approve and start testing** <!-- gt:approve -->", "");
+    out.push("---", "- [ ] **Approve and run** <!-- gt:approve -->", "",
+      "<sub>To change a claim, edit this comment: reword its row, or delete it. Then tick Approve.</sub>", "");
   }
   out.push(encodeState(state));
   return out.join("\n");
@@ -108,17 +113,31 @@ export type ReviewedComment = {
   lines: Map<string, { checked: boolean; text: string }>; // by marker id: c1, s2, ...
 };
 
-// Finds each checkbox line by its hidden marker, so reordering or rewording lines doesn't lose them.
+// Finds each claim row and checkbox line by its hidden marker, so reordering or rewording doesn't lose
+// them. A claim row that was deleted is simply absent (not approved); one struck through (~~) counts as
+// removed too. Checkbox lines are also how older comments listed claims, so those still parse.
 export function parseReview(body: string): ReviewedComment {
   const lines = new Map<string, { checked: boolean; text: string }>();
   let approveChecked = false;
   for (const m of body.matchAll(/^- \[([ xX])\] (.*?)\s*<!-- gt:(c\d+|s\d+|approve) -->\s*$/gm)) {
     const checked = m[1] !== " ";
     if (m[3] === "approve") approveChecked = checked;
-    else lines.set(m[3], { checked, text: m[2].replace(/^\*\*\d+\.\*\*\s*/, "").trim() });
+    else lines.set(m[3], { checked, text: plain(m[2].replace(/^\*\*\d+\.\*\*\s*/, "").replace(/^`[CA]\d+`\s*/, "")) });
+  }
+  for (const row of body.split("\n")) {
+    const id = /^\s*\|.*<!-- gt:(c\d+) -->/.exec(row)?.[1];
+    if (!id) continue;
+    const cells = row.trim().replace(/^\|/, "").replace(/\|$/, "").split(/(?<!\\)\|/).map((c) => c.replace(/\\\|/g, "|"));
+    const [, claimCell = "", whenCell = ""] = cells;
+    const what = plain(claimCell.split(/<br\s*\/?>/i)[0]);
+    const when = plain(whenCell.replace(/<!--.*?-->/g, ""));
+    lines.set(id, { checked: !/~~/.test(claimCell), text: line(when, what) });
   }
   return { approveChecked, lines };
 }
+
+// Markdown emphasis and whitespace removed: what the developer's wording says.
+const plain = (text: string) => text.replace(/\*\*|~~/g, "").replace(/\s+/g, " ").trim();
 
 // The approved claims: checked lines, using the developer's wording where it differs from ours.
 // A line without "→" is taken as the result, with no setup.
@@ -145,8 +164,8 @@ export function approvedClaims(state: CommentState, review: ReviewedComment): Ap
 // and updates the hidden state. Everything else in the body is left as they left it.
 export function markApproved(body: string, state: CommentState): string {
   const n = state.approval!.claims.length;
-  const banner = `✅ **Approved by @${state.approval!.by}: ${n} check${n === 1 ? "" : "s"} will be tested.** ` +
-    "Testing isn't built yet. Edits after approval are ignored; reopen the PR to start over.";
+  const banner = `✅ **Approved by @${state.approval!.by}: ${n} claim${n === 1 ? "" : "s"} will be tested.** ` +
+    "Follow along on the Groundtruth check. Edits after approval are ignored; reopen the PR to start over.";
   const start = body.indexOf(STATE_PREFIX);
   const end = body.indexOf(" -->", start) + " -->".length;
   return (body.slice(0, start) + encodeState(state) + body.slice(end)).replace(HEADER, `${HEADER}\n\n${banner}`);

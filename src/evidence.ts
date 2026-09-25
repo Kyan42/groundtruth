@@ -104,7 +104,8 @@ export async function buildEvidence(
       title: i.title,
       body: truncate(stripComments(i.body ?? ""), MAX_ISSUE_BODY_CHARS),
     })),
-    commits: commits.map((c) => c.commit.message.trim()),
+    // Trailers (Co-authored-by, Signed-off-by) are metadata, not intent.
+    commits: commits.map((c) => c.commit.message.replace(/^(co-authored-by|signed-off-by):.*$/gim, "").trim()),
   };
 }
 

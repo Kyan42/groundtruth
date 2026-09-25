@@ -1,0 +1,603 @@
+{
+  "repos": {
+    "mealie-recipes/mealie": {
+      "prs_examined": 26,
+      "prs_examined_excluding_bot_or_automated": 13,
+      "prs_with_2plus_commits": 12,
+      "prs_with_2plus_commits_excluding_bot_or_automated": 8,
+      "prs_qualified": 3,
+      "qualifying_prs": [
+        8275,
+        8292,
+        8493
+      ],
+      "merged_date_range_examined": {
+        "newest": "2026-09-25",
+        "oldest": "2026-09-21"
+      },
+      "examined_pr_numbers_newest_first": [
+        8275,
+        8546,
+        8538,
+        8537,
+        8292,
+        8468,
+        8535,
+        8534,
+        8533,
+        8526,
+        8525,
+        8524,
+        8523,
+        8522,
+        8521,
+        8520,
+        8473,
+        8397,
+        8289,
+        8518,
+        8492,
+        8516,
+        8508,
+        8501,
+        8495,
+        8493
+      ],
+      "bot_or_automated_prs_in_range": [
+        8546,
+        8535,
+        8534,
+        8533,
+        8525,
+        8524,
+        8523,
+        8520,
+        8518,
+        8492,
+        8508,
+        8501,
+        8495
+      ],
+      "prs_with_2plus_non_merge_commits_excluding_bot_or_automated": 8,
+      "qualification_rate_of_examined": 0.115,
+      "qualification_rate_of_examined_non_bot": 0.231
+    },
+    "actualbudget/actual": {
+      "prs_examined": 6,
+      "prs_examined_excluding_bot_or_automated": 6,
+      "prs_with_2plus_commits": 6,
+      "prs_with_2plus_commits_excluding_bot_or_automated": 6,
+      "prs_qualified": 3,
+      "qualifying_prs": [
+        9003,
+        8974,
+        8851
+      ],
+      "merged_date_range_examined": {
+        "newest": "2026-09-24",
+        "oldest": "2026-09-23"
+      },
+      "examined_pr_numbers_newest_first": [
+        9003,
+        9008,
+        8974,
+        8911,
+        8994,
+        8851
+      ],
+      "bot_or_automated_prs_in_range": [],
+      "prs_with_2plus_non_merge_commits_excluding_bot_or_automated": 6,
+      "qualification_rate_of_examined": 0.5,
+      "qualification_rate_of_examined_non_bot": 0.5
+    },
+    "immich-app/immich": {
+      "prs_examined": 10,
+      "prs_examined_excluding_bot_or_automated": 9,
+      "prs_with_2plus_commits": 6,
+      "prs_with_2plus_commits_excluding_bot_or_automated": 6,
+      "prs_qualified": 3,
+      "qualifying_prs": [
+        31750,
+        31753,
+        31557
+      ],
+      "merged_date_range_examined": {
+        "newest": "2026-09-25",
+        "oldest": "2026-09-24"
+      },
+      "examined_pr_numbers_newest_first": [
+        31750,
+        31742,
+        31793,
+        31799,
+        31768,
+        31776,
+        31753,
+        31758,
+        31714,
+        31557
+      ],
+      "bot_or_automated_prs_in_range": [
+        31714
+      ],
+      "prs_with_2plus_non_merge_commits_excluding_bot_or_automated": 6,
+      "qualification_rate_of_examined": 0.3,
+      "qualification_rate_of_examined_non_bot": 0.333
+    },
+    "go-gitea/gitea": {
+      "prs_examined": 10,
+      "prs_examined_excluding_bot_or_automated": 9,
+      "prs_with_2plus_commits": 9,
+      "prs_with_2plus_commits_excluding_bot_or_automated": 9,
+      "prs_qualified": 3,
+      "qualifying_prs": [
+        39423,
+        39276,
+        39419
+      ],
+      "merged_date_range_examined": {
+        "newest": "2026-09-25",
+        "oldest": "2026-09-25"
+      },
+      "examined_pr_numbers_newest_first": [
+        39370,
+        39365,
+        39429,
+        39412,
+        39423,
+        39393,
+        39420,
+        39276,
+        39421,
+        39419
+      ],
+      "bot_or_automated_prs_in_range": [
+        39421
+      ],
+      "prs_with_2plus_non_merge_commits_excluding_bot_or_automated": 6,
+      "qualification_rate_of_examined": 0.3,
+      "qualification_rate_of_examined_non_bot": 0.333
+    },
+    "TryGhost/Ghost": {
+      "prs_examined": 13,
+      "prs_examined_excluding_bot_or_automated": 13,
+      "prs_with_2plus_commits": 4,
+      "prs_with_2plus_commits_excluding_bot_or_automated": 4,
+      "prs_qualified": 3,
+      "qualifying_prs": [
+        30971,
+        30946,
+        30970
+      ],
+      "merged_date_range_examined": {
+        "newest": "2026-09-25",
+        "oldest": "2026-09-25"
+      },
+      "examined_pr_numbers_newest_first": [
+        30971,
+        30998,
+        30995,
+        30946,
+        30984,
+        30954,
+        30983,
+        30986,
+        30980,
+        30959,
+        30982,
+        30981,
+        30970
+      ],
+      "bot_or_automated_prs_in_range": [],
+      "prs_with_2plus_non_merge_commits_excluding_bot_or_automated": 4,
+      "qualification_rate_of_examined": 0.231,
+      "qualification_rate_of_examined_non_bot": 0.231
+    },
+    "paperless-ngx/paperless-ngx": {
+      "prs_examined": 83,
+      "prs_examined_excluding_bot_or_automated": 66,
+      "prs_with_2plus_commits": 24,
+      "prs_with_2plus_commits_excluding_bot_or_automated": 21,
+      "prs_qualified": 3,
+      "qualifying_prs": [
+        14115,
+        14072,
+        14066
+      ],
+      "merged_date_range_examined": {
+        "newest": "2026-09-24",
+        "oldest": "2026-09-11"
+      },
+      "examined_pr_numbers_newest_first": [
+        14254,
+        14250,
+        14249,
+        14247,
+        14244,
+        14246,
+        14067,
+        14202,
+        14231,
+        14243,
+        14242,
+        14236,
+        14235,
+        14224,
+        14223,
+        14222,
+        14221,
+        14217,
+        14216,
+        14213,
+        14215,
+        14212,
+        14211,
+        14200,
+        14199,
+        14173,
+        14172,
+        14171,
+        14170,
+        14168,
+        14166,
+        14133,
+        14203,
+        14198,
+        14179,
+        14175,
+        14182,
+        14189,
+        14190,
+        14180,
+        14176,
+        14167,
+        14134,
+        14165,
+        14149,
+        14117,
+        14162,
+        14141,
+        14137,
+        14138,
+        14159,
+        14157,
+        14156,
+        14144,
+        14143,
+        14146,
+        14142,
+        14115,
+        14127,
+        14130,
+        14114,
+        14129,
+        14124,
+        14121,
+        14120,
+        14119,
+        14122,
+        14118,
+        14116,
+        14113,
+        14074,
+        14073,
+        14072,
+        14071,
+        14100,
+        14083,
+        14085,
+        14096,
+        14093,
+        14086,
+        14084,
+        14064,
+        14066
+      ],
+      "bot_or_automated_prs_in_range": [
+        14231,
+        14133,
+        14198,
+        14179,
+        14175,
+        14176,
+        14167,
+        14134,
+        14149,
+        14162,
+        14141,
+        14137,
+        14138,
+        14144,
+        14143,
+        14146,
+        14142
+      ],
+      "prs_with_2plus_non_merge_commits_excluding_bot_or_automated": 18,
+      "qualification_rate_of_examined": 0.036,
+      "qualification_rate_of_examined_non_bot": 0.045
+    },
+    "outline/outline": {
+      "prs_examined": 15,
+      "prs_examined_excluding_bot_or_automated": 14,
+      "prs_with_2plus_commits": 6,
+      "prs_with_2plus_commits_excluding_bot_or_automated": 5,
+      "prs_qualified": 3,
+      "qualifying_prs": [
+        13871,
+        13870,
+        13844
+      ],
+      "merged_date_range_examined": {
+        "newest": "2026-09-25",
+        "oldest": "2026-09-23"
+      },
+      "examined_pr_numbers_newest_first": [
+        13886,
+        13881,
+        13884,
+        13885,
+        13883,
+        13882,
+        13866,
+        13880,
+        13767,
+        13872,
+        13871,
+        13870,
+        13869,
+        13868,
+        13844
+      ],
+      "bot_or_automated_prs_in_range": [
+        13767
+      ],
+      "prs_with_2plus_non_merge_commits_excluding_bot_or_automated": 5,
+      "qualification_rate_of_examined": 0.2,
+      "qualification_rate_of_examined_non_bot": 0.214
+    },
+    "calcom/cal.com": {
+      "prs_examined": 22,
+      "prs_examined_excluding_bot_or_automated": 22,
+      "prs_with_2plus_commits": 14,
+      "prs_with_2plus_commits_excluding_bot_or_automated": 14,
+      "prs_qualified": 3,
+      "qualifying_prs": [
+        30111,
+        29857,
+        29685
+      ],
+      "merged_date_range_examined": {
+        "newest": "2026-09-20",
+        "oldest": "2026-07-09"
+      },
+      "examined_pr_numbers_newest_first": [
+        30171,
+        30190,
+        30135,
+        30134,
+        30140,
+        30124,
+        30111,
+        30107,
+        30088,
+        30096,
+        29984,
+        30039,
+        29970,
+        30084,
+        29940,
+        29901,
+        29740,
+        29819,
+        29857,
+        29865,
+        29773,
+        29685
+      ],
+      "bot_or_automated_prs_in_range": [],
+      "prs_with_2plus_non_merge_commits_excluding_bot_or_automated": 9,
+      "qualification_rate_of_examined": 0.136,
+      "qualification_rate_of_examined_non_bot": 0.136
+    },
+    "discourse/discourse": {
+      "prs_examined": 55,
+      "prs_examined_excluding_bot_or_automated": 39,
+      "prs_with_2plus_commits": 11,
+      "prs_with_2plus_commits_excluding_bot_or_automated": 8,
+      "prs_qualified": 3,
+      "qualifying_prs": [
+        44122,
+        44111,
+        44052
+      ],
+      "merged_date_range_examined": {
+        "newest": "2026-09-25",
+        "oldest": "2026-09-24"
+      },
+      "examined_pr_numbers_newest_first": [
+        44131,
+        44133,
+        44124,
+        44121,
+        44123,
+        44125,
+        44122,
+        44120,
+        44119,
+        44118,
+        44116,
+        44117,
+        44115,
+        44114,
+        44102,
+        44106,
+        44109,
+        44112,
+        44111,
+        44110,
+        44107,
+        44105,
+        44104,
+        44100,
+        44099,
+        44103,
+        44098,
+        44016,
+        44015,
+        44096,
+        44089,
+        44076,
+        44075,
+        44074,
+        44073,
+        44072,
+        44071,
+        44092,
+        44091,
+        44090,
+        44095,
+        44093,
+        44094,
+        44084,
+        44085,
+        44083,
+        44068,
+        44088,
+        44059,
+        44086,
+        44060,
+        44061,
+        44079,
+        44082,
+        44052
+      ],
+      "bot_or_automated_prs_in_range": [
+        44133,
+        44116,
+        44112,
+        44100,
+        44099,
+        44098,
+        44092,
+        44091,
+        44090,
+        44095,
+        44093,
+        44094,
+        44059,
+        44060,
+        44079,
+        44082
+      ],
+      "prs_with_2plus_non_merge_commits_excluding_bot_or_automated": 7,
+      "qualification_rate_of_examined": 0.055,
+      "qualification_rate_of_examined_non_bot": 0.077
+    },
+    "saleor/saleor-dashboard": {
+      "prs_examined": 22,
+      "prs_examined_excluding_bot_or_automated": 14,
+      "prs_with_2plus_commits": 8,
+      "prs_with_2plus_commits_excluding_bot_or_automated": 8,
+      "prs_qualified": 3,
+      "qualifying_prs": [
+        6953,
+        6913,
+        6924
+      ],
+      "merged_date_range_examined": {
+        "newest": "2026-09-25",
+        "oldest": "2026-09-03"
+      },
+      "examined_pr_numbers_newest_first": [
+        6961,
+        6960,
+        6959,
+        6958,
+        6955,
+        6956,
+        6950,
+        6951,
+        6938,
+        6953,
+        6937,
+        6944,
+        6936,
+        6933,
+        6935,
+        6932,
+        6913,
+        6927,
+        6930,
+        6926,
+        6925,
+        6924
+      ],
+      "bot_or_automated_prs_in_range": [
+        6961,
+        6960,
+        6956,
+        6938,
+        6937,
+        6936,
+        6933,
+        6932
+      ],
+      "prs_with_2plus_non_merge_commits_excluding_bot_or_automated": 7,
+      "qualification_rate_of_examined": 0.136,
+      "qualification_rate_of_examined_non_bot": 0.214
+    }
+  },
+  "totals": {
+    "prs_examined": 262,
+    "prs_examined_excluding_bot_or_automated": 205,
+    "prs_with_2plus_commits": 100,
+    "prs_with_2plus_commits_excluding_bot_or_automated": 89,
+    "prs_qualified": 30,
+    "prs_with_2plus_non_merge_commits_excluding_bot_or_automated": 76,
+    "base_rate_qualified_per_examined": 0.115,
+    "base_rate_qualified_per_examined_non_bot": 0.146,
+    "base_rate_qualified_per_non_bot_2plus_non_merge": 0.395
+  },
+  "method": {
+    "window": "Merged PRs (merged on/after 2025-09-25), walked newest-merged first. Because these projects are very active, the walk only reached the most recent days/weeks before the per-repo cap was hit (see merged_date_range_examined).",
+    "stopping_rule": "Stopped each repository after the 3rd qualifying PR (self-imposed cap of 3 to spread the 30 PRs over 10 repos; the task allowed up to 4). The last PR examined in each repo is therefore always a qualifying one, which biases the per-repo rate upward, especially for repos where the cap was hit quickly.",
+    "examined": "Every PR in the range was looked at in listing form. Single-commit PRs cannot show an in-PR fix (force-pushes/squashes are invisible), so they were counted as examined but not inspected further. Every multi-commit non-bot PR had its non-merge commits checked; any commit that looked like a fix was opened (diff, review comments).",
+    "bot_or_automated": "Renovate/Dependabot/Crowdin/translation-sync PRs and automated release PRs; counted in prs_examined but reported separately.",
+    "one_bug_per_pr": "When a PR contained several in-PR bug fixes, the entry records the FIRST commit that fixes a bug introduced earlier in the PR (lint/type-only/test-refactor commits and pure design changes skipped); later ones are mentioned in the entry's notes.",
+    "sha_source": "All SHAs copied from gh API output. For some PRs the review comment refers to a pre-rebase commit that no longer appears in the PR commit list; buggy_sha then names the surviving commit that introduced the code."
+  },
+  "near_misses_not_counted": [
+    {
+      "pr": "go-gitea/gitea#39412",
+      "reason": "Second commit extended the fix to LOCAL_ROOT_URL=0.0.0.0/::, but that failure was pre-existing (incomplete fix of the linked issue), not introduced by the PR."
+    },
+    {
+      "pr": "paperless-ngx/paperless-ngx#14083",
+      "reason": "Reviewer found a ValueError on empty 'operations' lists, but the max() that raised it pre-dated the PR."
+    },
+    {
+      "pr": "paperless-ngx/paperless-ngx#14117",
+      "reason": "'Update views.py' changed excluded_documents access to .get(); looks defensive, no evidence a request could actually hit a KeyError (serializer has default=list)."
+    },
+    {
+      "pr": "calcom/cal.com#29970",
+      "reason": "Reviewer/bot corrected wording and terminology of newly added Japanese strings; judged style/terminology, not a clear bug (one clearly wrong string was pre-existing)."
+    },
+    {
+      "pr": "outline/outline#13872",
+      "reason": "'Upgrade React fix useEffectEvent bug' fixes something triggered by the new code, but neither the commit nor the discussion says what the visible bug was."
+    },
+    {
+      "pr": "mealie-recipes/mealie#8521",
+      "reason": "Several 'fix' commits (leaky DB connections, temp files) fix pre-existing problems surfaced by Python 3.14 warnings, as the PR body states."
+    },
+    {
+      "pr": "immich-app/immich#31742",
+      "reason": "'respect resize_mode' adds support for a config field that was already ignored before the PR; not PR-introduced."
+    },
+    {
+      "pr": "outline/outline#13854",
+      "reason": "Qualifies (Copilot: image fetching ran before authorization in the new comments.update text path; fixed in 3ca3e3d475777835297f2258b47594b5a923b784) but was met after the per-repo cap of 3 was reached, so not included."
+    }
+  ]
+}
