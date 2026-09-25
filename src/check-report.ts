@@ -1,6 +1,7 @@
 import type { ApprovedClaim } from "./comment.js";
 import type { ClaimResult, ClaimStatus } from "./explore/agent.js";
 import type { Check } from "./explore/checks.js";
+import type { ReplayResult } from "./compile/replay.js";
 import type { ExploreRun } from "./explore/run.js";
 
 // Renders an exploration run as the Groundtruth check's conclusion, title, summary and details.
@@ -21,7 +22,17 @@ const WORD: Record<ClaimStatus | "none", string> = {
 };
 const MAX_TEXT = 60_000;   // GitHub allows 65,535 characters per output field
 
-export function renderReport(run: ExploreRun, claims: ApprovedClaim[], opts: { sha: string; bootSeconds: number; dashboard: string; extra?: string }): CheckReport {
+// The replay is a check on the script, not on the PR: it's reported, but it never changes the verdicts.
+function replayLine(replay: ReplayResult | undefined): string {
+  if (!replay) return "**Replay:** not run.";
+  if (replay.error && !replay.journeys.length) return `**Replay:** couldn't run the compiled script (${replay.error}).`;
+  const passed = replay.journeys.filter((j) => j.status === "passed").length;
+  if (replay.ok) return `**Replay:** the compiled Playwright script re-ran all ${passed} journeys on the same app and passed, in ${replay.seconds}s with no model calls.`;
+  const bad = replay.journeys.filter((j) => j.status !== "passed").map((j) => `${j.id} ${j.status}`).join(", ");
+  return `**Replay:** the compiled script passed ${passed} of ${replay.journeys.length} journeys (${bad}). The verdicts above come from exploration; the script needs a look before it can be trusted.`;
+}
+
+export function renderReport(run: ExploreRun, claims: ApprovedClaim[], opts: { sha: string; bootSeconds: number; dashboard: string; replay?: ReplayResult; extra?: string }): CheckReport {
   const resultOf = (id: string): ClaimResult | undefined => run.results.find((r) => r.claimId === id);
   const statusOf = (id: string): ClaimStatus | "none" => resultOf(id)?.status ?? "none";
   const counts = new Map<ClaimStatus | "none", number>();
@@ -52,6 +63,8 @@ export function renderReport(run: ExploreRun, claims: ApprovedClaim[], opts: { s
     "",
     `[Open this run on the dashboard](${opts.dashboard}): a video of each journey, with every action and check marked.`,
     "",
+    replayLine(opts.replay),
+    "",
     "| | Claim | Result | Checks |",
     "|---|---|---|---|",
     ...rows,
@@ -77,6 +90,7 @@ export function renderReport(run: ExploreRun, claims: ApprovedClaim[], opts: { s
   const text = [
     ...journeys,
     unused.length ? `### Checks not used for a verdict\n\nThe agent ran these and then checked again differently; they're kept so nothing is hidden.\n\n${unused.map((k) => `- ${describeCheck(k)}`).join("\n")}` : "",
+    opts.replay?.notes.length ? `### Compiling the script\n\n${opts.replay.notes.map((n) => `- ${n}`).join("\n")}` : "",
     `### Run\n\n${run.turns} agent turns · ${run.steps.length} browser steps · [dashboard](${opts.dashboard})`,
     opts.extra ?? "",
   ].filter(Boolean).join("\n\n");

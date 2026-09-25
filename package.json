@@ -14,7 +14,8 @@
     "extract": "tsx --env-file-if-exists=.env src/cli/extract.ts",
     "typecheck": "tsc --noEmit",
     "boot": "tsx --env-file=.env src/cli/boot.ts",
-    "explore": "tsx --env-file=.env src/cli/explore.ts"
+    "explore": "tsx --env-file=.env src/cli/explore.ts",
+    "compile": "tsx src/cli/compile.ts"
   },
   "engines": {
     "node": ">=22"

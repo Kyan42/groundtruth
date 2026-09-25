@@ -18,8 +18,9 @@ expect:
   c4: { head: holds, base: breaks }   # Enter with an empty name: on base createOne posts without a guard
 
 review:
-  status: draft
+  status: reviewed
   drafted_by: claude
+  reviewed_by: Kyan42   # confirmed c3 holds on both commits (it's the guard that keeps c1/c2 honest)
   notes: >-
     Needs a login: Mealie creates changeme@example.com / MyPassword on first start (mealie/core/settings/settings.py,
     _DEFAULT_EMAIL and _DEFAULT_PASSWORD), given to the agent as the "admin" persona in evals/boot/mealie.yml.

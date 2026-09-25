@@ -70,3 +70,9 @@ Every Actual PR adds an `upcoming-release-notes/*.md` file, a human-written summ
 ## Rejected
 
 Maybe (archived) · Vikunja (96% bot PRs) · Rallly (one author) · Owncast (one maintainer, needs RTMP) · Linkwarden (thin bodies) · Docmost (one maintainer, needs Postgres + Redis) · Outline (external auth, heavy infra) · Hoppscotch (monorepo) · Excalidraw (a canvas is hard to check by clicking) · Kutt (inactive) · Shlink (API only) · Wiki.js (stalled) · Paperless-ngx (Redis + OCR) · Tandoor (61% bots) · Kanboard (one maintainer) · Healthchecks (no merged PRs) · Livebook (dev tool). Reserve: Baby Buddy (Django + SQLite).
+
+## Exploration evals: PRs with a bug fixed inside the PR
+
+For testing the exploring agent: run it on the commit before the fix (a claim should fail) and on the fix (it should pass). The rule: the bug must break something the PR's intent states as of opening (description, linked issues), or the agent could never have been given that claim.
+
+- **Regression-step candidate, not an exploration case:** [Mealie #7091](https://github.com/mealie-recipes/mealie/pull/7091) "Improve add shopping list item form". Buggy [`327d208`](https://github.com/mealie-recipes/mealie/commit/327d20888dd5167f1bdfb6513d31734a958546f7), fixed four minutes later in [`889ceab`](https://github.com/mealie-recipes/mealie/commit/889ceabbdc3422db741ad784bb58b85dd5b8b7c8) "fix missing emit for note field": pressing Enter in the note field stopped adding the item. The intent is layout only (field order, label icons inside the input, a bottom drawer on mobile, "desktop remains the same"), so no claim covers it; the regression step should catch it by replaying an older "add an item with a note" test.

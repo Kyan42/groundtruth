@@ -8,6 +8,7 @@ import type { ApprovedClaim } from "./comment.js";
 import { config } from "./config.js";
 import { runUrl } from "./dashboard/server.js";
 import type { PrRef } from "./evidence.js";
+import { replayRun, type ReplayResult } from "./compile/replay.js";
 import { exploreApp, type ExploreRun } from "./explore/run.js";
 import { createLimiter } from "./limit.js";
 
@@ -54,6 +55,7 @@ async function testAndReport(octokit: Octokit, ref: PrRef, sha: string, claims: 
 
   let explored: ExploreRun | undefined;
   let exploreError: string | undefined;
+  let replay: ReplayResult | undefined;
   let bootSeconds = 0;
   const result = await bootPr(octokit, ref, {
     sha, screenshotPath: path.join(runDir, "home.png"),
@@ -77,6 +79,16 @@ async function testAndReport(octokit: Octokit, ref: PrRef, sha: string, claims: 
       } catch (err) {
         // The agent or the browser broke: our problem, reported as such, never as a claim failing.
         exploreError = err instanceof Error ? err.message : String(err);
+      }
+      if (!explored) return;
+      // Compile the run into Playwright tests and replay them once on the same app: the clean record of the
+      // run, and a first sign of whether the script holds up. A replay problem never changes the verdicts.
+      report(`Claims tested · replaying the compiled script…`);
+      try {
+        replay = await replayRun({ runDir, baseUrl: url, headers, resetApp });
+        console.log(`[groundtruth] ${label}: replay ${replay.ok ? "passed" : "had problems"}: ${replay.journeys.map((j) => `${j.id} ${j.status}`).join(", ")}${replay.error ? ` (${replay.error})` : ""}`);
+      } catch (err) {
+        console.log(`[groundtruth] ${label}: replay error: ${err}`);
       }
     },
   });
@@ -121,7 +133,7 @@ async function testAndReport(octokit: Octokit, ref: PrRef, sha: string, claims: 
     return;
   }
 
-  const r = renderReport(explored, claims, { sha, bootSeconds, dashboard: runUrl(runDir), extra: bootReport(result) });
+  const r = renderReport(explored, claims, { sha, bootSeconds, dashboard: runUrl(runDir), replay, extra: bootReport(result) });
   await update({ conclusion: r.conclusion, output: { title: r.title, summary: r.summary, text: r.text } });
   console.log(`[groundtruth] ${label}: ${r.conclusion}: ${r.title} ($${explored.costUsd.toFixed(2)}, ${explored.seconds}s, ${runDir})`);
 }

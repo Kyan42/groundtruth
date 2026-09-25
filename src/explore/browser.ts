@@ -171,6 +171,7 @@ export class ExplorerBrowser {
   private async checkTarget(t: CheckTarget): Promise<{ locator: Locator; description: string }> {
     if (t.ref) {
       const { locator, description, stable } = await this.resolve(t.ref);
+      refuseTextPinned(description);
       return { locator, description: stable ? description : `${description} (not unique)` };
     }
     const scope: Page | Locator = t.within ? (await this.resolve(t.within)).locator : this.page;
@@ -178,7 +179,9 @@ export class ExplorerBrowser {
     if (t.role) locator = scope.getByRole(t.role as Parameters<Page["getByRole"]>[0], t.name ? { name: t.name } : undefined);
     else if (t.text) locator = scope.getByText(t.text);
     else throw new Error("A target needs a ref, a role (with an optional name), or a text");
-    return { locator, description: locator.toString() };
+    const description = locator.toString();
+    refuseTextPinned(description);
+    return { locator, description };
   }
 
   // Draws the check into the page for the video: a box around the element(s) and a ✓/✗ banner, briefly.
@@ -306,4 +309,14 @@ export class ExplorerBrowser {
   }
 
   private relativeUrl(): string { return this.relativePath(this.page.url()); }
+}
+
+// An element with no test id, role or label can only be described by its whole text, which breaks as soon as
+// the content changes (a cart described by every item in it). Refuse it while the agent can still pick better.
+function refuseTextPinned(description: string): void {
+  const pinned = /getByText\('((?:[^'\\]|\\.){60,})'/.exec(description);
+  if (pinned) {
+    throw new Error(`That target can only be identified by its full text ("${pinned[1].slice(0, 50)}…"), which breaks when the content changes. ` +
+      "Target a container by its role instead (e.g. role list, table, region), or check a smaller element directly.");
+  }
 }

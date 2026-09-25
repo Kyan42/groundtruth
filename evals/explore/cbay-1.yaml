@@ -43,5 +43,6 @@ expect:
   c7: { head: holds, base: breaks }
 
 review:
-  status: draft
+  status: reviewed
   drafted_by: claude
+  reviewed_by: Kyan42

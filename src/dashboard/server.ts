@@ -33,6 +33,16 @@ export async function handleDashboard(req: IncomingMessage, res: ServerResponse)
     // No trace yet means the run is still going; the page shows that and polls.
     return existsSync(file) ? json(res, JSON.parse(readFileSync(file, "utf8"))) : json(res, { running: true }, 202);
   }
+  if (parts.length === 3 && parts[2] === "replay.json") {
+    const file = path.join(dir, "replay.json");
+    return existsSync(file) ? json(res, JSON.parse(readFileSync(file, "utf8"))) : notFound(res);
+  }
+  if (parts.length === 3 && parts[2] === "script") {
+    const file = path.join(dir, "scripts", "journeys.spec.ts");
+    if (!existsSync(file)) return notFound(res);
+    res.writeHead(200, { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" }).end(readFileSync(file));
+    return true;
+  }
   if (parts.length === 4 && parts[2] === "videos" && VIDEO.test(parts[3])) {
     const file = path.join(dir, parts[3]);
     return existsSync(file) ? video(req, res, file) : notFound(res);

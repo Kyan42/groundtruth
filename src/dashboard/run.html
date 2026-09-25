@@ -3,6 +3,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Groundtruth Run</title>
+<script>
+// Light by default; the toggle's choice is remembered in this browser.
+(() => { let t = "light"; try { t = localStorage.getItem("gt-theme") || "light"; } catch {} document.documentElement.dataset.theme = t; })();
+function toggleTheme() {
+  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem("gt-theme", next); } catch {}
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
 <style>
@@ -49,6 +58,10 @@ aside{min-width:0;background:color-mix(in srgb,var(--card) 88%,transparent);bord
 .brand{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:18px 20px 14px;border-bottom:1px solid var(--line)}
 .brand a{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}
 .brand strong{font-weight:600;letter-spacing:-.01em}
+.brand .right{display:flex;align-items:center;gap:12px}
+.theme{border:1px solid var(--line);background:var(--card);color:var(--mid);border-radius:8px;padding:3px 9px;font:500 12.5px var(--sans);white-space:nowrap}
+.theme:hover{color:var(--ink)}
+:root[data-theme="dark"] .theme .to-dark,:root:not([data-theme="dark"]) .theme .to-light{display:none}
 .brand .all{font-size:13px;color:var(--mid)}
 .pr{padding:16px 20px;border-bottom:1px solid var(--line)}
 .pr .repo{font:12px var(--mono);color:var(--low)}
@@ -82,7 +95,13 @@ aside{min-width:0;background:color-mix(in srgb,var(--card) 88%,transparent);bord
 main{min-width:0;display:flex;flex-direction:column}
 .top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:16px 28px}
 .summary{font-size:15px;color:var(--mid)} .summary b{color:var(--ink);font-weight:600}
+.segs{display:flex;gap:10px;flex-wrap:wrap}
 .seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg[hidden]{display:none}
+.rbadge{font:11.5px var(--mono);padding:1px 7px;border-radius:999px;white-space:nowrap}
+.rbadge.ok{background:var(--pass-lo);color:var(--pass)} .rbadge.bad{background:var(--fail-lo);color:var(--fail)} .rbadge.none{background:var(--block-lo);color:var(--block)}
+.code{margin:14px 0 0;background:var(--sunk);border:1px solid var(--line);border-radius:12px;padding:14px 16px;overflow-x:auto;font:12.5px/1.6 var(--mono);color:var(--ink);white-space:pre;tab-size:2}
+.code .s{color:var(--pass)} .code .c{color:var(--low);font-style:italic} .code .k{color:var(--forest);font-weight:500}
 .seg button{border:0;background:transparent;padding:6px 14px;border-radius:7px;font-size:13.5px;font-weight:500;color:var(--mid)}
 .seg button[aria-pressed="true"]{background:var(--forest-lo);color:var(--forest)}
 
@@ -189,7 +208,10 @@ h4{margin:22px 0 6px;font-size:14px;font-weight:600}
         <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><g fill="none" stroke="var(--forest)" stroke-width="1.4"><circle cx="13" cy="13" r="11.5"/><circle cx="13" cy="13" r="7.5"/><circle cx="13" cy="13" r="3.5" fill="var(--forest)"/></g></svg>
         <strong>Groundtruth</strong>
       </a>
-      <a class="all" href="/runs">All runs</a>
+      <div class="right">
+        <button class="theme" type="button" onclick="toggleTheme()" aria-label="Switch between light and dark"><span class="to-dark">☾ Dark</span><span class="to-light">☀ Light</span></button>
+        <a class="all" href="/runs">All runs</a>
+      </div>
     </div>
     <div class="pr">
       <div class="repo" data-id="repo"></div>
@@ -208,9 +230,15 @@ h4{margin:22px 0 6px;font-size:14px;font-weight:600}
   <main>
     <div class="top">
       <div class="summary" data-id="summary"></div>
-      <div class="seg" role="group" aria-label="View">
-        <button data-id="viewJourney" aria-pressed="true">Journey</button>
-        <button data-id="viewGrid" aria-pressed="false">Grid</button>
+      <div class="segs">
+        <div class="seg" role="group" aria-label="Which recording" data-id="sourceSeg" hidden>
+          <button data-id="srcReplay" aria-pressed="true" title="The compiled Playwright script, replayed">Replay</button>
+          <button data-id="srcExplore" aria-pressed="false" title="The agent exploring, with its detours">Exploration</button>
+        </div>
+        <div class="seg" role="group" aria-label="View">
+          <button data-id="viewJourney" aria-pressed="true">Journey</button>
+          <button data-id="viewGrid" aria-pressed="false">Grid</button>
+        </div>
       </div>
     </div>
 
@@ -233,6 +261,7 @@ h4{margin:22px 0 6px;font-size:14px;font-weight:600}
         <button role="tab" data-tab="claims" aria-selected="true">Claims<span class="n" data-id="nClaims"></span></button>
         <button role="tab" data-tab="events" aria-selected="false">What happened<span class="n" data-id="nEvents"></span></button>
         <button role="tab" data-tab="network" aria-selected="false">Network &amp; console<span class="n" data-id="nNet"></span></button>
+        <button role="tab" data-tab="script" aria-selected="false" data-id="scriptTab" hidden>Script</button>
       </div>
       <div class="panel" data-id="panel"></div>
     </section>
@@ -267,14 +296,28 @@ async function load() {
     return;
   }
   if (trace.error) return showState(esc(trace.title ?? trace.pr ?? "Run"), `${esc(trace.error)}<br><br>This is a Groundtruth problem, not a result about the PR.`);
-  render(trace);
+  // The replay (compiled script run once) is optional: older runs and runs where it didn't happen have none.
+  const replay = await fetch(`${BASE}/replay.json`, { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  render(trace, replay);
+}
+
+// Light syntax colouring for the Script tab: comments, strings and a few keywords. Escapes first.
+function highlight(code) {
+  return code.split("\n").map((line) => {
+    const comment = line.indexOf("//");
+    const [body, rest] = comment >= 0 && !/["'`][^"'`]*\/\//.test(line.slice(0, comment + 2)) ? [line.slice(0, comment), line.slice(comment)] : [line, ""];
+    const b = esc(body)
+      .replace(/(&quot;(?:[^&\\]|\\.|&(?!quot;))*?&quot;)/g, '<span class="s">$1</span>')
+      .replace(/\b(await|async|import|from|const|test|expect|check)\b/g, '<span class="k">$1</span>');
+    return b + (rest ? `<span class="c">${esc(rest)}</span>` : "");
+  }).join("\n");
 }
 
 function showState(title, body) {
   document.getElementById("root").innerHTML = `<div class="state"><div class="box"><h1>${title}</h1><p>${body}</p><p><a href="/runs">All runs</a></p></div></div>`;
 }
 
-function render(T) {
+function render(T, R) {
   const root = document.getElementById("root");
   root.replaceChildren(document.getElementById("page").content.cloneNode(true));
   const $ = (id) => root.querySelector(`[data-id="${id}"]`);
@@ -294,6 +337,13 @@ function render(T) {
   const videoUrl = (j) => j.video ? `${BASE}/videos/${encodeURIComponent(j.video.split(/[\\/]/).pop())}` : "";
   const checkLine = (k) => `${words(k.assert)}${k.expected ? ` "${k.expected}"` : ""}`;
 
+  // Two recordings per journey: the replay of the compiled script (clean, the default) and the exploration.
+  const replayOf = (j) => R?.journeys?.find((x) => x.id === j.id);
+  let source = R?.journeys?.some((j) => j.video) ? "replay" : "explore";
+  const videoFor = (j) => (source === "replay" && replayOf(j)?.video ? `${BASE}/videos/${encodeURIComponent(replayOf(j).video)}` : videoUrl(j));
+  const replayCheck = (k) => R?.checks?.[k.id];
+  const checkTime = (k) => (source === "replay" ? replayCheck(k)?.t : k.t);
+
   // Sidebar
   document.title = `${T.title ?? T.pr} · Groundtruth`;
   $("repo").textContent = T.pr ?? "";
@@ -308,6 +358,7 @@ function render(T) {
     ["Checks", `${checks.filter((k) => citedIds.has(k.id)).length} used · ${checks.filter((k) => !citedIds.has(k.id)).length} redone`],
     T.bootSeconds != null && ["Boot", duration(T.bootSeconds)],
     T.seconds != null && ["Testing", `${duration(T.seconds)} · ${T.turns} turns`],
+    R?.journeys?.length && ["Replay", `${R.journeys.filter((j) => j.status === "passed").length} of ${R.journeys.length} passed · ${duration(R.seconds)}`],
     T.costUsd != null && ["Cost", `$${T.costUsd.toFixed(2)}`],
     T.startedAt && ["Started", new Date(T.startedAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })],
   ].filter(Boolean).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("");
@@ -333,12 +384,19 @@ function render(T) {
     current = journeys.find((j) => j.id === id) ?? journeys[0];
     if (!current) return;
     root.querySelectorAll(".jcard").forEach((b) => b.setAttribute("aria-current", String(b.dataset.j === current.id)));
-    timeline = [
-      ...steps.filter((s) => s.journey === current.id).map((s) => ({ kind: "step", t: s.t ?? 0, s })),
-      ...checks.filter((k) => k.journey === current.id).map((k) => ({ kind: "check", t: k.t ?? 0, k })),
-    ].sort((a, b) => a.t - b.t);
-    if (current.video) { video.src = videoUrl(current); video.hidden = false; $("vcard").querySelector(".novideo")?.remove(); }
-    else { video.removeAttribute("src"); video.hidden = true; if (!$("vcard").querySelector(".novideo")) $("vcard").insertAdjacentHTML("afterbegin", `<div class="novideo">No video for this journey</div>`); }
+    // The replay records only the checks (actions have no timestamps there); the exploration has both.
+    timeline = source === "replay"
+      ? checks.filter((k) => k.journey === current.id && replayCheck(k)).map((k) => ({ kind: "check", t: replayCheck(k).t, k: { ...k, passed: replayCheck(k).passed } }))
+      : [
+        ...steps.filter((s) => s.journey === current.id).map((s) => ({ kind: "step", t: s.t ?? 0, s })),
+        ...checks.filter((k) => k.journey === current.id).map((k) => ({ kind: "check", t: k.t ?? 0, k })),
+      ];
+    timeline.sort((a, b) => a.t - b.t);
+    const src = videoFor(current);
+    if (src) {
+      if (video.getAttribute("src") !== src) video.src = src;
+      video.hidden = false; $("vcard").querySelector(".novideo")?.remove();
+    } else { video.removeAttribute("src"); video.hidden = true; if (!$("vcard").querySelector(".novideo")) $("vcard").insertAdjacentHTML("afterbegin", `<div class="novideo">No video for this journey</div>`); }
     const ids = claimsIn(current);
     const held = ids.filter((c) => statusOf(c) === "verified").length;
     const bad = ids.filter((c) => statusOf(c) === "failed");
@@ -347,6 +405,12 @@ function render(T) {
       : held === ids.length && ids.length
         ? `<b>Verified.</b> All ${ids.length} claim${ids.length === 1 ? "" : "s"} in this journey held${current.resetData ? ", starting from fresh app data" : ""}.`
         : `<b>${held} of ${ids.length} claims verified.</b> See each claim below for what happened.`;
+    const rj = replayOf(current);
+    if (rj) {
+      $("verdict").innerHTML += rj.status === "passed"
+        ? ` The compiled Playwright script replayed this journey and passed${source === "replay" ? " (that's the video above)" : ""}.`
+        : ` <b>The compiled script's replay ${esc(rj.status)}</b>${rj.error ? `: ${esc(rj.error)}` : ""}. The verdicts come from the exploration; the script needs a look.`;
+    }
     $("nClaims").textContent = ids.length;
     $("nEvents").textContent = timeline.length;
     $("nNet").textContent = requests.filter((r) => r.journey === current.id && !/hot-update|__webpack_hmr|\/@vite\//.test(r.path)).length;
@@ -371,14 +435,19 @@ function render(T) {
   }
 
   function checkCard(k) {
+    const rc = replayCheck(k);
+    const badge = !R || !citedIds.has(k.id) ? ""
+      : rc ? `<span class="rbadge ${rc.passed ? "ok" : "bad"}">replay ${rc.passed ? "✓" : "✗"}</span>`
+      : `<span class="rbadge none">not reached in replay</span>`;
+    const t = checkTime(k);
     return `<div class="kcheck ${k.passed ? "" : "failed"} ${citedIds.has(k.id) ? "" : "unused"}">
       <span class="kid">${esc(k.id)}</span>
       <div class="kmain">
-        <div class="kwhat"><span class="${k.passed ? "ok" : "bad"}">${k.passed ? "✓ passed" : "✗ failed"}</span> · ${esc(checkLine(k))}</div>
+        <div class="kwhat"><span class="${k.passed ? "ok" : "bad"}">${k.passed ? "✓ passed" : "✗ failed"}</span> · ${esc(checkLine(k))} ${badge}</div>
         ${k.locator ? `<div class="loc">${esc(k.locator)}</div>` : ""}
         <div class="obs">Observed: ${esc(k.observed)}</div>
       </div>
-      <button class="jump" data-t="${k.t}">${fmt(k.t)}</button>
+      ${t != null ? `<button class="jump" data-t="${t}">${fmt(t)}</button>` : "<span></span>"}
     </div>`;
   }
 
@@ -401,13 +470,22 @@ function render(T) {
             ${others.length ? `<div class="klabel">Other checks for this claim, not used for the verdict</div><div class="klist">${others.map(checkCard).join("")}</div>` : ""}
           </div></div>`;
       }).join("") || `<p class="note">No claims were checked in this journey.</p>`;
+    } else if (tab === "script") {
+      p.innerHTML = `<p class="note">The Playwright tests compiled from this run: each journey's actions in order, and each check as a named step. This is what replays the run without a model, and what reruns on later PRs.</p><pre class="code" data-id="code">Loading…</pre>`;
+      fetch(`${BASE}/script`, { cache: "no-store" }).then((r) => (r.ok ? r.text() : Promise.reject(r.status)))
+        .then((code) => { const el = p.querySelector('[data-id="code"]'); if (el) el.innerHTML = highlight(code); })
+        .catch(() => { const el = p.querySelector('[data-id="code"]'); if (el) el.textContent = "No compiled script for this run."; });
+      return;
     } else if (tab === "events") {
+      const explorationNote = source === "replay" ? " Times here are in the exploration video; clicking one switches to it." : "";
       p.innerHTML = `<div class="events-wrap"><table class="events"><thead><tr><th>Time</th><th>What</th><th>Element or value</th><th>Page / observed</th></tr></thead><tbody>${
         timeline.map((e) => e.kind === "step"
           ? `<tr class="${e.s.ok ? "" : "bad"}"><td class="t"><button class="jump" data-t="${e.t}">${fmt(e.t)}</button></td><td class="a">${esc(words(e.s.action))}</td><td class="l">${esc(e.s.locator ?? (e.s.value != null ? `"${e.s.value}"` : ""))}</td><td class="u">${esc(e.s.url)}${e.s.note ? ` · ${esc(e.s.note)}` : ""}</td></tr>`
           : `<tr class="check ${e.k.passed ? "" : "failed"}"><td class="t"><button class="jump" data-t="${e.t}">${fmt(e.t)}</button></td><td class="a">${e.k.passed ? "✓" : "✗"} ${esc(e.k.id)} · ${esc(checkLine(e.k))}</td><td class="l">${esc(e.k.locator ?? "")}</td><td class="u">${esc(e.k.observed)}${citedIds.has(e.k.id) ? "" : " · not used for a verdict"}</td></tr>`
         ).join("")
-      }</tbody></table></div><p class="note">Actions and checks use stable locators (test ids, roles and names); they become the lines of this journey's Playwright script.</p>`;
+      }</tbody></table></div><p class="note">What the agent did while exploring. Actions and checks use stable locators (test ids, roles and names); they become the lines of this journey's Playwright script.${explorationNote}</p>`;
+      p.querySelectorAll(".jump").forEach((b) => b.addEventListener("click", () => seekIn("explore", Number(b.dataset.t))));
+      return;
     } else {
       const tag = `[${current.id}]`;
       // Dev servers' hot-reload polling isn't the app's traffic; the trace keeps it, the view hides it.
@@ -428,11 +506,34 @@ function render(T) {
   }
 
   function seek(t, play) {
-    if (!current?.video) return;
+    if (!current || !videoFor(current)) return;
     video.currentTime = Math.max(0, t - 0.4);
     if (play) video.play().catch(() => {});
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
+
+  // Seek in a particular recording, switching to it first if needed (the new video seeks once it loads).
+  let pendingSeek = null;
+  function seekIn(wanted, t) {
+    if (wanted === source || !R) return seek(t, true);
+    pendingSeek = t;
+    setSource(wanted);
+  }
+
+  function setSource(next) {
+    source = next;
+    $("srcReplay").setAttribute("aria-pressed", String(source === "replay"));
+    $("srcExplore").setAttribute("aria-pressed", String(source === "explore"));
+    buildGrid();
+    if (current) selectJourney(current.id);
+    updateDurations();
+  }
+  if (R?.journeys?.some((j) => j.video)) {
+    $("sourceSeg").hidden = false;
+    $("srcReplay").addEventListener("click", () => setSource("replay"));
+    $("srcExplore").addEventListener("click", () => setSource("explore"));
+  }
+  if (R) $("scriptTab").hidden = false;
 
   function updateTime() {
     if (!current) return;
@@ -448,8 +549,12 @@ function render(T) {
   }
   for (const ev of ["timeupdate", "play", "pause"]) video.addEventListener(ev, updateTime);
   video.addEventListener("loadedmetadata", () => {
-    // The first moment of a recording is a blank page still loading; open on the app instead.
-    if (video.currentTime === 0) video.currentTime = Math.min(1.5, video.duration || 0);
+    if (pendingSeek != null) { const t = pendingSeek; pendingSeek = null; seek(t, true); }
+    // The first moment of a recording is a blank page (loading, or waiting on a data reset); open on the app.
+    else if (video.currentTime === 0) {
+      const start = source === "replay" ? (replayOf(current)?.startsAt ?? 0) + 1 : 1.5;
+      video.currentTime = Math.min(start, video.duration || 0);
+    }
     drawMarkers(); updateTime();
   });
   $("play").addEventListener("click", () => (video.paused ? video.play().catch(() => {}) : video.pause()));
@@ -457,23 +562,32 @@ function render(T) {
   $("track").addEventListener("keydown", (e) => { if (e.key === "ArrowRight") video.currentTime += 2; if (e.key === "ArrowLeft") video.currentTime -= 2; });
   root.querySelectorAll('[role="tab"]').forEach((b) => b.addEventListener("click", () => { tab = b.dataset.tab; renderPanel(); }));
 
-  // Journey lengths, from each video's metadata
-  for (const j of journeys) {
-    if (!j.video) continue;
-    const v = document.createElement("video");
-    v.preload = "metadata"; v.src = videoUrl(j);
-    v.addEventListener("loadedmetadata", () => { const el = root.querySelector(`[data-dur="${CSS.escape(j.id)}"]`); if (el && isFinite(v.duration)) el.textContent = fmt(v.duration); });
+  // Journey lengths, from each video's metadata (they follow the recording being shown)
+  function updateDurations() {
+    for (const j of journeys) {
+      const el = root.querySelector(`[data-dur="${CSS.escape(j.id)}"]`);
+      const src = videoFor(j);
+      if (!el || !src) continue;
+      const v = document.createElement("video");
+      v.preload = "metadata"; v.src = src;
+      v.addEventListener("loadedmetadata", () => { if (isFinite(v.duration)) el.textContent = fmt(v.duration); });
+    }
   }
+  updateDurations();
 
   // Grid view: every journey's video at once
-  $("tiles").innerHTML = journeys.filter((j) => j.video).map((j) => `
-    <div class="tile">
-      <div class="vcard"><video src="${videoUrl(j)}" muted playsinline loop preload="auto"></video></div>
-      <div class="tt"><button class="tname" data-j="${esc(j.id)}">${esc(j.name)}</button><span class="jid">${esc(j.id.toUpperCase())}</span></div>
-      <div class="chips">${claimsIn(j).map(chip).join("")}</div>
-    </div>`).join("");
+  function buildGrid() {
+    $("tiles").innerHTML = journeys.filter((j) => videoFor(j)).map((j) => `
+      <div class="tile">
+        <div class="vcard"><video src="${videoFor(j)}" muted playsinline loop preload="auto"></video></div>
+        <div class="tt"><button class="tname" data-j="${esc(j.id)}">${esc(j.name)}</button><span class="jid">${esc(j.id.toUpperCase())}</span></div>
+        <div class="chips">${claimsIn(j).map(chip).join("")}</div>
+      </div>`).join("");
+    root.querySelectorAll(".tname").forEach((b) => b.addEventListener("click", () => { showView("journey"); selectJourney(b.dataset.j); }));
+    if (!$("gridView").hidden) gridVideos().forEach((v) => v.play().catch(() => {}));
+  }
   const gridVideos = () => [...root.querySelectorAll(".tile video")];
-  root.querySelectorAll(".tname").forEach((b) => b.addEventListener("click", () => { showView("journey"); selectJourney(b.dataset.j); }));
+  buildGrid();
   $("gridToggle").addEventListener("click", () => {
     const playing = gridVideos().some((v) => !v.paused);
     gridVideos().forEach((v) => (playing ? v.pause() : v.play().catch(() => {})));

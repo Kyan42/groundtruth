@@ -44,7 +44,8 @@ Use your own App, smee channel and keys rather than sharing someone else's. GitH
 | `npm run evals -- --runs 1` | Anthropic key only | claim-extraction evals on the frozen cases in `evals/` (about $0.45 per repeat; `--runs 3` is the usual) |
 | `npm run extract -- owner/repo#N` | App + Anthropic | extract claims for a PR without commenting |
 | `npm run boot -- owner/repo#N` | App + Runloop | boot a PR's app in a sandbox and check it loads |
-| `npm run explore -- owner/repo#N` | App + Runloop + Anthropic | boot, then run the agent on the PR's claims, printing every step; the run shows on the dashboard |
+| `npm run explore -- owner/repo#N` | App + Runloop + Anthropic | boot, run the agent on the PR's claims (printing every step), then compile and replay the Playwright script; the run shows on the dashboard |
+| `npm run compile -- runs/<run>` | nothing | compile a saved run into Playwright tests in `<run>/scripts/` (replay them with `GROUNDTRUTH_BASE_URL=… GROUNDTRUTH_RESET="…" npx playwright test -c <run>/scripts/playwright.config.ts`) |
 | `npm run typecheck` | | |
 
 ## Layout

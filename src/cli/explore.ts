@@ -1,4 +1,4 @@
-// Usage: npm run explore -- owner/repo#123 [--claim 1] [--model claude-opus-5] [--max-turns 40]
+// Usage: npm run explore -- owner/repo#123 [--claim 1] [--model claude-opus-5] [--max-turns 40] [--no-replay]
 // Boots the PR's app, then has the exploring agent check the approved claims from the PR's Groundtruth
 // comment (or just one with --claim N), printing every step. Saves trace.json and videos under runs/, where the dashboard shows them.
 import { mkdirSync } from "node:fs";
@@ -10,6 +10,7 @@ import { type ApprovedClaim, COMMENT_MARKER, readState } from "../comment.js";
 import { config } from "../config.js";
 import { listAll, parsePrRef, type PrRef } from "../evidence.js";
 import { DEFAULT_EXPLORE_MODEL } from "../explore/agent.js";
+import { replayRun } from "../compile/replay.js";
 import { exploreApp, type ExploreRun } from "../explore/run.js";
 import { installationOctokit } from "../github.js";
 
@@ -19,6 +20,7 @@ const { values, positionals } = parseArgs({
     claim: { type: "string" },
     model: { type: "string", default: DEFAULT_EXPLORE_MODEL },
     "max-turns": { type: "string", default: "40" },
+    "no-replay": { type: "boolean", default: false },
   },
 });
 if (!positionals[0]) {
@@ -78,6 +80,12 @@ const boot = await bootPr(octokit, ref, {
           (e.result.uncheckedReason ? `\n      unchecked: ${e.result.uncheckedReason}` : ""));
       },
     });
+    if (values["no-replay"]) return;
+    console.log("\nCompiling and replaying the script…");
+    const replay = await replayRun({ runDir: outDir, baseUrl: url, headers, resetApp });
+    for (const n of replay.notes) console.log(`  · ${n}`);
+    for (const j of replay.journeys) console.log(`  ${j.status === "passed" ? "✓" : "✗"} ${j.id} ${j.status} (${j.seconds}s)${j.error ? `: ${j.error}` : ""}`);
+    console.log(`  Replay ${replay.ok ? "passed" : "had problems"} in ${replay.seconds}s${replay.error ? ` (${replay.error})` : ""}`);
   },
 });
 
