@@ -1,0 +1,47 @@
+# Exploration eval: run the agent on the reference claims, once on the PR and once on the commit it branched from.
+id: cbay-1
+pr: Kyan42/cbay#1
+commits:
+  head: 067a0405f5ae773d26c2102ebbb207c6adc82aea   # "Add a shopping cart"
+  base: 9ab8ca42e6a9c8818af8d133f28e72d915e9fbb3   # merge base: "Scaffold cBay base marketplace"
+boot: repo                                          # the repo's own .groundtruth.yml (default branch)
+
+# The claims approved on the PR (Sept 24), frozen here so the case doesn't move if the comment changes.
+claims:
+  - id: c1
+    when: On a listing page for an available item, click the add to cart control
+    then: { kind: count, what: The header cart count badge increases to reflect the added item }
+  - id: c2
+    when: Add the same listing to the cart a second time, then open the /cart page
+    then: { kind: count, what: The cart shows one line for that item with quantity 2 rather than two separate lines }
+  - id: c3
+    when: On a sold-out listing page, click the add to cart control
+    then: { kind: visible, what: 'An inline "no longer available" message appears on the listing page' }
+  - id: c4
+    when: On a sold-out listing page, click the add to cart control
+    then: { kind: count, what: The header cart count is unchanged (nothing added to the cart) }
+  - id: c5
+    when: Add an item to the cart, then reload the page / start a new session as the same buyer
+    then: { kind: persisted, what: The cart still contains the added item with its quantity }
+  - id: c6
+    when: Open the /cart page with items in the cart
+    then: { kind: visible, what: A subtotal for the cart items is displayed }
+  - id: c7
+    when: Navigate to /cart
+    then: { kind: url, what: The cart page loads at /cart }
+
+# head: the PR's code. base: the code before it.   holds: verified.   breaks: anything but verified.
+# The base has no cart at all (no /api/cart, no cart page, no add-to-cart button), so every claim breaks there.
+# A weak negative control: it shows the agent doesn't verify what isn't there, not that it catches subtle bugs.
+expect:
+  c1: { head: holds, base: breaks }
+  c2: { head: holds, base: breaks }
+  c3: { head: holds, base: breaks }
+  c4: { head: holds, base: breaks }   # watch: "the count is unchanged" could pass on a base with a badge; this base has none
+  c5: { head: holds, base: breaks }
+  c6: { head: holds, base: breaks }
+  c7: { head: holds, base: breaks }
+
+review:
+  status: draft
+  drafted_by: claude

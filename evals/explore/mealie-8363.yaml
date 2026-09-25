@@ -1,0 +1,27 @@
+# Exploration eval: run the agent on the reference claims, once on the PR and once on the commit it branched from.
+id: mealie-8363
+pr: mealie-recipes/mealie#8363
+commits:
+  head: 33d71a7794bcb29152040474b881c4c49c063d8d   # the PR's only commit
+  base: ff97c105fff76902955a007467f812a013e43cd8   # merge base: mealie-next when the PR branched off
+boot: evals/boot/mealie.yml                         # we can't commit a .groundtruth.yml to Mealie
+claims: evals/cases/mealie-8363.yaml                # expected.claims (c1-c4); assumptions left out
+
+# What each claim should get. head: the PR's code. base: the code before it.
+#   holds: verified.   breaks: anything but verified (failed or unreachable).
+# Worked out from the diff (frontend/app/pages/shopping-lists/index.vue): the PR adds
+# :submit-disabled="!isCreateNameValid", trims the input, and returns early from createOne when the name is blank.
+expect:
+  c1: { head: holds, base: breaks }   # empty name: on base the create button has no disabled binding
+  c2: { head: holds, base: breaks }   # spaces only: same
+  c3: { head: holds, base: holds }    # a real name: the button was enabled before the PR too
+  c4: { head: holds, base: breaks }   # Enter with an empty name: on base createOne posts without a guard
+
+review:
+  status: draft
+  drafted_by: claude
+  notes: >-
+    Needs a login: Mealie creates changeme@example.com / MyPassword on first start (mealie/core/settings/settings.py,
+    _DEFAULT_EMAIL and _DEFAULT_PASSWORD), given to the agent as the "admin" persona in evals/boot/mealie.yml.
+    c4 on base assumes Enter submits the dialog; if it doesn't, base gets "verified" for the wrong reason
+    (no request because nothing submitted). Check the base video if c4 comes out verified there.

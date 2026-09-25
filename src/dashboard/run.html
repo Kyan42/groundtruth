@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Groundtruth Run</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#eef2f0; --hatch:rgba(14,105,78,.07); --card:#ffffff; --sunk:#f6f8f7;
+  --ink:#141614; --mid:#5a615e; --low:#8b928f; --faint:#b7bdba; --line:#e0e5e2;
+  --forest:#0e694e; --forest-lo:rgba(14,105,78,.08); --mint:#68ecc4; --mint-ring:rgba(104,236,196,.55);
+  --pass:#0b8259; --pass-lo:rgba(11,130,89,.1); --fail:#c03d29; --fail-lo:rgba(192,61,41,.09);
+  --warn:#9a7016; --warn-lo:rgba(154,112,22,.1); --block:#6b7370; --block-lo:rgba(107,115,112,.1);
+  --shadow:0 18px 50px -18px rgba(20,40,32,.28), 0 2px 6px rgba(20,40,32,.06);
+  --sans:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0c0e0d; --hatch:rgba(104,236,196,.05); --card:#111413; --sunk:#151917;
+    --ink:#e8ecea; --mid:#a6b0ac; --low:#727c78; --faint:#4b534f; --line:#242a28;
+    --forest:#68ecc4; --forest-lo:rgba(104,236,196,.08); --mint-ring:rgba(104,236,196,.35);
+    --pass:#45d19a; --pass-lo:rgba(69,209,154,.12); --fail:#ff6f5f; --fail-lo:rgba(255,111,95,.12);
+    --warn:#e3bd58; --warn-lo:rgba(227,189,88,.12); --block:#9aa39f; --block-lo:rgba(154,163,159,.12);
+    --shadow:0 18px 50px -18px rgba(0,0,0,.7), 0 2px 6px rgba(0,0,0,.4); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0c0e0d; --hatch:rgba(104,236,196,.05); --card:#111413; --sunk:#151917;
+  --ink:#e8ecea; --mid:#a6b0ac; --low:#727c78; --faint:#4b534f; --line:#242a28;
+  --forest:#68ecc4; --forest-lo:rgba(104,236,196,.08); --mint-ring:rgba(104,236,196,.35);
+  --pass:#45d19a; --pass-lo:rgba(69,209,154,.12); --fail:#ff6f5f; --fail-lo:rgba(255,111,95,.12);
+  --warn:#e3bd58; --warn-lo:rgba(227,189,88,.12); --block:#9aa39f; --block-lo:rgba(154,163,159,.12);
+  --shadow:0 18px 50px -18px rgba(0,0,0,.7), 0 2px 6px rgba(0,0,0,.4); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased;
+  background-image:repeating-linear-gradient(115deg,transparent 0 22px,var(--hatch) 22px 23px,transparent 23px 46px)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:2px solid var(--forest);outline-offset:2px}
+a{color:var(--forest)}
+code,.mono{font-family:var(--mono)}
+.app{display:grid;grid-template-columns:320px minmax(0,1fr);min-height:100%}
+
+/* sidebar */
+aside{min-width:0;background:color-mix(in srgb,var(--card) 88%,transparent);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:100vh}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:18px 20px 14px;border-bottom:1px solid var(--line)}
+.brand a{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}
+.brand strong{font-weight:600;letter-spacing:-.01em}
+.brand .all{font-size:13px;color:var(--mid)}
+.pr{padding:16px 20px;border-bottom:1px solid var(--line)}
+.pr .repo{font:12px var(--mono);color:var(--low)}
+.pr h1{font-size:17px;line-height:1.3;margin:4px 0 8px;font-weight:600;text-wrap:balance}
+.pr .meta{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font:11.5px var(--mono);padding:2px 7px;border:1px solid var(--line);border-radius:6px;color:var(--mid);background:var(--sunk)}
+.sect{padding:16px 20px 6px}
+.sect h2{margin:0;font-size:15px;font-weight:600}
+.sect p{margin:2px 0 0;font-size:13px;color:var(--low)}
+.journeys{display:flex;flex-direction:column;gap:10px;padding:10px 14px 16px}
+.jcard{text-align:left;background:transparent;border:1px solid transparent;border-radius:12px;padding:12px;display:grid;gap:8px}
+.jcard:hover{background:var(--sunk)}
+.jcard[aria-current="true"]{background:var(--card);border-color:var(--mint);box-shadow:0 0 0 3px var(--mint-ring)}
+.jhead{display:flex;justify-content:space-between;align-items:center;font:12px var(--mono);color:var(--low)}
+.jname{font-weight:500;line-height:1.35}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{display:inline-flex;align-items:center;gap:5px;font:11.5px var(--mono);padding:2px 7px 2px 6px;border-radius:999px;background:var(--pass-lo);color:var(--pass)}
+.chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.chip.failed{background:var(--fail-lo);color:var(--fail)}
+.chip.unreachable{background:var(--warn-lo);color:var(--warn)}
+.chip.blocked,.chip.none{background:var(--block-lo);color:var(--block)}
+.chip.error{background:transparent;color:var(--fail);box-shadow:inset 0 0 0 1px var(--fail)}
+.run{margin-top:auto;border-top:1px solid var(--line);padding:16px 20px 18px}
+.run h3{margin:0 0 8px;font-size:14px;font-weight:600}
+.kv{display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:13px;margin:0}
+.kv dt{color:var(--low)} .kv dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+.back{display:inline-block;margin-top:14px;font-size:13px;color:var(--mid);text-decoration:none}
+.back:hover{color:var(--ink)}
+
+/* main */
+main{min-width:0;display:flex;flex-direction:column}
+.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:16px 28px}
+.summary{font-size:15px;color:var(--mid)} .summary b{color:var(--ink);font-weight:600}
+.seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{border:0;background:transparent;padding:6px 14px;border-radius:7px;font-size:13.5px;font-weight:500;color:var(--mid)}
+.seg button[aria-pressed="true"]{background:var(--forest-lo);color:var(--forest)}
+
+.stage{display:flex;justify-content:center;padding:18px 28px 8px}
+.vcard{position:relative;width:min(100%,860px);border-radius:14px;overflow:hidden;background:#000;box-shadow:var(--shadow);border:1px solid var(--line)}
+.vcard video{display:block;width:100%;height:auto;aspect-ratio:16/10;background:#fff}
+.caption{position:absolute;left:0;right:0;bottom:0;padding:26px 16px 10px;background:linear-gradient(transparent,rgba(0,0,0,.72));color:#fff;font:12.5px var(--mono);display:flex;gap:10px;align-items:baseline;pointer-events:none}
+.caption .ct{opacity:.7}
+.caption .ok{color:#7ff0c3} .caption .bad{color:#ff9d91}
+.novideo{aspect-ratio:16/10;display:grid;place-items:center;color:var(--low);background:var(--sunk)}
+.controls{display:flex;align-items:center;gap:14px;width:100%;max-width:916px;margin:14px auto 0;padding:0 28px}
+.play{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;flex:none}
+.track{position:relative;flex:1;height:22px;cursor:pointer}
+.track .rail{position:absolute;left:0;right:0;top:10px;height:3px;border-radius:3px;background:var(--line)}
+.track .fill{position:absolute;left:0;top:10px;height:3px;border-radius:3px;background:var(--forest)}
+.track .tick{position:absolute;top:7px;width:2px;height:9px;background:var(--faint);transform:translateX(-1px);border-radius:1px}
+.track .dot{position:absolute;top:5px;width:12px;height:12px;border-radius:50%;transform:translateX(-6px);border:2px solid var(--card);background:var(--pass);box-shadow:0 0 0 1px var(--line)}
+.track .dot.failed{background:var(--fail)} .track .dot.unused{opacity:.45}
+.time{font:12.5px var(--mono);color:var(--low);font-variant-numeric:tabular-nums;min-width:86px;text-align:right}
+.verdict{width:100%;max-width:916px;margin:18px auto 0;padding:14px 28px;border-top:1px solid var(--line);color:var(--mid)}
+.verdict b{color:var(--ink)}
+
+.tabs{display:flex;gap:26px;width:100%;max-width:916px;margin:6px auto 0;padding:0 28px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{border:0;background:none;padding:12px 0;font-weight:500;color:var(--low);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--forest)}
+.tabs .n{font:12px var(--mono);color:var(--low);margin-left:6px}
+.panel{width:100%;max-width:916px;margin:0 auto;padding:6px 28px 60px}
+
+.claim{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;padding:18px 0;border-bottom:1px solid var(--line)}
+.claim:last-child{border-bottom:0}
+.claim .cid{padding-top:2px}
+.claim .text{font-weight:500;line-height:1.4}
+.claim .text .arrow{color:var(--low);font-weight:400}
+.claim .body{grid-column:2;display:grid;gap:10px}
+.evidence{color:var(--mid);font-size:14px;line-height:1.55;max-width:70ch}
+.evidence b{color:var(--ink)}
+.basis{font-size:12.5px;color:var(--warn);background:var(--warn-lo);border-radius:8px;padding:6px 10px;max-width:70ch}
+.klist{display:grid;gap:8px}
+.kcheck{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 12px;align-items:start;font-size:13px;background:var(--sunk);border:1px solid var(--line);border-left:3px solid var(--pass);border-radius:10px;padding:10px 12px}
+.kcheck.failed{border-left-color:var(--fail)}
+.kcheck.unused{opacity:.7;border-left-style:dashed}
+.kcheck .kid{font:12px var(--mono);color:var(--low);padding-top:1px}
+.kcheck .kmain{min-width:0;display:grid;gap:2px}
+.kcheck .kwhat{font-weight:500}
+.kcheck .kwhat .ok{color:var(--pass)} .kcheck .kwhat .bad{color:var(--fail)}
+.kcheck .loc{font:12.5px var(--mono);color:var(--forest);word-break:break-all}
+.kcheck .obs{color:var(--mid);word-break:break-word}
+.klabel{font-size:12.5px;color:var(--low);margin-top:4px}
+.jump{border:1px solid var(--line);background:var(--card);border-radius:7px;padding:3px 9px;font-size:12.5px;color:var(--mid);white-space:nowrap}
+.jump:hover{color:var(--ink);border-color:var(--faint)}
+
+.events{width:100%;border-collapse:collapse;font-size:13.5px}
+.events-wrap{overflow-x:auto}
+.events th{font-weight:500;color:var(--low);text-align:left;padding:10px 10px 8px 0;font-size:12.5px;border-bottom:1px solid var(--line)}
+.events td{padding:9px 10px 9px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.events td.t{white-space:nowrap}
+.events td.a{font-weight:500;white-space:nowrap}
+.events td.l{font:12.5px var(--mono);color:var(--forest);word-break:break-all}
+.events td.u{font:12.5px var(--mono);color:var(--mid);word-break:break-all}
+.events tr.check td.a{color:var(--pass)} .events tr.check.failed td.a{color:var(--fail)}
+.events tr.bad td{color:var(--fail)}
+.status-ok{color:var(--pass)} .status-bad{color:var(--fail)}
+.note{color:var(--low);font-size:13.5px;margin:14px 0}
+h4{margin:22px 0 6px;font-size:14px;font-weight:600}
+
+/* grid */
+.gridview{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:40px 28px 80px}
+.gridctl{display:flex;gap:10px}
+.gridctl button{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:6px 14px;font-size:13.5px;font-weight:500}
+.tiles{display:flex;flex-wrap:wrap;justify-content:center;gap:40px;max-width:1100px}
+.tile{width:min(100%,320px);display:grid;gap:12px}
+.tile .vcard{border-radius:12px}
+.tile .tt{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.tile .tt .jid{font:12px var(--mono);color:var(--low);white-space:nowrap}
+.tile .tname{font-weight:500;line-height:1.35;background:none;border:0;padding:0;text-align:left}
+.tile .tname:hover{color:var(--forest)}
+
+/* whole-page states */
+.state{min-height:100vh;display:grid;place-items:center;padding:24px}
+.state .box{max-width:520px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px 28px;box-shadow:var(--shadow)}
+.state h1{font-size:19px;margin:0 0 6px}
+.state p{color:var(--mid);margin:6px 0}
+.pulse{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--forest);margin-right:8px;animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25}}
+
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  aside{min-height:0;border-right:0;border-bottom:1px solid var(--line)}
+  .journeys{flex-direction:row;overflow-x:auto}
+  .jcard{min-width:250px}
+  .run{margin-top:0}
+  .top,.stage,.controls,.verdict,.tabs,.panel{padding-inline:16px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div id="root"></div>
+
+<template id="page">
+<div class="app">
+  <aside>
+    <div class="brand">
+      <a href="/runs">
+        <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><g fill="none" stroke="var(--forest)" stroke-width="1.4"><circle cx="13" cy="13" r="11.5"/><circle cx="13" cy="13" r="7.5"/><circle cx="13" cy="13" r="3.5" fill="var(--forest)"/></g></svg>
+        <strong>Groundtruth</strong>
+      </a>
+      <a class="all" href="/runs">All runs</a>
+    </div>
+    <div class="pr">
+      <div class="repo" data-id="repo"></div>
+      <h1 data-id="prTitle"></h1>
+      <div class="meta" data-id="prMeta"></div>
+    </div>
+    <div class="sect"><h2>Journeys</h2><p>Each one is a path through the app in a fresh browser, recorded as a video.</p></div>
+    <div class="journeys" data-id="journeys" role="list"></div>
+    <div class="run">
+      <h3>This run</h3>
+      <dl class="kv" data-id="runKv"></dl>
+      <a class="back" data-id="backLink" href="#">← Back to pull request</a>
+    </div>
+  </aside>
+
+  <main>
+    <div class="top">
+      <div class="summary" data-id="summary"></div>
+      <div class="seg" role="group" aria-label="View">
+        <button data-id="viewJourney" aria-pressed="true">Journey</button>
+        <button data-id="viewGrid" aria-pressed="false">Grid</button>
+      </div>
+    </div>
+
+    <section data-id="journeyView">
+      <div class="stage">
+        <div class="vcard" data-id="vcard">
+          <video data-id="video" muted playsinline preload="metadata"></video>
+          <div class="caption" data-id="caption"></div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="play" data-id="play" aria-label="Play">
+          <svg data-id="playIcon" width="12" height="14" viewBox="0 0 12 14" aria-hidden="true"><path d="M1 1l10 6-10 6z" fill="currentColor"/></svg>
+        </button>
+        <div class="track" data-id="track" role="slider" aria-label="Video position" tabindex="0"><div class="rail"></div><div class="fill" data-id="fill"></div></div>
+        <div class="time" data-id="time">0:00 / 0:00</div>
+      </div>
+      <div class="verdict" data-id="verdict"></div>
+      <div class="tabs" role="tablist">
+        <button role="tab" data-tab="claims" aria-selected="true">Claims<span class="n" data-id="nClaims"></span></button>
+        <button role="tab" data-tab="events" aria-selected="false">What happened<span class="n" data-id="nEvents"></span></button>
+        <button role="tab" data-tab="network" aria-selected="false">Network &amp; console<span class="n" data-id="nNet"></span></button>
+      </div>
+      <div class="panel" data-id="panel"></div>
+    </section>
+
+    <section data-id="gridView" class="gridview" hidden>
+      <div class="gridctl">
+        <button data-id="gridToggle">Pause all</button>
+        <button data-id="gridRestart">Restart together</button>
+      </div>
+      <div class="tiles" data-id="tiles"></div>
+    </section>
+  </main>
+</div>
+</template>
+
+<script>
+const RUN_ID = decodeURIComponent(location.pathname.split("/").filter(Boolean)[1] ?? "");
+const BASE = `/runs/${encodeURIComponent(RUN_ID)}`;
+const STATUS_WORD = { verified: "Verified", failed: "Failed", blocked: "Blocked", unreachable: "Unreachable", error: "Error", none: "No status" };
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const fmt = (s) => { s = Math.max(0, Math.round(s || 0)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
+const duration = (s) => (s >= 60 ? `${Math.floor(s / 60)}m ${String(Math.round(s % 60)).padStart(2, "0")}s` : `${Math.round(s)}s`);
+const words = (a) => a.replace(/_/g, " ");
+
+async function load() {
+  const res = await fetch(`${BASE}/trace.json`, { cache: "no-store" });
+  if (res.status === 404) return showState("Run not found", `There's no run called <code>${esc(RUN_ID)}</code>.`);
+  const trace = await res.json();
+  if (trace.running) {
+    showState(`<span class="pulse"></span>Testing in progress`, "The app is booting or the agent is still checking claims. This page refreshes when the run finishes.");
+    setTimeout(load, 5000);
+    return;
+  }
+  if (trace.error) return showState(esc(trace.title ?? trace.pr ?? "Run"), `${esc(trace.error)}<br><br>This is a Groundtruth problem, not a result about the PR.`);
+  render(trace);
+}
+
+function showState(title, body) {
+  document.getElementById("root").innerHTML = `<div class="state"><div class="box"><h1>${title}</h1><p>${body}</p><p><a href="/runs">All runs</a></p></div></div>`;
+}
+
+function render(T) {
+  const root = document.getElementById("root");
+  root.replaceChildren(document.getElementById("page").content.cloneNode(true));
+  const $ = (id) => root.querySelector(`[data-id="${id}"]`);
+
+  const claims = T.claims ?? [];
+  const results = T.results ?? [];
+  const checks = T.checks ?? [];
+  const steps = T.steps ?? [];
+  const requests = T.requests ?? [];
+  const journeys = (T.journeys ?? []).filter((j) => j.video || steps.some((s) => s.journey === j.id) || checks.some((k) => k.journey === j.id));
+  const claimById = Object.fromEntries(claims.map((c) => [c.id, c]));
+  const resultOf = (id) => results.find((r) => r.claimId === id);
+  const statusOf = (id) => resultOf(id)?.status ?? "none";
+  const citedIds = new Set(results.flatMap((r) => r.checkIds ?? []));
+  const chip = (id) => `<span class="chip ${statusOf(id)}" title="${esc(STATUS_WORD[statusOf(id)])}">${esc(id)}</span>`;
+  const claimsIn = (j) => [...new Set([...results.filter((r) => r.journey === j.id).map((r) => r.claimId), ...(j.claimIds ?? []).filter((id) => !resultOf(id))])];
+  const videoUrl = (j) => j.video ? `${BASE}/videos/${encodeURIComponent(j.video.split(/[\\/]/).pop())}` : "";
+  const checkLine = (k) => `${words(k.assert)}${k.expected ? ` "${k.expected}"` : ""}`;
+
+  // Sidebar
+  document.title = `${T.title ?? T.pr} · Groundtruth`;
+  $("repo").textContent = T.pr ?? "";
+  $("prTitle").textContent = T.title ?? "Test run";
+  $("prMeta").innerHTML = [T.sha && `commit ${T.sha.slice(0, 7)}`, T.model, T.source === "cli" ? "from the CLI" : T.source === "approval" ? "from approval" : ""]
+    .filter(Boolean).map((t) => `<span class="tag">${esc(t)}</span>`).join("");
+  if (T.url) $("backLink").href = T.url; else $("backLink").remove();
+  const verified = claims.filter((c) => statusOf(c.id) === "verified").length;
+  const failed = claims.filter((c) => statusOf(c.id) === "failed").length;
+  $("runKv").innerHTML = [
+    ["Claims verified", `${verified} of ${claims.length}`],
+    ["Checks", `${checks.filter((k) => citedIds.has(k.id)).length} used · ${checks.filter((k) => !citedIds.has(k.id)).length} redone`],
+    T.bootSeconds != null && ["Boot", duration(T.bootSeconds)],
+    T.seconds != null && ["Testing", `${duration(T.seconds)} · ${T.turns} turns`],
+    T.costUsd != null && ["Cost", `$${T.costUsd.toFixed(2)}`],
+    T.startedAt && ["Started", new Date(T.startedAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })],
+  ].filter(Boolean).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("");
+  $("summary").innerHTML = failed
+    ? `<b>${failed} of ${claims.length} claims failed</b> · ${verified} verified across ${journeys.length} journeys`
+    : `<b>${verified} of ${claims.length} claims verified</b> across ${journeys.length} journey${journeys.length === 1 ? "" : "s"}`;
+
+  $("journeys").innerHTML = journeys.map((j) => `
+    <button class="jcard" role="listitem" data-j="${esc(j.id)}">
+      <span class="jhead"><span>${esc(j.id.toUpperCase())}${j.resetData ? " · fresh data" : ""}</span><span data-dur="${esc(j.id)}"></span></span>
+      <span class="jname">${esc(j.name)}</span>
+      <span class="chips">${claimsIn(j).map(chip).join("")}</span>
+    </button>`).join("");
+  root.querySelectorAll(".jcard").forEach((b) => b.addEventListener("click", () => { showView("journey"); selectJourney(b.dataset.j); }));
+
+  // Journey view
+  const video = $("video");
+  let current = null;
+  let tab = "claims";
+  let timeline = [];   // steps and checks of the current journey, by time
+
+  function selectJourney(id) {
+    current = journeys.find((j) => j.id === id) ?? journeys[0];
+    if (!current) return;
+    root.querySelectorAll(".jcard").forEach((b) => b.setAttribute("aria-current", String(b.dataset.j === current.id)));
+    timeline = [
+      ...steps.filter((s) => s.journey === current.id).map((s) => ({ kind: "step", t: s.t ?? 0, s })),
+      ...checks.filter((k) => k.journey === current.id).map((k) => ({ kind: "check", t: k.t ?? 0, k })),
+    ].sort((a, b) => a.t - b.t);
+    if (current.video) { video.src = videoUrl(current); video.hidden = false; $("vcard").querySelector(".novideo")?.remove(); }
+    else { video.removeAttribute("src"); video.hidden = true; if (!$("vcard").querySelector(".novideo")) $("vcard").insertAdjacentHTML("afterbegin", `<div class="novideo">No video for this journey</div>`); }
+    const ids = claimsIn(current);
+    const held = ids.filter((c) => statusOf(c) === "verified").length;
+    const bad = ids.filter((c) => statusOf(c) === "failed");
+    $("verdict").innerHTML = bad.length
+      ? `<b>${bad.length} claim${bad.length === 1 ? "" : "s"} failed</b> in this journey (${bad.join(", ")}). The red marks on the timeline are the checks that failed.`
+      : held === ids.length && ids.length
+        ? `<b>Verified.</b> All ${ids.length} claim${ids.length === 1 ? "" : "s"} in this journey held${current.resetData ? ", starting from fresh app data" : ""}.`
+        : `<b>${held} of ${ids.length} claims verified.</b> See each claim below for what happened.`;
+    $("nClaims").textContent = ids.length;
+    $("nEvents").textContent = timeline.length;
+    $("nNet").textContent = requests.filter((r) => r.journey === current.id && !/hot-update|__webpack_hmr|\/@vite\//.test(r.path)).length;
+    drawMarkers();
+    renderPanel();
+    updateTime();
+  }
+
+  const length = () => (isFinite(video.duration) && video.duration > 0 ? video.duration : Math.max(1, ...timeline.map((e) => e.t + 2)));
+
+  function drawMarkers() {
+    const track = $("track");
+    track.querySelectorAll(".tick,.dot").forEach((e) => e.remove());
+    const pct = (t) => `${Math.min(100, (t / length()) * 100)}%`;
+    for (const e of timeline) {
+      const el = document.createElement("div");
+      if (e.kind === "step") { el.className = "tick"; el.title = `${e.s.action} ${e.s.locator ?? e.s.value ?? ""}`; }
+      else { el.className = `dot ${e.k.passed ? "" : "failed"} ${citedIds.has(e.k.id) ? "" : "unused"}`; el.title = `${e.k.id} ${e.k.passed ? "✓" : "✗"} ${checkLine(e.k)}`; }
+      el.style.left = pct(e.t);
+      track.appendChild(el);
+    }
+  }
+
+  function checkCard(k) {
+    return `<div class="kcheck ${k.passed ? "" : "failed"} ${citedIds.has(k.id) ? "" : "unused"}">
+      <span class="kid">${esc(k.id)}</span>
+      <div class="kmain">
+        <div class="kwhat"><span class="${k.passed ? "ok" : "bad"}">${k.passed ? "✓ passed" : "✗ failed"}</span> · ${esc(checkLine(k))}</div>
+        ${k.locator ? `<div class="loc">${esc(k.locator)}</div>` : ""}
+        <div class="obs">Observed: ${esc(k.observed)}</div>
+      </div>
+      <button class="jump" data-t="${k.t}">${fmt(k.t)}</button>
+    </div>`;
+  }
+
+  function renderPanel() {
+    root.querySelectorAll('[role="tab"]').forEach((t) => t.setAttribute("aria-selected", String(t.dataset.tab === tab)));
+    const p = $("panel");
+    if (tab === "claims") {
+      p.innerHTML = claimsIn(current).map((id) => {
+        const c = claimById[id] ?? { when: "", then: { what: id } };
+        const r = resultOf(id);
+        const cited = (r?.checkIds ?? []).map((cid) => checks.find((k) => k.id === cid)).filter(Boolean);
+        const others = checks.filter((k) => (k.claimIds ?? []).includes(id) && !cited.includes(k));
+        return `<div class="claim">
+          <div class="cid">${chip(id)}</div>
+          <div class="text">${c.when ? `${esc(c.when)} <span class="arrow">→</span> ` : ""}${esc(c.then?.what)}</div>
+          <div class="body">
+            ${r ? `<div class="evidence"><b>${STATUS_WORD[r.status]}.</b> ${esc(r.evidence)}</div>` : `<div class="evidence">No status was recorded for this claim.</div>`}
+            ${r?.basis === "observation" ? `<div class="basis">No check could express this result, so it rests on the agent's own reading: ${esc(r.uncheckedReason ?? "")}</div>` : ""}
+            ${cited.length ? `<div class="klist">${cited.map(checkCard).join("")}</div>` : ""}
+            ${others.length ? `<div class="klabel">Other checks for this claim, not used for the verdict</div><div class="klist">${others.map(checkCard).join("")}</div>` : ""}
+          </div></div>`;
+      }).join("") || `<p class="note">No claims were checked in this journey.</p>`;
+    } else if (tab === "events") {
+      p.innerHTML = `<div class="events-wrap"><table class="events"><thead><tr><th>Time</th><th>What</th><th>Element or value</th><th>Page / observed</th></tr></thead><tbody>${
+        timeline.map((e) => e.kind === "step"
+          ? `<tr class="${e.s.ok ? "" : "bad"}"><td class="t"><button class="jump" data-t="${e.t}">${fmt(e.t)}</button></td><td class="a">${esc(words(e.s.action))}</td><td class="l">${esc(e.s.locator ?? (e.s.value != null ? `"${e.s.value}"` : ""))}</td><td class="u">${esc(e.s.url)}${e.s.note ? ` · ${esc(e.s.note)}` : ""}</td></tr>`
+          : `<tr class="check ${e.k.passed ? "" : "failed"}"><td class="t"><button class="jump" data-t="${e.t}">${fmt(e.t)}</button></td><td class="a">${e.k.passed ? "✓" : "✗"} ${esc(e.k.id)} · ${esc(checkLine(e.k))}</td><td class="l">${esc(e.k.locator ?? "")}</td><td class="u">${esc(e.k.observed)}${citedIds.has(e.k.id) ? "" : " · not used for a verdict"}</td></tr>`
+        ).join("")
+      }</tbody></table></div><p class="note">Actions and checks use stable locators (test ids, roles and names); they become the lines of this journey's Playwright script.</p>`;
+    } else {
+      const tag = `[${current.id}]`;
+      // Dev servers' hot-reload polling isn't the app's traffic; the trace keeps it, the view hides it.
+      const reqs = requests.filter((r) => r.journey === current.id && !/hot-update|__webpack_hmr|\/@vite\//.test(r.path));
+      const consoleErrors = (T.consoleErrors ?? []).filter((m) => m.startsWith(tag)).map((m) => m.slice(tag.length + 1));
+      const failedReqs = (T.failedRequests ?? []).filter((m) => m.startsWith(tag)).map((m) => m.slice(tag.length + 1));
+      p.innerHTML = `
+        <h4>Requests</h4>
+        ${reqs.length ? `<div class="events-wrap"><table class="events"><thead><tr><th>Time</th><th>Request</th><th>Status</th><th>After step</th></tr></thead><tbody>${
+          reqs.map((r) => `<tr><td class="t"><button class="jump" data-t="${r.t}">${fmt(r.t)}</button></td><td class="u">${esc(r.method)} ${esc(r.path)}</td><td class="${r.status >= 400 ? "status-bad" : "status-ok"}">${esc(r.status ?? "…")}</td><td class="u">${r.step ? `#${r.step}` : "page load"}</td></tr>`).join("")
+        }</tbody></table></div>` : `<p class="note">No page loads or API requests were recorded for this journey.</p>`}
+        <h4>Console errors</h4>
+        ${consoleErrors.length ? `<ul>${consoleErrors.map((m) => `<li class="mono">${esc(m)}</li>`).join("")}</ul>` : `<p class="note">None.</p>`}
+        <h4>Failed requests (4xx/5xx, including assets)</h4>
+        ${failedReqs.length ? `<ul>${failedReqs.map((m) => `<li class="mono">${esc(m)}</li>`).join("")}</ul>` : `<p class="note">None.</p>`}`;
+    }
+    p.querySelectorAll(".jump").forEach((b) => b.addEventListener("click", () => seek(Number(b.dataset.t), true)));
+  }
+
+  function seek(t, play) {
+    if (!current?.video) return;
+    video.currentTime = Math.max(0, t - 0.4);
+    if (play) video.play().catch(() => {});
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function updateTime() {
+    if (!current) return;
+    const d = length(), t = video.currentTime || 0;
+    $("fill").style.width = `${Math.min(100, (t / d) * 100)}%`;
+    $("time").textContent = `${fmt(t)} / ${fmt(d)}`;
+    const e = timeline.filter((x) => x.t <= t + 0.05).at(-1);
+    $("caption").innerHTML = !e ? `<span class="ct">0:00</span><span>open ${esc(current.startPath ?? "/")}</span>`
+      : e.kind === "step" ? `<span class="ct">${fmt(e.t)}</span><span>${esc(words(e.s.action))} ${esc(e.s.locator ?? e.s.value ?? "")}</span>`
+      : `<span class="ct">${fmt(e.t)}</span><span class="${e.k.passed ? "ok" : "bad"}">${e.k.passed ? "✓" : "✗"} ${esc(e.k.id)}</span><span>${esc(checkLine(e.k))}</span>`;
+    $("playIcon").innerHTML = video.paused ? '<path d="M1 1l10 6-10 6z" fill="currentColor"/>' : '<path d="M1 1h3.5v12H1zM7.5 1H11v12H7.5z" fill="currentColor"/>';
+    $("play").setAttribute("aria-label", video.paused ? "Play" : "Pause");
+  }
+  for (const ev of ["timeupdate", "play", "pause"]) video.addEventListener(ev, updateTime);
+  video.addEventListener("loadedmetadata", () => {
+    // The first moment of a recording is a blank page still loading; open on the app instead.
+    if (video.currentTime === 0) video.currentTime = Math.min(1.5, video.duration || 0);
+    drawMarkers(); updateTime();
+  });
+  $("play").addEventListener("click", () => (video.paused ? video.play().catch(() => {}) : video.pause()));
+  $("track").addEventListener("click", (e) => { const r = e.currentTarget.getBoundingClientRect(); video.currentTime = ((e.clientX - r.left) / r.width) * length(); });
+  $("track").addEventListener("keydown", (e) => { if (e.key === "ArrowRight") video.currentTime += 2; if (e.key === "ArrowLeft") video.currentTime -= 2; });
+  root.querySelectorAll('[role="tab"]').forEach((b) => b.addEventListener("click", () => { tab = b.dataset.tab; renderPanel(); }));
+
+  // Journey lengths, from each video's metadata
+  for (const j of journeys) {
+    if (!j.video) continue;
+    const v = document.createElement("video");
+    v.preload = "metadata"; v.src = videoUrl(j);
+    v.addEventListener("loadedmetadata", () => { const el = root.querySelector(`[data-dur="${CSS.escape(j.id)}"]`); if (el && isFinite(v.duration)) el.textContent = fmt(v.duration); });
+  }
+
+  // Grid view: every journey's video at once
+  $("tiles").innerHTML = journeys.filter((j) => j.video).map((j) => `
+    <div class="tile">
+      <div class="vcard"><video src="${videoUrl(j)}" muted playsinline loop preload="auto"></video></div>
+      <div class="tt"><button class="tname" data-j="${esc(j.id)}">${esc(j.name)}</button><span class="jid">${esc(j.id.toUpperCase())}</span></div>
+      <div class="chips">${claimsIn(j).map(chip).join("")}</div>
+    </div>`).join("");
+  const gridVideos = () => [...root.querySelectorAll(".tile video")];
+  root.querySelectorAll(".tname").forEach((b) => b.addEventListener("click", () => { showView("journey"); selectJourney(b.dataset.j); }));
+  $("gridToggle").addEventListener("click", () => {
+    const playing = gridVideos().some((v) => !v.paused);
+    gridVideos().forEach((v) => (playing ? v.pause() : v.play().catch(() => {})));
+    $("gridToggle").textContent = playing ? "Play all" : "Pause all";
+  });
+  $("gridRestart").addEventListener("click", () => { gridVideos().forEach((v) => { v.currentTime = 0; v.play().catch(() => {}); }); $("gridToggle").textContent = "Pause all"; });
+
+  function showView(which) {
+    const grid = which === "grid";
+    $("gridView").hidden = !grid;
+    $("journeyView").hidden = grid;
+    $("viewGrid").setAttribute("aria-pressed", String(grid));
+    $("viewJourney").setAttribute("aria-pressed", String(!grid));
+    if (grid) { video.pause(); gridVideos().forEach((v) => { v.currentTime = 0; v.play().catch(() => {}); }); $("gridToggle").textContent = "Pause all"; }
+    else gridVideos().forEach((v) => v.pause());
+  }
+  $("viewJourney").addEventListener("click", () => showView("journey"));
+  $("viewGrid").addEventListener("click", () => showView("grid"));
+
+  if (journeys.length) selectJourney(journeys[0].id);
+  else $("journeyView").innerHTML = `<p class="note" style="text-align:center">This run has no journeys.</p>`;
+}
+
+load().catch((err) => showState("Couldn't load this run", esc(err)));
+</script>

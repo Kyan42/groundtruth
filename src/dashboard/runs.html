@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Groundtruth Runs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#eef2f0; --hatch:rgba(14,105,78,.07); --card:#ffffff; --sunk:#f6f8f7;
+  --ink:#141614; --mid:#5a615e; --low:#8b928f; --line:#e0e5e2;
+  --forest:#0e694e; --mint:#68ecc4;
+  --pass:#0b8259; --pass-lo:rgba(11,130,89,.1); --fail:#c03d29; --fail-lo:rgba(192,61,41,.09);
+  --warn:#9a7016; --warn-lo:rgba(154,112,22,.1); --block:#6b7370; --block-lo:rgba(107,115,112,.1);
+  --shadow:0 12px 34px -16px rgba(20,40,32,.25), 0 1px 3px rgba(20,40,32,.06);
+  --sans:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0c0e0d; --hatch:rgba(104,236,196,.05); --card:#111413; --sunk:#151917;
+    --ink:#e8ecea; --mid:#a6b0ac; --low:#727c78; --line:#242a28; --forest:#68ecc4;
+    --pass:#45d19a; --pass-lo:rgba(69,209,154,.12); --fail:#ff6f5f; --fail-lo:rgba(255,111,95,.12);
+    --warn:#e3bd58; --warn-lo:rgba(227,189,88,.12); --block:#9aa39f; --block-lo:rgba(154,163,159,.12);
+    --shadow:0 12px 34px -16px rgba(0,0,0,.7); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0c0e0d; --hatch:rgba(104,236,196,.05); --card:#111413; --sunk:#151917;
+  --ink:#e8ecea; --mid:#a6b0ac; --low:#727c78; --line:#242a28; --forest:#68ecc4;
+  --pass:#45d19a; --pass-lo:rgba(69,209,154,.12); --fail:#ff6f5f; --fail-lo:rgba(255,111,95,.12);
+  --warn:#e3bd58; --warn-lo:rgba(227,189,88,.12); --block:#9aa39f; --block-lo:rgba(154,163,159,.12);
+  --shadow:0 12px 34px -16px rgba(0,0,0,.7); color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased;min-height:100vh;
+  background-image:repeating-linear-gradient(115deg,transparent 0 22px,var(--hatch) 22px 23px,transparent 23px 46px)}
+a{color:inherit}
+.wrap{max-width:860px;margin:0 auto;padding:40px 24px 80px}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.brand strong{font-weight:600;font-size:17px}
+h1{font-size:26px;margin:0 0 4px;letter-spacing:-.01em}
+.lead{color:var(--mid);margin:0 0 26px}
+.list{display:grid;gap:12px}
+.item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px 16px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;text-decoration:none;box-shadow:var(--shadow)}
+.item:hover{border-color:var(--mint)}
+.item:focus-visible{outline:2px solid var(--forest);outline-offset:2px}
+.mark{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:15px}
+.mark.success{background:var(--pass-lo);color:var(--pass)}
+.mark.failure{background:var(--fail-lo);color:var(--fail)}
+.mark.neutral,.mark.running{background:var(--block-lo);color:var(--block)}
+.mark.running::after{content:"";width:9px;height:9px;border-radius:50%;background:var(--forest);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25}}
+.title{font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sub{grid-column:2;font:12.5px var(--mono);color:var(--low);display:flex;flex-wrap:wrap;gap:4px 12px}
+.result{text-align:right;font-size:13.5px;color:var(--mid);white-space:nowrap}
+.result b{color:var(--ink)}
+.result .when{display:block;font-size:12.5px;color:var(--low)}
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:28px;color:var(--mid);text-align:center}
+code{font-family:var(--mono);font-size:.92em}
+@media (max-width:640px){ .item{grid-template-columns:auto minmax(0,1fr)} .result{grid-column:2;text-align:left} .title{white-space:normal} }
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+<div class="wrap">
+  <div class="brand">
+    <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><g fill="none" stroke="var(--forest)" stroke-width="1.4"><circle cx="13" cy="13" r="11.5"/><circle cx="13" cy="13" r="7.5"/><circle cx="13" cy="13" r="3.5" fill="var(--forest)"/></g></svg>
+    <strong>Groundtruth</strong>
+  </div>
+  <h1>Test runs</h1>
+  <p class="lead">Every time approved claims were tested against a pull request, newest first.</p>
+  <div class="list" id="list"></div>
+</div>
+<script>
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const duration = (s) => (s >= 60 ? `${Math.floor(s / 60)}m ${String(Math.round(s % 60)).padStart(2, "0")}s` : `${Math.round(s)}s`);
+
+async function load() {
+  const runs = await fetch("/runs/index.json", { cache: "no-store" }).then((r) => r.json());
+  const list = document.getElementById("list");
+  if (!runs.length) {
+    list.innerHTML = `<div class="empty">No runs yet. Approve the claims in a Groundtruth comment on a pull request, or run <code>npm run explore -- owner/repo#N</code>.</div>`;
+    return;
+  }
+  list.innerHTML = runs.map((r) => {
+    const when = new Date(r.startedAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+    if (r.running) return `<a class="item" href="/runs/${encodeURIComponent(r.id)}"><span class="mark running"></span><span class="title">Testing in progress…</span><span class="result"><span class="when">${esc(when)}</span></span><span class="sub">${esc(r.id)}</span></a>`;
+    const statuses = r.statuses ?? [];
+    const verified = statuses.filter((s) => s === "verified").length;
+    const failed = statuses.filter((s) => s === "failed").length;
+    const outcome = r.broken ? "neutral" : failed ? "failure" : r.claims && verified === r.claims ? "success" : "neutral";
+    const icon = { success: "✓", failure: "✗", neutral: "–" }[outcome];
+    const result = r.broken ? "Unreadable trace"
+      : r.claims == null ? "Didn't finish"
+      : failed ? `<b>${failed} failed</b> · ${verified} of ${r.claims} verified`
+      : `<b>${verified} of ${r.claims}</b> verified`;
+    return `<a class="item" href="/runs/${encodeURIComponent(r.id)}">
+      <span class="mark ${outcome}" aria-hidden="true">${icon}</span>
+      <span class="title">${esc(r.title ?? r.pr ?? r.id)}</span>
+      <span class="result">${result}<span class="when">${esc(when)}</span></span>
+      <span class="sub">${[r.pr, r.sha && r.sha.slice(0, 7), r.journeys != null && `${r.journeys} journeys`, r.checks != null && `${r.checks} checks`, r.seconds != null && duration(r.seconds), r.costUsd != null && `$${r.costUsd.toFixed(2)}`].filter(Boolean).map((x) => `<span>${esc(x)}</span>`).join("")}</span>
+    </a>`;
+  }).join("");
+  if (runs.some((r) => r.running)) setTimeout(load, 5000);
+}
+load().catch((err) => { document.getElementById("list").innerHTML = `<div class="empty">Couldn't load runs: ${esc(err)}</div>`; });
+</script>

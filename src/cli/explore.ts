@@ -1,7 +1,7 @@
 // Usage: npm run explore -- owner/repo#123 [--claim 1] [--model claude-opus-5] [--max-turns 40]
 // Boots the PR's app, then has the exploring agent check the approved claims from the PR's Groundtruth
-// comment (or just one with --claim N), printing every step. Saves trace.json and a video under explore-runs/.
-import { mkdirSync, writeFileSync } from "node:fs";
+// comment (or just one with --claim N), printing every step. Saves trace.json and videos under runs/, where the dashboard shows them.
+import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import type { Octokit } from "@octokit/core";
@@ -9,8 +9,8 @@ import { bootPr } from "../boot/boot.js";
 import { type ApprovedClaim, COMMENT_MARKER, readState } from "../comment.js";
 import { config } from "../config.js";
 import { listAll, parsePrRef, type PrRef } from "../evidence.js";
-import { DEFAULT_EXPLORE_MODEL, explore, type ExploreResult } from "../explore/agent.js";
-import { ExplorerBrowser } from "../explore/browser.js";
+import { DEFAULT_EXPLORE_MODEL } from "../explore/agent.js";
+import { exploreApp, type ExploreRun } from "../explore/run.js";
 import { installationOctokit } from "../github.js";
 
 const { values, positionals } = parseArgs({
@@ -52,34 +52,32 @@ if (values.claim) {
 console.log(`Claims to check (${claims.length}):`);
 for (const c of claims) console.log(`  ${c.id}: ${c.when ? `${c.when} → ` : ""}${c.then.what}`);
 
-const outDir = path.join("explore-runs", `${ref.repo}-${ref.number}-${new Date().toISOString().replace(/[:.]/g, "-")}`);
+const { data: pr } = await octokit.request("GET /repos/{owner}/{repo}/pulls/{pull_number}", { owner: ref.owner, repo: ref.repo, pull_number: ref.number });
+const startedAt = new Date().toISOString();
+const outDir = path.join(config.runsDir, `${ref.repo}-${ref.number}-cli-${startedAt.replace(/[:.]/g, "-")}`);
 mkdirSync(outDir, { recursive: true });
 const started = Date.now();
-let explored: ExploreResult | undefined;
+let explored: ExploreRun | undefined;
 
 console.log(`\nBooting ${ref.owner}/${ref.repo}#${ref.number}…`);
 const boot = await bootPr(octokit, ref, {
   screenshotPath: path.join(outDir, "boot.png"),
   onPhase: (p) => { if (!p.ok || p.name === "browser check") console.log(`  ${p.ok ? "✓" : "✗"} ${p.name} (${p.seconds.toFixed(0)}s)`); },
-  afterBoot: async ({ url, headers, resetApp }) => {
+  afterBoot: async ({ url, headers, resetApp, sha }) => {
     console.log(`\nExploring with ${values.model}…`);
-    const browser = await ExplorerBrowser.open(url, headers, outDir);
-    try {
-      explored = await explore({
-        claims, browser, resetApp, model: values.model, maxTurns: Number(values["max-turns"]),
-        onEvent: (e) => {
-          if (e.type === "thinking") console.log(`  💭 ${e.text.replace(/\s+/g, " ").slice(0, 220)}`);
-          else if (e.type === "tool") console.log(`  ${e.ok ? "→" : "✗"} ${e.name} ${e.summary}`.slice(0, 220));
-          else if (e.type === "check") {
-            const k = e.check;
-            console.log(`  ${k.passed ? "✓" : "✗"} ${k.id} [${k.claimIds.join(", ")}] ${k.locator ? `${k.locator} ` : ""}${k.assert}${k.expected ? ` "${k.expected}"` : ""} · observed ${k.observed}`.slice(0, 260));
-          } else console.log(`  ■ ${e.result.claimId} ${e.result.status.toUpperCase()} (${e.result.basis}${e.result.checkIds.length ? `: ${e.result.checkIds.join(", ")}` : ""}): ${e.result.evidence}` +
-            (e.result.uncheckedReason ? `\n      unchecked: ${e.result.uncheckedReason}` : ""));
-        },
-      });
-    } finally {
-      await browser.close();   // finalizes each journey's video
-    }
+    explored = await exploreApp({
+      url, headers, resetApp, claims, outDir, model: values.model, maxTurns: Number(values["max-turns"]),
+      meta: { pr: `${ref.owner}/${ref.repo}#${ref.number}`, title: pr.title, url: pr.html_url, sha, startedAt, bootSeconds: Math.round((Date.now() - started) / 1000), source: "cli" },
+      onEvent: (e) => {
+        if (e.type === "thinking") console.log(`  💭 ${e.text.replace(/\s+/g, " ").slice(0, 220)}`);
+        else if (e.type === "tool") console.log(`  ${e.ok ? "→" : "✗"} ${e.name} ${e.summary}`.slice(0, 220));
+        else if (e.type === "check") {
+          const k = e.check;
+          console.log(`  ${k.passed ? "✓" : "✗"} ${k.id} [${k.claimIds.join(", ")}] ${k.locator ? `${k.locator} ` : ""}${k.assert}${k.expected ? ` "${k.expected}"` : ""} · observed ${k.observed}`.slice(0, 260));
+        } else console.log(`  ■ ${e.result.claimId} ${e.result.status.toUpperCase()} (${e.result.basis}${e.result.checkIds.length ? `: ${e.result.checkIds.join(", ")}` : ""}): ${e.result.evidence}` +
+          (e.result.uncheckedReason ? `\n      unchecked: ${e.result.uncheckedReason}` : ""));
+      },
+    });
   },
 });
 
@@ -87,8 +85,11 @@ if (!boot.ok) {
   console.log(`\nBoot error: ${boot.error}${boot.appLogTail ? `\n${boot.appLogTail}` : ""}`);
   process.exit(1);
 }
-const r = explored!;
-writeFileSync(path.join(outDir, "trace.json"), JSON.stringify({ pr: `${ref.owner}/${ref.repo}#${ref.number}`, sha: boot.sha, claims, ...r }, null, 2));
+if (!explored) {
+  console.log(`\nExploration error: ${boot.error}`);
+  process.exit(1);
+}
+const r = explored;
 console.log(`\nDone in ${Math.round((Date.now() - started) / 1000)}s (${r.turns} turns, ${r.steps.length} browser steps, stopped: ${r.stoppedBecause})`);
 for (const j of r.journeys) {
   const steps = r.steps.filter((s) => s.journey === j.id);

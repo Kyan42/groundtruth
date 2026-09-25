@@ -3,6 +3,7 @@ import { createNodeMiddleware } from "@octokit/webhooks";
 import { SmeeClient } from "smee-client";
 import { app } from "./app.js";
 import { config } from "./config.js";
+import { handleDashboard } from "./dashboard/server.js";
 
 const WEBHOOK_PATH = "/api/github/webhooks";
 const githubMiddleware = createNodeMiddleware(app.webhooks, {
@@ -18,8 +19,15 @@ const githubMiddleware = createNodeMiddleware(app.webhooks, {
 
 const server = createServer(async (req, res) => {
   if (await githubMiddleware(req, res)) return;
-  if (req.method === "GET" && req.url === "/") {
+  if (req.method === "GET" && req.url === "/health") {
     res.writeHead(200, { "content-type": "text/plain" }).end("groundtruth ok\n");
+    return;
+  }
+  try {
+    if (await handleDashboard(req, res)) return;
+  } catch (err) {
+    console.error(`[dashboard] ${req.url}: ${err}`);
+    if (!res.headersSent) res.writeHead(500).end();
     return;
   }
   res.writeHead(404).end();
@@ -27,7 +35,7 @@ const server = createServer(async (req, res) => {
 
 server.listen(config.port, async () => {
   const target = `http://localhost:${config.port}${WEBHOOK_PATH}`;
-  console.log(`[server] listening, webhooks at ${target}`);
+  console.log(`[server] listening, webhooks at ${target}, dashboard at ${config.dashboardUrl}/runs`);
 
   try {
     const { data } = await app.octokit.request("GET /app");

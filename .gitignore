@@ -4,3 +4,4 @@ node_modules/
 boot-runs/
 src/_tmp/
 explore-runs/
+/runs/

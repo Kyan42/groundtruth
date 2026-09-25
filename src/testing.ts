@@ -1,21 +1,24 @@
-import { mkdirSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import type { Octokit } from "@octokit/core";
 import { bootPr, type BootResult } from "./boot/boot.js";
 import { CONFIG_PATH } from "./boot/config.js";
+import { renderReport } from "./check-report.js";
 import type { ApprovedClaim } from "./comment.js";
 import { config } from "./config.js";
+import { runUrl } from "./dashboard/server.js";
 import type { PrRef } from "./evidence.js";
+import { exploreApp, type ExploreRun } from "./explore/run.js";
 import { createLimiter } from "./limit.js";
 
-// Where approved claims are handed to browser testing. Today that means: boot the PR's app in a sandbox
-// and report on a GitHub Check. Exploring the app to verify the claims is the next step and isn't built.
+// Where approved claims are tested: boot the PR's app in a sandbox, have the exploring agent check each
+// claim in a real browser, and report per-claim results on the "Groundtruth" GitHub Check.
 
-// Each boot holds a sandbox for about 30s; the Runloop trial allows 3 at once.
-const boots = createLimiter(config.bootConcurrency);
+// Each run holds a sandbox for a few minutes (boot plus exploration); the Runloop trial allows 3 at once.
+const runs = createLimiter(config.bootConcurrency);
 
 export async function startTesting(octokit: Octokit, ref: PrRef, sha: string, claims: ApprovedClaim[]): Promise<number> {
-  const n = `${claims.length} check${claims.length === 1 ? "" : "s"}`;
+  const n = `${claims.length} claim${claims.length === 1 ? "" : "s"}`;
   const { data } = await octokit.request("POST /repos/{owner}/{repo}/check-runs", {
     owner: ref.owner, repo: ref.repo, name: "Groundtruth", head_sha: sha, status: "queued",
     output: { title: `${n} approved · waiting to boot the app`, summary: summary(claims), text: claimList(claims) },
@@ -23,34 +26,71 @@ export async function startTesting(octokit: Octokit, ref: PrRef, sha: string, cl
   const checkId = Number(data.id);
   const label = `${ref.owner}/${ref.repo}#${ref.number}`;
 
-  void boots.run(() => bootAndReport(octokit, ref, sha, claims, checkId, label)).catch((err) =>
-    console.error(`[groundtruth] ${label}: boot reporting failed: ${err}`));
+  void runs.run(() => testAndReport(octokit, ref, sha, claims, checkId, label)).catch((err) =>
+    console.error(`[groundtruth] ${label}: testing failed to report: ${err}`));
   return checkId;
 }
 
-async function bootAndReport(octokit: Octokit, ref: PrRef, sha: string, claims: ApprovedClaim[], checkId: number, label: string) {
+async function testAndReport(octokit: Octokit, ref: PrRef, sha: string, claims: ApprovedClaim[], checkId: number, label: string) {
   const update = (body: Record<string, unknown>) => octokit.request("PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}", {
     owner: ref.owner, repo: ref.repo, check_run_id: checkId, ...body,
   });
-  await update({ status: "in_progress", output: { title: "Booting the app…", summary: summary(claims), text: claimList(claims) } });
-
-  const outDir = path.join("boot-runs", `${ref.repo}-${ref.number}-${sha.slice(0, 7)}-${Date.now()}`);
-  mkdirSync(outDir, { recursive: true });
+  // Progress updates go out in order and never break the run.
+  let progress: Promise<unknown> = Promise.resolve();
+  const report = (title: string) => {
+    progress = progress.then(() => update({ output: { title, summary: summary(claims), text: claimList(claims) } })).catch(() => {});
+  };
+  const startedAt = new Date().toISOString();
+  const runDir = path.join(config.runsDir, `${ref.repo}-${ref.number}-${sha.slice(0, 7)}-${startedAt.replace(/[:.]/g, "-")}`);
+  mkdirSync(runDir, { recursive: true });
+  // The check's Details link opens this run on the dashboard (local-only unless DASHBOARD_URL says otherwise).
+  const inProgress = { status: "in_progress", output: { title: "Booting the app…", summary: summary(claims), text: claimList(claims) } };
+  await update({ ...inProgress, details_url: runUrl(runDir) }).catch(async (err) => {
+    console.warn(`[groundtruth] ${label}: GitHub refused the dashboard link (${err}); continuing without it`);
+    await update(inProgress);
+  });
+  const { data: pr } = await octokit.request("GET /repos/{owner}/{repo}/pulls/{pull_number}", { owner: ref.owner, repo: ref.repo, pull_number: ref.number });
   console.log(`[groundtruth] ${label}: booting ${sha.slice(0, 7)}…`);
-  const result = await bootPr(octokit, ref, { sha, screenshotPath: path.join(outDir, "home.png") });
-  const seconds = result.phases.reduce((s, p) => s + p.seconds, 0).toFixed(0);
 
-  if (result.ok) {
-    // The app is up; the claims themselves aren't tested yet, so this is neutral, not success.
-    await update({
-      conclusion: "neutral",
-      output: {
-        title: `App booted in ${seconds}s · claim testing not built yet`,
-        summary: `${summary(claims)}\n\nThe app booted from \`${CONFIG_PATH}\` and loaded in a browser.`,
-        text: `${bootReport(result)}\n\n### Approved checks\n\n${claimList(claims)}`,
-      },
-    });
-  } else {
+  let explored: ExploreRun | undefined;
+  let exploreError: string | undefined;
+  let bootSeconds = 0;
+  const result = await bootPr(octokit, ref, {
+    sha, screenshotPath: path.join(runDir, "home.png"),
+    onPhase: (p) => { bootSeconds += p.seconds; },
+    afterBoot: async ({ url, headers, resetApp }) => {
+      bootSeconds = Math.round(bootSeconds);
+      console.log(`[groundtruth] ${label}: booted in ${bootSeconds}s; testing ${claims.length} claims`);
+      report(`App booted in ${bootSeconds}s · testing ${claims.length} claims…`);
+      let done = 0;
+      try {
+        explored = await exploreApp({
+          url, headers, resetApp, claims, outDir: runDir,
+          meta: { pr: label, title: pr.title, url: pr.html_url, sha, startedAt, bootSeconds, source: "approval", checkRun: checkId },
+          onEvent: (e) => {
+            if (e.type === "status") report(`Testing · ${++done} of ${claims.length} claims done`);
+            if (e.type === "status" || (e.type === "check" && !e.check.passed)) {
+              console.log(`[groundtruth] ${label}: ${e.type === "status" ? `${e.result.claimId} ${e.result.status}` : `check ${e.check.id} failed`}`);
+            }
+          },
+        });
+      } catch (err) {
+        // The agent or the browser broke: our problem, reported as such, never as a claim failing.
+        exploreError = err instanceof Error ? err.message : String(err);
+      }
+    },
+  });
+  await progress;
+  bootSeconds = Math.round(bootSeconds);
+
+  // Runs that end without exploring still get a trace, so the dashboard shows what happened.
+  if (!explored) {
+    const meta = { pr: label, title: pr.title, url: pr.html_url, sha, startedAt, bootSeconds, source: "approval", checkRun: checkId, claims };
+    const error = result.ok ? `Testing stopped: ${exploreError}` : `Couldn't boot the app: ${result.error}`;
+    writeFileSync(path.join(runDir, "trace.json"), JSON.stringify({ ...meta, error }, null, 2));
+  }
+
+  if (!result.ok) {
     // A boot failure is an infrastructure error, never a claim failing: point at the config to fix.
     const { data: repo } = await octokit.request("GET /repos/{owner}/{repo}", { owner: ref.owner, repo: ref.repo });
     await update({
@@ -63,13 +103,31 @@ async function bootAndReport(octokit: Octokit, ref: PrRef, sha: string, claims: 
         text: `${bootReport(result)}${result.appLogTail ? `\n\n### Last lines of the app's output\n\n\`\`\`\n${result.appLogTail}\n\`\`\`` : ""}`,
       },
     });
+    console.log(`[groundtruth] ${label}: boot error: ${result.error}`);
+    return;
   }
-  console.log(`[groundtruth] ${label}: ${result.ok ? `booted in ${seconds}s` : `boot error: ${result.error}`} ` +
-    `(sandbox ${result.sandboxId ?? "-"}, screenshot ${outDir})`);
+
+  if (!explored) {
+    await update({
+      conclusion: "neutral",
+      output: {
+        title: "Testing stopped (not a test failure)",
+        summary: `The app booted in ${bootSeconds}s, but testing broke before it finished: ${exploreError ?? "unknown error"}. ` +
+          "This is a Groundtruth problem, so it says nothing about the PR's changes.",
+        text: `${bootReport(result)}\n\n### Approved claims\n\n${claimList(claims)}`,
+      },
+    });
+    console.log(`[groundtruth] ${label}: testing error: ${exploreError}`);
+    return;
+  }
+
+  const r = renderReport(explored, claims, { sha, bootSeconds, dashboard: runUrl(runDir), extra: bootReport(result) });
+  await update({ conclusion: r.conclusion, output: { title: r.title, summary: r.summary, text: r.text } });
+  console.log(`[groundtruth] ${label}: ${r.conclusion}: ${r.title} ($${explored.costUsd.toFixed(2)}, ${explored.seconds}s, ${runDir})`);
 }
 
 const summary = (claims: ApprovedClaim[]) =>
-  `${claims.length} check${claims.length === 1 ? " was" : "s were"} approved in the Groundtruth comment.`;
+  `${claims.length} claim${claims.length === 1 ? " was" : "s were"} approved in the Groundtruth comment.`;
 
 const claimList = (claims: ApprovedClaim[]) =>
   claims.map((c, i) => `${i + 1}. ${c.when ? `${c.when} → ` : ""}${c.then.what}`).join("\n");

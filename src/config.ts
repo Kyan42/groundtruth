@@ -17,6 +17,10 @@ export const config = {
   runloopApiKey: required("RUNLOOP_API_KEY"),
   bootConcurrency: Number(process.env.BOOT_CONCURRENCY ?? 2),
   port: Number(process.env.PORT ?? 3000),
+  // Where the dashboard is reachable; the Groundtruth check links runs here. Local-only by default.
+  dashboardUrl: (process.env.DASHBOARD_URL ?? `http://localhost:${process.env.PORT ?? 3000}`).replace(/\/$/, ""),
+  // Each test run (trace.json, videos) is saved in a folder here; the dashboard reads them.
+  runsDir: process.env.RUNS_DIR ?? "runs",
   // Optional: when set, forward webhooks from this smee.io channel to the local server.
   smeeUrl: process.env.SMEE_URL,
 };

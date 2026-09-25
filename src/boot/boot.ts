@@ -30,6 +30,7 @@ export type BootOptions = {
   // Runs once the app is up and verified, before the sandbox shuts down (e.g. exploration).
   afterBoot?: (app: {
     url: string; headers: Record<string, string>; sandbox: Sandbox;
+    sha: string;                           // the commit that was booted
     resetApp?: () => Promise<void>;        // runs the config's `reset` command, if it has one
   }) => Promise<void>;
   onPhase?: (p: Phase) => void;
@@ -173,7 +174,7 @@ export async function bootCommit(target: BootTarget, opts: BootOptions): Promise
     if (opts.afterBoot) {
       const reset = config.reset;
       await opts.afterBoot({
-        url: exposed.url, headers: exposed.headers, sandbox: sb,
+        url: exposed.url, headers: exposed.headers, sandbox: sb, sha: result.sha,
         resetApp: reset ? async () => { await mustRun(inRepo(reset), 120); } : undefined,
       });
     }

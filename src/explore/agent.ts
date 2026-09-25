@@ -34,6 +34,9 @@ export type ExploreResult = {
   steps: Step[];
   checks: Check[];
   requests: RequestRecord[];
+  consoleErrors: string[];       // "[j1] message"
+  failedRequests: string[];      // "[j1] 404 url"
+  model: string;
   turns: number;
   stoppedBecause: "all claims have a status" | "step budget" | "model stopped" | "refusal";
   usage: { input: number; cacheWrite: number; cacheRead: number; output: number };
@@ -222,7 +225,8 @@ export async function explore(opts: {
 
   const [inPrice, outPrice] = PRICES[model] ?? [NaN, NaN];
   const costUsd = (usage.input * inPrice + usage.cacheWrite * inPrice * 1.25 + usage.cacheRead * inPrice * 0.1 + usage.output * outPrice) / 1e6;
-  return { results, journeys: browser.journeys, steps: browser.steps, checks: browser.checks, requests: browser.requests, turns, stoppedBecause, usage, costUsd };
+  return { results, journeys: browser.journeys, steps: browser.steps, checks: browser.checks, requests: browser.requests,
+    consoleErrors: browser.consoleErrors, failedRequests: browser.failedRequests, model, turns, stoppedBecause, usage, costUsd };
 }
 
 async function runTool(
