@@ -58,4 +58,18 @@
     root().appendChild(box);
   };
   window.__gtHideCheck = () => document.getElementById("__groundtruth_check")?.remove();
+
+  // A neutral note (a clock move, a real-time wait), in the same place as check banners.
+  window.__gtShowNote = (text) => {
+    window.__gtHideCheck();
+    const box = document.createElement("div");
+    box.id = "__groundtruth_check";
+    box.setAttribute("aria-hidden", "true");
+    box.setAttribute("data-gt-overlay", "");
+    box.style.cssText = "position:fixed;top:14px;left:14px;z-index:2147483647;pointer-events:none;max-width:min(760px,80vw);"
+      + "background:#1f2937;color:#fff;border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.3);padding:9px 14px;"
+      + "font:600 17px/1.35 system-ui,-apple-system,'Segoe UI',sans-serif";
+    box.textContent = text;
+    root().appendChild(box);
+  };
 })();

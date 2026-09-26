@@ -16,6 +16,13 @@ const SUPPORT = ["groundtruth.ts", "overlay.js", "playwright.config.ts"];
 
 type Repo = { owner: string; repo: string };
 
+// The commit a branch points at now. A PR's recorded base commit (pull_request.base.sha) can lag behind
+// its base branch (GitHub doesn't refresh it when the branch moves), so regression tests are read from here.
+export async function branchTip(octokit: Octokit, repo: Repo, branch: string): Promise<string> {
+  const { data } = await octokit.request("GET /repos/{owner}/{repo}/git/ref/{ref}", { ...repo, ref: `heads/${branch}` });
+  return data.object.sha;
+}
+
 // The tests in the repo at a branch or commit (none if it has no manifest yet).
 export async function readRegistry(octokit: Octokit, repo: Repo, gitRef: string): Promise<TestEntry[]> {
   const text = await readFile(octokit, repo, `${REGISTRY_DIR}/tests/index.json`, gitRef);

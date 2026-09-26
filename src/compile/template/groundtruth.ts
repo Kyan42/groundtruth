@@ -65,6 +65,18 @@ export const test = base.extend<{ resetApp: () => Promise<void> }>({
   },
 });
 
+// Waits in real time, for something the app's server times (the fake page clock can't move it). Shown in
+// the video, and recorded so the dashboard can skip the idle stretch.
+export async function pause(page: Page, seconds: number, reason: string): Promise<void> {
+  await test.step(`wait ${seconds}s: ${reason}`, async () => {
+    write({ file: path.basename(test.info().file), test: test.info().title, event: "wait", t: since(page), seconds });
+    await page.evaluate((t) => (window as unknown as { __gtShowNote?: (t: string) => void }).__gtShowNote?.(t),
+      `⏳ Waiting ${seconds}s (real time): ${reason}`).catch(() => {});
+    await page.waitForTimeout(seconds * 1000);
+    await page.evaluate(() => (window as unknown as { __gtHideCheck?: () => void }).__gtHideCheck?.()).catch(() => {});
+  });
+}
+
 export async function check(page: Page, title: string, target: Locator | null, assertion: () => Promise<unknown>): Promise<void> {
   await test.step(title, async () => {
     const errorsBefore = test.info().errors.length;

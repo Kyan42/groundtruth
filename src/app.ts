@@ -11,7 +11,7 @@ import { extractClaims } from "./extract.js";
 import { githubApp } from "./github.js";
 import { createLimiter } from "./limit.js";
 import { editComment, upsertComment } from "./pr-comment.js";
-import { commitTests, readRegistry } from "./registry.js";
+import { branchTip, commitTests, readRegistry } from "./registry.js";
 import { startTesting } from "./testing.js";
 
 export const app = githubApp;
@@ -78,9 +78,11 @@ async function handleReview(
     owner: ref.owner, repo: ref.repo, pull_number: ref.number,
   });
   const regressions = approvedRegressions(state, review);
-  state.approval = { by, at: new Date().toISOString(), testedSha: pr.head.sha, baseSha: pr.base.sha, claims, regressions };
+  // Regression tests are read from the base branch as it is now (the PR's recorded base commit can be stale).
+  const baseSha = await branchTip(octokit, ref, pr.base.ref);
+  state.approval = { by, at: new Date().toISOString(), testedSha: pr.head.sha, baseSha, claims, regressions };
   await editComment(octokit, ref, commentId, markApproved(body, state));
-  const checkId = await startTesting(octokit, ref, pr.head.sha, claims, { approvedBy: by, baseSha: pr.base.sha, regressions });
+  const checkId = await startTesting(octokit, ref, pr.head.sha, claims, { approvedBy: by, baseSha, regressions });
 
   // How the developer's review differs from what we extracted: a real-world precision signal.
   const { extraction } = state;
@@ -119,7 +121,7 @@ async function processPr(octokit: Octokit, ref: PrRef, headSha: string, label: s
     // Tests earlier PRs added to the repo, from the base branch: offered as regression checks. All of them
     // for now; picking the ones this PR could affect comes later.
     const { data: pr } = await octokit.request("GET /repos/{owner}/{repo}/pulls/{pull_number}", { owner: ref.owner, repo: ref.repo, pull_number: ref.number });
-    const registry = await readRegistry(octokit, ref, pr.base.sha).catch(() => []);
+    const registry = await branchTip(octokit, ref, pr.base.ref).then((sha) => readRegistry(octokit, ref, sha)).catch(() => []);
     const regressions: RegressionRow[] = registry.map((e, i) => ({
       id: `r${i + 1}`, file: e.file, title: e.title, summary: e.summary,
       from: `${e.from.pr.replace(`${ref.owner}/${ref.repo}`, "")}${e.from.title ? ` "${e.from.title}"` : ""}`,

@@ -50,7 +50,10 @@ export function compileRun(trace: Trace, opts: { approvedBy?: string } = {}): Co
     if (lastCited < 0) { notes.push(`${j.id}: no cited checks; not compiled`); continue; }
 
     const body: string[] = [];
+    const waited = trace.steps.filter((s) => s.journey === j.id && s.action === "wait" && s.ok).reduce((n, s) => n + (parseFloat(s.value ?? "0") || 0), 0);
+    if (waited) body.push(`test.setTimeout(${90_000 + waited * 1000}); // this journey waits ${waited}s in real time`);
     if (j.resetData) body.push("await resetApp();");
+    if (j.controlClock) body.push("await page.clock.install(); // the clock is moved below, as it was while exploring");
     body.push(`await page.goto(${str(j.startPath)});`);
     for (const [i, e] of events.entries()) {
       if (i > lastCited) { if (e.step && isAction(e.step)) notes.push(`${j.id}: dropped step ${e.step.n} (${e.step.action}) after the last cited check`); continue; }
@@ -113,7 +116,7 @@ export function compileRun(trace: Trace, opts: { approvedBy?: string } = {}): Co
         + `test.describe.serial(${str(title)}, () => {\n${chain.map((t) => indent(t.code)).join("\n\n")}\n});`;
     files[`tests/${file}`] = [
       header(entry, chain.some((t) => t.journey.resetData)),
-      `import { check, expect, test } from "../support/groundtruth";`,
+      `import { check, expect, pause, test } from "../support/groundtruth";`,
       "",
       body,
       "",
@@ -151,7 +154,7 @@ function banner(k: Check, trace: Trace): { title: string; code: string } {
 
 const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60).replace(/-+$/, "") || "journey";
 
-const isAction = (s: Step) => ["click", "type", "select", "press", "navigate", "back", "wait_for"].includes(s.action);
+const isAction = (s: Step) => ["click", "type", "select", "press", "navigate", "back", "wait_for", "clock", "wait"].includes(s.action);
 
 function action(s: Step, journey: string, notes: string[]): string[] {
   if (!s.ok) { notes.push(`${journey}: dropped step ${s.n} (${s.action} failed during exploration: ${s.note ?? ""})`); return []; }
@@ -165,6 +168,16 @@ function action(s: Step, journey: string, notes: string[]): string[] {
     case "navigate": return [`await page.goto(${str(s.value ?? "/")});`];
     case "back": return ["await page.goBack();"];
     case "wait_for": return [`await expect(page.getByText(${str(s.value ?? "")}).first()).toBeVisible();`];
+    case "clock": {
+      const [kind, ...rest] = (s.value ?? "").split(" ");
+      const v = rest.join(" ");
+      return kind === "fast_forward" ? [`await page.clock.fastForward(${Math.round(Number(v) * 1000)});`]
+        : [`await page.clock.setSystemTime(new Date(${str(v)}));`];
+    }
+    case "wait": {
+      const [seconds, ...why] = (s.value ?? "").split(" | ");
+      return [`await pause(page, ${Number(seconds)}, ${str(why.join(" | ") || "waiting in real time")});`];
+    }
     default: return [];   // screenshots and other observation-only steps
   }
 }
@@ -200,6 +213,7 @@ function assertion(k: Check, journey: string, notes: string[]): string[] {
     }
   })();
   if (/\(not unique\)/.test(k.locator ?? "")) notes.push(`${journey}: ${k.id} locator wasn't unique during exploration`);
+  if (k.expected && CLOCKISH.test(k.expected)) notes.push(`${journey}: ${k.id} expects "${k.expected}", which looks clock-dependent; the replay only matches if the time is controlled or waited for`);
   if (k.locator && /getByText\('.{60,}'\)/.test(k.locator)) notes.push(`${journey}: ${k.id} locator pins a long text (${k.locator.slice(0, 60)}…); brittle if the content changes`);
   const title = str(`${k.id} · ${k.claimIds.join(", ")} · ${k.assert.replace(/_/g, " ")}${k.expected ? ` "${k.expected}"` : ""}`);
   return [`await check(page, ${title}, ${target},`, `  () => ${expr});`];
@@ -325,3 +339,6 @@ const str = (s: string) => JSON.stringify(s);
 
 // The helpers and config the compiled tests run with, copied next to them (see src/compile/template/).
 const template = (name: string) => readFileSync(fileURLToPath(new URL(`./template/${name}`, import.meta.url)), "utf8");
+
+// Expected values that depend on the clock ("2 minutes ago", "today", "10:45").
+const CLOCKISH = /\b(ago|just now|seconds?|minutes?|hours?|days?|today|yesterday|tomorrow)\b|\b\d{1,2}:\d{2}\b/i;

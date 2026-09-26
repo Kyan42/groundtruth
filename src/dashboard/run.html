@@ -627,6 +627,19 @@ function render(T, R, G) {
     $("playIcon").innerHTML = video.paused ? '<path d="M1 1l10 6-10 6z" fill="currentColor"/>' : '<path d="M1 1h3.5v12H1zM7.5 1H11v12H7.5z" fill="currentColor"/>';
     $("play").setAttribute("aria-label", video.paused ? "Play" : "Pause");
   }
+  // Real-time waits (the "⏳ Waiting" note) are idle video; playback jumps over them, keeping a second of each.
+  function waitsNow() {
+    if (!current) return [];
+    if (current.regression) return current.regression.test.waits ?? [];
+    if (source === "replay" && replayOf(current)) return replayOf(current).waits ?? [];
+    return steps.filter((s) => s.journey === current.id && s.action === "wait" && s.ok).map((s) => ({ t: s.t, seconds: parseFloat(s.value) || 0 }));
+  }
+  video.addEventListener("timeupdate", () => {
+    if (video.paused) return;
+    const t = video.currentTime;
+    const w = waitsNow().find((w) => w.seconds > 3 && t > w.t + 1 && t < w.t + w.seconds - 1);
+    if (w) video.currentTime = w.t + w.seconds - 0.5;
+  });
   for (const ev of ["timeupdate", "play", "pause"]) video.addEventListener(ev, updateTime);
   video.addEventListener("loadedmetadata", () => {
     if (pendingSeek != null) { const t = pendingSeek; pendingSeek = null; seek(t, true); }

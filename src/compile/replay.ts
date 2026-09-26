@@ -19,6 +19,7 @@ export type RanTest = {
   seconds: number;
   video?: string;          // absolute path in the runner's output folder
   startsAt?: number;       // seconds into the video where the app appears (after the first page load)
+  waits?: { t: number; seconds: number }[];   // real-time waits, where they are in the video
   error?: string;
 };
 export type RanCheck = { file: string; test: string; check: string; passed: boolean; t: number };
@@ -100,7 +101,9 @@ export async function runTests(opts: {
   if (existsSync(checksFile)) {
     for (const line of readFileSync(checksFile, "utf8").split("\n").filter(Boolean)) {
       const c = JSON.parse(line) as { file: string; test: string; check?: string; event?: string; passed?: boolean; t: number };
-      if (c.event === "loaded") { const t = tests.find((x) => x.file === c.file && x.title === c.test); if (t) t.startsAt = c.t; }
+      const test = tests.find((x) => x.file === c.file && x.title === c.test);
+      if (c.event === "loaded") { if (test) test.startsAt = c.t; }
+      else if (c.event === "wait") { if (test) (test.waits ??= []).push({ t: c.t, seconds: (c as { seconds?: number }).seconds ?? 0 }); }
       else if (c.check) checks.push({ file: c.file, test: c.test, check: c.check, passed: Boolean(c.passed), t: c.t });
     }
   }
@@ -140,6 +143,7 @@ export type ReplayJourney = {
   seconds: number;
   video?: string;          // file name inside the run folder
   startsAt?: number;
+  waits?: { t: number; seconds: number }[];
   error?: string;
 };
 
@@ -184,7 +188,7 @@ export async function replayRun(opts: {
   for (const t of ran.tests) {
     const id = journeyOf(t.file, t.title);
     if (!id) continue;
-    const j: ReplayJourney = { id, title: t.title, file: t.file, status: t.status, seconds: t.seconds, startsAt: t.startsAt, error: t.error };
+    const j: ReplayJourney = { id, title: t.title, file: t.file, status: t.status, seconds: t.seconds, startsAt: t.startsAt, waits: t.waits, error: t.error };
     if (t.video) { j.video = `replay-${id}.webm`; copyFileSync(t.video, path.join(runDir, j.video)); }
     journeys.push(j);
   }

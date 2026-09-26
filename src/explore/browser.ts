@@ -30,6 +30,7 @@ export type Journey = {
   claimIds: string[];
   startPath: string;
   resetData: boolean;
+  controlClock?: boolean;   // the page's clock is Playwright's fake clock, moved with clock()
   video?: string;
 };
 
@@ -80,7 +81,7 @@ export class ExplorerBrowser {
 
   // Ends the current journey (finalizing its video) and starts a fresh browser session at startPath.
   // An initial journey with no steps is replaced rather than kept.
-  async startJourney(j: { name: string; claimIds: string[]; startPath?: string; resetData: boolean }): Promise<string> {
+  async startJourney(j: { name: string; claimIds: string[]; startPath?: string; resetData: boolean; controlClock?: boolean }): Promise<string> {
     const current = this.journey;
     const unused = !this.steps.some((s) => s.journey === current.id) && !this.checks.some((c) => c.journey === current.id);
     await this.endSession();
@@ -88,7 +89,10 @@ export class ExplorerBrowser {
       this.journeys.pop();
       for (let i = this.requests.length - 1; i >= 0; i--) if (this.requests[i].journey === current.id) this.requests.splice(i, 1);
     }
-    await this.newSession({ id: `j${this.journeys.length + 1}`, name: j.name, claimIds: j.claimIds, startPath: j.startPath ?? "/", resetData: j.resetData });
+    await this.newSession({
+      id: `j${this.journeys.length + 1}`, name: j.name, claimIds: j.claimIds, startPath: j.startPath ?? "/", resetData: j.resetData,
+      ...(j.controlClock ? { controlClock: true } : {}),
+    });
     return `Started journey ${this.journey.id} "${j.name}" in a fresh browser session.\n\n${await this.snapshot()}`;
   }
 
@@ -148,6 +152,45 @@ export class ExplorerBrowser {
       await this.page.getByText(text).first().waitFor({ state: "visible", timeout: seconds * 1000 });
       return { value: text };
     });
+  }
+
+  // Moves the page's (fake) clock: "fast_forward" by a number of seconds, or "set_time" to a moment. Only
+  // time inside the browser moves; a time computed on the server is unaffected.
+  async clock(action: "fast_forward" | "set_time", value: string): Promise<string> {
+    if (!this.journey.controlClock) throw new Error("This journey's clock isn't controlled; start a journey with control_clock: true first");
+    return this.record("clock", async () => {
+      let note: string;
+      if (action === "fast_forward") {
+        const seconds = Number(value);
+        if (!Number.isFinite(seconds) || seconds <= 0) throw new Error(`fast_forward needs a number of seconds, got "${value}"`);
+        await this.page.clock.fastForward(seconds * 1000);
+        note = `⏩ Clock moved forward ${duration(seconds)}`;
+      } else {
+        const time = new Date(value);
+        if (Number.isNaN(time.getTime())) throw new Error(`set_time needs a date and time, got "${value}"`);
+        await this.page.clock.setSystemTime(time);
+        note = `🕒 Clock set to ${time.toISOString().replace("T", " ").slice(0, 16)}`;
+      }
+      await this.showNote(note, 1500);
+      return { value: `${action} ${value}` };
+    });
+  }
+
+  // Waits in real time (the app's server clock moves too). Slow: the compiled test waits as long.
+  async wait(seconds: number, reason: string): Promise<string> {
+    if (!Number.isFinite(seconds) || seconds <= 0 || seconds > 300) throw new Error("wait takes 1 to 300 seconds");
+    return this.record("wait", async () => {
+      await this.showNote(`⏳ Waiting ${duration(seconds)} (real time): ${reason}`, seconds * 1000);
+      return { value: `${seconds} | ${reason}` };
+    });
+  }
+
+  // A neutral banner in the video (for clock moves and waits), shown for `ms`.
+  private async showNote(text: string, ms: number): Promise<void> {
+    if (!this.videoDir) { await this.page.waitForTimeout(ms); return; }
+    await this.page.evaluate((t) => (window as unknown as { __gtShowNote?: (t: string) => void }).__gtShowNote?.(t), text).catch(() => {});
+    await this.page.waitForTimeout(ms);
+    await this.page.evaluate(() => (window as unknown as { __gtHideCheck?: () => void }).__gtHideCheck?.()).catch(() => {});
   }
 
   async screenshot(): Promise<string> {
@@ -244,6 +287,8 @@ export class ExplorerBrowser {
         if (records.some((r) => !ours(r.target) && !(r.type === "childList" && [...r.addedNodes, ...r.removedNodes].every(ours)))) w.__gtChanges++;
       }).observe(document, { subtree: true, childList: true, characterData: true, attributes: true });
     });
+    // A controlled clock must be installed before the first page loads.
+    if (j.controlClock) await this.context.clock.install();
     this.page = await this.context.newPage();
     this.journeyStarted = Date.now();
     this.actionStep = 0;
@@ -342,4 +387,11 @@ function refuseTextPinned(description: string): void {
     throw new Error(`That target can only be identified by its full text ("${pinned[1].slice(0, 50)}…"), which breaks when the content changes. ` +
       "Target a container by its role instead (e.g. role list, table, region), or check a smaller element directly.");
   }
+}
+
+// 90 → "1:30", 45 → "45s", 7200 → "2:00:00".
+function duration(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`;
+  const h = Math.floor(seconds / 3600), m = Math.floor((seconds % 3600) / 60), s = Math.round(seconds % 60);
+  return h ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}` : `${m}:${String(s).padStart(2, "0")}`;
 }
