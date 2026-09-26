@@ -5,6 +5,7 @@ import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import { createRequire } from "node:module";
 import path from "node:path";
+import { chromium } from "playwright";
 import { compileRun, type TestEntry, type Trace } from "./compile.js";
 
 // Runs compiled Groundtruth tests (tests/*.spec.ts + support/, see compile.ts) against an app with
@@ -32,11 +33,29 @@ export async function runTests(opts: {
   baseUrl: string;
   headers?: Record<string, string>;
   resetApp?: () => Promise<void>;
+  warmPaths?: string[];        // pages to request once first (dev servers compile a page on its first visit)
   timeoutSeconds?: number;
 }): Promise<{ tests: RanTest[]; checks: RanCheck[]; error?: string }> {
   const checksFile = path.join(opts.outputDir, "checks.jsonl");
   rmSync(opts.outputDir, { recursive: true, force: true });
   mkdirSync(opts.outputDir, { recursive: true });
+
+  // A dev server can take longer than a check's retry window to compile a page it hasn't served yet, and
+  // clicks made before the page's JavaScript has loaded only take effect once it has. Either would read as a
+  // failure. Load each page the tests visit once in a real browser (HTML and scripts), so it's all compiled.
+  const warm = [...new Set(opts.warmPaths ?? [])];
+  if (warm.length) {
+    const browser = await chromium.launch();
+    try {
+      const page = await browser.newPage({ extraHTTPHeaders: opts.headers });
+      for (const p of warm) {
+        await page.goto(new URL(p, opts.baseUrl).toString(), { waitUntil: "load", timeout: 90_000 }).catch(() => {});
+        await page.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
+      }
+    } finally {
+      await browser.close();
+    }
+  }
 
   // The tests run in a separate process; they reach resetApp through a one-off local endpoint.
   const token = randomBytes(12).toString("hex");
@@ -154,7 +173,10 @@ export async function replayRun(opts: {
     writeFileSync(path.join(scripts, name), content);
   }
 
-  const ran = await runTests({ dir: scripts, outputDir: path.join(runDir, "replay"), baseUrl: opts.baseUrl, headers: opts.headers, resetApp: opts.resetApp });
+  const ran = await runTests({
+    dir: scripts, outputDir: path.join(runDir, "replay"), baseUrl: opts.baseUrl, headers: opts.headers, resetApp: opts.resetApp,
+    warmPaths: entries.flatMap((e) => e.pages),
+  });
 
   // Map test titles back to the run's journeys through the manifest, and keep each journey's video.
   const journeyOf = (file: string, title: string) => entries.find((e) => e.file === file)?.journeys.find((j) => j.title === title)?.id;

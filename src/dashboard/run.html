@@ -461,7 +461,7 @@ function render(T, R, G) {
       ? `<b>Still works.</b> This test was added by ${esc(item.reg.from)} and passes on this PR too.`
       : item.reg.status === "failed"
         ? `<b>Regression.</b> This test was added by ${esc(item.reg.from)}, passed then, and fails on this PR` +
-          (broke.length ? `: ${broke.map((c) => esc(c.title)).join("; ")}.` : item.test.error ? `: ${esc(item.test.error)}` : ".") +
+          (broke.length ? `: ${[...new Set(broke.map((c) => c.title))].map(esc).join("; ")}.` : item.test.error ? `: ${esc(item.test.error)}` : ".") +
           " If this PR changes that behavior on purpose, update the test in this PR."
         : `<b>Couldn't run</b> this test${item.reg.error ? `: ${esc(item.reg.error)}` : ""}. This says nothing about the PR.`;
     $("nClaims").textContent = timeline.length;
@@ -504,9 +504,36 @@ function render(T, R, G) {
     </div>`;
   }
 
+  // The tabs for a regression test: its checks, and its script. It replays a script, so there are no agent
+  // actions or recorded requests to show.
+  function renderRegressionPanel(p, item) {
+    if (tab === "claims") {
+      const rows = timeline.map((e) => `<div class="kcheck ${e.k.passed ? "" : "failed"}">
+          <span class="kid">${esc(e.k.id)}</span>
+          <div class="kmain">
+            <div class="kwhat"><span class="${e.k.passed ? "ok" : "bad"}">${e.k.passed ? "✓ still holds" : "✗ broken"}</span> · ${esc(e.k.title)}</div>
+            <div class="loc">${esc(e.k.code)}</div>
+          </div>
+          <button class="jump" data-t="${e.t}">${fmt(e.t)}</button>
+        </div>`).join("");
+      const notReached = item.test.status !== "passed" && item.test.error ? `<p class="note">Stopped early: ${esc(item.test.error)}</p>` : "";
+      p.innerHTML = `<p class="note">${esc(item.reg.summary)}</p>${rows ? `<div class="klist">${rows}</div>` : `<p class="note">No checks ran in this test.</p>`}${notReached}`;
+    } else if (tab === "script") {
+      p.innerHTML = `<p class="note">The test ${esc(item.reg.from)} added to the repo (<code>.groundtruth/tests/${esc(item.reg.file)}</code>), read from the base branch and replayed on this PR.</p><pre class="code" data-id="code">Loading…</pre>`;
+      fetch(`${BASE}/regression/${encodeURIComponent(item.reg.file)}`, { cache: "no-store" }).then((r) => (r.ok ? r.text() : Promise.reject(r.status)))
+        .then((code) => { const el = p.querySelector('[data-id="code"]'); if (el) el.innerHTML = highlight(code); })
+        .catch(() => { const el = p.querySelector('[data-id="code"]'); if (el) el.textContent = "The test file wasn't saved with this run."; });
+      return;
+    } else {
+      p.innerHTML = `<p class="note">Regression tests replay a script, so there are no agent actions or recorded requests to show. The checks are in the first tab; the video above is the replay on this PR.</p>`;
+    }
+    p.querySelectorAll(".jump").forEach((b) => b.addEventListener("click", () => seek(Number(b.dataset.t), true)));
+  }
+
   function renderPanel() {
     root.querySelectorAll('[role="tab"]').forEach((t) => t.setAttribute("aria-selected", String(t.dataset.tab === tab)));
     const p = $("panel");
+    if (current?.regression) return renderRegressionPanel(p, current.regression);
     if (tab === "claims") {
       p.innerHTML = claimsIn(current).map((id) => {
         const c = claimById[id] ?? { when: "", then: { what: id } };
@@ -559,7 +586,7 @@ function render(T, R, G) {
   }
 
   function seek(t, play) {
-    if (!current || !videoFor(current)) return;
+    if (!current || !(current.regression ? current.regression.test.video : videoFor(current))) return;
     video.currentTime = Math.max(0, t - 0.4);
     if (play) video.play().catch(() => {});
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -586,7 +613,7 @@ function render(T, R, G) {
     $("srcReplay").addEventListener("click", () => setSource("replay"));
     $("srcExplore").addEventListener("click", () => setSource("explore"));
   }
-  if (R) $("scriptTab").hidden = false;
+  if (R || regItems.length) $("scriptTab").hidden = false;
 
   function updateTime() {
     if (!current) return;
@@ -605,7 +632,8 @@ function render(T, R, G) {
     if (pendingSeek != null) { const t = pendingSeek; pendingSeek = null; seek(t, true); }
     // The first moment of a recording is a blank page (loading, or waiting on a data reset); open on the app.
     else if (video.currentTime === 0) {
-      const start = source === "replay" ? (replayOf(current)?.startsAt ?? 0) + 1 : 1.5;
+      const start = current?.regression ? (current.regression.test.startsAt ?? 0) + 1
+        : source === "replay" ? (replayOf(current)?.startsAt ?? 0) + 1 : 1.5;
       video.currentTime = Math.min(start, video.duration || 0);
     }
     drawMarkers(); updateTime();

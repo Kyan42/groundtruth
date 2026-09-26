@@ -2,6 +2,7 @@ import { copyFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import type { Octokit } from "@octokit/core";
 import type { RegressionRow } from "./comment.js";
+import type { TestEntry } from "./compile/compile.js";
 import { runTests, type RanTest } from "./compile/replay.js";
 import type { PrRef } from "./evidence.js";
 import { fetchTests, readRegistry } from "./registry.js";
@@ -31,9 +32,19 @@ export async function runRegressions(opts: {
   const entries = opts.rows.map((r) => registry.find((e) => e.file === r.file)).filter((e) => e !== undefined);
   const dir = path.join(opts.runDir, "regression");
   await fetchTests(opts.octokit, opts.ref, opts.baseSha, entries, dir);
+  return replayRegressions({ ...opts, dir, entries });
+}
+
+// Replays regression tests already on disk (dir/tests + dir/support) and records the results.
+export async function replayRegressions(opts: {
+  dir: string; entries: TestEntry[]; rows: RegressionRow[];
+  runDir: string; baseUrl: string; headers?: Record<string, string>; resetApp?: () => Promise<void>;
+}): Promise<RegressionResult[]> {
+  const { dir, entries } = opts;
   const ran = await runTests({
     dir, files: entries.map((e) => e.file), outputDir: path.join(opts.runDir, "regression-out"),
     baseUrl: opts.baseUrl, headers: opts.headers, resetApp: opts.resetApp,
+    warmPaths: entries.flatMap((e) => e.pages),
   });
 
   const results: RegressionResult[] = opts.rows.map((row) => {
@@ -50,8 +61,11 @@ export async function runRegressions(opts: {
       check: c.check, test: c.test, passed: c.passed, t: c.t,
       title: entry.checks[c.check]?.title ?? c.check, code: entry.checks[c.check]?.code ?? "",
     }));
-    const status = !tests.length ? "error" : tests.every((t) => t.status === "passed") && checks.every((c) => c.passed) ? "passed" : "failed";
-    return { ...base, status, tests, checks, error: !tests.length ? (ran.error ?? "the test didn't run") : undefined };
+    // A test that couldn't even reset the app's data says nothing about the PR: that's our problem, not a regression.
+    const infra = tests.find((t) => t.error?.includes("Resetting the app's data failed"))?.error;
+    const status = !tests.length || infra ? "error"
+      : tests.every((t) => t.status === "passed") && checks.every((c) => c.passed) ? "passed" : "failed";
+    return { ...base, status, tests, checks, error: !tests.length ? (ran.error ?? "the test didn't run") : infra ? "the app's data couldn't be reset" : undefined };
   });
   writeFileSync(path.join(opts.runDir, "regressions.json"), JSON.stringify(results, null, 2));
   return results;

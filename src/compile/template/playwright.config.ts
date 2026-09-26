@@ -11,7 +11,7 @@ export default defineConfig({
   workers: 1,
   retries: 0,
   timeout: 90_000,
-  expect: { timeout: 10_000 },
+  expect: { timeout: 15_000 },
   reporter: [["list"], ["json", { outputFile: `${output}/results.json` }]],
   use: {
     baseURL: process.env.GROUNDTRUTH_BASE_URL,
