@@ -185,7 +185,7 @@ export async function explore(opts: {
 }): Promise<ExploreResult> {
   const client = opts.client ?? new Anthropic();
   const model = opts.model ?? DEFAULT_EXPLORE_MODEL;
-  const maxTurns = opts.maxTurns ?? 40;
+  const maxTurns = opts.maxTurns ?? 60;
   const { browser } = opts;
   const results: ClaimResult[] = [];
   const usage = { input: 0, cacheWrite: 0, cacheRead: 0, output: 0 };

@@ -58,7 +58,7 @@ export function compileRun(trace: Trace, opts: { approvedBy?: string } = {}): Co
     for (const [i, e] of events.entries()) {
       if (i > lastCited) { if (e.step && isAction(e.step)) notes.push(`${j.id}: dropped step ${e.step.n} (${e.step.action}) after the last cited check`); continue; }
       if (e.step) body.push(...action(e.step, j.id, notes));
-      else if (e.check && cited.has(e.check.id)) body.push(...assertion(e.check, j.id, notes));
+      else if (e.check && cited.has(e.check.id)) body.push(...assertion(e.check, j.id, notes, Boolean(waited || j.controlClock)));
       else if (e.check) notes.push(`${j.id}: dropped ${e.check.id} (not cited by any verdict${e.check.passed ? "" : ", failed"})`);
     }
     const claimIds = [...new Set(trace.checks.filter((k) => k.journey === j.id && cited.has(k.id)).flatMap((k) => k.claimIds))];
@@ -184,7 +184,7 @@ function action(s: Step, journey: string, notes: string[]): string[] {
 
 // One cited check → one check() call: a named step holding the matching (soft) assertion, marked in the
 // replay video with a box around the element and a ✓/✗ banner.
-function assertion(k: Check, journey: string, notes: string[]): string[] {
+function assertion(k: Check, journey: string, notes: string[], timed = false): string[] {
   if (k.assert === "request_sent" || k.assert === "request_not_sent") {
     notes.push(`${journey}: ${k.id} (${k.assert}) needs request tracking in the helpers; not compiled yet`);
     return [`// ${k.id}: ${k.assert} ${k.expected ?? ""} (not compiled yet)`];
@@ -213,7 +213,7 @@ function assertion(k: Check, journey: string, notes: string[]): string[] {
     }
   })();
   if (/\(not unique\)/.test(k.locator ?? "")) notes.push(`${journey}: ${k.id} locator wasn't unique during exploration`);
-  if (k.expected && CLOCKISH.test(k.expected)) notes.push(`${journey}: ${k.id} expects "${k.expected}", which looks clock-dependent; the replay only matches if the time is controlled or waited for`);
+  if (k.expected && !timed && CLOCKISH.test(k.expected)) notes.push(`${journey}: ${k.id} expects "${k.expected}", which looks clock-dependent; the replay only matches if the time is controlled or waited for`);
   if (k.locator && /getByText\('.{60,}'\)/.test(k.locator)) notes.push(`${journey}: ${k.id} locator pins a long text (${k.locator.slice(0, 60)}…); brittle if the content changes`);
   const title = str(`${k.id} · ${k.claimIds.join(", ")} · ${k.assert.replace(/_/g, " ")}${k.expected ? ` "${k.expected}"` : ""}`);
   return [`await check(page, ${title}, ${target},`, `  () => ${expr});`];

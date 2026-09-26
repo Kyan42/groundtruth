@@ -1,4 +1,4 @@
-// Usage: npm run explore -- owner/repo#123 [--claim 1] [--model claude-opus-5] [--max-turns 40] [--no-replay]
+// Usage: npm run explore -- owner/repo#123 [--claim 1] [--model claude-opus-5] [--max-turns 60] [--no-replay]
 // Boots the PR's app, then has the exploring agent check the approved claims from the PR's Groundtruth
 // comment (or just one with --claim N), printing every step. Saves trace.json and videos under runs/, where the dashboard shows them.
 import { mkdirSync } from "node:fs";
@@ -19,12 +19,12 @@ const { values, positionals } = parseArgs({
   options: {
     claim: { type: "string" },
     model: { type: "string", default: DEFAULT_EXPLORE_MODEL },
-    "max-turns": { type: "string", default: "40" },
+    "max-turns": { type: "string", default: "60" },
     "no-replay": { type: "boolean", default: false },
   },
 });
 if (!positionals[0]) {
-  console.error("Usage: npm run explore -- owner/repo#123 [--claim N] [--model ...] [--max-turns 40]");
+  console.error("Usage: npm run explore -- owner/repo#123 [--claim N] [--model ...] [--max-turns 60]");
   process.exit(1);
 }
 const ref = parsePrRef(positionals[0]);
