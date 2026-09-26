@@ -4,7 +4,7 @@
 //   the replay (GROUNDTRUTH_RESET_URL), which runs the app's `reset` command where the app lives. Locally,
 //   set GROUNDTRUTH_RESET to a shell command instead.
 // check: runs one assertion as a named step and marks it in the video: a box around the element and a
-//   banner with the claim and the assertion's code (from checks.json). Assertions are soft: a failed check
+//   banner with the claim and the assertion's code (from tests/index.json). Assertions are soft: a failed check
 //   is recorded and the journey continues.
 // Every page also gets overlay.js: a visible cursor that glides between the automated mouse's positions.
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
@@ -35,7 +35,7 @@ function pointBeforeActing(page: Page) {
 
 export const test = base.extend<{ resetApp: () => Promise<void> }>({
   page: async ({ page }, use, testInfo) => {
-    const overlay = path.join(path.dirname(testInfo.file), "overlay.js");
+    const overlay = path.join(path.dirname(testInfo.file), "..", "support", "overlay.js");
     if (existsSync(overlay)) {
       await page.addInitScript({ path: overlay });
       pointBeforeActing(page);
@@ -45,7 +45,7 @@ export const test = base.extend<{ resetApp: () => Promise<void> }>({
     const onLoad = () => {
       if (page.url() === "about:blank") return;
       page.off("load", onLoad);
-      write({ test: test.info().title, event: "loaded", t: since(page) });
+      write({ file: path.basename(test.info().file), test: test.info().title, event: "loaded", t: since(page) });
     };
     page.on("load", onLoad);
     await use(page);
@@ -77,7 +77,7 @@ export async function check(page: Page, title: string, target: Locator | null, a
 
 // One line per check (and per first page load), for whoever runs the replay: the dashboard places them on the video.
 function record(page: Page, title: string, passed: boolean) {
-  write({ test: test.info().title, check: title.split(" ·")[0], passed, t: since(page) });
+  write({ file: path.basename(test.info().file), test: test.info().title, check: title.split(" ·")[0], passed, t: since(page) });
 }
 
 function write(line: Record<string, unknown>) {
@@ -87,14 +87,20 @@ function write(line: Record<string, unknown>) {
 
 const since = (page: Page) => Math.round((Date.now() - (pageStarted.get(page) ?? Date.now())) / 100) / 10;
 
-// The banner text per check id, written by the compiler next to the script.
-let banners: Record<string, { title: string; code: string }> | undefined;
+// The banner text per check id, from this test file's entry in tests/index.json (written by the compiler).
+const banners = new Map<string, Record<string, { title: string; code: string }>>();
 function bannerFor(id: string, fallback: string) {
-  if (!banners) {
-    const file = path.join(path.dirname(test.info().file), "checks.json");
-    try { banners = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : {}; } catch { banners = {}; }
+  const spec = test.info().file;
+  if (!banners.has(spec)) {
+    let checks = {};
+    try {
+      const index = path.join(path.dirname(spec), "index.json");
+      const entries = existsSync(index) ? (JSON.parse(readFileSync(index, "utf8")) as { file: string; checks?: typeof checks }[]) : [];
+      checks = entries.find((e) => e.file === path.basename(spec))?.checks ?? {};
+    } catch { /* no banners: fall back to the step title */ }
+    banners.set(spec, checks);
   }
-  return banners![id] ?? { title: fallback, code: "" };
+  return banners.get(spec)![id] ?? { title: fallback, code: "" };
 }
 
 async function mark(page: Page, target: Locator | null, passed: boolean, title: string) {

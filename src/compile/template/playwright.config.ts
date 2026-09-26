@@ -1,14 +1,18 @@
 import { defineConfig } from "playwright/test";
 
-// Replays against GROUNDTRUTH_BASE_URL (plus GROUNDTRUTH_HEADERS as JSON, e.g. a sandbox tunnel's token).
+// Groundtruth's tests: run against GROUNDTRUTH_BASE_URL (plus GROUNDTRUTH_HEADERS as JSON, e.g. a sandbox
+// tunnel's token). To reset data, set GROUNDTRUTH_RESET to the app's reset command. For example:
+//   GROUNDTRUTH_BASE_URL=http://localhost:3000 GROUNDTRUTH_RESET="npm run seed -- --reset" \
+//     npx playwright test -c .groundtruth/support/playwright.config.ts
+const output = process.env.GROUNDTRUTH_OUTPUT ?? "../test-results";
 export default defineConfig({
-  testDir: ".",
-  outputDir: "../replay",
+  testDir: "../tests",
+  outputDir: output,
   workers: 1,
   retries: 0,
   timeout: 90_000,
   expect: { timeout: 10_000 },
-  reporter: [["list"], ["json", { outputFile: "../replay/results.json" }]],
+  reporter: [["list"], ["json", { outputFile: `${output}/results.json` }]],
   use: {
     baseURL: process.env.GROUNDTRUTH_BASE_URL,
     extraHTTPHeaders: process.env.GROUNDTRUTH_HEADERS ? JSON.parse(process.env.GROUNDTRUTH_HEADERS) : undefined,

@@ -5,22 +5,40 @@ import type { ClaimResult } from "../explore/agent.js";
 import type { Journey, Step } from "../explore/browser.js";
 import { assertionCode, type Check } from "../explore/checks.js";
 
-// Step 3, first cut: compile an exploration trace into Playwright tests, one per journey. Rules, not a
-// model: keep the actions that succeeded and the checks the verdicts rest on, in the order they happened;
-// drop failed actions, redone checks, screenshots, and actions after a journey's last cited check.
-// Replaying the result on the same app is what tells us whether the rules were enough.
+// Step 3: compile an exploration trace into Playwright tests. Rules, not a model: keep the actions that
+// succeeded and the checks the verdicts rest on, in the order they happened; drop failed actions, redone
+// checks, screenshots, and actions after a journey's last cited check. Replaying the result on the same
+// app is what tells us whether the rules were enough.
+//
+// The output has the same layout wherever it goes: a run's scripts/ folder, and the repo's .groundtruth/
+// folder when a developer adds the tests to their PR (so what's replayed is exactly what's committed).
+//   tests/<slug>.spec.ts   one file per chain of journeys, with a readable header
+//   tests/index.json       the manifest: title, summary, claims, pages, source PR, check banners per file
+//   support/               the helpers, video overlay and Playwright config the tests run with
 
 export type Trace = {
-  pr: string; sha: string; title?: string;
+  pr: string; sha: string; title?: string; url?: string; startedAt?: string;
   claims: ApprovedClaim[]; results: ClaimResult[]; journeys: Journey[]; steps: Step[]; checks: Check[];
 };
 
-export type Compiled = { files: Record<string, string>; notes: string[] };
+// One test file's entry in tests/index.json. Also what regression runs list, match and report on.
+export type TestEntry = {
+  file: string;                                   // e.g. add-item-twice-and-review-cart.spec.ts
+  title: string;                                  // what the file checks, in a few words
+  summary: string;                                // the claims it rests on, in a sentence
+  claims: string[];
+  pages: string[];                                // app paths the journeys visit (for picking tests later)
+  journeys: { id: string; title: string }[];      // test titles in the file, by the run's journey ids
+  from: { pr: string; title?: string; sha: string; approvedBy?: string; date?: string };
+  checks: Record<string, { title: string; code: string }>;   // banner text per check id, for videos
+};
 
-export function compileRun(trace: Trace, runId: string): Compiled {
+export type Compiled = { files: Record<string, string>; entries: TestEntry[]; notes: string[] };
+
+export function compileRun(trace: Trace, opts: { approvedBy?: string } = {}): Compiled {
   const notes: string[] = [];
   const cited = new Set(trace.results.flatMap((r) => r.checkIds ?? []));
-  const tests: { journey: Journey; code: string }[] = [];
+  const tests: { journey: Journey; code: string; claimIds: string[] }[] = [];
 
   for (const j of trace.journeys) {
     type Event = { t: number; step?: Step; check?: Check };
@@ -40,12 +58,12 @@ export function compileRun(trace: Trace, runId: string): Compiled {
       else if (e.check && cited.has(e.check.id)) body.push(...assertion(e.check, j.id, notes));
       else if (e.check) notes.push(`${j.id}: dropped ${e.check.id} (not cited by any verdict${e.check.passed ? "" : ", failed"})`);
     }
-    const claims = [...new Set(trace.results.filter((r) => r.journey === j.id).map((r) => r.claimId))];
+    const claimIds = [...new Set(trace.checks.filter((k) => k.journey === j.id && cited.has(k.id)).flatMap((k) => k.claimIds))];
     tests.push({
       journey: j,
+      claimIds,
       code: [
-        `// ${j.id}: ${claims.map((id) => `${id} ${trace.claims.find((c) => c.id === id)?.then.what ?? ""}`).join(" · ")}`,
-        `test(${str(`${j.id} · ${j.name}`)}, async ({ page${j.resetData ? ", resetApp" : ""} }) => {`,
+        `test(${str(j.name)}, async ({ page${j.resetData ? ", resetApp" : ""} }) => {`,
         ...body.map((l) => `  ${l}`),
         "});",
       ].join("\n"),
@@ -53,48 +71,85 @@ export function compileRun(trace: Trace, runId: string): Compiled {
   }
 
   // A journey that keeps the app's data sees what the journey before it left behind, so the two form a
-  // chain that runs in order (and the later one is skipped if the earlier fails). A journey that resets
-  // the data starts a new chain and runs regardless of what happened before.
+  // chain that runs in order (and the later one is skipped if the earlier fails) and live in one file. A
+  // journey that resets the data starts a new chain, and a new file.
   const chains: (typeof tests)[] = [];
   for (const t of tests) {
     if (t.journey.resetData || !chains.length) chains.push([t]);
     else chains.at(-1)!.push(t);
   }
-  const indent = (s: string) => s.split("\n").map((l) => (l ? `  ${l}` : l)).join("\n");
-  const blocks = chains.map((chain) => {
-    if (chain.length === 1) return chain[0].code;
-    const ids = chain.map((t) => t.journey.id);
-    notes.push(`chain: ${ids.join(" → ")} (${ids.slice(1).join(", ")} keep the data ${ids[0]} leaves, so they run in order)`);
-    return `// ${ids.slice(1).join(", ")} start from the data ${ids[0]} leaves behind, so this chain runs in order.\ntest.describe.serial(${str(ids.join(" → "))}, () => {\n${chain.map((t) => indent(t.code)).join("\n\n")}\n});`;
-  });
 
-  const spec = [
-    `// Compiled by Groundtruth from run ${runId} (${trace.pr} at ${trace.sha.slice(0, 7)}${trace.title ? `, "${trace.title}"` : ""}).`,
-    "// Regenerate instead of editing: npm run compile -- <run>",
-    "// Checks are soft (a failed check is recorded and the journey continues); actions are hard (if one",
-    "// can't be done, the rest of the journey can't be reached).",
-    `import { check, expect, test } from "./groundtruth";`,
-    "",
-    blocks.join("\n\n"),
-    "",
-  ].join("\n");
+  const files: Record<string, string> = {};
+  const entries: TestEntry[] = [];
+  const used = new Set<string>();
+  const claimText = (id: string) => trace.claims.find((c) => c.id === id)?.then.what ?? id;
+  const from: TestEntry["from"] = {
+    pr: trace.pr, title: trace.title, sha: trace.sha.slice(0, 7), approvedBy: opts.approvedBy, date: trace.startedAt?.slice(0, 10),
+  };
+  for (const chain of chains) {
+    // A chain is named for what it ends up verifying (its first journeys are often just setup).
+    const title = chain.at(-1)!.journey.name;
+    let slug = slugify(title);
+    for (let n = 2; used.has(slug); n++) slug = `${slugify(title)}-${n}`;
+    used.add(slug);
+    const file = `${slug}.spec.ts`;
+    const claims = [...new Set(chain.flatMap((t) => t.claimIds))].map(claimText);
+    const pages = [...new Set(chain.flatMap((t) => [
+      t.journey.startPath, ...trace.steps.filter((s) => s.journey === t.journey.id).map((s) => s.url),
+    ]).map((u) => u.split("?")[0]).filter((u) => u.startsWith("/")))];
+    const checkIds = trace.checks.filter((k) => cited.has(k.id) && chain.some((t) => t.journey.id === k.journey));
+    const entry: TestEntry = {
+      file, title, summary: claims.join("; "), claims, pages,
+      journeys: chain.map((t) => ({ id: t.journey.id, title: t.journey.name })),
+      from,
+      checks: Object.fromEntries(checkIds.map((k) => [k.id, banner(k, trace)])),
+    };
+    entries.push(entry);
+    if (chain.length > 1) notes.push(`chain: ${chain.map((t) => t.journey.id).join(" → ")} in ${file} (later journeys keep the data earlier ones leave, so they run in order)`);
 
-  // What each check's banner in the replay video says: the claim, and the assertion as Playwright code.
-  const banners: Record<string, { title: string; code: string }> = {};
-  for (const k of trace.checks.filter((k) => cited.has(k.id))) {
-    const claim = trace.claims.find((c) => c.id === k.claimIds[0]);
-    const target = k.assert === "url" ? undefined : k.locator ? loc(k.locator, k.id) : undefined;
-    banners[k.id] = { title: `${k.claimIds.map((id) => id.toUpperCase()).join(", ")} · ${claim?.then.what ?? k.assert}`, code: assertionCode(k.assert, target, k.expected) };
+    const indent = (s: string) => s.split("\n").map((l) => (l ? `  ${l}` : l)).join("\n");
+    const body = chain.length === 1 ? chain[0].code
+      : `// Each journey after the first starts from the data the one before it leaves, so they run in order.\n`
+        + `test.describe.serial(${str(title)}, () => {\n${chain.map((t) => indent(t.code)).join("\n\n")}\n});`;
+    files[`tests/${file}`] = [
+      header(entry, chain.some((t) => t.journey.resetData)),
+      `import { check, expect, test } from "../support/groundtruth";`,
+      "",
+      body,
+      "",
+    ].join("\n");
   }
 
-  return {
-    files: {
-      "journeys.spec.ts": spec, "checks.json": JSON.stringify(banners, null, 2),
-      "groundtruth.ts": template("groundtruth.ts"), "overlay.js": template("overlay.js"), "playwright.config.ts": template("playwright.config.ts"),
-    },
-    notes,
-  };
+  files["tests/index.json"] = `${JSON.stringify(entries, null, 2)}\n`;
+  for (const name of ["groundtruth.ts", "overlay.js", "playwright.config.ts"]) files[`support/${name}`] = template(name);
+  return { files, entries, notes };
 }
+
+// The comment block at the top of each test file: what it checks and where it came from, for people
+// reading the repo (the same fields are in tests/index.json for tools).
+function header(e: TestEntry, resets: boolean): string {
+  const lines = [
+    "@groundtruth",
+    `title:   ${e.title}`,
+    `claims:  ${e.claims.join(" · ")}`,
+    `pages:   ${e.pages.join(", ")}`,
+    `from:    ${e.from.pr}${e.from.title ? ` "${e.from.title}"` : ""} at ${e.from.sha}${e.from.approvedBy ? `, approved by @${e.from.approvedBy}` : ""}${e.from.date ? `, ${e.from.date}` : ""}`,
+    `data:    ${resets ? "resets the app's data first" : "uses the app's data as it is"}`,
+    "",
+    "Compiled from a verified Groundtruth run. Checks are soft (a failed check is recorded and the journey",
+    "continues); actions are hard (if one can't be done, the rest of the journey isn't reached).",
+  ];
+  return ["/**", ...lines.map((l) => (l ? ` * ${l.replace(/\*\//g, "* /")}` : " *")), " */"].join("\n");
+}
+
+// What a check's banner says in the replay video: the claim, and the assertion as Playwright code.
+function banner(k: Check, trace: Trace): { title: string; code: string } {
+  const claim = trace.claims.find((c) => c.id === k.claimIds[0]);
+  const target = k.assert === "url" ? undefined : k.locator ? loc(k.locator, k.id) : undefined;
+  return { title: `${k.claimIds.map((id) => id.toUpperCase()).join(", ")} · ${claim?.then.what ?? k.assert}`, code: assertionCode(k.assert, target, k.expected) };
+}
+
+const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60).replace(/-+$/, "") || "journey";
 
 const isAction = (s: Step) => ["click", "type", "select", "press", "navigate", "back", "wait_for"].includes(s.action);
 

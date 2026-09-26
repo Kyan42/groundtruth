@@ -220,6 +220,10 @@ h4{margin:22px 0 6px;font-size:14px;font-weight:600}
     </div>
     <div class="sect"><h2>Journeys</h2><p>Each one is a path through the app in a fresh browser, recorded as a video.</p></div>
     <div class="journeys" data-id="journeys" role="list"></div>
+    <div data-id="regBlock" hidden>
+      <div class="sect"><h2>Regression checks</h2><p>Tests earlier PRs added to the repo, replayed on this PR.</p></div>
+      <div class="journeys" data-id="regressions" role="list"></div>
+    </div>
     <div class="run">
       <h3>This run</h3>
       <dl class="kv" data-id="runKv"></dl>
@@ -298,7 +302,8 @@ async function load() {
   if (trace.error) return showState(esc(trace.title ?? trace.pr ?? "Run"), `${esc(trace.error)}<br><br>This is a Groundtruth problem, not a result about the PR.`);
   // The replay (compiled script run once) is optional: older runs and runs where it didn't happen have none.
   const replay = await fetch(`${BASE}/replay.json`, { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
-  render(trace, replay);
+  const regressions = await fetch(`${BASE}/regressions.json`, { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  render(trace, replay, regressions ?? []);
 }
 
 // Light syntax colouring for the Script tab: comments, strings and a few keywords. Escapes first.
@@ -317,7 +322,7 @@ function showState(title, body) {
   document.getElementById("root").innerHTML = `<div class="state"><div class="box"><h1>${title}</h1><p>${body}</p><p><a href="/runs">All runs</a></p></div></div>`;
 }
 
-function render(T, R) {
+function render(T, R, G) {
   const root = document.getElementById("root");
   root.replaceChildren(document.getElementById("page").content.cloneNode(true));
   const $ = (id) => root.querySelector(`[data-id="${id}"]`);
@@ -335,7 +340,7 @@ function render(T, R) {
   const chip = (id) => `<span class="chip ${statusOf(id)}" title="${esc(STATUS_WORD[statusOf(id)])}">${esc(id)}</span>`;
   const claimsIn = (j) => [...new Set([...results.filter((r) => r.journey === j.id).map((r) => r.claimId), ...(j.claimIds ?? []).filter((id) => !resultOf(id))])];
   const videoUrl = (j) => j.video ? `${BASE}/videos/${encodeURIComponent(j.video.split(/[\\/]/).pop())}` : "";
-  const checkLine = (k) => `${words(k.assert)}${k.expected ? ` "${k.expected}"` : ""}`;
+  const checkLine = (k) => (k.code ? k.code : `${words(k.assert)}${k.expected ? ` "${k.expected}"` : ""}`);
 
   // Two recordings per journey: the replay of the compiled script (clean, the default) and the exploration.
   const replayOf = (j) => R?.journeys?.find((x) => x.id === j.id);
@@ -362,9 +367,17 @@ function render(T, R) {
     T.costUsd != null && ["Cost", `$${T.costUsd.toFixed(2)}`],
     T.startedAt && ["Started", new Date(T.startedAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })],
   ].filter(Boolean).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("");
-  $("summary").innerHTML = failed
+  // Regression checks: tests earlier PRs added, replayed on this PR. One sidebar card per test (a file
+  // with a chain of journeys has several), shown like a journey: its replay video and its checks.
+  const regItems = (G ?? []).flatMap((r) => (r.tests.length ? r.tests : [{ title: r.title, status: r.status }]).map((test, i, all) => ({
+    id: all.length > 1 ? `${r.id}-${i + 1}` : r.id, name: all.length > 1 ? `${r.title} (${i + 1} of ${all.length})` : r.title, reg: r, test,
+  })));
+  const regBroken = (G ?? []).filter((r) => r.status === "failed").length;
+  const regHeld = (G ?? []).filter((r) => r.status === "passed").length;
+  const regSummary = regBroken ? ` · <b>${regBroken} regression${regBroken === 1 ? "" : "s"}</b>` : regHeld ? ` · ${regHeld} regression check${regHeld === 1 ? "" : "s"} passed` : "";
+  $("summary").innerHTML = (failed
     ? `<b>${failed} of ${claims.length} claims failed</b> · ${verified} verified across ${journeys.length} journeys`
-    : `<b>${verified} of ${claims.length} claims verified</b> across ${journeys.length} journey${journeys.length === 1 ? "" : "s"}`;
+    : `<b>${verified} of ${claims.length} claims verified</b> across ${journeys.length} journey${journeys.length === 1 ? "" : "s"}`) + regSummary;
 
   $("journeys").innerHTML = journeys.map((j) => `
     <button class="jcard" role="listitem" data-j="${esc(j.id)}">
@@ -372,6 +385,16 @@ function render(T, R) {
       <span class="jname">${esc(j.name)}</span>
       <span class="chips">${claimsIn(j).map(chip).join("")}</span>
     </button>`).join("");
+  if (regItems.length) {
+    const regStatus = { passed: ["verified", "still works"], failed: ["failed", "broken by this PR"], error: ["error", "couldn't run"] };
+    $("regBlock").hidden = false;
+    $("regressions").innerHTML = regItems.map((it) => `
+      <button class="jcard" role="listitem" data-j="${esc(it.id)}">
+        <span class="jhead"><span>${esc(it.id.toUpperCase())} · from ${esc(it.reg.from)}</span><span>${it.test.seconds != null ? fmt(it.test.seconds) : ""}</span></span>
+        <span class="jname">${esc(it.name)}</span>
+        <span class="chips"><span class="chip ${regStatus[it.reg.status][0]}">${esc(regStatus[it.reg.status][1])}</span></span>
+      </button>`).join("");
+  }
   root.querySelectorAll(".jcard").forEach((b) => b.addEventListener("click", () => { showView("journey"); selectJourney(b.dataset.j); }));
 
   // Journey view
@@ -381,6 +404,8 @@ function render(T, R) {
   let timeline = [];   // steps and checks of the current journey, by time
 
   function selectJourney(id) {
+    const item = regItems.find((it) => it.id === id);
+    if (item) return selectRegression(item);
     current = journeys.find((j) => j.id === id) ?? journeys[0];
     if (!current) return;
     root.querySelectorAll(".jcard").forEach((b) => b.setAttribute("aria-current", String(b.dataset.j === current.id)));
@@ -419,6 +444,34 @@ function render(T, R) {
     updateTime();
   }
 
+  // A regression test: its replay video on this PR, its checks on the timeline, and whether it still works.
+  function selectRegression(item) {
+    current = { id: item.id, regression: item, startPath: "/" };
+    root.querySelectorAll(".jcard").forEach((b) => b.setAttribute("aria-current", String(b.dataset.j === item.id)));
+    timeline = item.reg.checks.filter((c) => c.test === item.test.title)
+      .map((c) => ({ kind: "check", t: c.t, k: { id: c.check, passed: c.passed, code: c.code, title: c.title, reg: true } }))
+      .sort((a, b) => a.t - b.t);
+    const src = item.test.video ? `${BASE}/videos/${encodeURIComponent(item.test.video)}` : "";
+    if (src) {
+      if (video.getAttribute("src") !== src) video.src = src;
+      video.hidden = false; $("vcard").querySelector(".novideo")?.remove();
+    } else { video.removeAttribute("src"); video.hidden = true; if (!$("vcard").querySelector(".novideo")) $("vcard").insertAdjacentHTML("afterbegin", `<div class="novideo">No video for this test</div>`); }
+    const broke = item.reg.checks.filter((c) => c.test === item.test.title && !c.passed);
+    $("verdict").innerHTML = item.reg.status === "passed"
+      ? `<b>Still works.</b> This test was added by ${esc(item.reg.from)} and passes on this PR too.`
+      : item.reg.status === "failed"
+        ? `<b>Regression.</b> This test was added by ${esc(item.reg.from)}, passed then, and fails on this PR` +
+          (broke.length ? `: ${broke.map((c) => esc(c.title)).join("; ")}.` : item.test.error ? `: ${esc(item.test.error)}` : ".") +
+          " If this PR changes that behavior on purpose, update the test in this PR."
+        : `<b>Couldn't run</b> this test${item.reg.error ? `: ${esc(item.reg.error)}` : ""}. This says nothing about the PR.`;
+    $("nClaims").textContent = timeline.length;
+    $("nEvents").textContent = "";
+    $("nNet").textContent = "";
+    drawMarkers();
+    renderPanel();
+    updateTime();
+  }
+
   const length = () => (isFinite(video.duration) && video.duration > 0 ? video.duration : Math.max(1, ...timeline.map((e) => e.t + 2)));
 
   function drawMarkers() {
@@ -428,7 +481,7 @@ function render(T, R) {
     for (const e of timeline) {
       const el = document.createElement("div");
       if (e.kind === "step") { el.className = "tick"; el.title = `${e.s.action} ${e.s.locator ?? e.s.value ?? ""}`; }
-      else { el.className = `dot ${e.k.passed ? "" : "failed"} ${citedIds.has(e.k.id) ? "" : "unused"}`; el.title = `${e.k.id} ${e.k.passed ? "✓" : "✗"} ${checkLine(e.k)}`; }
+      else { el.className = `dot ${e.k.passed ? "" : "failed"} ${e.k.reg || citedIds.has(e.k.id) ? "" : "unused"}`; el.title = `${e.k.id} ${e.k.passed ? "✓" : "✗"} ${checkLine(e.k)}`; }
       el.style.left = pct(e.t);
       track.appendChild(el);
     }

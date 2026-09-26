@@ -2,6 +2,7 @@ import type { ApprovedClaim } from "./comment.js";
 import type { ClaimResult, ClaimStatus } from "./explore/agent.js";
 import type { Check } from "./explore/checks.js";
 import type { ReplayResult } from "./compile/replay.js";
+import type { RegressionResult } from "./regressions.js";
 import type { ExploreRun } from "./explore/run.js";
 
 // Renders an exploration run as the Groundtruth check's conclusion, title, summary and details.
@@ -32,7 +33,27 @@ function replayLine(replay: ReplayResult | undefined): string {
   return `**Replay:** the compiled script passed ${passed} of ${replay.journeys.length} journeys (${bad}). The verdicts above come from exploration; the script needs a look before it can be trusted.`;
 }
 
-export function renderReport(run: ExploreRun, claims: ApprovedClaim[], opts: { sha: string; bootSeconds: number; dashboard: string; replay?: ReplayResult; extra?: string }): CheckReport {
+// Regression checks: tests earlier PRs added, replayed on this one. A failed one fails the check, like a
+// failed claim; one that couldn't run is reported but never counts against the PR.
+function regressionSection(rs: RegressionResult[] | undefined, error: string | undefined): string {
+  if (error) return `**Regression checks:** couldn't run (${error}). This says nothing about the PR's changes.`;
+  if (!rs?.length) return "";
+  const icon = { passed: "✅", failed: "❌", error: "💥" } as const;
+  const failedChecks = (r: RegressionResult) => r.checks.filter((c) => !c.passed).map((c) => `✗ ${c.title}`).join("<br>");
+  return [
+    "**Regression checks:** tests earlier PRs added to this repo, replayed on this PR (no model calls).",
+    "",
+    "| | Test | Added by | Result |",
+    "|---|---|---|---|",
+    ...rs.map((r) => `| ${icon[r.status]} | **${r.id.toUpperCase()}** ${cell(r.title)} | ${cell(r.from)} | ${r.status === "failed"
+      ? `broke: ${failedChecks(r) || cell(r.tests.find((t) => t.error)?.error ?? "a step failed")}` : r.status === "error" ? `couldn't run: ${cell(r.error ?? "")}` : "still works"} |`),
+  ].join("\n");
+}
+
+export function renderReport(run: ExploreRun, claims: ApprovedClaim[], opts: {
+  sha: string; bootSeconds: number; dashboard: string; replay?: ReplayResult;
+  regressions?: RegressionResult[]; regressionError?: string; extra?: string;
+}): CheckReport {
   const resultOf = (id: string): ClaimResult | undefined => run.results.find((r) => r.claimId === id);
   const statusOf = (id: string): ClaimStatus | "none" => resultOf(id)?.status ?? "none";
   const counts = new Map<ClaimStatus | "none", number>();
@@ -40,11 +61,14 @@ export function renderReport(run: ExploreRun, claims: ApprovedClaim[], opts: { s
 
   const failed = counts.get("failed") ?? 0;
   const verified = counts.get("verified") ?? 0;
-  const conclusion = failed ? "failure" : verified === claims.length ? "success" : "neutral";
+  const broken = opts.regressions?.filter((r) => r.status === "failed").length ?? 0;
+  const held = opts.regressions?.filter((r) => r.status === "passed").length ?? 0;
+  const conclusion = failed || broken ? "failure" : verified === claims.length ? "success" : "neutral";
   const others = [...counts].filter(([s]) => s !== "verified" && s !== "failed").map(([s, n]) => `${n} ${WORD[s]}`);
+  const regressionTitle = broken ? [`${broken} regression${broken === 1 ? "" : "s"}`] : held ? [`${held} regression check${held === 1 ? "" : "s"} passed`] : [];
   const title = failed
-    ? [`${failed} of ${claims.length} claims failed`, `${verified} verified`, ...others].join(" · ")
-    : [`${verified} of ${claims.length} claims verified`, ...others].join(" · ");
+    ? [`${failed} of ${claims.length} claims failed`, `${verified} verified`, ...others, ...regressionTitle].join(" · ")
+    : [`${verified} of ${claims.length} claims verified`, ...others, ...regressionTitle].join(" · ");
 
   const checkRef = (id: string) => {
     const k = run.checks.find((x) => x.id === id);
@@ -70,6 +94,8 @@ export function renderReport(run: ExploreRun, claims: ApprovedClaim[], opts: { s
     ...rows,
     observed ? `\n${observed} verdict${observed === 1 ? " rests" : "s rest"} on the agent's own reading because no check could express the result.` : "",
     run.stoppedBecause !== "all claims have a status" ? `\nTesting stopped early: ${run.stoppedBecause}.` : "",
+    "",
+    regressionSection(opts.regressions, opts.regressionError),
   ].join("\n").trimEnd();
 
   const journeys = run.journeys.map((j) => {

@@ -12,8 +12,14 @@ export type CommentState = {
   pr: string;       // owner/repo#number
   headSha: string;  // the commit the claims were read at
   extraction: Extraction;
+  // Tests earlier PRs added to the repo (.groundtruth/tests on the base branch), offered as regression checks.
+  regressions?: RegressionRow[];
   approval?: Approval;
+  // After a run whose compiled tests replayed cleanly: the tests offered for adding to this PR.
+  tests?: { run: string; files: { file: string; title: string }[]; added?: { sha: string; by: string } };
 };
+
+export type RegressionRow = { id: string; file: string; title: string; summary: string; from: string };
 
 // One claim the developer approved for testing: a checked claim or a checked assumption,
 // with their wording if they edited it. `kind` always comes from the original extraction.
@@ -28,7 +34,9 @@ export type Approval = {
   by: string;
   at: string;
   testedSha: string; // the PR head when approved, which testing will run against
+  baseSha?: string;  // the base branch when approved, which regression tests are read from
   claims: ApprovedClaim[];
+  regressions?: RegressionRow[];   // the regression rows the developer kept
 };
 
 const HEADER = "### Groundtruth · what I'll verify";
@@ -70,6 +78,18 @@ export function renderClaimsComment(state: CommentState): string {
     out.push("");
   }
 
+  const regressions = state.regressions ?? [];
+  if (regressions.length) {
+    out.push("#### Regression checks",
+      "Tests that earlier PRs added to this repo. I'll replay them on this PR to catch anything it breaks. " +
+      "Delete a row if this PR changes that behavior on purpose.", "",
+      "| ID | Test | Added by |", "|:--|:--|:--|");
+    for (const r of regressions) {
+      out.push(`| \`${r.id.toUpperCase()}\` | **${cell(r.title)}**<br><sub>${cell(clip(r.summary, 120))}</sub> | ${cell(r.from)} <!-- gt:${r.id} --> |`);
+    }
+    out.push("");
+  }
+
   if (assumptions.length) {
     out.push("#### Please confirm", "Where the PR doesn't say, these are my guesses. Tick the ones you intend and I'll test them too.", "");
     assumptions.forEach((a, i) => {
@@ -87,7 +107,7 @@ export function renderClaimsComment(state: CommentState): string {
       ...regression_hints.map((h) => `- ${h}`), "", "</details>", "");
   }
 
-  if (claims.length || assumptions.length) {
+  if (claims.length || assumptions.length || regressions.length) {
     out.push("---", "- [ ] **Approve and run** <!-- gt:approve -->", "",
       "<sub>To change a claim, edit this comment: reword its row, or delete it. Then tick Approve.</sub>", "");
   }
@@ -110,7 +130,8 @@ export function readState(body: string): CommentState | undefined {
 
 export type ReviewedComment = {
   approveChecked: boolean;
-  lines: Map<string, { checked: boolean; text: string }>; // by marker id: c1, s2, ...
+  addTestsChecked: boolean;
+  lines: Map<string, { checked: boolean; text: string }>; // by marker id: c1, s2, r1, ...
 };
 
 // Finds each claim row and checkbox line by its hidden marker, so reordering or rewording doesn't lose
@@ -119,13 +140,15 @@ export type ReviewedComment = {
 export function parseReview(body: string): ReviewedComment {
   const lines = new Map<string, { checked: boolean; text: string }>();
   let approveChecked = false;
-  for (const m of body.matchAll(/^- \[([ xX])\] (.*?)\s*<!-- gt:(c\d+|s\d+|approve) -->\s*$/gm)) {
+  let addTestsChecked = false;
+  for (const m of body.matchAll(/^- \[([ xX])\] (.*?)\s*<!-- gt:(c\d+|s\d+|approve|addtests) -->\s*$/gm)) {
     const checked = m[1] !== " ";
     if (m[3] === "approve") approveChecked = checked;
+    else if (m[3] === "addtests") addTestsChecked = checked;
     else lines.set(m[3], { checked, text: plain(m[2].replace(/^\*\*\d+\.\*\*\s*/, "").replace(/^`[CA]\d+`\s*/, "")) });
   }
   for (const row of body.split("\n")) {
-    const id = /^\s*\|.*<!-- gt:(c\d+) -->/.exec(row)?.[1];
+    const id = /^\s*\|.*<!-- gt:([cr]\d+) -->/.exec(row)?.[1];
     if (!id) continue;
     const cells = row.trim().replace(/^\|/, "").replace(/\|$/, "").split(/(?<!\\)\|/).map((c) => c.replace(/\\\|/g, "|"));
     const [, claimCell = "", whenCell = ""] = cells;
@@ -133,7 +156,7 @@ export function parseReview(body: string): ReviewedComment {
     const when = plain(whenCell.replace(/<!--.*?-->/g, ""));
     lines.set(id, { checked: !/~~/.test(claimCell), text: line(when, what) });
   }
-  return { approveChecked, lines };
+  return { approveChecked, addTestsChecked, lines };
 }
 
 // Markdown emphasis and whitespace removed: what the developer's wording says.
@@ -164,9 +187,47 @@ export function approvedClaims(state: CommentState, review: ReviewedComment): Ap
 // and updates the hidden state. Everything else in the body is left as they left it.
 export function markApproved(body: string, state: CommentState): string {
   const n = state.approval!.claims.length;
-  const banner = `✅ **Approved by @${state.approval!.by}: ${n} claim${n === 1 ? "" : "s"} will be tested.** ` +
+  const r = state.approval!.regressions?.length ?? 0;
+  const what = `${n} claim${n === 1 ? "" : "s"}${r ? ` and ${r} regression check${r === 1 ? "" : "s"}` : ""}`;
+  const banner = `✅ **Approved by @${state.approval!.by}: ${what} will be tested.** ` +
     "Follow along on the Groundtruth check. Edits after approval are ignored; reopen the PR to start over.";
+  return withState(body, state).replace(HEADER, `${HEADER}\n\n${banner}`);
+}
+
+// The regression rows the developer kept: rows still present and not struck through.
+export function approvedRegressions(state: CommentState, review: ReviewedComment): RegressionRow[] {
+  return (state.regressions ?? []).filter((r) => review.lines.get(r.id)?.checked);
+}
+
+// After a run whose compiled tests replayed cleanly: offers to commit them to the PR.
+export function offerTests(body: string, state: CommentState, runUrl: string): string {
+  const files = state.tests!.files;
+  const n = files.length;
+  const section = [
+    "---",
+    "#### Tests from this run",
+    `Every claim was verified, and the compiled Playwright tests replayed cleanly ([see the run](${runUrl})). ` +
+      "Add them to this PR and later PRs are checked against them.",
+    "",
+    ...files.map((f) => `- ${"`"}.groundtruth/tests/${f.file}${"`"}: ${f.title}`),
+    "",
+    `- [ ] **Add these ${n} test${n === 1 ? "" : "s"} to this PR** <!-- gt:addtests -->`,
+    "",
+  ].join("\n");
+  const start = body.indexOf(STATE_PREFIX);
+  return body.slice(0, start) + section + "\n" + withState(body.slice(start), state);
+}
+
+// After the tests were committed: replaces the offer with where they went, and updates the state.
+export function markTestsAdded(body: string, state: CommentState, commitUrl: string): string {
+  const { added, files } = state.tests!;
+  const note = `✅ **Added ${files.length} test${files.length === 1 ? "" : "s"} to this PR** in [${added!.sha.slice(0, 7)}](${commitUrl}), for @${added!.by}.`;
+  return withState(body, state).replace(/^- \[[ xX]\] \*\*Add these .*<!-- gt:addtests -->\s*$/m, note);
+}
+
+// Replaces the hidden state in a comment body.
+function withState(body: string, state: CommentState): string {
   const start = body.indexOf(STATE_PREFIX);
   const end = body.indexOf(" -->", start) + " -->".length;
-  return (body.slice(0, start) + encodeState(state) + body.slice(end)).replace(HEADER, `${HEADER}\n\n${banner}`);
+  return body.slice(0, start) + encodeState(state) + body.slice(end);
 }
