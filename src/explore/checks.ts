@@ -110,6 +110,25 @@ export async function runAssertion(
   }
 }
 
+// The Playwright assertion a check stands for, as shown on screen in videos (the compiled script adds
+// soft mode and a message). `target` is locator code such as page.getByTestId("cart-link").
+export function assertionCode(assert: Assertion, target: string | undefined, expected: string | undefined): string {
+  const t = target ?? "page";
+  const x = JSON.stringify(expected ?? "");
+  const matcher: Record<Assertion, string> = {
+    visible: "toBeVisible()", hidden: "toBeHidden()", contains_text: `toContainText(${x})`, has_text: `toHaveText(${x})`,
+    count: `toHaveCount(${Number(expected)})`, value: `toHaveValue(${x})`, disabled: "toBeDisabled()", enabled: "toBeEnabled()",
+    checked: "toBeChecked()", unchecked: "toBeChecked({ checked: false })",
+    expanded: `toHaveAttribute("aria-expanded", "true")`, collapsed: `toHaveAttribute("aria-expanded", "false")`,
+    selected: `toHaveAttribute("aria-selected", "true")`, invalid: "", url: `toHaveURL(${x})`, request_sent: "", request_not_sent: "",
+  };
+  // Not single matchers in Playwright: shown as what the compiled script does, or as a plain description.
+  if (assert === "invalid") return `expect.poll(() => ${t}.evaluate((e) => e.validity.valid)).toBe(false)`;
+  if (assert === "request_sent") return `// a request ${x} was sent`;
+  if (assert === "request_not_sent") return `// no request ${x} was sent`;
+  return `expect(${assert === "url" ? "page" : t}).${matcher[assert]}`;
+}
+
 // "POST /api/cart" matches a POST whose path starts with /api/cart; "/api/cart" matches any method.
 export function requestMatches(r: RequestRecord, spec: string): boolean {
   const m = spec.trim().match(/^(?:([A-Za-z]+)\s+)?(\S+)$/);

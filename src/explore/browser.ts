@@ -1,5 +1,7 @@
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { type Browser, type BrowserContext, chromium, type Locator, type Page, type Request } from "playwright";
-import { type Assertion, type Check, PAGE_ASSERTIONS, type RequestRecord, runAssertion } from "./checks.js";
+import { type Assertion, assertionCode, type Check, PAGE_ASSERTIONS, type RequestRecord, runAssertion } from "./checks.js";
 
 // The browser the exploring agent drives. The agent sees the page as an accessibility snapshot whose
 // elements carry throwaway refs (e12); every action resolves a ref to the stable locator Playwright
@@ -40,7 +42,11 @@ const SETTLE_QUIET_MS = 500;       // the page counts as settled after this long
 const SETTLE_MAX_MS = 12_000;      // give up waiting after this long
 const DOM_CHURN_MS = 3_000;        // after this long, ignore DOM changes alone (animations, clocks)
 const LONG_REQUEST_MS = 10_000;    // requests open longer than this (polling, streams) don't count as pending
-const CHECK_HOLD_MS = 1_400;       // how long a check's box and banner stay on screen for the video
+const CHECK_HOLD_MS = 2_500;       // how long a check's box and banner stay on screen for the video
+const POINT_MS = 550;              // the cursor glides to its target before each action, for the video
+
+// The cursor and check banner drawn into videos; shared with compiled scripts (src/compile/template/).
+const OVERLAY = readFileSync(fileURLToPath(new URL("../compile/template/overlay.js", import.meta.url)), "utf8");
 
 export class ExplorerBrowser {
   readonly steps: Step[] = [];
@@ -108,6 +114,11 @@ export class ExplorerBrowser {
     return this.record(action, async () => {
       // Act through the stable locator: it's what the script will use, and what the video's action label shows.
       const { locator: el, description, stable } = await this.resolve(ref);
+      // Move the mouse there first so the video's cursor visibly travels to the element before acting.
+      if (this.videoDir) {
+        await el.hover({ timeout: 10_000 }).catch(() => {});
+        await this.page.waitForTimeout(POINT_MS);
+      }
       // Playwright waits until the element is visible, enabled and stable, then acts like a user.
       if (action === "click") await el.click({ timeout: 10_000 });
       else if (action === "type") await el.fill(value ?? "", { timeout: 10_000 });
@@ -145,7 +156,8 @@ export class ExplorerBrowser {
   }
 
   // Runs one assertion from the menu against the page as it is now, records it, and marks it in the video.
-  async check(c: { assert: Assertion; target?: CheckTarget; expected?: string; claimIds: string[] }): Promise<Check> {
+  // `label` names what's being checked in the video's banner (e.g. the claim's text).
+  async check(c: { assert: Assertion; target?: CheckTarget; expected?: string; claimIds: string[]; label?: string }): Promise<Check> {
     const onPage = PAGE_ASSERTIONS.includes(c.assert);
     if (!onPage && !c.target) throw new Error(`${c.assert} needs a target`);
     const target = onPage ? undefined : await this.checkTarget(c.target!);
@@ -158,7 +170,7 @@ export class ExplorerBrowser {
       assert: c.assert, locator: target?.description, expected: c.expected, observed, passed,
     };
     this.checks.push(check);
-    await this.showCheck(check, target?.locator);
+    await this.showCheck(check, target?.locator, c.label);
     return check;
   }
 
@@ -184,26 +196,23 @@ export class ExplorerBrowser {
     return { locator, description };
   }
 
-  // Draws the check into the page for the video: a box around the element(s) and a ✓/✗ banner, briefly.
-  private async showCheck(check: Check, target?: Locator): Promise<void> {
+  // Draws the check into the page for the video: a box around the element(s), and a banner naming the
+  // claim and showing the Playwright assertion, held long enough to read.
+  private async showCheck(check: Check, target?: Locator, label?: string): Promise<void> {
+    if (!this.videoDir) return;
     const colour = check.passed ? "#0b8259" : "#c03d29";
-    const label = `${check.passed ? "✓" : "✗"} ${check.claimIds.join(", ")} · ${check.assert.replace(/_/g, " ")}${check.expected ? ` "${check.expected}"` : ""}`;
+    const ids = check.claimIds.map((id) => id.toUpperCase()).join(", ");
+    const title = label ? `${ids} · ${label}` : `${ids} · ${check.assert.replace(/_/g, " ")}`;
+    const code = assertionCode(check.assert, check.locator ? `page.${check.locator.replace(/ \(not unique\)$/, "")}` : undefined, check.expected);
     try {
       if (target && (await target.count()) > 0) {
         await target.highlight({ style: { outline: `3px solid ${colour}`, outlineOffset: "3px", borderRadius: "6px", background: `${colour}1f` } });
       }
-      await this.page.evaluate(([text, colour]) => {
-        const el = document.createElement("div");
-        el.id = "__groundtruth_check";
-        el.setAttribute("aria-hidden", "true");
-        el.textContent = text;
-        el.style.cssText = `position:fixed;top:12px;left:12px;z-index:2147483647;pointer-events:none;background:${colour};color:#fff;`
-          + "font:600 18px/1.3 system-ui,sans-serif;padding:8px 14px;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.25);max-width:70vw";
-        document.documentElement.appendChild(el);
-      }, [label, colour] as const);
+      await this.page.evaluate(([t, c, p]) => (window as unknown as { __gtShowCheck?: (t: string, c: string, p: boolean) => void }).__gtShowCheck?.(t, c, p),
+        [title, code, check.passed] as const);
       await this.page.waitForTimeout(CHECK_HOLD_MS);
     } catch { /* the overlay is cosmetic; a page that navigated away mid-check just loses it */ }
-    await this.page.evaluate(() => document.getElementById("__groundtruth_check")?.remove()).catch(() => {});
+    await this.page.evaluate(() => (window as unknown as { __gtHideCheck?: () => void }).__gtHideCheck?.()).catch(() => {});
     await this.page.hideHighlight().catch(() => {});
   }
 
@@ -212,14 +221,28 @@ export class ExplorerBrowser {
       extraHTTPHeaders: this.headers,       // the tunnel's token, on every request the page makes
       viewport: { width: 1280, height: 800 },
       recordVideo: this.videoDir
-        ? { dir: this.videoDir, size: { width: 1280, height: 800 }, showActions: { duration: 600, position: "top-right", fontSize: 18, cursor: "pointer" } }
+        ? { dir: this.videoDir, size: { width: 1280, height: 800 }, showActions: { duration: 500, position: "top-right", fontSize: 18, cursor: "none" } }
         : undefined,
     });
+    // Our own always-visible cursor and check banner (Playwright's cursor only appears during an action).
+    if (this.videoDir) await this.context.addInitScript({ content: OVERLAY });
     // Count DOM changes so settle() can tell when the page has stopped updating.
     await this.context.addInitScript(() => {
       const w = window as unknown as { __gtChanges: number };
       w.__gtChanges = 0;
-      new MutationObserver(() => { w.__gtChanges++; }).observe(document, { subtree: true, childList: true, characterData: true, attributes: true });
+      // Changes to video overlays (our cursor and check banners, Playwright's x-pw-* action annotations)
+      // aren't the page changing.
+      const ours = (n: Node | null) => {
+        for (let e: Element | null = n instanceof Element ? n : (n?.parentElement ?? null); e; ) {
+          if (e.hasAttribute("data-gt-overlay") || e.tagName.startsWith("X-PW-")) return true;
+          const root = e.getRootNode();
+          e = e.parentElement ?? (root instanceof ShadowRoot ? root.host : null);
+        }
+        return false;
+      };
+      new MutationObserver((records) => {
+        if (records.some((r) => !ours(r.target) && !(r.type === "childList" && [...r.addedNodes, ...r.removedNodes].every(ours)))) w.__gtChanges++;
+      }).observe(document, { subtree: true, childList: true, characterData: true, attributes: true });
     });
     this.page = await this.context.newPage();
     this.journeyStarted = Date.now();

@@ -14,7 +14,9 @@ export default defineConfig({
     extraHTTPHeaders: process.env.GROUNDTRUTH_HEADERS ? JSON.parse(process.env.GROUNDTRUTH_HEADERS) : undefined,
     viewport: { width: 1280, height: 800 },
     actionTimeout: 15_000,
-    video: { mode: "on", size: { width: 1280, height: 800 }, show: { actions: { duration: 500, fontSize: 18, cursor: "pointer" } } },
+    // A little slower than full speed, so the video is easy to follow (the helper also points before acting).
+    launchOptions: { slowMo: 150 },
+    video: { mode: "on", size: { width: 1280, height: 800 }, show: { actions: { duration: 500, fontSize: 18, cursor: "none" } } },
     trace: "retain-on-failure",
   },
 });

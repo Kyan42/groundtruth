@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import type { ApprovedClaim } from "../comment.js";
 import type { ClaimResult } from "../explore/agent.js";
 import type { Journey, Step } from "../explore/browser.js";
-import type { Check } from "../explore/checks.js";
+import { assertionCode, type Check } from "../explore/checks.js";
 
 // Step 3, first cut: compile an exploration trace into Playwright tests, one per journey. Rules, not a
 // model: keep the actions that succeeded and the checks the verdicts rest on, in the order they happened;
@@ -79,7 +79,21 @@ export function compileRun(trace: Trace, runId: string): Compiled {
     "",
   ].join("\n");
 
-  return { files: { "journeys.spec.ts": spec, "groundtruth.ts": template("groundtruth.ts"), "playwright.config.ts": template("playwright.config.ts") }, notes };
+  // What each check's banner in the replay video says: the claim, and the assertion as Playwright code.
+  const banners: Record<string, { title: string; code: string }> = {};
+  for (const k of trace.checks.filter((k) => cited.has(k.id))) {
+    const claim = trace.claims.find((c) => c.id === k.claimIds[0]);
+    const target = k.assert === "url" ? undefined : k.locator ? loc(k.locator, k.id) : undefined;
+    banners[k.id] = { title: `${k.claimIds.map((id) => id.toUpperCase()).join(", ")} · ${claim?.then.what ?? k.assert}`, code: assertionCode(k.assert, target, k.expected) };
+  }
+
+  return {
+    files: {
+      "journeys.spec.ts": spec, "checks.json": JSON.stringify(banners, null, 2),
+      "groundtruth.ts": template("groundtruth.ts"), "overlay.js": template("overlay.js"), "playwright.config.ts": template("playwright.config.ts"),
+    },
+    notes,
+  };
 }
 
 const isAction = (s: Step) => ["click", "type", "select", "press", "navigate", "back", "wait_for"].includes(s.action);

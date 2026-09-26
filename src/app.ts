@@ -22,10 +22,16 @@ app.webhooks.onAny(({ id, name, payload }) => {
 });
 
 // Respond to GitHub right away (it waits at most 10s); the work happens in the background.
-app.webhooks.on(["pull_request.opened", "pull_request.reopened"], ({ octokit, payload }) => {
+// A PR is read when it's opened or reopened, or when a draft is marked ready for review. Drafts are
+// skipped: their description is usually still being written.
+app.webhooks.on(["pull_request.opened", "pull_request.reopened", "pull_request.ready_for_review"], ({ octokit, payload }) => {
   const { repository, pull_request: pr } = payload;
   const ref: PrRef = { owner: repository.owner.login, repo: repository.name, number: pr.number };
   const label = `${repository.full_name}#${pr.number}`;
+  if (pr.draft) {
+    console.log(`[groundtruth] ${label} is a draft; waiting until it's marked ready for review`);
+    return;
+  }
   console.log(`[groundtruth] ${label} "${pr.title}" (head ${pr.head.sha.slice(0, 7)}), ` +
     `queued (${extractions.active} running, ${extractions.queued} waiting)`);
 

@@ -107,7 +107,7 @@ main{min-width:0;display:flex;flex-direction:column}
 
 .stage{display:flex;justify-content:center;padding:18px 28px 8px}
 .vcard{position:relative;width:min(100%,860px);border-radius:14px;overflow:hidden;background:#000;box-shadow:var(--shadow);border:1px solid var(--line)}
-.vcard video{display:block;width:100%;height:auto;aspect-ratio:16/10;background:#fff}
+.vcard video{display:block;width:100%;height:auto;aspect-ratio:16/10;background:#fff;cursor:pointer}
 .caption{position:absolute;left:0;right:0;bottom:0;padding:26px 16px 10px;background:linear-gradient(transparent,rgba(0,0,0,.72));color:#fff;font:12.5px var(--mono);display:flex;gap:10px;align-items:baseline;pointer-events:none}
 .caption .ct{opacity:.7}
 .caption .ok{color:#7ff0c3} .caption .bad{color:#ff9d91}
@@ -557,7 +557,9 @@ function render(T, R) {
     }
     drawMarkers(); updateTime();
   });
-  $("play").addEventListener("click", () => (video.paused ? video.play().catch(() => {}) : video.pause()));
+  const togglePlay = () => (video.paused ? video.play().catch(() => {}) : video.pause());
+  $("play").addEventListener("click", togglePlay);
+  video.addEventListener("click", togglePlay);   // clicking the video itself plays and pauses it
   $("track").addEventListener("click", (e) => { const r = e.currentTarget.getBoundingClientRect(); video.currentTime = ((e.clientX - r.left) / r.width) * length(); });
   $("track").addEventListener("keydown", (e) => { if (e.key === "ArrowRight") video.currentTime += 2; if (e.key === "ArrowLeft") video.currentTime -= 2; });
   root.querySelectorAll('[role="tab"]').forEach((b) => b.addEventListener("click", () => { tab = b.dataset.tab; renderPanel(); }));

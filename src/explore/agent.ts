@@ -258,7 +258,9 @@ async function runTool(
       if (NEEDS_EXPECTED.includes(assert) && !input.expected) throw new Error(`${assert} needs expected`);
       const target: CheckTarget | undefined = PAGE_ASSERTIONS.includes(assert) ? undefined
         : { ref: input.ref, role: input.role, name: input.name, text: input.text, within: input.within };
-      const check = await browser.check({ assert, target, expected: input.expected, claimIds: (input.claim_ids as unknown as string[]) ?? [] });
+      const claimIds = (input.claim_ids as unknown as string[]) ?? [];
+      const label = claims.find((c) => c.id === claimIds[0])?.then.what;   // named in the video's banner
+      const check = await browser.check({ assert, target, expected: input.expected, claimIds, label });
       onEvent?.({ type: "check", check });
       return `${check.id} ${check.passed ? "PASSED" : "FAILED"}: ${check.locator ? `${check.locator} ` : ""}${assert}${check.expected ? ` "${check.expected}"` : ""}. Observed: ${check.observed}`;
     }
