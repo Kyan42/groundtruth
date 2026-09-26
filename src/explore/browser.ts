@@ -135,11 +135,13 @@ export class ExplorerBrowser {
     return this.record("press", async () => { await this.page.keyboard.press(key); return { value: key }; });
   }
 
-  async navigate(path: string): Promise<string> {
+  // Typing an address, which the agent may only do for a stated reason (recorded with the step, so every
+  // URL jump in a trace carries its justification); otherwise it moves through the UI.
+  async navigate(path: string, reason?: string): Promise<string> {
     return this.record("navigate", async () => {
       const url = this.appUrl(path);
       await this.page.goto(url.toString(), { waitUntil: "load" });
-      return { value: url.pathname + url.search };
+      return { value: url.pathname + url.search, note: reason ? `by address: ${reason.replace(/_/g, " ")}` : undefined };
     });
   }
 

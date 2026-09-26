@@ -49,6 +49,8 @@ You see the page as an accessibility snapshot: each element's role, name and sta
 
 How to work:
 - Start from the snapshot you're given. Find the path to each claim's starting point, perform its actions, then check its result.
+- Move through the app the way a user does: click links, buttons, menus and tabs. These are end-to-end tests, so how you reach a page is part of what's tested. A journey may start on the page a claim begins on (start_path); after that, don't type addresses. Use navigate only when the claim is about a URL itself, to reload or reopen a page, or when you've looked and the UI has no way to get there (that's worth reporting).
+- Never guess URLs or API endpoints the app doesn't show you. If a claim needs data or a state the app gives you no way to create, record it as unreachable and say what's missing.
 - Supply whatever a claim needs but doesn't spell out, like a competent tester would (e.g. pick an item that is in stock). Note what you chose in the evidence.
 - Each action waits for the page to finish reacting (requests and updates) before returning its snapshot. Use wait_for only when something appears later than that.
 - When a claim offers alternatives (e.g. "reload or start a new session"), test the most demanding one it names.
@@ -130,8 +132,19 @@ const TOOLS: Anthropic.Tool[] = [
     input_schema: { type: "object", properties: { ref: { type: "string" }, option: { type: "string" } }, required: ["ref", "option"], additionalProperties: false } },
   { name: "press", description: "Press a key on the focused element, e.g. Enter, Escape, Tab. Returns a fresh snapshot.",
     input_schema: { type: "object", properties: { key: { type: "string" } }, required: ["key"], additionalProperties: false } },
-  { name: "navigate", description: "Open a path within the app, e.g. /cart. Returns a fresh snapshot.",
-    input_schema: { type: "object", properties: { path: { type: "string" } }, required: ["path"], additionalProperties: false } },
+  { name: "navigate",
+    description: "Type a path into the address bar, e.g. /cart. Only for the reasons listed; otherwise get there through the UI. Returns a fresh snapshot.",
+    input_schema: {
+      type: "object",
+      properties: {
+        path: { type: "string" },
+        reason: {
+          type: "string", enum: ["claim_is_about_this_url", "reload_or_reopen", "no_link_to_it"],
+          description: "claim_is_about_this_url: the claim is about visiting this address (a deep link, a query string, an unknown page). reload_or_reopen: going back to the page you're on or were just on, to check something survives. no_link_to_it: you looked and the UI has no way to get there (say so in the evidence).",
+        },
+      },
+      required: ["path", "reason"], additionalProperties: false,
+    } },
   { name: "back", description: "Go back one page in the browser history. Returns a fresh snapshot.",
     input_schema: { type: "object", properties: {}, additionalProperties: false } },
   { name: "wait_for", description: "Wait up to `seconds` (default 10) for text to appear on the page. Returns a fresh snapshot.",
@@ -272,7 +285,7 @@ async function runTool(
     case "type": return browser.act("type", input.ref, input.text);
     case "select": return browser.act("select", input.ref, input.option);
     case "press": return browser.press(input.key);
-    case "navigate": return browser.navigate(input.path);
+    case "navigate": return browser.navigate(input.path, input.reason);
     case "back": return browser.back();
     case "wait_for": return browser.waitFor(input.text, Number(input.seconds ?? 10));
     case "clock": return browser.clock(input.action as "fast_forward" | "set_time", String(input.value));
