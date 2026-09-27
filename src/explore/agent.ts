@@ -49,6 +49,8 @@ You see the page as an accessibility snapshot: each element's role, name and sta
 
 How to work:
 - Start from the snapshot you're given. Find the path to each claim's starting point, perform its actions, then check its result.
+- Move through the app the way a user does: click links, buttons, menus and tabs. These are end-to-end tests, so how you reach a page is part of what's tested. A journey may start on the page a claim begins on (start_path); after that, don't type addresses. Use navigate only when the claim is about a URL itself, to reload or reopen a page, or when you've looked and the UI has no way to get there (that's worth reporting).
+- Never guess URLs or API endpoints the app doesn't show you. If a claim needs data or a state the app gives you no way to create, record it as unreachable and say what's missing.
 - Supply whatever a claim needs but doesn't spell out, like a competent tester would (e.g. pick an item that is in stock). Note what you chose in the evidence.
 - Each action waits for the page to finish reacting (requests and updates) before returning its snapshot. Use wait_for only when something appears later than that.
 - When a claim offers alternatives (e.g. "reload or start a new session"), test the most demanding one it names.
@@ -61,6 +63,10 @@ Checking results:
 - When the claim is about a change, check the before state too if it's cheap (the badge contains "0" before adding).
 - Use as many checks as the claim needs ("one line with quantity 2" is a count of lines equal to 1, plus the line contains "Qty 2").
 - Prefer contains_text unless the whole text matters. Avoid expected values that change between runs (dates, generated ids).
+- Time: never use a relative time ("2 minutes ago") or the current date as an expected value unless you controlled it. When a result depends on time passing:
+  1. If the exact time isn't the point, check the stable part (e.g. contains "Added").
+  2. Otherwise start the journey with control_clock and use clock fast_forward (instant; the replay moves the clock the same way). Check it works: if the time shown on the page doesn't change after fast-forwarding, the server computes it and the fake clock can't help.
+  3. Only then, if the exact amount matters, wait in real time (keep it to a few minutes: every replay of the test waits as long).
 - To check that something is absent or hidden, or to count elements, target them by role (and name) or by text, optionally within a container ref.
 - Request checks look at requests since your last action; expected is like "POST /api/cart" (a path prefix, method optional).
 - If a check failed because you targeted the wrong element or gave a wrong expected value, fix it and check again, and say so in the evidence.
@@ -95,8 +101,26 @@ const TOOLS: Anthropic.Tool[] = [
         claim_ids: { type: "array", items: { type: "string" } },
         start_path: { type: "string", description: "Path within the app to start at; defaults to /" },
         reset_data: { type: "boolean", description: "Restore the app's starting data first" },
+        control_clock: { type: "boolean", description: "Give the page a fake clock you can move with the clock tool (needed before using it)" },
       },
       required: ["name", "claim_ids"], additionalProperties: false,
+    } },
+  { name: "clock",
+    description: "Move the page's clock (journeys started with control_clock only): fast_forward by a number of seconds, or set_time to a date and time (ISO). Instant. Only time inside the browser moves; times the server computes don't change. Returns a fresh snapshot.",
+    input_schema: {
+      type: "object",
+      properties: {
+        action: { type: "string", enum: ["fast_forward", "set_time"] },
+        value: { type: "string", description: "Seconds for fast_forward (e.g. \"120\"), or a date and time for set_time (e.g. \"2026-09-26T09:00\")" },
+      },
+      required: ["action", "value"], additionalProperties: false,
+    } },
+  { name: "wait",
+    description: "Wait in real time (1-300 seconds), e.g. for something the server times. Slow: the replayed test waits just as long, so use it only when the clock tool can't help.",
+    input_schema: {
+      type: "object",
+      properties: { seconds: { type: "number" }, reason: { type: "string", description: "What you're waiting for, shown in the video" } },
+      required: ["seconds", "reason"], additionalProperties: false,
     } },
   { name: "snapshot", description: "Get the current page's accessibility snapshot (URL, title, elements with refs).",
     input_schema: { type: "object", properties: {}, additionalProperties: false } },
@@ -108,8 +132,19 @@ const TOOLS: Anthropic.Tool[] = [
     input_schema: { type: "object", properties: { ref: { type: "string" }, option: { type: "string" } }, required: ["ref", "option"], additionalProperties: false } },
   { name: "press", description: "Press a key on the focused element, e.g. Enter, Escape, Tab. Returns a fresh snapshot.",
     input_schema: { type: "object", properties: { key: { type: "string" } }, required: ["key"], additionalProperties: false } },
-  { name: "navigate", description: "Open a path within the app, e.g. /cart. Returns a fresh snapshot.",
-    input_schema: { type: "object", properties: { path: { type: "string" } }, required: ["path"], additionalProperties: false } },
+  { name: "navigate",
+    description: "Type a path into the address bar, e.g. /cart. Only for the reasons listed; otherwise get there through the UI. Returns a fresh snapshot.",
+    input_schema: {
+      type: "object",
+      properties: {
+        path: { type: "string" },
+        reason: {
+          type: "string", enum: ["claim_is_about_this_url", "reload_or_reopen", "no_link_to_it"],
+          description: "claim_is_about_this_url: the claim is about visiting this address (a deep link, a query string, an unknown page). reload_or_reopen: going back to the page you're on or were just on, to check something survives. no_link_to_it: you looked and the UI has no way to get there (say so in the evidence).",
+        },
+      },
+      required: ["path", "reason"], additionalProperties: false,
+    } },
   { name: "back", description: "Go back one page in the browser history. Returns a fresh snapshot.",
     input_schema: { type: "object", properties: {}, additionalProperties: false } },
   { name: "wait_for", description: "Wait up to `seconds` (default 10) for text to appear on the page. Returns a fresh snapshot.",
@@ -163,7 +198,7 @@ export async function explore(opts: {
 }): Promise<ExploreResult> {
   const client = opts.client ?? new Anthropic();
   const model = opts.model ?? DEFAULT_EXPLORE_MODEL;
-  const maxTurns = opts.maxTurns ?? 40;
+  const maxTurns = opts.maxTurns ?? 60;
   const { browser } = opts;
   const results: ClaimResult[] = [];
   const usage = { input: 0, cacheWrite: 0, cacheRead: 0, output: 0 };
@@ -209,7 +244,7 @@ export async function explore(opts: {
         toolResults.push({ type: "tool_result", tool_use_id: use.id, content });
         if (use.name !== "record_status" && use.name !== "check") {
           const summary = use.name === "start_journey" ? `${browser.journey.id} "${input.name}" (${(input.claim_ids as unknown as string[]).join(", ")})${input.reset_data ? ", data reset" : ""}`
-            : browser.steps.at(-1)?.locator ?? input.path ?? input.key ?? input.text ?? "";
+            : browser.steps.at(-1)?.locator ?? input.path ?? input.key ?? input.text ?? (input.action ? `${input.action} ${input.value}` : input.seconds ? `${input.seconds}s: ${input.reason}` : "");
           opts.onEvent?.({ type: "tool", name: use.name, input, ok: true, summary });
         }
       } catch (err) {
@@ -240,16 +275,21 @@ async function runTool(
         if (!resetApp) throw new Error("This app has no reset command; start the journey without reset_data");
         await resetApp();
       }
-      return browser.startJourney({ name: input.name, claimIds: input.claim_ids as unknown as string[], startPath: input.start_path, resetData });
+      return browser.startJourney({
+        name: input.name, claimIds: input.claim_ids as unknown as string[], startPath: input.start_path, resetData,
+        controlClock: Boolean(input.control_clock),
+      });
     }
     case "snapshot": return browser.snapshot();
     case "click": return browser.act("click", input.ref);
     case "type": return browser.act("type", input.ref, input.text);
     case "select": return browser.act("select", input.ref, input.option);
     case "press": return browser.press(input.key);
-    case "navigate": return browser.navigate(input.path);
+    case "navigate": return browser.navigate(input.path, input.reason);
     case "back": return browser.back();
     case "wait_for": return browser.waitFor(input.text, Number(input.seconds ?? 10));
+    case "clock": return browser.clock(input.action as "fast_forward" | "set_time", String(input.value));
+    case "wait": return browser.wait(Number(input.seconds), input.reason);
     case "screenshot":
       return [{ type: "image", source: { type: "base64", media_type: "image/png", data: await browser.screenshot() } }];
     case "check": {
@@ -258,7 +298,9 @@ async function runTool(
       if (NEEDS_EXPECTED.includes(assert) && !input.expected) throw new Error(`${assert} needs expected`);
       const target: CheckTarget | undefined = PAGE_ASSERTIONS.includes(assert) ? undefined
         : { ref: input.ref, role: input.role, name: input.name, text: input.text, within: input.within };
-      const check = await browser.check({ assert, target, expected: input.expected, claimIds: (input.claim_ids as unknown as string[]) ?? [] });
+      const claimIds = (input.claim_ids as unknown as string[]) ?? [];
+      const label = claims.find((c) => c.id === claimIds[0])?.then.what;   // named in the video's banner
+      const check = await browser.check({ assert, target, expected: input.expected, claimIds, label });
       onEvent?.({ type: "check", check });
       return `${check.id} ${check.passed ? "PASSED" : "FAILED"}: ${check.locator ? `${check.locator} ` : ""}${assert}${check.expected ? ` "${check.expected}"` : ""}. Observed: ${check.observed}`;
     }

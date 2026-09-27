@@ -1,13 +1,17 @@
 import type { Octokit } from "@octokit/core";
+import path from "node:path";
 import {
-  approvedClaims, COMMENT_MARKER, markApproved, parseReview, readState, renderClaimsComment, renderError,
-  renderPlaceholder,
+  approvedClaims, approvedRegressions, COMMENT_MARKER, type CommentState, markApproved, markTestsAdded, parseReview,
+  readState, type RegressionRow, renderClaimsComment, renderError, renderPlaceholder,
 } from "./comment.js";
 import { config } from "./config.js";
-import { buildEvidence, listAll, type PrRef, renderEvidence } from "./evidence.js";
+import { runUrl } from "./dashboard/server.js";
+import { buildEvidence, type PrRef, renderEvidence } from "./evidence.js";
 import { extractClaims } from "./extract.js";
 import { githubApp } from "./github.js";
 import { createLimiter } from "./limit.js";
+import { editComment, upsertComment } from "./pr-comment.js";
+import { branchTip, commitTests, readRegistry } from "./registry.js";
 import { startTesting } from "./testing.js";
 
 export const app = githubApp;
@@ -22,10 +26,16 @@ app.webhooks.onAny(({ id, name, payload }) => {
 });
 
 // Respond to GitHub right away (it waits at most 10s); the work happens in the background.
-app.webhooks.on(["pull_request.opened", "pull_request.reopened"], ({ octokit, payload }) => {
+// A PR is read when it's opened or reopened, or when a draft is marked ready for review. Drafts are
+// skipped: their description is usually still being written.
+app.webhooks.on(["pull_request.opened", "pull_request.reopened", "pull_request.ready_for_review"], ({ octokit, payload }) => {
   const { repository, pull_request: pr } = payload;
   const ref: PrRef = { owner: repository.owner.login, repo: repository.name, number: pr.number };
   const label = `${repository.full_name}#${pr.number}`;
+  if (pr.draft) {
+    console.log(`[groundtruth] ${label} is a draft; waiting until it's marked ready for review`);
+    return;
+  }
   console.log(`[groundtruth] ${label} "${pr.title}" (head ${pr.head.sha.slice(0, 7)}), ` +
     `queued (${extractions.active} running, ${extractions.queued} waiting)`);
 
@@ -51,11 +61,13 @@ async function handleReview(
 ): Promise<void> {
   const state = readState(body);
   if (!state) return; // still the placeholder or an error
+  const review = parseReview(body);
   if (state.approval) {
+    // After approval the only thing we act on is "Add these tests to this PR".
+    if (state.tests && !state.tests.added && review.addTestsChecked) return addTests(octokit, ref, commentId, body, state, by, label);
     console.log(`[groundtruth] ${label}: edited by ${by} after approval; ignored`);
     return;
   }
-  const review = parseReview(body);
   if (!review.approveChecked) {
     console.log(`[groundtruth] ${label}: edited by ${by}, not approved yet`);
     return;
@@ -65,9 +77,12 @@ async function handleReview(
   const { data: pr } = await octokit.request("GET /repos/{owner}/{repo}/pulls/{pull_number}", {
     owner: ref.owner, repo: ref.repo, pull_number: ref.number,
   });
-  state.approval = { by, at: new Date().toISOString(), testedSha: pr.head.sha, claims };
+  const regressions = approvedRegressions(state, review);
+  // Regression tests are read from the base branch as it is now (the PR's recorded base commit can be stale).
+  const baseSha = await branchTip(octokit, ref, pr.base.ref);
+  state.approval = { by, at: new Date().toISOString(), testedSha: pr.head.sha, baseSha, claims, regressions };
   await editComment(octokit, ref, commentId, markApproved(body, state));
-  const checkId = await startTesting(octokit, ref, pr.head.sha, claims);
+  const checkId = await startTesting(octokit, ref, pr.head.sha, claims, { approvedBy: by, baseSha, regressions });
 
   // How the developer's review differs from what we extracted: a real-world precision signal.
   const { extraction } = state;
@@ -75,7 +90,25 @@ async function handleReview(
   const flipped = extraction.assumptions.filter((a, i) => (review.lines.get(`s${i + 1}`)?.checked ?? a.checked) !== a.checked).length;
   console.log(`[groundtruth] ${label}: approved by ${by}: ${claims.length} checks ` +
     `(kept ${keptClaims}/${extraction.claims.length} claims, ${flipped}/${extraction.assumptions.length} assumptions flipped, ` +
-    `${claims.filter((c) => c.edited).length} reworded), check run ${checkId} on ${pr.head.sha.slice(0, 7)}`);
+    `${claims.filter((c) => c.edited).length} reworded, ${regressions.length}/${state.regressions?.length ?? 0} regression checks), ` +
+    `check run ${checkId} on ${pr.head.sha.slice(0, 7)}`);
+}
+
+// The developer accepted a run's tests: commit them to the PR's branch under .groundtruth/.
+async function addTests(octokit: Octokit, ref: PrRef, commentId: number, body: string, state: CommentState, by: string, label: string): Promise<void> {
+  const runDir = path.join(config.runsDir, state.tests!.run);
+  try {
+    const { sha, files } = await commitTests(octokit, ref, { runDir, approvedBy: by, runUrl: runUrl(runDir) });
+    state.tests!.added = { sha, by };
+    const commitUrl = `https://github.com/${ref.owner}/${ref.repo}/commit/${sha}`;
+    await editComment(octokit, ref, commentId, markTestsAdded(body, state, commitUrl));
+    console.log(`[groundtruth] ${label}: added ${state.tests!.files.length} tests for ${by} in ${sha.slice(0, 7)} (${files.length} files)`);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`[groundtruth] ${label}: couldn't add tests: ${message}`);
+    await editComment(octokit, ref, commentId, body.replace(/^(- \[)[xX](\] \*\*Add these .*<!-- gt:addtests -->)\s*$/m,
+      `$1 $2\n\n⚠️ Couldn't add the tests: ${message}`));
+  }
 }
 
 async function processPr(octokit: Octokit, ref: PrRef, headSha: string, label: string): Promise<void> {
@@ -85,38 +118,22 @@ async function processPr(octokit: Octokit, ref: PrRef, headSha: string, label: s
   try {
     const evidence = renderEvidence(await buildEvidence(octokit, ref));
     const { extraction, usage } = await extractClaims(evidence);
-    await editComment(octokit, ref, commentId, renderClaimsComment({
-      version: 1, pr: label, headSha, extraction,
+    // Tests earlier PRs added to the repo, from the base branch: offered as regression checks. All of them
+    // for now; picking the ones this PR could affect comes later.
+    const { data: pr } = await octokit.request("GET /repos/{owner}/{repo}/pulls/{pull_number}", { owner: ref.owner, repo: ref.repo, pull_number: ref.number });
+    const registry = await branchTip(octokit, ref, pr.base.ref).then((sha) => readRegistry(octokit, ref, sha)).catch(() => []);
+    const regressions: RegressionRow[] = registry.map((e, i) => ({
+      id: `r${i + 1}`, file: e.file, title: e.title, summary: e.summary,
+      from: `${e.from.pr.replace(`${ref.owner}/${ref.repo}`, "")}${e.from.title ? ` "${e.from.title}"` : ""}`,
     }));
-    console.log(`[groundtruth] ${label}: ${extraction.claims.length} claims, ${extraction.assumptions.length} assumptions ` +
-      `in ${Math.round((Date.now() - started) / 1000)}s (${usage.input_tokens} in / ${usage.output_tokens} out tokens)`);
+    await editComment(octokit, ref, commentId, renderClaimsComment({
+      version: 1, pr: label, headSha, extraction, regressions,
+    }));
+    console.log(`[groundtruth] ${label}: ${extraction.claims.length} claims, ${extraction.assumptions.length} assumptions, ` +
+      `${regressions.length} regression checks in ${Math.round((Date.now() - started) / 1000)}s (${usage.input_tokens} in / ${usage.output_tokens} out tokens)`);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`[groundtruth] ${label}: extraction failed: ${message}`);
     await editComment(octokit, ref, commentId, renderError(message));
   }
-}
-
-// Reuses our existing comment on the PR (e.g. on reopen) instead of posting a second one.
-async function upsertComment(octokit: Octokit, ref: PrRef, body: string): Promise<number> {
-  const comments = await listAll((page) =>
-    octokit.request("GET /repos/{owner}/{repo}/issues/{issue_number}/comments", {
-      owner: ref.owner, repo: ref.repo, issue_number: ref.number, per_page: 100, page,
-    }).then((r) => r.data));
-  const ours = comments.find((c) =>
-    Number(c.performed_via_github_app?.id) === Number(config.appId) && c.body?.startsWith(COMMENT_MARKER));
-  if (ours) {
-    await editComment(octokit, ref, Number(ours.id), body);
-    return Number(ours.id);
-  }
-  const { data } = await octokit.request("POST /repos/{owner}/{repo}/issues/{issue_number}/comments", {
-    owner: ref.owner, repo: ref.repo, issue_number: ref.number, body,
-  });
-  return Number(data.id);
-}
-
-async function editComment(octokit: Octokit, ref: PrRef, commentId: number, body: string): Promise<void> {
-  await octokit.request("PATCH /repos/{owner}/{repo}/issues/comments/{comment_id}", {
-    owner: ref.owner, repo: ref.repo, comment_id: commentId, body,
-  });
 }

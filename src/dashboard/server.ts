@@ -10,6 +10,7 @@ import { config } from "../config.js";
 const PAGES = path.dirname(fileURLToPath(import.meta.url));
 const RUN_ID = /^\w[\w.-]*$/;                // folder names only: no slashes, and no "." or ".."
 const VIDEO = /^\w[\w@.-]*\.webm$/;
+const SPEC = /^\w[\w.-]*\.spec\.ts$/;
 
 // Handles dashboard routes; returns false for anything else.
 export async function handleDashboard(req: IncomingMessage, res: ServerResponse): Promise<boolean> {
@@ -37,11 +38,21 @@ export async function handleDashboard(req: IncomingMessage, res: ServerResponse)
     const file = path.join(dir, "replay.json");
     return existsSync(file) ? json(res, JSON.parse(readFileSync(file, "utf8"))) : notFound(res);
   }
+  if (parts.length === 3 && parts[2] === "regressions.json") {
+    const file = path.join(dir, "regressions.json");
+    return existsSync(file) ? json(res, JSON.parse(readFileSync(file, "utf8"))) : notFound(res);
+  }
+  // The run's compiled tests (scripts/tests/*.spec.ts, one per journey chain), or one regression test's file.
   if (parts.length === 3 && parts[2] === "script") {
-    const file = path.join(dir, "scripts", "journeys.spec.ts");
-    if (!existsSync(file)) return notFound(res);
-    res.writeHead(200, { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" }).end(readFileSync(file));
-    return true;
+    const tests = path.join(dir, "scripts", "tests");
+    if (!existsSync(tests)) return notFound(res);
+    const files = readdirSync(tests).filter((f) => f.endsWith(".spec.ts")).sort();
+    const text = files.map((f) => `// ── tests/${f} ${"─".repeat(Math.max(4, 70 - f.length))}\n\n${readFileSync(path.join(tests, f), "utf8")}`).join("\n\n");
+    return plain(res, text);
+  }
+  if (parts.length === 4 && parts[2] === "regression" && SPEC.test(parts[3])) {
+    const file = path.join(dir, "regression", "tests", parts[3]);
+    return existsSync(file) ? plain(res, readFileSync(file, "utf8")) : notFound(res);
   }
   if (parts.length === 4 && parts[2] === "videos" && VIDEO.test(parts[3])) {
     const file = path.join(dir, parts[3]);
@@ -82,6 +93,11 @@ function page(res: ServerResponse, name: string): true {
 
 function json(res: ServerResponse, body: unknown, status = 200): true {
   res.writeHead(status, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" }).end(JSON.stringify(body));
+  return true;
+}
+
+function plain(res: ServerResponse, text: string): true {
+  res.writeHead(200, { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" }).end(text);
   return true;
 }
 

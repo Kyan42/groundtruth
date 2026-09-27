@@ -1,5 +1,7 @@
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { type Browser, type BrowserContext, chromium, type Locator, type Page, type Request } from "playwright";
-import { type Assertion, type Check, PAGE_ASSERTIONS, type RequestRecord, runAssertion } from "./checks.js";
+import { type Assertion, assertionCode, type Check, PAGE_ASSERTIONS, type RequestRecord, runAssertion } from "./checks.js";
 
 // The browser the exploring agent drives. The agent sees the page as an accessibility snapshot whose
 // elements carry throwaway refs (e12); every action resolves a ref to the stable locator Playwright
@@ -28,6 +30,7 @@ export type Journey = {
   claimIds: string[];
   startPath: string;
   resetData: boolean;
+  controlClock?: boolean;   // the page's clock is Playwright's fake clock, moved with clock()
   video?: string;
 };
 
@@ -40,7 +43,11 @@ const SETTLE_QUIET_MS = 500;       // the page counts as settled after this long
 const SETTLE_MAX_MS = 12_000;      // give up waiting after this long
 const DOM_CHURN_MS = 3_000;        // after this long, ignore DOM changes alone (animations, clocks)
 const LONG_REQUEST_MS = 10_000;    // requests open longer than this (polling, streams) don't count as pending
-const CHECK_HOLD_MS = 1_400;       // how long a check's box and banner stay on screen for the video
+const CHECK_HOLD_MS = 2_500;       // how long a check's box and banner stay on screen for the video
+const POINT_MS = 550;              // the cursor glides to its target before each action, for the video
+
+// The cursor and check banner drawn into videos; shared with compiled scripts (src/compile/template/).
+const OVERLAY = readFileSync(fileURLToPath(new URL("../compile/template/overlay.js", import.meta.url)), "utf8");
 
 export class ExplorerBrowser {
   readonly steps: Step[] = [];
@@ -74,7 +81,7 @@ export class ExplorerBrowser {
 
   // Ends the current journey (finalizing its video) and starts a fresh browser session at startPath.
   // An initial journey with no steps is replaced rather than kept.
-  async startJourney(j: { name: string; claimIds: string[]; startPath?: string; resetData: boolean }): Promise<string> {
+  async startJourney(j: { name: string; claimIds: string[]; startPath?: string; resetData: boolean; controlClock?: boolean }): Promise<string> {
     const current = this.journey;
     const unused = !this.steps.some((s) => s.journey === current.id) && !this.checks.some((c) => c.journey === current.id);
     await this.endSession();
@@ -82,7 +89,10 @@ export class ExplorerBrowser {
       this.journeys.pop();
       for (let i = this.requests.length - 1; i >= 0; i--) if (this.requests[i].journey === current.id) this.requests.splice(i, 1);
     }
-    await this.newSession({ id: `j${this.journeys.length + 1}`, name: j.name, claimIds: j.claimIds, startPath: j.startPath ?? "/", resetData: j.resetData });
+    await this.newSession({
+      id: `j${this.journeys.length + 1}`, name: j.name, claimIds: j.claimIds, startPath: j.startPath ?? "/", resetData: j.resetData,
+      ...(j.controlClock ? { controlClock: true } : {}),
+    });
     return `Started journey ${this.journey.id} "${j.name}" in a fresh browser session.\n\n${await this.snapshot()}`;
   }
 
@@ -108,6 +118,11 @@ export class ExplorerBrowser {
     return this.record(action, async () => {
       // Act through the stable locator: it's what the script will use, and what the video's action label shows.
       const { locator: el, description, stable } = await this.resolve(ref);
+      // Move the mouse there first so the video's cursor visibly travels to the element before acting.
+      if (this.videoDir) {
+        await el.hover({ timeout: 10_000 }).catch(() => {});
+        await this.page.waitForTimeout(POINT_MS);
+      }
       // Playwright waits until the element is visible, enabled and stable, then acts like a user.
       if (action === "click") await el.click({ timeout: 10_000 });
       else if (action === "type") await el.fill(value ?? "", { timeout: 10_000 });
@@ -120,11 +135,13 @@ export class ExplorerBrowser {
     return this.record("press", async () => { await this.page.keyboard.press(key); return { value: key }; });
   }
 
-  async navigate(path: string): Promise<string> {
+  // Typing an address, which the agent may only do for a stated reason (recorded with the step, so every
+  // URL jump in a trace carries its justification); otherwise it moves through the UI.
+  async navigate(path: string, reason?: string): Promise<string> {
     return this.record("navigate", async () => {
       const url = this.appUrl(path);
       await this.page.goto(url.toString(), { waitUntil: "load" });
-      return { value: url.pathname + url.search };
+      return { value: url.pathname + url.search, note: reason ? `by address: ${reason.replace(/_/g, " ")}` : undefined };
     });
   }
 
@@ -139,13 +156,53 @@ export class ExplorerBrowser {
     });
   }
 
+  // Moves the page's (fake) clock: "fast_forward" by a number of seconds, or "set_time" to a moment. Only
+  // time inside the browser moves; a time computed on the server is unaffected.
+  async clock(action: "fast_forward" | "set_time", value: string): Promise<string> {
+    if (!this.journey.controlClock) throw new Error("This journey's clock isn't controlled; start a journey with control_clock: true first");
+    return this.record("clock", async () => {
+      let note: string;
+      if (action === "fast_forward") {
+        const seconds = Number(value);
+        if (!Number.isFinite(seconds) || seconds <= 0) throw new Error(`fast_forward needs a number of seconds, got "${value}"`);
+        await this.page.clock.fastForward(seconds * 1000);
+        note = `⏩ Clock moved forward ${duration(seconds)}`;
+      } else {
+        const time = new Date(value);
+        if (Number.isNaN(time.getTime())) throw new Error(`set_time needs a date and time, got "${value}"`);
+        await this.page.clock.setSystemTime(time);
+        note = `🕒 Clock set to ${time.toISOString().replace("T", " ").slice(0, 16)}`;
+      }
+      await this.showNote(note, 1500);
+      return { value: `${action} ${value}` };
+    });
+  }
+
+  // Waits in real time (the app's server clock moves too). Slow: the compiled test waits as long.
+  async wait(seconds: number, reason: string): Promise<string> {
+    if (!Number.isFinite(seconds) || seconds <= 0 || seconds > 300) throw new Error("wait takes 1 to 300 seconds");
+    return this.record("wait", async () => {
+      await this.showNote(`⏳ Waiting ${duration(seconds)} (real time): ${reason}`, seconds * 1000);
+      return { value: `${seconds} | ${reason}` };
+    });
+  }
+
+  // A neutral banner in the video (for clock moves and waits), shown for `ms`.
+  private async showNote(text: string, ms: number): Promise<void> {
+    if (!this.videoDir) { await this.page.waitForTimeout(ms); return; }
+    await this.page.evaluate((t) => (window as unknown as { __gtShowNote?: (t: string) => void }).__gtShowNote?.(t), text).catch(() => {});
+    await this.page.waitForTimeout(ms);
+    await this.page.evaluate(() => (window as unknown as { __gtHideCheck?: () => void }).__gtHideCheck?.()).catch(() => {});
+  }
+
   async screenshot(): Promise<string> {
     this.steps.push({ n: this.steps.length + 1, journey: this.journey.id, t: this.elapsed, action: "screenshot", url: this.relativeUrl(), ok: true });
     return (await this.page.screenshot({ caret: "initial" })).toString("base64");
   }
 
   // Runs one assertion from the menu against the page as it is now, records it, and marks it in the video.
-  async check(c: { assert: Assertion; target?: CheckTarget; expected?: string; claimIds: string[] }): Promise<Check> {
+  // `label` names what's being checked in the video's banner (e.g. the claim's text).
+  async check(c: { assert: Assertion; target?: CheckTarget; expected?: string; claimIds: string[]; label?: string }): Promise<Check> {
     const onPage = PAGE_ASSERTIONS.includes(c.assert);
     if (!onPage && !c.target) throw new Error(`${c.assert} needs a target`);
     const target = onPage ? undefined : await this.checkTarget(c.target!);
@@ -158,7 +215,7 @@ export class ExplorerBrowser {
       assert: c.assert, locator: target?.description, expected: c.expected, observed, passed,
     };
     this.checks.push(check);
-    await this.showCheck(check, target?.locator);
+    await this.showCheck(check, target?.locator, c.label);
     return check;
   }
 
@@ -184,26 +241,23 @@ export class ExplorerBrowser {
     return { locator, description };
   }
 
-  // Draws the check into the page for the video: a box around the element(s) and a ✓/✗ banner, briefly.
-  private async showCheck(check: Check, target?: Locator): Promise<void> {
+  // Draws the check into the page for the video: a box around the element(s), and a banner naming the
+  // claim and showing the Playwright assertion, held long enough to read.
+  private async showCheck(check: Check, target?: Locator, label?: string): Promise<void> {
+    if (!this.videoDir) return;
     const colour = check.passed ? "#0b8259" : "#c03d29";
-    const label = `${check.passed ? "✓" : "✗"} ${check.claimIds.join(", ")} · ${check.assert.replace(/_/g, " ")}${check.expected ? ` "${check.expected}"` : ""}`;
+    const ids = check.claimIds.map((id) => id.toUpperCase()).join(", ");
+    const title = label ? `${ids} · ${label}` : `${ids} · ${check.assert.replace(/_/g, " ")}`;
+    const code = assertionCode(check.assert, check.locator ? `page.${check.locator.replace(/ \(not unique\)$/, "")}` : undefined, check.expected);
     try {
       if (target && (await target.count()) > 0) {
         await target.highlight({ style: { outline: `3px solid ${colour}`, outlineOffset: "3px", borderRadius: "6px", background: `${colour}1f` } });
       }
-      await this.page.evaluate(([text, colour]) => {
-        const el = document.createElement("div");
-        el.id = "__groundtruth_check";
-        el.setAttribute("aria-hidden", "true");
-        el.textContent = text;
-        el.style.cssText = `position:fixed;top:12px;left:12px;z-index:2147483647;pointer-events:none;background:${colour};color:#fff;`
-          + "font:600 18px/1.3 system-ui,sans-serif;padding:8px 14px;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.25);max-width:70vw";
-        document.documentElement.appendChild(el);
-      }, [label, colour] as const);
+      await this.page.evaluate(([t, c, p]) => (window as unknown as { __gtShowCheck?: (t: string, c: string, p: boolean) => void }).__gtShowCheck?.(t, c, p),
+        [title, code, check.passed] as const);
       await this.page.waitForTimeout(CHECK_HOLD_MS);
     } catch { /* the overlay is cosmetic; a page that navigated away mid-check just loses it */ }
-    await this.page.evaluate(() => document.getElementById("__groundtruth_check")?.remove()).catch(() => {});
+    await this.page.evaluate(() => (window as unknown as { __gtHideCheck?: () => void }).__gtHideCheck?.()).catch(() => {});
     await this.page.hideHighlight().catch(() => {});
   }
 
@@ -212,15 +266,31 @@ export class ExplorerBrowser {
       extraHTTPHeaders: this.headers,       // the tunnel's token, on every request the page makes
       viewport: { width: 1280, height: 800 },
       recordVideo: this.videoDir
-        ? { dir: this.videoDir, size: { width: 1280, height: 800 }, showActions: { duration: 600, position: "top-right", fontSize: 18, cursor: "pointer" } }
+        ? { dir: this.videoDir, size: { width: 1280, height: 800 }, showActions: { duration: 500, position: "top-right", fontSize: 18, cursor: "none" } }
         : undefined,
     });
+    // Our own always-visible cursor and check banner (Playwright's cursor only appears during an action).
+    if (this.videoDir) await this.context.addInitScript({ content: OVERLAY });
     // Count DOM changes so settle() can tell when the page has stopped updating.
     await this.context.addInitScript(() => {
       const w = window as unknown as { __gtChanges: number };
       w.__gtChanges = 0;
-      new MutationObserver(() => { w.__gtChanges++; }).observe(document, { subtree: true, childList: true, characterData: true, attributes: true });
+      // Changes to video overlays (our cursor and check banners, Playwright's x-pw-* action annotations)
+      // aren't the page changing.
+      const ours = (n: Node | null) => {
+        for (let e: Element | null = n instanceof Element ? n : (n?.parentElement ?? null); e; ) {
+          if (e.hasAttribute("data-gt-overlay") || e.tagName.startsWith("X-PW-")) return true;
+          const root = e.getRootNode();
+          e = e.parentElement ?? (root instanceof ShadowRoot ? root.host : null);
+        }
+        return false;
+      };
+      new MutationObserver((records) => {
+        if (records.some((r) => !ours(r.target) && !(r.type === "childList" && [...r.addedNodes, ...r.removedNodes].every(ours)))) w.__gtChanges++;
+      }).observe(document, { subtree: true, childList: true, characterData: true, attributes: true });
     });
+    // A controlled clock must be installed before the first page loads.
+    if (j.controlClock) await this.context.clock.install();
     this.page = await this.context.newPage();
     this.journeyStarted = Date.now();
     this.actionStep = 0;
@@ -319,4 +389,11 @@ function refuseTextPinned(description: string): void {
     throw new Error(`That target can only be identified by its full text ("${pinned[1].slice(0, 50)}…"), which breaks when the content changes. ` +
       "Target a container by its role instead (e.g. role list, table, region), or check a smaller element directly.");
   }
+}
+
+// 90 → "1:30", 45 → "45s", 7200 → "2:00:00".
+function duration(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`;
+  const h = Math.floor(seconds / 3600), m = Math.floor((seconds % 3600) / 60), s = Math.round(seconds % 60);
+  return h ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}` : `${m}:${String(s).padStart(2, "0")}`;
 }
