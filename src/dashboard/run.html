@@ -56,13 +56,11 @@ code,.mono{font-family:var(--mono)}
 /* sidebar */
 aside{min-width:0;background:color-mix(in srgb,var(--card) 88%,transparent);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
 .brand{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:18px 20px 14px;border-bottom:1px solid var(--line)}
-.brand a{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}
-.brand strong{font-weight:600;letter-spacing:-.01em}
-.brand .right{display:flex;align-items:center;gap:12px}
 .theme{border:1px solid var(--line);background:var(--card);color:var(--mid);border-radius:8px;padding:3px 9px;font:500 12.5px var(--sans);white-space:nowrap}
 .theme:hover{color:var(--ink)}
 :root[data-theme="dark"] .theme .to-dark,:root:not([data-theme="dark"]) .theme .to-light{display:none}
-.brand .all{font-size:13px;color:var(--mid)}
+.brand .all{font-size:13px;color:var(--mid);text-decoration:none}
+.brand .all:hover{color:var(--ink)}
 .pr{padding:16px 20px;border-bottom:1px solid var(--line)}
 .pr .repo{font-size:13px;color:var(--low)}
 .pr h1{font-size:17px;line-height:1.3;margin:4px 0 0;font-weight:600;text-wrap:balance}
@@ -93,7 +91,13 @@ aside{min-width:0;background:color-mix(in srgb,var(--card) 88%,transparent);bord
 main{min-width:0;display:flex;flex-direction:column}
 .top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:16px 28px}
 .summary{font-size:15px;color:var(--mid)} .summary b{color:var(--ink);font-weight:600}
-.segs{display:flex;gap:10px;flex-wrap:wrap}
+.segs{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+/* the Groundtruth mark, top right like the old dashboard */
+.brandmk{display:block;flex:none;--mark-ring:#2f6b4f;--mark-dot:#12a150}
+.brandmk .gtm{display:block;overflow:visible}
+:root[data-theme="dark"] .brandmk{--mark-ring:#68ecc4}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .brandmk{--mark-ring:#68ecc4}}
+
 .seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:3px}
 .seg[hidden]{display:none}
 .rbadge{font-size:12.5px;font-weight:500;white-space:nowrap;margin-left:6px}
@@ -201,20 +205,73 @@ html{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' wi
 a,button,summary,.track,.vcard video{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M5.2 3.1 19.2 10.4 12.6 12.1 9.5 19.2 Z' fill='%230e694e' stroke='%23ffffff' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 5 3, pointer}
 </style>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="gt-mark" viewBox="394 394 1260 1260"><g transform="translate(0,2048) scale(0.1,-0.1)"><path fill="var(--mark-ring,#2f6b4f)" fill-rule="evenodd" d="M9960 16269 c-682 -26 -1364 -262 -2036 -704 -458 -302 -1271 -964
+-1583 -1291 -254 -266 -426 -513 -576 -828 -127 -266 -199 -487 -336 -1031
+-123 -489 -206 -774 -349 -1200 -155 -462 -220 -714 -272 -1066 -30 -208 -33
+-697 -5 -879 57 -362 125 -580 277 -889 172 -348 312 -553 771 -1128 257 -322
+405 -526 580 -801 433 -678 618 -934 869 -1197 384 -404 812 -674 1362 -859
+356 -120 712 -182 1099 -193 734 -20 1374 168 2022 593 334 219 630 462 1052
+860 521 492 681 637 1085 984 380 326 472 410 688 624 404 399 647 723 832
+1108 87 183 139 327 183 508 117 479 109 918 -28 1461 -36 143 -73 271 -167
+569 -162 522 -190 659 -228 1160 -23 289 -35 406 -56 535 -52 318 -135 575
+-265 825 -213 406 -516 727 -1094 1161 -372 279 -1092 781 -1335 931 -476 293
+-1016 534 -1426 637 -365 91 -682 124 -1064 110z m490 -374 c412 -48 756 -151
+1209 -359 393 -181 746 -403 1481 -929 624 -447 789 -577 981 -767 205 -204
+331 -375 450 -612 158 -314 213 -557 264 -1163 50 -595 75 -714 280 -1380 191
+-620 232 -846 222 -1230 -6 -214 -20 -324 -66 -501 -120 -467 -417 -939 -886
+-1409 -171 -171 -354 -335 -870 -781 -329 -284 -474 -415 -805 -729 -684 -648
+-1033 -916 -1491 -1146 -306 -153 -578 -239 -929 -294 -144 -23 -538 -31 -711
+-15 -658 59 -1291 302 -1748 670 -133 108 -367 350 -487 505 -117 150 -278
+381 -414 592 -426 665 -482 745 -745 1072 -388 483 -497 629 -631 855 -376
+628 -483 1175 -374 1899 41 266 106 511 280 1042 138 422 196 620 311 1073
+150 590 212 777 354 1067 189 385 467 705 995 1141 373 309 721 577 924 713
+588 395 1167 621 1766 690 128 14 503 12 640 -4z M10195 14723 c-237 -10 -543
+-69 -800 -154 -295 -98 -601 -256 -1075 -557 -478 -302 -692 -479 -908 -751
+-144 -179 -257 -386 -392 -716 -129 -313 -189 -441 -427 -905 -78 -151 -168
+-338 -201 -415 -113 -265 -193 -549 -223 -789 -15 -123 -7 -420 16 -563 50
+-322 180 -640 465 -1138 121 -211 171 -315 295 -615 167 -402 248 -564 379
+-765 287 -436 721 -806 1251 -1066 913 -446 1858 -403 2845 130 200 108 401
+228 875 524 605 378 734 466 985 676 152 127 395 371 500 501 438 548 589
+1122 480 1830 -11 71 -40 234 -64 362 -81 421 -91 553 -74 940 13 312 5 452
+-37 663 -98 489 -382 904 -908 1327 -56 45 -176 145 -266 222 -387 331 -603
+499 -861 671 -549 366 -1043 547 -1592 585 -78 5 -154 9 -168 8 -14 -1 -56 -3
+-95 -5z m385 -377 c302 -41 629 -149 916 -303 152 -81 375 -221 541 -338 125
+-89 883 -714 1099 -906 211 -189 368 -385 465 -584 68 -140 100 -235 131 -388
+22 -107 23 -129 20 -532 -3 -520 7 -645 88 -1050 108 -544 118 -864 36 -1171
+-114 -422 -361 -785 -780 -1143 -201 -172 -384 -300 -786 -553 -118 -74 -303
+-191 -410 -258 -679 -429 -1124 -635 -1565 -724 -197 -41 -307 -49 -549 -43
+-414 11 -712 91 -1120 300 -378 193 -719 470 -937 759 -173 230 -257 392 -475
+918 -117 281 -163 374 -293 600 -245 424 -369 723 -418 1010 -22 132 -22 392
+1 534 50 306 174 628 436 1126 146 278 206 406 362 775 285 677 438 854 1123
+1297 329 213 502 314 709 414 292 141 623 238 906 267 96 10 405 5 500 -7z
+M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
+-95 -276 -177 -388 -289 -155 -155 -256 -308 -366 -554 -170 -379 -179 -395
+-361 -695 -289 -474 -383 -843 -318 -1240 38 -237 80 -347 277 -735 96 -191
+140 -289 172 -390 199 -620 422 -921 930 -1261 408 -273 871 -406 1291 -370
+416 36 738 155 1313 485 756 434 958 570 1211 815 219 213 348 407 426 640 92
+273 97 485 24 970 -41 279 -51 437 -35 581 19 172 25 387 13 495 -28 250 -115
+465 -274 676 -74 98 -235 262 -343 349 -44 35 -154 130 -245 210 -261 231
+-327 286 -458 383 -344 258 -656 404 -996 468 -127 24 -435 34 -551 18z m478
+-379 c390 -66 722 -260 1251 -729 81 -72 194 -169 250 -214 146 -117 296 -273
+366 -379 130 -198 182 -424 159 -688 -5 -63 -12 -203 -15 -310 -6 -193 -6
+-198 36 -475 55 -362 63 -565 31 -724 -75 -359 -308 -647 -774 -955 -145 -95
+-723 -438 -944 -560 -233 -128 -434 -212 -628 -261 -490 -125 -934 -42 -1397
+262 -252 165 -432 343 -555 550 -69 117 -108 207 -183 428 -83 243 -125 341
+-240 555 -195 363 -249 551 -237 829 11 259 79 438 324 851 153 258 189 327
+293 560 140 314 202 413 343 546 107 102 203 171 352 255 72 39 188 106 260
+147 294 171 572 280 810 317 128 21 364 18 498 -5z"/><path fill="var(--mark-dot,#12a150)" d="M10090 11143 c-195 -35 -358 -119 -496 -257 -154 -154 -237 -329
+-264 -554 -20 -169 11 -326 97 -502 53 -107 65 -123 167 -225 80 -80 133 -122
+189 -154 242 -136 512 -158 781 -62 118 42 205 100 322 216 102 102 114 118
+167 225 86 176 118 339 97 506 -50 405 -333 718 -722 798 -72 15 -274 20 -338
+9z"/></g></symbol></svg>
 <div id="root"></div>
 
 <template id="page">
 <div class="app">
   <aside>
     <div class="brand">
-      <a href="/runs">
-        <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><g fill="none" stroke="var(--forest)" stroke-width="1.4"><circle cx="13" cy="13" r="11.5"/><circle cx="13" cy="13" r="7.5"/><circle cx="13" cy="13" r="3.5" fill="var(--forest)"/></g></svg>
-        <strong>Groundtruth</strong>
-      </a>
-      <div class="right">
-        <button class="theme" type="button" onclick="toggleTheme()" aria-label="Switch between light and dark"><span class="to-dark">☾ Dark</span><span class="to-light">☀ Light</span></button>
-        <a class="all" href="/runs">All runs</a>
-      </div>
+      <a class="all" href="/runs">All runs</a>
+      <button class="theme" type="button" onclick="toggleTheme()" aria-label="Switch between light and dark"><span class="to-dark">☾ Dark</span><span class="to-light">☀ Light</span></button>
     </div>
     <div class="pr">
       <div class="repo" data-id="repo"></div>
@@ -245,6 +302,7 @@ a,button,summary,.track,.vcard video{cursor:url("data:image/svg+xml,%3Csvg xmlns
           <button data-id="viewJourney" aria-pressed="true">Journey</button>
           <button data-id="viewGrid" aria-pressed="false">Grid</button>
         </div>
+        <a class="brandmk" href="/runs" aria-label="All runs"><svg class="gtm" width="56" height="56" aria-hidden="true"><use href="#gt-mark"/></svg></a>
       </div>
     </div>
 
