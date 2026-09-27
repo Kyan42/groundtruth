@@ -54,7 +54,7 @@ code,.mono{font-family:var(--mono)}
 .app{display:grid;grid-template-columns:320px minmax(0,1fr);min-height:100%}
 
 /* sidebar */
-aside{min-width:0;background:color-mix(in srgb,var(--card) 88%,transparent);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+aside{min-width:0;background:color-mix(in srgb,var(--card) 88%,transparent);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
 .brand{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:18px 20px 14px;border-bottom:1px solid var(--line)}
 .brand a{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}
 .brand strong{font-weight:600;letter-spacing:-.01em}
@@ -68,7 +68,7 @@ aside{min-width:0;background:color-mix(in srgb,var(--card) 88%,transparent);bord
 .pr h1{font-size:17px;line-height:1.3;margin:4px 0 0;font-weight:600;text-wrap:balance}
 .sect{padding:16px 20px 6px}
 .sect h2{margin:0;font-size:15px;font-weight:600}
-.journeys{display:flex;flex-direction:column;gap:10px;padding:10px 14px 16px;flex:1;min-height:0;overflow-y:auto}
+.journeys{display:flex;flex-direction:column;gap:10px;padding:10px 14px 16px}
 .jcard{text-align:left;background:transparent;border:1px solid transparent;border-radius:12px;padding:12px;display:grid;gap:8px}
 .jcard:hover{background:var(--sunk)}
 .jcard[aria-current="true"]{background:var(--forest-lo);border-color:color-mix(in srgb,var(--forest) 30%,var(--line))}
@@ -80,7 +80,7 @@ aside{min-width:0;background:color-mix(in srgb,var(--card) 88%,transparent);bord
 .chip.failed .m,.chip.error .m{color:var(--fail)}
 .chip.unreachable .m{color:var(--warn)}
 .chip.blocked .m,.chip.none .m{color:var(--block)}
-.run{flex:none;border-top:1px solid var(--line);padding:22px 22px 24px}
+.run{flex:none;margin-top:auto;border-top:1px solid var(--line);padding:22px 22px 24px}
 .runid{margin:0 0 13px;font-size:15.5px;font-weight:700;letter-spacing:-.03em;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .runid .ticon{margin-right:0;color:var(--forest);font-size:5.4px;line-height:3.6px;letter-spacing:.58px;text-indent:.58px}
 .kv{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:7px 0;font-size:13.5px;border-bottom:1px solid var(--line)}
