@@ -1,6 +1,5 @@
 import type { Octokit } from "@octokit/core";
 import type { PrRef } from "../evidence.js";
-import { readOnlyRepoToken, revokeToken } from "../github.js";
 import { type BrowserCheck, checkInBrowser } from "./browser-check.js";
 import { type BootConfig, loadBootConfig } from "./config.js";
 import { createSandbox, type ExposedPort, type Sandbox } from "./sandbox.js";
@@ -52,6 +51,7 @@ export type BootTarget = {
 
 // Boots a PR of an installed repo: its config from the default branch, cloned with a scoped app token.
 export async function bootPr(octokit: Octokit, ref: PrRef, opts: BootOptions): Promise<BootResult> {
+  const { readOnlyRepoToken, revokeToken } = await import("../github.js");
   const { data: pr } = await octokit.request("GET /repos/{owner}/{repo}/pulls/{pull_number}", {
     owner: ref.owner, repo: ref.repo, pull_number: ref.number,
   });
