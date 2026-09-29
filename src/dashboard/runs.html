@@ -109,7 +109,7 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
 9z"/></g></symbol></svg>
 <div class="wrap">
   <div class="brand">
-    <h1>Runs</h1>
+    <h1>Test runs</h1>
     <a class="brandmk" href="/runs" aria-label="All runs"><svg class="gtm" width="56" height="56" aria-hidden="true"><use href="#gt-mark"/></svg></a>
   </div>
   <div class="list" id="list"></div>
@@ -146,7 +146,7 @@ async function load() {
       <span class="mark ${outcome}" aria-hidden="true">${icon}</span>
       <span class="title">${esc(r.title ?? r.pr ?? r.id)}</span>
       <span class="result">${result}<span class="when">${esc(when)}</span></span>
-      <span class="sub">${[r.pr, r.sha && r.sha.slice(0, 7), r.journeys != null && `${r.journeys} recording${r.journeys === 1 ? "" : "s"}`, r.checks != null && `${r.checks} checks`, r.seconds != null && duration(r.seconds), r.costUsd != null && `$${r.costUsd.toFixed(2)}`].filter(Boolean).map((x) => `<span>${esc(x)}</span>`).join("")}</span>
+      <span class="sub">${[r.pr, r.sha && r.sha.slice(0, 7), r.journeys != null && `${r.journeys} journeys`, r.checks != null && `${r.checks} checks`, r.seconds != null && duration(r.seconds), r.costUsd != null && `$${r.costUsd.toFixed(2)}`].filter(Boolean).map((x) => `<span>${esc(x)}</span>`).join("")}</span>
     </a>`;
   }).join("");
   if (runs.some((r) => r.running)) setTimeout(load, 5000);

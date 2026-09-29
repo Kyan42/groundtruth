@@ -246,10 +246,10 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
     <div class="brand">
       <a class="all" href="/runs">All runs</a>
     </div>
-    <div class="sect"><h2>Recordings</h2></div>
+    <div class="sect"><h2>Journeys</h2></div>
     <div class="journeys" data-id="journeys" role="list"></div>
     <div data-id="regBlock" hidden>
-      <div class="sect"><h2>Existing behavior</h2></div>
+      <div class="sect"><h2>Regression checks</h2></div>
       <div class="journeys" data-id="regressions" role="list"></div>
     </div>
     <div class="run">
@@ -267,8 +267,8 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
           <button data-id="srcExplore" aria-pressed="false" title="The agent exploring, with its detours">Exploration</button>
         </div>
         <div class="iconseg" role="group" aria-label="View">
-          <button data-id="viewJourney" aria-pressed="true" aria-label="One recording" title="One recording"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
-          <button data-id="viewGrid" aria-pressed="false" aria-label="All recordings" title="All recordings"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.2"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.2"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1.2"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.2"/></g></svg></button>
+          <button data-id="viewJourney" aria-pressed="true" aria-label="One video" title="One video"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+          <button data-id="viewGrid" aria-pressed="false" aria-label="All videos" title="All videos"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.2"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.2"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1.2"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.2"/></g></svg></button>
         </div>
         <a class="brandmk" href="/runs" aria-label="All runs"><svg class="gtm" width="56" height="56" aria-hidden="true"><use href="#gt-mark"/></svg></a>
       </div>
@@ -290,7 +290,7 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
       </div>
       <div class="verdict" data-id="verdict"></div>
       <div class="tabs" role="tablist">
-        <button role="tab" data-tab="claims" aria-selected="true"><span class="ticon" data-i="claims"></span><span data-id="claimsLabel">Claims</span><span class="n" data-id="nClaims"></span></button>
+        <button role="tab" data-tab="claims" aria-selected="true"><span class="ticon" data-i="claims"></span>Claims<span class="n" data-id="nClaims"></span></button>
         <button role="tab" data-tab="events" aria-selected="false"><span class="ticon" data-i="cursor"></span>Actions<span class="n" data-id="nEvents"></span></button>
         <button role="tab" data-tab="network" aria-selected="false"><span class="ticon" data-i="net"></span>Network<span class="n" data-id="nNet"></span></button>
         <button role="tab" data-tab="script" aria-selected="false" data-id="scriptTab" hidden>Script</button>
@@ -411,7 +411,7 @@ function render(T, R, G) {
 
   $("journeys").innerHTML = journeys.map((j, i) => `
     <button class="jcard" role="listitem" data-j="${esc(j.id)}">
-      <span class="jhead"><span>Recording ${i + 1}</span><span data-dur="${esc(j.id)}"></span></span>
+      <span class="jhead"><span>Journey ${i + 1}</span><span data-dur="${esc(j.id)}"></span></span>
       <span class="jname">${esc(j.name)}</span>
       <span class="chips">${claimsIn(j).map(chip).join("")}</span>
     </button>`).join("");
@@ -451,13 +451,12 @@ function render(T, R, G) {
     if (src) {
       if (video.getAttribute("src") !== src) video.src = src;
       video.hidden = false; $("vcard").querySelector(".novideo")?.remove();
-    } else { video.removeAttribute("src"); video.hidden = true; if (!$("vcard").querySelector(".novideo")) $("vcard").insertAdjacentHTML("afterbegin", `<div class="novideo">No video for this recording</div>`); }
+    } else { video.removeAttribute("src"); video.hidden = true; if (!$("vcard").querySelector(".novideo")) $("vcard").insertAdjacentHTML("afterbegin", `<div class="novideo">No video for this journey</div>`); }
     const ids = claimsIn(current);
     const rj = replayOf(current);
     $("verdict").innerHTML = rj && rj.status !== "passed"
       ? `<b>The replay of the compiled script ${esc(rj.status)}</b>${rj.error ? `: ${esc(rj.error)}` : ""}.` : "";
     $("verdict").hidden = !$("verdict").innerHTML;
-    $("claimsLabel").textContent = "Claims";
     $("nClaims").textContent = ids.length;
     $("nEvents").textContent = timeline.length;
     $("nNet").textContent = requests.filter((r) => r.journey === current.id && !/hot-update|__webpack_hmr|\/@vite\//.test(r.path)).length;
@@ -477,17 +476,16 @@ function render(T, R, G) {
     if (src) {
       if (video.getAttribute("src") !== src) video.src = src;
       video.hidden = false; $("vcard").querySelector(".novideo")?.remove();
-    } else { video.removeAttribute("src"); video.hidden = true; if (!$("vcard").querySelector(".novideo")) $("vcard").insertAdjacentHTML("afterbegin", `<div class="novideo">No video was recorded</div>`); }
+    } else { video.removeAttribute("src"); video.hidden = true; if (!$("vcard").querySelector(".novideo")) $("vcard").insertAdjacentHTML("afterbegin", `<div class="novideo">No video for this test</div>`); }
     const broke = item.reg.checks.filter((c) => c.test === item.test.title && !c.passed);
     $("verdict").hidden = false;
     $("verdict").innerHTML = item.reg.status === "passed"
-      ? `<b>Still works.</b> Added by ${esc(item.reg.from)} and still works on this PR.`
+      ? `<b>Still works.</b> This test was added by ${esc(item.reg.from)} and passes on this PR too.`
       : item.reg.status === "failed"
-        ? `<b>Broken by this PR.</b> Added by ${esc(item.reg.from)}, worked then, and fails on this PR` +
+        ? `<b>Regression.</b> This test was added by ${esc(item.reg.from)}, passed then, and fails on this PR` +
           (broke.length ? `: ${[...new Set(broke.map((c) => c.title))].map(esc).join("; ")}.` : item.test.error ? `: ${esc(item.test.error)}` : ".") +
-          " If this PR changes it on purpose, update its test in this PR."
-        : `<b>Couldn't check this.</b>${item.reg.error ? ` ${esc(item.reg.error)}.` : ""} This says nothing about the PR.`;
-    $("claimsLabel").textContent = "Checks";
+          " If this PR changes that behavior on purpose, update the test in this PR."
+        : `<b>Couldn't run</b> this test${item.reg.error ? `: ${esc(item.reg.error)}` : ""}. This says nothing about the PR.`;
     $("nClaims").textContent = timeline.length;
     $("nEvents").textContent = "";
     $("nNet").textContent = "";
@@ -539,7 +537,7 @@ function render(T, R, G) {
           <button class="jump" data-t="${e.t}">${fmt(e.t)}</button>
         </div>`).join("");
       const notReached = item.test.status !== "passed" && item.test.error ? `<p class="note">Stopped early: ${esc(item.test.error)}</p>` : "";
-      p.innerHTML = `<p class="note">${esc(item.reg.summary)}</p>${rows ? `<div class="klist">${rows}</div>` : `<p class="note">No checks ran.</p>`}${notReached}`;
+      p.innerHTML = `<p class="note">${esc(item.reg.summary)}</p>${rows ? `<div class="klist">${rows}</div>` : `<p class="note">No checks ran in this test.</p>`}${notReached}`;
     } else if (tab === "script") {
       p.innerHTML = `<p class="note">Added by ${esc(item.reg.from)} in <code>.groundtruth/tests/${esc(item.reg.file)}</code></p><pre class="code" data-id="code">Loading…</pre>`;
       fetch(`${BASE}/regression/${encodeURIComponent(item.reg.file)}`, { cache: "no-store" }).then((r) => (r.ok ? r.text() : Promise.reject(r.status)))
@@ -547,7 +545,7 @@ function render(T, R, G) {
         .catch(() => { const el = p.querySelector('[data-id="code"]'); if (el) el.textContent = "The test file wasn't saved with this run."; });
       return;
     } else {
-      p.innerHTML = `<p class="note">Nothing to show here. The checks for this are in the first tab.</p>`;
+      p.innerHTML = `<p class="note">Nothing here for a regression test. Its checks are in Claims.</p>`;
     }
     p.querySelectorAll(".jump").forEach((b) => b.addEventListener("click", () => seek(Number(b.dataset.t), true)));
   }
@@ -571,7 +569,7 @@ function render(T, R, G) {
             ${cited.length ? `<div class="klist">${cited.map(checkCard).join("")}</div>` : ""}
             ${others.length ? `<div class="klabel">Also checked, not used for the verdict</div><div class="klist">${others.map(checkCard).join("")}</div>` : ""}
           </div></div>`;
-      }).join("") || `<p class="note">No claims were checked in this recording.</p>`;
+      }).join("") || `<p class="note">No claims were checked in this journey.</p>`;
     } else if (tab === "script") {
       p.innerHTML = `<pre class="code" data-id="code">Loading…</pre>`;
       fetch(`${BASE}/script`, { cache: "no-store" }).then((r) => (r.ok ? r.text() : Promise.reject(r.status)))
@@ -597,7 +595,7 @@ function render(T, R, G) {
         <h4>Requests</h4>
         ${reqs.length ? `<div class="events-wrap"><table class="events"><thead><tr><th>Time</th><th>Request</th><th>Status</th><th>After step</th></tr></thead><tbody>${
           reqs.map((r) => `<tr><td class="t"><button class="jump" data-t="${r.t}">${fmt(r.t)}</button></td><td class="u">${esc(r.method)} ${esc(r.path)}</td><td class="${r.status >= 400 ? "status-bad" : "status-ok"}">${esc(r.status ?? "…")}</td><td class="u">${r.step ? `#${r.step}` : "page load"}</td></tr>`).join("")
-        }</tbody></table></div>` : `<p class="note">No page loads or API requests were recorded here.</p>`}
+        }</tbody></table></div>` : `<p class="note">No page loads or API requests were recorded for this journey.</p>`}
         <h4>Console errors</h4>
         ${consoleErrors.length ? `<ul>${consoleErrors.map((m) => `<li class="mono">${esc(m)}</li>`).join("")}</ul>` : `<p class="note">None.</p>`}
         <h4>Failed requests (4xx/5xx, including assets)</h4>
@@ -725,7 +723,7 @@ function render(T, R, G) {
   $("viewGrid").addEventListener("click", () => showView("grid"));
 
   if (journeys.length) selectJourney(journeys[0].id);
-  else $("journeyView").innerHTML = `<p class="note" style="text-align:center">This run has no recordings.</p>`;
+  else $("journeyView").innerHTML = `<p class="note" style="text-align:center">This run has no journeys.</p>`;
 }
 
 load().catch((err) => showState("Couldn't load this run", esc(err)));
