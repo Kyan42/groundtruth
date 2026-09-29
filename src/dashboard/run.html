@@ -29,8 +29,9 @@ code,.mono{font-family:var(--mono)}
 /* sidebar */
 aside{min-width:0;background:color-mix(in srgb,var(--card) 88%,transparent);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
 .brand{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:18px 20px 14px;border-bottom:1px solid var(--line)}
-.brand .all{font-size:13px;color:var(--mid);text-decoration:none}
-.brand .all:hover{color:var(--ink)}
+.home{display:inline-flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;--mark-ring:#2f6b4f;--mark-dot:#12a150}
+.home .gtm{display:block;overflow:visible;flex:none}
+.home strong{font-weight:600;font-size:16px;letter-spacing:-.02em}
 .sect{padding:12px 20px 2px}
 .sect h2{margin:0;font-size:14px;font-weight:600}
 .journeys{display:flex;flex-direction:column;gap:2px;padding:6px 12px 10px}
@@ -59,11 +60,8 @@ aside{min-width:0;background:color-mix(in srgb,var(--card) 88%,transparent);bord
 
 /* main */
 main{min-width:0;display:flex;flex-direction:column}
-.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:16px 28px}
+.top{display:flex;justify-content:flex-end;align-items:center;gap:16px;flex-wrap:wrap;padding:16px 28px}
 .segs{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
-/* the Groundtruth mark, top right like the old dashboard */
-.brandmk{display:block;flex:none;--mark-ring:#2f6b4f;--mark-dot:#12a150}
-.brandmk .gtm{display:block;overflow:visible}
 
 .seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:3px}
 .seg[hidden]{display:none}
@@ -243,7 +241,7 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
 <div class="app">
   <aside>
     <div class="brand">
-      <a class="all" href="/runs">All runs</a>
+      <a class="home" href="/runs" aria-label="Groundtruth, all runs"><svg class="gtm" width="26" height="26" aria-hidden="true"><use href="#gt-mark"/></svg><strong>Groundtruth</strong></a>
     </div>
     <div class="sect"><h2>Intent checks</h2></div>
     <div class="journeys" data-id="journeys" role="list"></div>
@@ -260,16 +258,15 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
 
   <main>
     <div class="top">
-      <div class="iconseg" role="group" aria-label="View">
-        <button data-id="viewJourney" aria-pressed="true" aria-label="One video" title="One video"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
-        <button data-id="viewGrid" aria-pressed="false" aria-label="All videos" title="All videos"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.2"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.2"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1.2"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.2"/></g></svg></button>
-      </div>
       <div class="segs">
+        <div class="iconseg" role="group" aria-label="View">
+          <button data-id="viewJourney" aria-pressed="true" aria-label="One video" title="One video"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+          <button data-id="viewGrid" aria-pressed="false" aria-label="All videos" title="All videos"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.2"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.2"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1.2"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.2"/></g></svg></button>
+        </div>
         <div class="seg" role="group" aria-label="Which recording" data-id="sourceSeg" hidden>
           <button data-id="srcReplay" aria-pressed="true" title="The compiled Playwright script, replayed">Replay</button>
           <button data-id="srcExplore" aria-pressed="false" title="The agent exploring, with its detours">Exploration</button>
         </div>
-        <a class="brandmk" href="/runs" aria-label="All runs"><svg class="gtm" width="56" height="56" aria-hidden="true"><use href="#gt-mark"/></svg></a>
       </div>
     </div>
 
