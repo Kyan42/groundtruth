@@ -78,7 +78,7 @@ async function testAndReport(octokit: Octokit, ref: PrRef, sha: string, claims: 
       try {
         explored = await exploreApp({
           url, headers, resetApp, claims, outDir: runDir,
-          meta: { pr: label, title: pr.title, url: pr.html_url, sha, startedAt, bootSeconds, source: "approval", checkRun: checkId },
+          meta: { pr: label, title: pr.title, url: pr.html_url, branch: pr.head.ref, sha, startedAt, bootSeconds, source: "approval", checkRun: checkId },
           onEvent: (e) => {
             if (e.type === "status") report(`Testing · ${++done} of ${claims.length} claims done`);
             if (e.type === "status" || (e.type === "check" && !e.check.passed)) {
@@ -119,7 +119,7 @@ async function testAndReport(octokit: Octokit, ref: PrRef, sha: string, claims: 
 
   // Runs that end without exploring still get a trace, so the dashboard shows what happened.
   if (!explored) {
-    const meta = { pr: label, title: pr.title, url: pr.html_url, sha, startedAt, bootSeconds, source: "approval", checkRun: checkId, claims };
+    const meta = { pr: label, title: pr.title, url: pr.html_url, branch: pr.head.ref, sha, startedAt, bootSeconds, source: "approval", checkRun: checkId, claims };
     const error = result.ok ? `Testing stopped: ${exploreError}` : `Couldn't boot the app: ${result.error}`;
     writeFileSync(path.join(runDir, "trace.json"), JSON.stringify({ ...meta, error }, null, 2));
   }

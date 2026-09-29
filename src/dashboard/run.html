@@ -3,15 +3,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Groundtruth Run</title>
-<script>
-// Light by default; the toggle's choice is remembered in this browser.
-(() => { let t = "light"; try { t = localStorage.getItem("gt-theme") || "light"; } catch {} document.documentElement.dataset.theme = t; })();
-function toggleTheme() {
-  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-  document.documentElement.dataset.theme = next;
-  try { localStorage.setItem("gt-theme", next); } catch {}
-}
-</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
 <style>
@@ -25,28 +16,10 @@ function toggleTheme() {
   --sans:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --ground:#0c0e0d; --hatch:rgba(104,236,196,.05); --card:#111413; --sunk:#151917;
-    --ink:#e8ecea; --mid:#a6b0ac; --low:#727c78; --faint:#4b534f; --line:#242a28;
-    --forest:#68ecc4; --forest-lo:rgba(104,236,196,.08); --mint-ring:rgba(104,236,196,.35);
-    --pass:#45d19a; --pass-lo:rgba(69,209,154,.12); --fail:#ff6f5f; --fail-lo:rgba(255,111,95,.12);
-    --warn:#e3bd58; --warn-lo:rgba(227,189,88,.12); --block:#9aa39f; --block-lo:rgba(154,163,159,.12);
-    --shadow:0 18px 50px -18px rgba(0,0,0,.7), 0 2px 6px rgba(0,0,0,.4); color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --ground:#0c0e0d; --hatch:rgba(104,236,196,.05); --card:#111413; --sunk:#151917;
-  --ink:#e8ecea; --mid:#a6b0ac; --low:#727c78; --faint:#4b534f; --line:#242a28;
-  --forest:#68ecc4; --forest-lo:rgba(104,236,196,.08); --mint-ring:rgba(104,236,196,.35);
-  --pass:#45d19a; --pass-lo:rgba(69,209,154,.12); --fail:#ff6f5f; --fail-lo:rgba(255,111,95,.12);
-  --warn:#e3bd58; --warn-lo:rgba(227,189,88,.12); --block:#9aa39f; --block-lo:rgba(154,163,159,.12);
-  --shadow:0 18px 50px -18px rgba(0,0,0,.7), 0 2px 6px rgba(0,0,0,.4); color-scheme:dark;
-}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{height:100%}
-body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased;
-  background-image:repeating-linear-gradient(115deg,transparent 0 22px,var(--hatch) 22px 23px,transparent 23px 46px)}
+body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible,a:focus-visible{outline:2px solid var(--forest);outline-offset:2px}
 a{color:var(--forest)}
@@ -54,52 +27,60 @@ code,.mono{font-family:var(--mono)}
 .app{display:grid;grid-template-columns:320px minmax(0,1fr);min-height:100%}
 
 /* sidebar */
-aside{min-width:0;background:color-mix(in srgb,var(--card) 88%,transparent);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:100vh}
+aside{min-width:0;background:color-mix(in srgb,var(--card) 88%,transparent);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
 .brand{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:18px 20px 14px;border-bottom:1px solid var(--line)}
-.brand a{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}
-.brand strong{font-weight:600;letter-spacing:-.01em}
-.brand .right{display:flex;align-items:center;gap:12px}
-.theme{border:1px solid var(--line);background:var(--card);color:var(--mid);border-radius:8px;padding:3px 9px;font:500 12.5px var(--sans);white-space:nowrap}
-.theme:hover{color:var(--ink)}
-:root[data-theme="dark"] .theme .to-dark,:root:not([data-theme="dark"]) .theme .to-light{display:none}
-.brand .all{font-size:13px;color:var(--mid)}
-.pr{padding:16px 20px;border-bottom:1px solid var(--line)}
-.pr .repo{font:12px var(--mono);color:var(--low)}
-.pr h1{font-size:17px;line-height:1.3;margin:4px 0 8px;font-weight:600;text-wrap:balance}
-.pr .meta{display:flex;flex-wrap:wrap;gap:6px}
-.tag{font:11.5px var(--mono);padding:2px 7px;border:1px solid var(--line);border-radius:6px;color:var(--mid);background:var(--sunk)}
-.sect{padding:16px 20px 6px}
-.sect h2{margin:0;font-size:15px;font-weight:600}
-.sect p{margin:2px 0 0;font-size:13px;color:var(--low)}
-.journeys{display:flex;flex-direction:column;gap:10px;padding:10px 14px 16px}
-.jcard{text-align:left;background:transparent;border:1px solid transparent;border-radius:12px;padding:12px;display:grid;gap:8px}
+.home{display:inline-flex;align-items:center;gap:12px;color:var(--ink);text-decoration:none;--mark-ring:#2f6b4f;--mark-dot:#12a150}
+.home .gtm{display:block;overflow:visible;flex:none}
+.home strong{font-weight:600;font-size:19px;letter-spacing:-.02em}
+.listswitch{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin:12px 12px 4px;padding:3px;background:var(--sunk);border-radius:10px}
+.listswitch button{border:0;text-align:center;padding:7px 8px;border-radius:8px;font-size:14px;font-weight:500;color:var(--mid);background:transparent}
+.listswitch button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.07)}
+.listswitch .n{color:var(--low);font-weight:500;margin-left:6px}
+.journeys .empty{padding:10px 12px;font-size:13.5px;color:var(--low)}
+.journeys{display:flex;flex-direction:column;gap:2px;padding:6px 12px 10px}
+.jcard{text-align:left;background:transparent;border:1px solid transparent;border-radius:10px;padding:8px 10px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start}
+.jbody{display:grid;gap:4px;min-width:0}
+.thumb{position:relative;width:80px;aspect-ratio:16/10;border-radius:6px;overflow:hidden;border:1px solid var(--line);background:var(--sunk);flex:none}
+.thumb canvas{display:block;width:100%;height:100%}
+.thumb .tbox{position:absolute;border:1.5px solid var(--forest);border-radius:2px;box-shadow:0 0 0 1px rgba(255,255,255,.7)}
+.thumb .tbox.bad{border-color:var(--fail)}
 .jcard:hover{background:var(--sunk)}
-.jcard[aria-current="true"]{background:var(--card);border-color:var(--mint);box-shadow:0 0 0 3px var(--mint-ring)}
-.jhead{display:flex;justify-content:space-between;align-items:center;font:12px var(--mono);color:var(--low)}
-.jname{font-weight:500;line-height:1.35}
-.chips{display:flex;flex-wrap:wrap;gap:5px}
-.chip{display:inline-flex;align-items:center;gap:5px;font:11.5px var(--mono);padding:2px 7px 2px 6px;border-radius:999px;background:var(--pass-lo);color:var(--pass)}
-.chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
-.chip.failed{background:var(--fail-lo);color:var(--fail)}
-.chip.unreachable{background:var(--warn-lo);color:var(--warn)}
-.chip.blocked,.chip.none{background:var(--block-lo);color:var(--block)}
-.chip.error{background:transparent;color:var(--fail);box-shadow:inset 0 0 0 1px var(--fail)}
-.run{margin-top:auto;border-top:1px solid var(--line);padding:16px 20px 18px}
-.run h3{margin:0 0 8px;font-size:14px;font-weight:600}
-.kv{display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:13px;margin:0}
-.kv dt{color:var(--low)} .kv dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
-.back{display:inline-block;margin-top:14px;font-size:13px;color:var(--mid);text-decoration:none}
+.jcard[aria-current="true"]{background:var(--forest-lo);border-color:color-mix(in srgb,var(--forest) 30%,var(--line))}
+.jhead{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.jdur{flex:none;font-size:12px;color:var(--low);font-variant-numeric:tabular-nums}
+.jname{font-weight:500;font-size:14px;line-height:1.3}
+.chips{display:flex;flex-wrap:wrap;gap:3px 10px;margin-top:2px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:var(--mid)}
+.chip .cidt{font-family:var(--mono);font-size:12.5px;font-weight:400;color:var(--ink);letter-spacing:0}
+/* ascii verdict glyphs in tinted tiles, from the old dashboard */
+.mark{display:inline-flex;align-items:center;justify-content:center;flex:none;width:14px;font-family:var(--sans);font-size:13px;font-weight:600;line-height:1;opacity:.6}
+.mark.lg{width:18px;font-size:16px}
+.mark.p{color:var(--pass)}
+.mark.f{color:var(--fail);opacity:.75}
+.mark.u{color:var(--warn)}
+
+.run{flex:none;margin-top:auto;border-top:1px solid var(--line);padding:12px 20px 14px}
+.runid{margin:0 0 4px;font-size:14px;font-weight:700;letter-spacing:-.03em;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.runid .ticon{margin-right:0;vertical-align:0;color:var(--forest);font-size:3.8px;line-height:2.5px;letter-spacing:.4px;text-indent:.4px}
+.kv{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:4px 0;font-size:12.5px;border-bottom:1px solid var(--line)}
+.kv span{color:var(--low)}
+.kv b{font-weight:600;letter-spacing:-.01em;color:var(--mid);font-variant-numeric:tabular-nums;text-align:right}
+.back{display:inline-flex;align-items:center;gap:7px;margin-top:10px;font-size:12.5px;font-weight:600;color:var(--low);text-decoration:none}
 .back:hover{color:var(--ink)}
 
 /* main */
 main{min-width:0;display:flex;flex-direction:column}
-.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:16px 28px}
-.summary{font-size:15px;color:var(--mid)} .summary b{color:var(--ink);font-weight:600}
-.segs{display:flex;gap:10px;flex-wrap:wrap}
+.top{display:flex;justify-content:flex-end;align-items:center;gap:16px;flex-wrap:wrap;padding:16px 28px}
+.segs{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+
 .seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:3px}
 .seg[hidden]{display:none}
-.rbadge{font:11.5px var(--mono);padding:1px 7px;border-radius:999px;white-space:nowrap}
-.rbadge.ok{background:var(--pass-lo);color:var(--pass)} .rbadge.bad{background:var(--fail-lo);color:var(--fail)} .rbadge.none{background:var(--block-lo);color:var(--block)}
+.iconseg{display:inline-flex;gap:2px;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:2px}
+.iconseg button{border:0;background:transparent;width:32px;height:28px;border-radius:7px;display:grid;place-items:center;color:var(--low)}
+.iconseg button:hover{color:var(--ink)}
+.iconseg button[aria-pressed="true"]{background:var(--sunk);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.rbadge{font-size:12.5px;font-weight:500;white-space:nowrap;margin-left:6px}
+.rbadge.ok{color:var(--pass)} .rbadge.bad{color:var(--fail)} .rbadge.none{color:var(--block)}
 .code{margin:14px 0 0;background:var(--sunk);border:1px solid var(--line);border-radius:12px;padding:14px 16px;overflow-x:auto;font:12.5px/1.6 var(--mono);color:var(--ink);white-space:pre;tab-size:2}
 .code .s{color:var(--pass)} .code .c{color:var(--low);font-style:italic} .code .k{color:var(--forest);font-weight:500}
 .seg button{border:0;background:transparent;padding:6px 14px;border-radius:7px;font-size:13.5px;font-weight:500;color:var(--mid)}
@@ -107,45 +88,46 @@ main{min-width:0;display:flex;flex-direction:column}
 
 .stage{display:flex;justify-content:center;padding:18px 28px 8px}
 .vcard{position:relative;width:min(100%,860px);border-radius:14px;overflow:hidden;background:#000;box-shadow:var(--shadow);border:1px solid var(--line)}
-.vcard video{display:block;width:100%;height:auto;aspect-ratio:16/10;background:#fff;cursor:pointer}
-.caption{position:absolute;left:0;right:0;bottom:0;padding:26px 16px 10px;background:linear-gradient(transparent,rgba(0,0,0,.72));color:#fff;font:12.5px var(--mono);display:flex;gap:10px;align-items:baseline;pointer-events:none}
-.caption .ct{opacity:.7}
+.vcard video{display:block;width:100%;height:auto;aspect-ratio:16/10;background:#fff}
+.caption{position:absolute;left:0;right:0;bottom:0;padding:26px 16px 10px;background:linear-gradient(transparent,rgba(0,0,0,.72));color:#fff;font-size:13px;display:flex;gap:10px;align-items:center;pointer-events:none}
+.caption .mark{opacity:.9} .caption .mark.p{color:#7ff0c3} .caption .mark.f{color:#ff9d91}
+.caption .ct{opacity:.7;font-variant-numeric:tabular-nums}
+.caption .loc{font-family:var(--mono);font-size:12px;opacity:.85}
 .caption .ok{color:#7ff0c3} .caption .bad{color:#ff9d91}
 .novideo{aspect-ratio:16/10;display:grid;place-items:center;color:var(--low);background:var(--sunk)}
-.controls{display:flex;align-items:center;gap:14px;width:100%;max-width:916px;margin:14px auto 0;padding:0 28px}
+.controls{display:flex;align-items:center;gap:14px;width:100%;margin:14px 0 0;padding:0 28px}
 .play{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;flex:none}
 .track{position:relative;flex:1;height:22px;cursor:pointer}
 .track .rail{position:absolute;left:0;right:0;top:10px;height:3px;border-radius:3px;background:var(--line)}
 .track .fill{position:absolute;left:0;top:10px;height:3px;border-radius:3px;background:var(--forest)}
 .track .tick{position:absolute;top:7px;width:2px;height:9px;background:var(--faint);transform:translateX(-1px);border-radius:1px}
-.track .dot{position:absolute;top:5px;width:12px;height:12px;border-radius:50%;transform:translateX(-6px);border:2px solid var(--card);background:var(--pass);box-shadow:0 0 0 1px var(--line)}
+.track .dot{position:absolute;top:4px;width:3px;height:14px;border-radius:2px;transform:translateX(-1.5px);background:var(--pass)}
 .track .dot.failed{background:var(--fail)} .track .dot.unused{opacity:.45}
-.time{font:12.5px var(--mono);color:var(--low);font-variant-numeric:tabular-nums;min-width:86px;text-align:right}
-.verdict{width:100%;max-width:916px;margin:18px auto 0;padding:14px 28px;border-top:1px solid var(--line);color:var(--mid)}
+.time{font-size:13px;color:var(--low);font-variant-numeric:tabular-nums;min-width:86px;text-align:right}
+.verdict{width:100%;margin:18px 0 0;padding:14px 28px;border-top:1px solid var(--line);color:var(--mid)}
 .verdict b{color:var(--ink)}
 
-.tabs{display:flex;gap:26px;width:100%;max-width:916px;margin:6px auto 0;padding:0 28px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs{display:flex;gap:26px;width:100%;margin:6px 0 0;padding:0 28px;border-bottom:1px solid var(--line);overflow-x:auto}
 .tabs button{border:0;background:none;padding:12px 0;font-weight:500;color:var(--low);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
 .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--forest)}
-.tabs .n{font:12px var(--mono);color:var(--low);margin-left:6px}
-.panel{width:100%;max-width:916px;margin:0 auto;padding:6px 28px 60px}
+.tabs .n{font-size:13px;font-weight:500;color:var(--low);margin-left:7px}
+.panel{width:100%;padding:6px 28px 60px}
 
-.claim{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;padding:18px 0;border-bottom:1px solid var(--line)}
+.claim{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;align-items:start;padding:18px 0;border-bottom:1px solid var(--line)}
 .claim:last-child{border-bottom:0}
-.claim .cid{padding-top:2px}
-.claim .text{font-weight:500;line-height:1.4}
+.claim .cid{display:flex;align-items:center;height:24px}
+.claim .text{font-weight:500;line-height:24px}
 .claim .text .arrow{color:var(--low);font-weight:400}
 .claim .body{grid-column:2;display:grid;gap:10px}
 .evidence{color:var(--mid);font-size:14px;line-height:1.55;max-width:70ch}
 .evidence b{color:var(--ink)}
-.basis{font-size:12.5px;color:var(--warn);background:var(--warn-lo);border-radius:8px;padding:6px 10px;max-width:70ch}
+.basis{font-size:13px;color:var(--warn);max-width:70ch}
 .klist{display:grid;gap:8px}
-.kcheck{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 12px;align-items:start;font-size:13px;background:var(--sunk);border:1px solid var(--line);border-left:3px solid var(--pass);border-radius:10px;padding:10px 12px}
-.kcheck.failed{border-left-color:var(--fail)}
-.kcheck.unused{opacity:.7;border-left-style:dashed}
-.kcheck .kid{font:12px var(--mono);color:var(--low);padding-top:1px}
+.kcheck{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:start;font-size:13px;background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.kcheck.unused{opacity:.7}
 .kcheck .kmain{min-width:0;display:grid;gap:2px}
-.kcheck .kwhat{font-weight:500}
+.kcheck .kwhat{font-weight:500;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.events .aw{display:inline-flex;align-items:center;gap:8px}
 .kcheck .kwhat .ok{color:var(--pass)} .kcheck .kwhat .bad{color:var(--fail)}
 .kcheck .loc{font:12.5px var(--mono);color:var(--forest);word-break:break-all}
 .kcheck .obs{color:var(--mid);word-break:break-word}
@@ -161,6 +143,7 @@ main{min-width:0;display:flex;flex-direction:column}
 .events td.a{font-weight:500;white-space:nowrap}
 .events td.l{font:12.5px var(--mono);color:var(--forest);word-break:break-all}
 .events td.u{font:12.5px var(--mono);color:var(--mid);word-break:break-all}
+.events td.o{color:var(--mid);word-break:break-word}
 .events tr.check td.a{color:var(--pass)} .events tr.check.failed td.a{color:var(--fail)}
 .events tr.bad td{color:var(--fail)}
 .status-ok{color:var(--pass)} .status-bad{color:var(--fail)}
@@ -168,14 +151,13 @@ main{min-width:0;display:flex;flex-direction:column}
 h4{margin:22px 0 6px;font-size:14px;font-weight:600}
 
 /* grid */
-.gridview{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:40px 28px 80px}
+.gridview{flex:1;display:flex;flex-direction:column;gap:22px;padding:8px 28px 80px}
 .gridctl{display:flex;gap:10px}
 .gridctl button{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:6px 14px;font-size:13.5px;font-weight:500}
-.tiles{display:flex;flex-wrap:wrap;justify-content:center;gap:40px;max-width:1100px}
-.tile{width:min(100%,320px);display:grid;gap:12px}
+.tiles{display:flex;flex-wrap:wrap;gap:32px}
+.tile{width:min(100%,340px);display:grid;gap:10px}
 .tile .vcard{border-radius:12px}
-.tile .tt{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
-.tile .tt .jid{font:12px var(--mono);color:var(--low);white-space:nowrap}
+.tile .tt{display:flex;align-items:baseline;gap:10px}
 .tile .tname{font-weight:500;line-height:1.35;background:none;border:0;padding:0;text-align:left}
 .tile .tname:hover{color:var(--forest)}
 
@@ -184,64 +166,114 @@ h4{margin:22px 0 6px;font-size:14px;font-weight:600}
 .state .box{max-width:520px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px 28px;box-shadow:var(--shadow)}
 .state h1{font-size:19px;margin:0 0 6px}
 .state p{color:var(--mid);margin:6px 0}
-.pulse{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--forest);margin-right:8px;animation:pulse 1.4s ease-in-out infinite}
-@keyframes pulse{50%{opacity:.25}}
 
 @media (max-width:900px){
   .app{grid-template-columns:minmax(0,1fr)}
-  aside{min-height:0;border-right:0;border-bottom:1px solid var(--line)}
+  aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
   .journeys{flex-direction:row;overflow-x:auto}
   .jcard{min-width:250px}
   .run{margin-top:0}
   .top,.stage,.controls,.verdict,.tabs,.panel{padding-inline:16px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ascii tab icons, drawn on a 7 by 7 grid */
+.ticon{display:inline-block;vertical-align:-3px;margin-right:8px;white-space:pre;font-family:var(--mono);font-size:3.2px;line-height:2.15px;letter-spacing:.35px;text-indent:.25px;font-weight:500;color:var(--faint)}
+.tabs button[aria-selected="true"] .ticon{color:var(--forest)}
+
+/* the landing page's survey cursor: dark arrow at rest, forest green over anything interactive */
+html{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M5.2 3.1 19.2 10.4 12.6 12.1 9.5 19.2 Z' fill='%23161717' stroke='%23ffffff' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 5 3, auto}
+a,button,summary,.track,.vcard video{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M5.2 3.1 19.2 10.4 12.6 12.1 9.5 19.2 Z' fill='%230e694e' stroke='%23ffffff' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 5 3, pointer}
 </style>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="gt-mark" viewBox="394 394 1260 1260"><g transform="translate(0,2048) scale(0.1,-0.1)"><path fill="var(--mark-ring,#2f6b4f)" fill-rule="evenodd" d="M9960 16269 c-682 -26 -1364 -262 -2036 -704 -458 -302 -1271 -964
+-1583 -1291 -254 -266 -426 -513 -576 -828 -127 -266 -199 -487 -336 -1031
+-123 -489 -206 -774 -349 -1200 -155 -462 -220 -714 -272 -1066 -30 -208 -33
+-697 -5 -879 57 -362 125 -580 277 -889 172 -348 312 -553 771 -1128 257 -322
+405 -526 580 -801 433 -678 618 -934 869 -1197 384 -404 812 -674 1362 -859
+356 -120 712 -182 1099 -193 734 -20 1374 168 2022 593 334 219 630 462 1052
+860 521 492 681 637 1085 984 380 326 472 410 688 624 404 399 647 723 832
+1108 87 183 139 327 183 508 117 479 109 918 -28 1461 -36 143 -73 271 -167
+569 -162 522 -190 659 -228 1160 -23 289 -35 406 -56 535 -52 318 -135 575
+-265 825 -213 406 -516 727 -1094 1161 -372 279 -1092 781 -1335 931 -476 293
+-1016 534 -1426 637 -365 91 -682 124 -1064 110z m490 -374 c412 -48 756 -151
+1209 -359 393 -181 746 -403 1481 -929 624 -447 789 -577 981 -767 205 -204
+331 -375 450 -612 158 -314 213 -557 264 -1163 50 -595 75 -714 280 -1380 191
+-620 232 -846 222 -1230 -6 -214 -20 -324 -66 -501 -120 -467 -417 -939 -886
+-1409 -171 -171 -354 -335 -870 -781 -329 -284 -474 -415 -805 -729 -684 -648
+-1033 -916 -1491 -1146 -306 -153 -578 -239 -929 -294 -144 -23 -538 -31 -711
+-15 -658 59 -1291 302 -1748 670 -133 108 -367 350 -487 505 -117 150 -278
+381 -414 592 -426 665 -482 745 -745 1072 -388 483 -497 629 -631 855 -376
+628 -483 1175 -374 1899 41 266 106 511 280 1042 138 422 196 620 311 1073
+150 590 212 777 354 1067 189 385 467 705 995 1141 373 309 721 577 924 713
+588 395 1167 621 1766 690 128 14 503 12 640 -4z M10195 14723 c-237 -10 -543
+-69 -800 -154 -295 -98 -601 -256 -1075 -557 -478 -302 -692 -479 -908 -751
+-144 -179 -257 -386 -392 -716 -129 -313 -189 -441 -427 -905 -78 -151 -168
+-338 -201 -415 -113 -265 -193 -549 -223 -789 -15 -123 -7 -420 16 -563 50
+-322 180 -640 465 -1138 121 -211 171 -315 295 -615 167 -402 248 -564 379
+-765 287 -436 721 -806 1251 -1066 913 -446 1858 -403 2845 130 200 108 401
+228 875 524 605 378 734 466 985 676 152 127 395 371 500 501 438 548 589
+1122 480 1830 -11 71 -40 234 -64 362 -81 421 -91 553 -74 940 13 312 5 452
+-37 663 -98 489 -382 904 -908 1327 -56 45 -176 145 -266 222 -387 331 -603
+499 -861 671 -549 366 -1043 547 -1592 585 -78 5 -154 9 -168 8 -14 -1 -56 -3
+-95 -5z m385 -377 c302 -41 629 -149 916 -303 152 -81 375 -221 541 -338 125
+-89 883 -714 1099 -906 211 -189 368 -385 465 -584 68 -140 100 -235 131 -388
+22 -107 23 -129 20 -532 -3 -520 7 -645 88 -1050 108 -544 118 -864 36 -1171
+-114 -422 -361 -785 -780 -1143 -201 -172 -384 -300 -786 -553 -118 -74 -303
+-191 -410 -258 -679 -429 -1124 -635 -1565 -724 -197 -41 -307 -49 -549 -43
+-414 11 -712 91 -1120 300 -378 193 -719 470 -937 759 -173 230 -257 392 -475
+918 -117 281 -163 374 -293 600 -245 424 -369 723 -418 1010 -22 132 -22 392
+1 534 50 306 174 628 436 1126 146 278 206 406 362 775 285 677 438 854 1123
+1297 329 213 502 314 709 414 292 141 623 238 906 267 96 10 405 5 500 -7z
+M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
+-95 -276 -177 -388 -289 -155 -155 -256 -308 -366 -554 -170 -379 -179 -395
+-361 -695 -289 -474 -383 -843 -318 -1240 38 -237 80 -347 277 -735 96 -191
+140 -289 172 -390 199 -620 422 -921 930 -1261 408 -273 871 -406 1291 -370
+416 36 738 155 1313 485 756 434 958 570 1211 815 219 213 348 407 426 640 92
+273 97 485 24 970 -41 279 -51 437 -35 581 19 172 25 387 13 495 -28 250 -115
+465 -274 676 -74 98 -235 262 -343 349 -44 35 -154 130 -245 210 -261 231
+-327 286 -458 383 -344 258 -656 404 -996 468 -127 24 -435 34 -551 18z m478
+-379 c390 -66 722 -260 1251 -729 81 -72 194 -169 250 -214 146 -117 296 -273
+366 -379 130 -198 182 -424 159 -688 -5 -63 -12 -203 -15 -310 -6 -193 -6
+-198 36 -475 55 -362 63 -565 31 -724 -75 -359 -308 -647 -774 -955 -145 -95
+-723 -438 -944 -560 -233 -128 -434 -212 -628 -261 -490 -125 -934 -42 -1397
+262 -252 165 -432 343 -555 550 -69 117 -108 207 -183 428 -83 243 -125 341
+-240 555 -195 363 -249 551 -237 829 11 259 79 438 324 851 153 258 189 327
+293 560 140 314 202 413 343 546 107 102 203 171 352 255 72 39 188 106 260
+147 294 171 572 280 810 317 128 21 364 18 498 -5z"/><path fill="var(--mark-dot,#12a150)" d="M10090 11143 c-195 -35 -358 -119 -496 -257 -154 -154 -237 -329
+-264 -554 -20 -169 11 -326 97 -502 53 -107 65 -123 167 -225 80 -80 133 -122
+189 -154 242 -136 512 -158 781 -62 118 42 205 100 322 216 102 102 114 118
+167 225 86 176 118 339 97 506 -50 405 -333 718 -722 798 -72 15 -274 20 -338
+9z"/></g></symbol></svg>
 <div id="root"></div>
 
 <template id="page">
 <div class="app">
   <aside>
     <div class="brand">
-      <a href="/runs">
-        <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><g fill="none" stroke="var(--forest)" stroke-width="1.4"><circle cx="13" cy="13" r="11.5"/><circle cx="13" cy="13" r="7.5"/><circle cx="13" cy="13" r="3.5" fill="var(--forest)"/></g></svg>
-        <strong>Groundtruth</strong>
-      </a>
-      <div class="right">
-        <button class="theme" type="button" onclick="toggleTheme()" aria-label="Switch between light and dark"><span class="to-dark">☾ Dark</span><span class="to-light">☀ Light</span></button>
-        <a class="all" href="/runs">All runs</a>
-      </div>
+      <a class="home" href="/runs" aria-label="Groundtruth, all runs"><svg class="gtm" width="31" height="31" aria-hidden="true"><use href="#gt-mark"/></svg><strong>Groundtruth</strong></a>
     </div>
-    <div class="pr">
-      <div class="repo" data-id="repo"></div>
-      <h1 data-id="prTitle"></h1>
-      <div class="meta" data-id="prMeta"></div>
+    <div class="listswitch" role="group" aria-label="Which checks">
+      <button aria-pressed="true" data-list="intent">Intent<span class="n" data-id="nIntent"></span></button>
+      <button aria-pressed="false" data-list="regression">Regression<span class="n" data-id="nRegression"></span></button>
     </div>
-    <div class="sect"><h2>Journeys</h2><p>Each one is a path through the app in a fresh browser, recorded as a video.</p></div>
-    <div class="journeys" data-id="journeys" role="list"></div>
-    <div data-id="regBlock" hidden>
-      <div class="sect"><h2>Regression checks</h2><p>Tests earlier PRs added to the repo, replayed on this PR.</p></div>
+    <div class="journeys" data-id="journeys" data-list-pane="intent" role="list"></div>
+    <div data-id="regBlock" data-list-pane="regression" hidden>
       <div class="journeys" data-id="regressions" role="list"></div>
     </div>
     <div class="run">
-      <h3>This run</h3>
-      <dl class="kv" data-id="runKv"></dl>
-      <a class="back" data-id="backLink" href="#">← Back to pull request</a>
+      <h3 class="runid">This run<span class="ticon" data-i="run"></span></h3>
+      <div data-id="runKv"></div>
+      <a class="back" data-id="backLink" href="#"><svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M7.78 12.53a.75.75 0 0 1-1.06 0L2.47 8.28a.75.75 0 0 1 0-1.06l4.25-4.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L4.81 7h7.44a.75.75 0 0 1 0 1.5H4.81l2.97 2.97a.75.75 0 0 1 0 1.06Z"/></svg>Back to pull request</a>
     </div>
   </aside>
 
   <main>
     <div class="top">
-      <div class="summary" data-id="summary"></div>
       <div class="segs">
-        <div class="seg" role="group" aria-label="Which recording" data-id="sourceSeg" hidden>
-          <button data-id="srcReplay" aria-pressed="true" title="The compiled Playwright script, replayed">Replay</button>
-          <button data-id="srcExplore" aria-pressed="false" title="The agent exploring, with its detours">Exploration</button>
-        </div>
-        <div class="seg" role="group" aria-label="View">
-          <button data-id="viewJourney" aria-pressed="true">Journey</button>
-          <button data-id="viewGrid" aria-pressed="false">Grid</button>
+        <div class="iconseg" role="group" aria-label="View">
+          <button data-id="viewJourney" aria-pressed="true" aria-label="One video" title="One video"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+          <button data-id="viewGrid" aria-pressed="false" aria-label="All videos" title="All videos"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.2"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.2"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1.2"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.2"/></g></svg></button>
         </div>
       </div>
     </div>
@@ -262,10 +294,10 @@ h4{margin:22px 0 6px;font-size:14px;font-weight:600}
       </div>
       <div class="verdict" data-id="verdict"></div>
       <div class="tabs" role="tablist">
-        <button role="tab" data-tab="claims" aria-selected="true">Claims<span class="n" data-id="nClaims"></span></button>
-        <button role="tab" data-tab="events" aria-selected="false">What happened<span class="n" data-id="nEvents"></span></button>
-        <button role="tab" data-tab="network" aria-selected="false">Network &amp; console<span class="n" data-id="nNet"></span></button>
-        <button role="tab" data-tab="script" aria-selected="false" data-id="scriptTab" hidden>Script</button>
+        <button role="tab" data-tab="claims" aria-selected="true"><span class="ticon" data-i="claims"></span>Claims<span class="n" data-id="nClaims"></span></button>
+        <button role="tab" data-tab="events" aria-selected="false"><span class="ticon" data-i="cursor"></span>Actions<span class="n" data-id="nEvents"></span></button>
+        <button role="tab" data-tab="network" aria-selected="false"><span class="ticon" data-i="net"></span>Network<span class="n" data-id="nNet"></span></button>
+        <button role="tab" data-tab="script" aria-selected="false" data-id="scriptTab" hidden><span class="ticon" data-i="script"></span>Script</button>
       </div>
       <div class="panel" data-id="panel"></div>
     </section>
@@ -285,6 +317,17 @@ h4{margin:22px 0 6px;font-size:14px;font-weight:600}
 const RUN_ID = decodeURIComponent(location.pathname.split("/").filter(Boolean)[1] ?? "");
 const BASE = `/runs/${encodeURIComponent(RUN_ID)}`;
 const STATUS_WORD = { verified: "Verified", failed: "Failed", blocked: "Blocked", unreachable: "Unreachable", error: "Error", none: "No status" };
+const GLYPH_OF = { verified: "p", passed: "p", failed: "f", error: "f", blocked: "u", unreachable: "u", none: "u" };
+const SYMBOL = { p: "✓", f: "✗", u: "?" };
+const glyph = (status, big) => `<span class="mark ${GLYPH_OF[status] ?? "u"}${big ? " lg" : ""}" aria-hidden="true">${SYMBOL[GLYPH_OF[status] ?? "u"]}</span>`;
+const okGlyph = (passed) => glyph(passed ? "verified" : "failed");
+const TICONS = {
+  run:    ["     ", "#    ", "##   ", " ##  ", "##   ", "#    ", "  ###"],
+  script: ["          ", "  #  # #  ", " #   #  # ", "#   #    #", " #  #   # ", "  # #  #  ", "          "],
+  claims: ["#######", "#     #", "# ### #", "#     #", "#######", " ##    ", " #     "],
+  cursor: ["    #  ", "    #  ", "#   #  ", "#   # #", "# # # #", "# # # #", "#######"],
+  net:    ["## ## #", "       ", "# # ## ", "       ", "## # ##", "       ", "# ## ##"],
+};
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const fmt = (s) => { s = Math.max(0, Math.round(s || 0)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
 const duration = (s) => (s >= 60 ? `${Math.floor(s / 60)}m ${String(Math.round(s % 60)).padStart(2, "0")}s` : `${Math.round(s)}s`);
@@ -295,7 +338,7 @@ async function load() {
   if (res.status === 404) return showState("Run not found", `There's no run called <code>${esc(RUN_ID)}</code>.`);
   const trace = await res.json();
   if (trace.running) {
-    showState(`<span class="pulse"></span>Testing in progress`, "The app is booting or the agent is still checking claims. This page refreshes when the run finishes.");
+    showState("Testing in progress","The app is booting or the agent is still checking claims. This page refreshes when the run finishes.");
     setTimeout(load, 5000);
     return;
   }
@@ -326,75 +369,88 @@ function render(T, R, G) {
   const root = document.getElementById("root");
   root.replaceChildren(document.getElementById("page").content.cloneNode(true));
   const $ = (id) => root.querySelector(`[data-id="${id}"]`);
+  root.querySelectorAll(".ticon[data-i]").forEach((el) => { el.textContent = (TICONS[el.dataset.i] ?? []).join("\n"); });
 
   const claims = T.claims ?? [];
   const results = T.results ?? [];
   const checks = T.checks ?? [];
   const steps = T.steps ?? [];
   const requests = T.requests ?? [];
-  const journeys = (T.journeys ?? []).filter((j) => j.video || steps.some((s) => s.journey === j.id) || checks.some((k) => k.journey === j.id));
+  const journeys = (T.journeys ?? []).filter((j) => R?.journeys?.some((replay) => replay.id === j.id));
   const claimById = Object.fromEntries(claims.map((c) => [c.id, c]));
   const resultOf = (id) => results.find((r) => r.claimId === id);
   const statusOf = (id) => resultOf(id)?.status ?? "none";
   const citedIds = new Set(results.flatMap((r) => r.checkIds ?? []));
-  const chip = (id) => `<span class="chip ${statusOf(id)}" title="${esc(STATUS_WORD[statusOf(id)])}">${esc(id)}</span>`;
+  const chip = (id) => `<span class="chip ${statusOf(id)}" title="${esc(STATUS_WORD[statusOf(id)])}">${glyph(statusOf(id))}<span class="cidt">${esc(id.toUpperCase())}</span></span>`;
   const claimsIn = (j) => [...new Set([...results.filter((r) => r.journey === j.id).map((r) => r.claimId), ...(j.claimIds ?? []).filter((id) => !resultOf(id))])];
-  const videoUrl = (j) => j.video ? `${BASE}/videos/${encodeURIComponent(j.video.split(/[\\/]/).pop())}` : "";
+  // The frame a card shows: the first failed check if the recording has one, else its last cited check.
+  const keyCheck = (list) => list.find((k) => !k.passed && citedIds.has(k.id)) ?? [...list].reverse().find((k) => citedIds.has(k.id)) ?? list.at(-1);
+  const thumb = (src, k) => !src ? "" : `<span class="thumb" data-src="${src}" data-t="${Math.max(0.1, k?.t ?? 1.5)}"><canvas></canvas>${k?.box
+    ? `<span class="tbox ${k.passed ? "" : "bad"}" style="left:${k.box.x * 100}%;top:${k.box.y * 100}%;width:${k.box.width * 100}%;height:${k.box.height * 100}%"></span>` : ""}</span>`;
   const checkLine = (k) => (k.code ? k.code : `${words(k.assert)}${k.expected ? ` "${k.expected}"` : ""}`);
 
-  // Two recordings per journey: the replay of the compiled script (clean, the default) and the exploration.
   const replayOf = (j) => R?.journeys?.find((x) => x.id === j.id);
-  let source = R?.journeys?.some((j) => j.video) ? "replay" : "explore";
-  const videoFor = (j) => (source === "replay" && replayOf(j)?.video ? `${BASE}/videos/${encodeURIComponent(replayOf(j).video)}` : videoUrl(j));
+  const videoFor = (j) => replayOf(j)?.video ? `${BASE}/videos/${encodeURIComponent(replayOf(j).video)}` : "";
   const replayCheck = (k) => R?.checks?.[k.id];
-  const checkTime = (k) => (source === "replay" ? replayCheck(k)?.t : k.t);
+  const checkTime = (k) => replayCheck(k)?.t;
 
   // Sidebar
-  document.title = `${T.title ?? T.pr} · Groundtruth`;
-  $("repo").textContent = T.pr ?? "";
-  $("prTitle").textContent = T.title ?? "Test run";
-  $("prMeta").innerHTML = [T.sha && `commit ${T.sha.slice(0, 7)}`, T.model, T.source === "cli" ? "from the CLI" : T.source === "approval" ? "from approval" : ""]
-    .filter(Boolean).map((t) => `<span class="tag">${esc(t)}</span>`).join("");
+  document.title = `${T.title ?? T.pr} / Groundtruth`;
   if (T.url) $("backLink").href = T.url; else $("backLink").remove();
-  const verified = claims.filter((c) => statusOf(c.id) === "verified").length;
-  const failed = claims.filter((c) => statusOf(c.id) === "failed").length;
   $("runKv").innerHTML = [
-    ["Claims verified", `${verified} of ${claims.length}`],
-    ["Checks", `${checks.filter((k) => citedIds.has(k.id)).length} used · ${checks.filter((k) => !citedIds.has(k.id)).length} redone`],
-    T.bootSeconds != null && ["Boot", duration(T.bootSeconds)],
-    T.seconds != null && ["Testing", `${duration(T.seconds)} · ${T.turns} turns`],
-    R?.journeys?.length && ["Replay", `${R.journeys.filter((j) => j.status === "passed").length} of ${R.journeys.length} passed · ${duration(R.seconds)}`],
+    T.branch && ["Branch", T.branch],
+    T.sha && ["Commit", T.sha.slice(0, 7)],
+    T.seconds != null && ["Duration", duration((T.bootSeconds ?? 0) + T.seconds)],
     T.costUsd != null && ["Cost", `$${T.costUsd.toFixed(2)}`],
-    T.startedAt && ["Started", new Date(T.startedAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })],
-  ].filter(Boolean).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("");
+    R?.journeys?.length && ["Replay", `${R.journeys.filter((j) => j.status === "passed").length} of ${R.journeys.length} passed`],
+  ].filter(Boolean).map(([k, v]) => `<div class="kv"><span>${k}</span><b>${esc(v)}</b></div>`).join("");
   // Regression checks: tests earlier PRs added, replayed on this PR. One sidebar card per test (a file
   // with a chain of journeys has several), shown like a journey: its replay video and its checks.
   const regItems = (G ?? []).flatMap((r) => (r.tests.length ? r.tests : [{ title: r.title, status: r.status }]).map((test, i, all) => ({
     id: all.length > 1 ? `${r.id}-${i + 1}` : r.id, name: all.length > 1 ? `${r.title} (${i + 1} of ${all.length})` : r.title, reg: r, test,
   })));
-  const regBroken = (G ?? []).filter((r) => r.status === "failed").length;
-  const regHeld = (G ?? []).filter((r) => r.status === "passed").length;
-  const regSummary = regBroken ? ` · <b>${regBroken} regression${regBroken === 1 ? "" : "s"}</b>` : regHeld ? ` · ${regHeld} regression check${regHeld === 1 ? "" : "s"} passed` : "";
-  $("summary").innerHTML = (failed
-    ? `<b>${failed} of ${claims.length} claims failed</b> · ${verified} verified across ${journeys.length} journeys`
-    : `<b>${verified} of ${claims.length} claims verified</b> across ${journeys.length} journey${journeys.length === 1 ? "" : "s"}`) + regSummary;
 
-  $("journeys").innerHTML = journeys.map((j) => `
+  $("journeys").innerHTML = journeys.map((j, i) => `
     <button class="jcard" role="listitem" data-j="${esc(j.id)}">
-      <span class="jhead"><span>${esc(j.id.toUpperCase())}${j.resetData ? " · fresh data" : ""}</span><span data-dur="${esc(j.id)}"></span></span>
-      <span class="jname">${esc(j.name)}</span>
-      <span class="chips">${claimsIn(j).map(chip).join("")}</span>
+      ${thumb(videoFor(j), keyCheck(checks.filter((k) => k.journey === j.id && replayCheck(k)).map((k) => ({ ...k, ...replayCheck(k), box: undefined }))))}
+      <span class="jbody"><span class="jhead"><span class="jname">${esc(j.name)}</span><span class="jdur" data-dur="${esc(j.id)}"></span></span>
+      <span class="chips">${claimsIn(j).map(chip).join("")}</span></span>
     </button>`).join("");
+  // Each tile is one still frame: load the recording off-screen, seek to the moment, paint it, let the video go.
+  // One at a time, so a long list doesn't open every recording at once.
+  const fitThumbs = async () => {
+    for (const tile of root.querySelectorAll(".thumb[data-src]")) {
+      const v = document.createElement("video");
+      v.muted = true; v.preload = "auto"; v.src = tile.dataset.src;
+      try {
+        await new Promise((ok, fail) => { v.onloadeddata = ok; v.onerror = fail; });
+        v.currentTime = Math.min(Number(tile.dataset.t), v.duration || Infinity);
+        await new Promise((ok) => { v.onseeked = ok; });
+        const c = tile.querySelector("canvas");
+        c.width = 320; c.height = Math.round((320 * v.videoHeight) / v.videoWidth);
+        c.getContext("2d").drawImage(v, 0, 0, c.width, c.height);
+        tile.style.aspectRatio = `${v.videoWidth} / ${v.videoHeight}`;
+      } catch { /* no frame: the tile stays blank */ }
+      v.removeAttribute("src"); v.load();
+    }
+  };
+  $("nIntent").textContent = journeys.length;
+  $("nRegression").textContent = regItems.length;
+  root.querySelectorAll(".listswitch button").forEach((b) => b.addEventListener("click", () => {
+    root.querySelectorAll(".listswitch button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    root.querySelectorAll("[data-list-pane]").forEach((pane) => (pane.hidden = pane.dataset.listPane !== b.dataset.list));
+  }));
+  if (!regItems.length) $("regressions").innerHTML = `<p class="empty">No regression checks ran on this PR.</p>`;
   if (regItems.length) {
     const regStatus = { passed: ["verified", "still works"], failed: ["failed", "broken by this PR"], error: ["error", "couldn't run"] };
-    $("regBlock").hidden = false;
     $("regressions").innerHTML = regItems.map((it) => `
       <button class="jcard" role="listitem" data-j="${esc(it.id)}">
-        <span class="jhead"><span>${esc(it.id.toUpperCase())} · from ${esc(it.reg.from)}</span><span>${it.test.seconds != null ? fmt(it.test.seconds) : ""}</span></span>
-        <span class="jname">${esc(it.name)}</span>
-        <span class="chips"><span class="chip ${regStatus[it.reg.status][0]}">${esc(regStatus[it.reg.status][1])}</span></span>
+        ${thumb(it.test.video ? `${BASE}/videos/${encodeURIComponent(it.test.video)}` : "", { t: Math.max(0, ...it.reg.checks.filter((c) => c.test === it.test.title).map((c) => c.t)), passed: it.reg.status !== "failed" })}
+        <span class="jbody"><span class="jhead"><span class="jname">${esc(it.name)}</span><span class="jdur">${it.test.seconds != null ? fmt(it.test.seconds) : ""}</span></span>
+        <span class="chips"><span class="chip ${regStatus[it.reg.status][0]}" title="${esc(regStatus[it.reg.status][1])}">${glyph(regStatus[it.reg.status][0])}<span class="cidt">${esc(it.id.toUpperCase().replace("-", "."))}</span></span></span></span>
       </button>`).join("");
   }
+  fitThumbs();
   root.querySelectorAll(".jcard").forEach((b) => b.addEventListener("click", () => { showView("journey"); selectJourney(b.dataset.j); }));
 
   // Journey view
@@ -409,13 +465,7 @@ function render(T, R, G) {
     current = journeys.find((j) => j.id === id) ?? journeys[0];
     if (!current) return;
     root.querySelectorAll(".jcard").forEach((b) => b.setAttribute("aria-current", String(b.dataset.j === current.id)));
-    // The replay records only the checks (actions have no timestamps there); the exploration has both.
-    timeline = source === "replay"
-      ? checks.filter((k) => k.journey === current.id && replayCheck(k)).map((k) => ({ kind: "check", t: replayCheck(k).t, k: { ...k, passed: replayCheck(k).passed } }))
-      : [
-        ...steps.filter((s) => s.journey === current.id).map((s) => ({ kind: "step", t: s.t ?? 0, s })),
-        ...checks.filter((k) => k.journey === current.id).map((k) => ({ kind: "check", t: k.t ?? 0, k })),
-      ];
+    timeline = checks.filter((k) => k.journey === current.id && replayCheck(k)).map((k) => ({ kind: "check", t: replayCheck(k).t, k: { ...k, passed: replayCheck(k).passed } }));
     timeline.sort((a, b) => a.t - b.t);
     const src = videoFor(current);
     if (src) {
@@ -423,19 +473,10 @@ function render(T, R, G) {
       video.hidden = false; $("vcard").querySelector(".novideo")?.remove();
     } else { video.removeAttribute("src"); video.hidden = true; if (!$("vcard").querySelector(".novideo")) $("vcard").insertAdjacentHTML("afterbegin", `<div class="novideo">No video for this journey</div>`); }
     const ids = claimsIn(current);
-    const held = ids.filter((c) => statusOf(c) === "verified").length;
-    const bad = ids.filter((c) => statusOf(c) === "failed");
-    $("verdict").innerHTML = bad.length
-      ? `<b>${bad.length} claim${bad.length === 1 ? "" : "s"} failed</b> in this journey (${bad.join(", ")}). The red marks on the timeline are the checks that failed.`
-      : held === ids.length && ids.length
-        ? `<b>Verified.</b> All ${ids.length} claim${ids.length === 1 ? "" : "s"} in this journey held${current.resetData ? ", starting from fresh app data" : ""}.`
-        : `<b>${held} of ${ids.length} claims verified.</b> See each claim below for what happened.`;
     const rj = replayOf(current);
-    if (rj) {
-      $("verdict").innerHTML += rj.status === "passed"
-        ? ` The compiled Playwright script replayed this journey and passed${source === "replay" ? " (that's the video above)" : ""}.`
-        : ` <b>The compiled script's replay ${esc(rj.status)}</b>${rj.error ? `: ${esc(rj.error)}` : ""}. The verdicts come from the exploration; the script needs a look.`;
-    }
+    $("verdict").innerHTML = rj && rj.status !== "passed"
+      ? `<b>The replay of the compiled script ${esc(rj.status)}</b>${rj.error ? `: ${esc(rj.error)}` : ""}.` : "";
+    $("verdict").hidden = !$("verdict").innerHTML;
     $("nClaims").textContent = ids.length;
     $("nEvents").textContent = timeline.length;
     $("nNet").textContent = requests.filter((r) => r.journey === current.id && !/hot-update|__webpack_hmr|\/@vite\//.test(r.path)).length;
@@ -457,6 +498,7 @@ function render(T, R, G) {
       video.hidden = false; $("vcard").querySelector(".novideo")?.remove();
     } else { video.removeAttribute("src"); video.hidden = true; if (!$("vcard").querySelector(".novideo")) $("vcard").insertAdjacentHTML("afterbegin", `<div class="novideo">No video for this test</div>`); }
     const broke = item.reg.checks.filter((c) => c.test === item.test.title && !c.passed);
+    $("verdict").hidden = false;
     $("verdict").innerHTML = item.reg.status === "passed"
       ? `<b>Still works.</b> This test was added by ${esc(item.reg.from)} and passes on this PR too.`
       : item.reg.status === "failed"
@@ -481,7 +523,7 @@ function render(T, R, G) {
     for (const e of timeline) {
       const el = document.createElement("div");
       if (e.kind === "step") { el.className = "tick"; el.title = `${e.s.action} ${e.s.locator ?? e.s.value ?? ""}`; }
-      else { el.className = `dot ${e.k.passed ? "" : "failed"} ${e.k.reg || citedIds.has(e.k.id) ? "" : "unused"}`; el.title = `${e.k.id} ${e.k.passed ? "✓" : "✗"} ${checkLine(e.k)}`; }
+      else { el.className = `dot ${e.k.passed ? "" : "failed"} ${e.k.reg || citedIds.has(e.k.id) ? "" : "unused"}`; el.title = `${e.k.passed ? "Passed" : "Failed"}: ${checkLine(e.k)}`; }
       el.style.left = pct(e.t);
       track.appendChild(el);
     }
@@ -490,13 +532,12 @@ function render(T, R, G) {
   function checkCard(k) {
     const rc = replayCheck(k);
     const badge = !R || !citedIds.has(k.id) ? ""
-      : rc ? `<span class="rbadge ${rc.passed ? "ok" : "bad"}">replay ${rc.passed ? "✓" : "✗"}</span>`
-      : `<span class="rbadge none">not reached in replay</span>`;
+      : rc ? `<span class="rbadge ${rc.passed ? "ok" : "bad"}">Replay ${rc.passed ? "passed" : "failed"}</span>`
+      : `<span class="rbadge none">Not reached in replay</span>`;
     const t = checkTime(k);
     return `<div class="kcheck ${k.passed ? "" : "failed"} ${citedIds.has(k.id) ? "" : "unused"}">
-      <span class="kid">${esc(k.id)}</span>
       <div class="kmain">
-        <div class="kwhat"><span class="${k.passed ? "ok" : "bad"}">${k.passed ? "✓ passed" : "✗ failed"}</span> · ${esc(checkLine(k))} ${badge}</div>
+        <div class="kwhat">${okGlyph(k.passed)}<span>${esc(checkLine(k))}</span>${badge}</div>
         ${k.locator ? `<div class="loc">${esc(k.locator)}</div>` : ""}
         <div class="obs">Observed: ${esc(k.observed)}</div>
       </div>
@@ -509,9 +550,8 @@ function render(T, R, G) {
   function renderRegressionPanel(p, item) {
     if (tab === "claims") {
       const rows = timeline.map((e) => `<div class="kcheck ${e.k.passed ? "" : "failed"}">
-          <span class="kid">${esc(e.k.id)}</span>
           <div class="kmain">
-            <div class="kwhat"><span class="${e.k.passed ? "ok" : "bad"}">${e.k.passed ? "✓ still holds" : "✗ broken"}</span> · ${esc(e.k.title)}</div>
+            <div class="kwhat">${okGlyph(e.k.passed)}<span>${esc(e.k.title)}</span>${e.k.passed ? "" : `<span class="rbadge bad">Broken</span>`}</div>
             <div class="loc">${esc(e.k.code)}</div>
           </div>
           <button class="jump" data-t="${e.t}">${fmt(e.t)}</button>
@@ -519,13 +559,13 @@ function render(T, R, G) {
       const notReached = item.test.status !== "passed" && item.test.error ? `<p class="note">Stopped early: ${esc(item.test.error)}</p>` : "";
       p.innerHTML = `<p class="note">${esc(item.reg.summary)}</p>${rows ? `<div class="klist">${rows}</div>` : `<p class="note">No checks ran in this test.</p>`}${notReached}`;
     } else if (tab === "script") {
-      p.innerHTML = `<p class="note">The test ${esc(item.reg.from)} added to the repo (<code>.groundtruth/tests/${esc(item.reg.file)}</code>), read from the base branch and replayed on this PR.</p><pre class="code" data-id="code">Loading…</pre>`;
+      p.innerHTML = `<p class="note">Added by ${esc(item.reg.from)} in <code>.groundtruth/tests/${esc(item.reg.file)}</code></p><pre class="code" data-id="code">Loading…</pre>`;
       fetch(`${BASE}/regression/${encodeURIComponent(item.reg.file)}`, { cache: "no-store" }).then((r) => (r.ok ? r.text() : Promise.reject(r.status)))
         .then((code) => { const el = p.querySelector('[data-id="code"]'); if (el) el.innerHTML = highlight(code); })
         .catch(() => { const el = p.querySelector('[data-id="code"]'); if (el) el.textContent = "The test file wasn't saved with this run."; });
       return;
     } else {
-      p.innerHTML = `<p class="note">Regression tests replay a script, so there are no agent actions or recorded requests to show. The checks are in the first tab; the video above is the replay on this PR.</p>`;
+      p.innerHTML = `<p class="note">Nothing here for a regression test. Its checks are in Claims.</p>`;
     }
     p.querySelectorAll(".jump").forEach((b) => b.addEventListener("click", () => seek(Number(b.dataset.t), true)));
   }
@@ -545,26 +585,25 @@ function render(T, R, G) {
           <div class="text">${c.when ? `${esc(c.when)} <span class="arrow">→</span> ` : ""}${esc(c.then?.what)}</div>
           <div class="body">
             ${r ? `<div class="evidence"><b>${STATUS_WORD[r.status]}.</b> ${esc(r.evidence)}</div>` : `<div class="evidence">No status was recorded for this claim.</div>`}
-            ${r?.basis === "observation" ? `<div class="basis">No check could express this result, so it rests on the agent's own reading: ${esc(r.uncheckedReason ?? "")}</div>` : ""}
+            ${r?.basis === "observation" ? `<div class="basis">Based on what the agent saw, not on a check: ${esc(r.uncheckedReason ?? "")}</div>` : ""}
             ${cited.length ? `<div class="klist">${cited.map(checkCard).join("")}</div>` : ""}
-            ${others.length ? `<div class="klabel">Other checks for this claim, not used for the verdict</div><div class="klist">${others.map(checkCard).join("")}</div>` : ""}
+            ${others.length ? `<div class="klabel">Also checked, not used for the verdict</div><div class="klist">${others.map(checkCard).join("")}</div>` : ""}
           </div></div>`;
       }).join("") || `<p class="note">No claims were checked in this journey.</p>`;
     } else if (tab === "script") {
-      p.innerHTML = `<p class="note">The Playwright tests compiled from this run: each journey's actions in order, and each check as a named step. This is what replays the run without a model, and what reruns on later PRs.</p><pre class="code" data-id="code">Loading…</pre>`;
+      p.innerHTML = `<pre class="code" data-id="code">Loading…</pre>`;
       fetch(`${BASE}/script`, { cache: "no-store" }).then((r) => (r.ok ? r.text() : Promise.reject(r.status)))
         .then((code) => { const el = p.querySelector('[data-id="code"]'); if (el) el.innerHTML = highlight(code); })
         .catch(() => { const el = p.querySelector('[data-id="code"]'); if (el) el.textContent = "No compiled script for this run."; });
       return;
     } else if (tab === "events") {
-      const explorationNote = source === "replay" ? " Times here are in the exploration video; clicking one switches to it." : "";
-      p.innerHTML = `<div class="events-wrap"><table class="events"><thead><tr><th>Time</th><th>What</th><th>Element or value</th><th>Page / observed</th></tr></thead><tbody>${
+      p.innerHTML = `<div class="events-wrap"><table class="events"><thead><tr><th>Time</th><th>Action</th><th>Element or value</th><th>Page or result</th></tr></thead><tbody>${
         timeline.map((e) => e.kind === "step"
-          ? `<tr class="${e.s.ok ? "" : "bad"}"><td class="t"><button class="jump" data-t="${e.t}">${fmt(e.t)}</button></td><td class="a">${esc(words(e.s.action))}</td><td class="l">${esc(e.s.locator ?? (e.s.value != null ? `"${e.s.value}"` : ""))}</td><td class="u">${esc(e.s.url)}${e.s.note ? ` · ${esc(e.s.note)}` : ""}</td></tr>`
-          : `<tr class="check ${e.k.passed ? "" : "failed"}"><td class="t"><button class="jump" data-t="${e.t}">${fmt(e.t)}</button></td><td class="a">${e.k.passed ? "✓" : "✗"} ${esc(e.k.id)} · ${esc(checkLine(e.k))}</td><td class="l">${esc(e.k.locator ?? "")}</td><td class="u">${esc(e.k.observed)}${citedIds.has(e.k.id) ? "" : " · not used for a verdict"}</td></tr>`
+          ? `<tr class="${e.s.ok ? "" : "bad"}"><td class="t"><button class="jump" data-t="${e.t}">${fmt(e.t)}</button></td><td class="a">${esc(words(e.s.action))}</td><td class="l">${esc(e.s.locator ?? (e.s.value != null ? `"${e.s.value}"` : ""))}</td><td class="u">${esc(e.s.url)}${e.s.note ? `, ${esc(e.s.note)}` : ""}</td></tr>`
+          : `<tr class="check ${e.k.passed ? "" : "failed"}"><td class="t"><button class="jump" data-t="${e.t}">${fmt(e.t)}</button></td><td class="a"><span class="aw">${okGlyph(e.k.passed)}${esc(checkLine(e.k))}</span></td><td class="l">${esc(e.k.locator ?? "")}</td><td class="o">${esc(e.k.observed)}${citedIds.has(e.k.id) ? "" : ", not used for the verdict"}</td></tr>`
         ).join("")
-      }</tbody></table></div><p class="note">What the agent did while exploring. Actions and checks use stable locators (test ids, roles and names); they become the lines of this journey's Playwright script.${explorationNote}</p>`;
-      p.querySelectorAll(".jump").forEach((b) => b.addEventListener("click", () => seekIn("explore", Number(b.dataset.t))));
+      }</tbody></table></div>`;
+      p.querySelectorAll(".jump").forEach((b) => b.addEventListener("click", () => seek(Number(b.dataset.t), true)));
       return;
     } else {
       const tag = `[${current.id}]`;
@@ -573,9 +612,9 @@ function render(T, R, G) {
       const consoleErrors = (T.consoleErrors ?? []).filter((m) => m.startsWith(tag)).map((m) => m.slice(tag.length + 1));
       const failedReqs = (T.failedRequests ?? []).filter((m) => m.startsWith(tag)).map((m) => m.slice(tag.length + 1));
       p.innerHTML = `
-        <h4>Requests</h4>
+        <h4>Requests</h4><p class="note">Captured during agent discovery; times do not correspond to the replay.</p>
         ${reqs.length ? `<div class="events-wrap"><table class="events"><thead><tr><th>Time</th><th>Request</th><th>Status</th><th>After step</th></tr></thead><tbody>${
-          reqs.map((r) => `<tr><td class="t"><button class="jump" data-t="${r.t}">${fmt(r.t)}</button></td><td class="u">${esc(r.method)} ${esc(r.path)}</td><td class="${r.status >= 400 ? "status-bad" : "status-ok"}">${esc(r.status ?? "…")}</td><td class="u">${r.step ? `#${r.step}` : "page load"}</td></tr>`).join("")
+          reqs.map((r) => `<tr><td class="t">${fmt(r.t)}</td><td class="u">${esc(r.method)} ${esc(r.path)}</td><td class="${r.status >= 400 ? "status-bad" : "status-ok"}">${esc(r.status ?? "…")}</td><td class="u">${r.step ? `#${r.step}` : "page load"}</td></tr>`).join("")
         }</tbody></table></div>` : `<p class="note">No page loads or API requests were recorded for this journey.</p>`}
         <h4>Console errors</h4>
         ${consoleErrors.length ? `<ul>${consoleErrors.map((m) => `<li class="mono">${esc(m)}</li>`).join("")}</ul>` : `<p class="note">None.</p>`}
@@ -592,27 +631,6 @@ function render(T, R, G) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  // Seek in a particular recording, switching to it first if needed (the new video seeks once it loads).
-  let pendingSeek = null;
-  function seekIn(wanted, t) {
-    if (wanted === source || !R) return seek(t, true);
-    pendingSeek = t;
-    setSource(wanted);
-  }
-
-  function setSource(next) {
-    source = next;
-    $("srcReplay").setAttribute("aria-pressed", String(source === "replay"));
-    $("srcExplore").setAttribute("aria-pressed", String(source === "explore"));
-    buildGrid();
-    if (current) selectJourney(current.id);
-    updateDurations();
-  }
-  if (R?.journeys?.some((j) => j.video)) {
-    $("sourceSeg").hidden = false;
-    $("srcReplay").addEventListener("click", () => setSource("replay"));
-    $("srcExplore").addEventListener("click", () => setSource("explore"));
-  }
   if (R || regItems.length) $("scriptTab").hidden = false;
 
   function updateTime() {
@@ -622,8 +640,8 @@ function render(T, R, G) {
     $("time").textContent = `${fmt(t)} / ${fmt(d)}`;
     const e = timeline.filter((x) => x.t <= t + 0.05).at(-1);
     $("caption").innerHTML = !e ? `<span class="ct">0:00</span><span>open ${esc(current.startPath ?? "/")}</span>`
-      : e.kind === "step" ? `<span class="ct">${fmt(e.t)}</span><span>${esc(words(e.s.action))} ${esc(e.s.locator ?? e.s.value ?? "")}</span>`
-      : `<span class="ct">${fmt(e.t)}</span><span class="${e.k.passed ? "ok" : "bad"}">${e.k.passed ? "✓" : "✗"} ${esc(e.k.id)}</span><span>${esc(checkLine(e.k))}</span>`;
+      : e.kind === "step" ? `<span class="ct">${fmt(e.t)}</span><span>${esc(words(e.s.action))}</span><span class="loc">${esc(e.s.locator ?? e.s.value ?? "")}</span>`
+      : `<span class="ct">${fmt(e.t)}</span>${okGlyph(e.k.passed)}<span>${esc(checkLine(e.k))}</span>`;
     $("playIcon").innerHTML = video.paused ? '<path d="M1 1l10 6-10 6z" fill="currentColor"/>' : '<path d="M1 1h3.5v12H1zM7.5 1H11v12H7.5z" fill="currentColor"/>';
     $("play").setAttribute("aria-label", video.paused ? "Play" : "Pause");
   }
@@ -631,7 +649,7 @@ function render(T, R, G) {
   function waitsNow() {
     if (!current) return [];
     if (current.regression) return current.regression.test.waits ?? [];
-    if (source === "replay" && replayOf(current)) return replayOf(current).waits ?? [];
+    if (replayOf(current)) return replayOf(current).waits ?? [];
     return steps.filter((s) => s.journey === current.id && s.action === "wait" && s.ok).map((s) => ({ t: s.t, seconds: parseFloat(s.value) || 0 }));
   }
   video.addEventListener("timeupdate", () => {
@@ -642,11 +660,10 @@ function render(T, R, G) {
   });
   for (const ev of ["timeupdate", "play", "pause"]) video.addEventListener(ev, updateTime);
   video.addEventListener("loadedmetadata", () => {
-    if (pendingSeek != null) { const t = pendingSeek; pendingSeek = null; seek(t, true); }
     // The first moment of a recording is a blank page (loading, or waiting on a data reset); open on the app.
-    else if (video.currentTime === 0) {
+    if (video.currentTime === 0) {
       const start = current?.regression ? (current.regression.test.startsAt ?? 0) + 1
-        : source === "replay" ? (replayOf(current)?.startsAt ?? 0) + 1 : 1.5;
+        : (replayOf(current)?.startsAt ?? 0) + 1;
       video.currentTime = Math.min(start, video.duration || 0);
     }
     drawMarkers(); updateTime();
@@ -676,7 +693,7 @@ function render(T, R, G) {
     $("tiles").innerHTML = journeys.filter((j) => videoFor(j)).map((j) => `
       <div class="tile">
         <div class="vcard"><video src="${videoFor(j)}" muted playsinline loop preload="auto"></video></div>
-        <div class="tt"><button class="tname" data-j="${esc(j.id)}">${esc(j.name)}</button><span class="jid">${esc(j.id.toUpperCase())}</span></div>
+        <div class="tt"><button class="tname" data-j="${esc(j.id)}">${esc(j.name)}</button></div>
         <div class="chips">${claimsIn(j).map(chip).join("")}</div>
       </div>`).join("");
     root.querySelectorAll(".tname").forEach((b) => b.addEventListener("click", () => { showView("journey"); selectJourney(b.dataset.j); }));
@@ -704,7 +721,7 @@ function render(T, R, G) {
   $("viewGrid").addEventListener("click", () => showView("grid"));
 
   if (journeys.length) selectJourney(journeys[0].id);
-  else $("journeyView").innerHTML = `<p class="note" style="text-align:center">This run has no journeys.</p>`;
+  else $("journeyView").innerHTML = `<p class="note" style="text-align:center">No replay recordings are available for this run yet.</p>`;
 }
 
 load().catch((err) => showState("Couldn't load this run", esc(err)));

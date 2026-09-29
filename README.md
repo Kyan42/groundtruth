@@ -38,6 +38,20 @@ Use your own App, smee channel and keys rather than sharing someone else's. GitH
 
 ## Commands
 
+For a public PR without a GitHub App, set only `ANTHROPIC_API_KEY` and `RUNLOOP_API_KEY` in `.env`, then run:
+
+```sh
+PORT=2003 node --import tsx --env-file=.env src/cli/local.ts 'Kyan42/cbay#3'
+```
+
+This serves the local dashboard, extracts claims from the current PR title, body, and commit messages,
+boots the exact head commit in Runloop, runs browser verification and compiled replay, and replays the
+saved regression tests from the pinned current base-branch tip. It uses anonymous GitHub reads and
+cloning; it never posts comments, checks, or commits. Linked issues are not fetched in this mode.
+Running the command authorizes testing the grounded extracted claims; assumptions are saved for
+review but excluded. Evidence and diagnostics are saved under `runs/`. The sandbox shuts down after
+the run; the local dashboard stays available until the command is stopped.
+
 | Command | Needs | What it does |
 |---|---|---|
 | `npm run dev` | everything | the App server, webhooks and dashboard (restarts on code changes) |

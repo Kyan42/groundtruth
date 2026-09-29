@@ -7,9 +7,9 @@ function required(name: string): string {
 }
 
 export const config = {
-  appId: required("GITHUB_APP_ID"),
-  privateKey: readFileSync(required("GITHUB_PRIVATE_KEY_PATH"), "utf8"),
-  webhookSecret: required("GITHUB_WEBHOOK_SECRET"),
+  get appId() { return required("GITHUB_APP_ID"); },
+  get privateKey() { return readFileSync(required("GITHUB_PRIVATE_KEY_PATH"), "utf8"); },
+  get webhookSecret() { return required("GITHUB_WEBHOOK_SECRET"); },
   // Read by the Anthropic SDK itself; required here so a missing key fails at startup, not mid-PR.
   anthropicApiKey: required("ANTHROPIC_API_KEY"),
   extractConcurrency: Number(process.env.EXTRACT_CONCURRENCY ?? 4),
