@@ -171,7 +171,7 @@ h4{margin:22px 0 6px;font-size:14px;font-weight:600}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 /* ascii tab icons, drawn on a 7 by 7 grid */
-.ticon{display:inline-block;vertical-align:1px;margin-right:10px;white-space:pre;font-family:var(--mono);font-size:4.6px;line-height:3.05px;letter-spacing:.5px;text-indent:.36px;font-weight:500;color:var(--faint)}
+.ticon{display:inline-block;vertical-align:-6px;margin-right:10px;white-space:pre;font-family:var(--mono);font-size:4.6px;line-height:3.05px;letter-spacing:.5px;text-indent:.36px;font-weight:500;color:var(--faint)}
 .tabs button[aria-selected="true"] .ticon{color:var(--forest)}
 
 /* the landing page's survey cursor: dark arrow at rest, forest green over anything interactive */
@@ -293,7 +293,7 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
         <button role="tab" data-tab="claims" aria-selected="true"><span class="ticon" data-i="claims"></span>Claims<span class="n" data-id="nClaims"></span></button>
         <button role="tab" data-tab="events" aria-selected="false"><span class="ticon" data-i="cursor"></span>Actions<span class="n" data-id="nEvents"></span></button>
         <button role="tab" data-tab="network" aria-selected="false"><span class="ticon" data-i="net"></span>Network<span class="n" data-id="nNet"></span></button>
-        <button role="tab" data-tab="script" aria-selected="false" data-id="scriptTab" hidden>Script</button>
+        <button role="tab" data-tab="script" aria-selected="false" data-id="scriptTab" hidden><span class="ticon" data-i="script"></span>Script</button>
       </div>
       <div class="panel" data-id="panel"></div>
     </section>
@@ -324,6 +324,7 @@ const glyph = (status, big) => `<span class="mark ${GLYPH_OF[status] ?? "u"}${bi
 const okGlyph = (passed) => glyph(passed ? "verified" : "failed");
 const TICONS = {
   run:    ["     ", "#    ", "##   ", " ##  ", "##   ", "#    ", "  ###"],
+  script: ["          ", "  #  # #  ", " #   #  # ", "#   #    #", " #  #   # ", "  # #  #  ", "          "],
   claims: ["#######", "#     #", "# ### #", "#     #", "#######", " ##    ", " #     "],
   cursor: ["    #  ", "    #  ", "#   #  ", "#   # #", "# # # #", "# # # #", "#######"],
   net:    ["## ## #", "       ", "# # ## ", "       ", "## # ##", "       ", "# ## ##"],
