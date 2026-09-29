@@ -275,10 +275,6 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
           <button data-id="viewJourney" aria-pressed="true" aria-label="One video" title="One video"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
           <button data-id="viewGrid" aria-pressed="false" aria-label="All videos" title="All videos"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.2"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.2"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1.2"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.2"/></g></svg></button>
         </div>
-        <div class="seg" role="group" aria-label="Which recording" data-id="sourceSeg" hidden>
-          <button data-id="srcReplay" aria-pressed="true" title="The compiled Playwright script, replayed">Replay</button>
-          <button data-id="srcExplore" aria-pressed="false" title="The agent exploring, with its detours">Exploration</button>
-        </div>
       </div>
     </div>
 
@@ -380,7 +376,7 @@ function render(T, R, G) {
   const checks = T.checks ?? [];
   const steps = T.steps ?? [];
   const requests = T.requests ?? [];
-  const journeys = (T.journeys ?? []).filter((j) => j.video || steps.some((s) => s.journey === j.id) || checks.some((k) => k.journey === j.id));
+  const journeys = (T.journeys ?? []).filter((j) => R?.journeys?.some((replay) => replay.id === j.id));
   const claimById = Object.fromEntries(claims.map((c) => [c.id, c]));
   const resultOf = (id) => results.find((r) => r.claimId === id);
   const statusOf = (id) => resultOf(id)?.status ?? "none";
@@ -391,15 +387,12 @@ function render(T, R, G) {
   const keyCheck = (list) => list.find((k) => !k.passed && citedIds.has(k.id)) ?? [...list].reverse().find((k) => citedIds.has(k.id)) ?? list.at(-1);
   const thumb = (src, k) => !src ? "" : `<span class="thumb" data-src="${src}" data-t="${Math.max(0.1, k?.t ?? 1.5)}"><canvas></canvas>${k?.box
     ? `<span class="tbox ${k.passed ? "" : "bad"}" style="left:${k.box.x * 100}%;top:${k.box.y * 100}%;width:${k.box.width * 100}%;height:${k.box.height * 100}%"></span>` : ""}</span>`;
-  const videoUrl = (j) => j.video ? `${BASE}/videos/${encodeURIComponent(j.video.split(/[\\/]/).pop())}` : "";
   const checkLine = (k) => (k.code ? k.code : `${words(k.assert)}${k.expected ? ` "${k.expected}"` : ""}`);
 
-  // Two recordings per journey: the replay of the compiled script (clean, the default) and the exploration.
   const replayOf = (j) => R?.journeys?.find((x) => x.id === j.id);
-  let source = R?.journeys?.some((j) => j.video) ? "replay" : "explore";
-  const videoFor = (j) => (source === "replay" && replayOf(j)?.video ? `${BASE}/videos/${encodeURIComponent(replayOf(j).video)}` : videoUrl(j));
+  const videoFor = (j) => replayOf(j)?.video ? `${BASE}/videos/${encodeURIComponent(replayOf(j).video)}` : "";
   const replayCheck = (k) => R?.checks?.[k.id];
-  const checkTime = (k) => (source === "replay" ? replayCheck(k)?.t : k.t);
+  const checkTime = (k) => replayCheck(k)?.t;
 
   // Sidebar
   document.title = `${T.title ?? T.pr} / Groundtruth`;
@@ -419,7 +412,7 @@ function render(T, R, G) {
 
   $("journeys").innerHTML = journeys.map((j, i) => `
     <button class="jcard" role="listitem" data-j="${esc(j.id)}">
-      ${thumb(videoUrl(j), keyCheck(checks.filter((k) => k.journey === j.id)))}
+      ${thumb(videoFor(j), keyCheck(checks.filter((k) => k.journey === j.id && replayCheck(k)).map((k) => ({ ...k, ...replayCheck(k), box: undefined }))))}
       <span class="jbody"><span class="jhead"><span class="jname">${esc(j.name)}</span><span class="jdur" data-dur="${esc(j.id)}"></span></span>
       <span class="chips">${claimsIn(j).map(chip).join("")}</span></span>
     </button>`).join("");
@@ -472,13 +465,7 @@ function render(T, R, G) {
     current = journeys.find((j) => j.id === id) ?? journeys[0];
     if (!current) return;
     root.querySelectorAll(".jcard").forEach((b) => b.setAttribute("aria-current", String(b.dataset.j === current.id)));
-    // The replay records only the checks (actions have no timestamps there); the exploration has both.
-    timeline = source === "replay"
-      ? checks.filter((k) => k.journey === current.id && replayCheck(k)).map((k) => ({ kind: "check", t: replayCheck(k).t, k: { ...k, passed: replayCheck(k).passed } }))
-      : [
-        ...steps.filter((s) => s.journey === current.id).map((s) => ({ kind: "step", t: s.t ?? 0, s })),
-        ...checks.filter((k) => k.journey === current.id).map((k) => ({ kind: "check", t: k.t ?? 0, k })),
-      ];
+    timeline = checks.filter((k) => k.journey === current.id && replayCheck(k)).map((k) => ({ kind: "check", t: replayCheck(k).t, k: { ...k, passed: replayCheck(k).passed } }));
     timeline.sort((a, b) => a.t - b.t);
     const src = videoFor(current);
     if (src) {
@@ -615,8 +602,8 @@ function render(T, R, G) {
           ? `<tr class="${e.s.ok ? "" : "bad"}"><td class="t"><button class="jump" data-t="${e.t}">${fmt(e.t)}</button></td><td class="a">${esc(words(e.s.action))}</td><td class="l">${esc(e.s.locator ?? (e.s.value != null ? `"${e.s.value}"` : ""))}</td><td class="u">${esc(e.s.url)}${e.s.note ? `, ${esc(e.s.note)}` : ""}</td></tr>`
           : `<tr class="check ${e.k.passed ? "" : "failed"}"><td class="t"><button class="jump" data-t="${e.t}">${fmt(e.t)}</button></td><td class="a"><span class="aw">${okGlyph(e.k.passed)}${esc(checkLine(e.k))}</span></td><td class="l">${esc(e.k.locator ?? "")}</td><td class="o">${esc(e.k.observed)}${citedIds.has(e.k.id) ? "" : ", not used for the verdict"}</td></tr>`
         ).join("")
-      }</tbody></table></div>${source === "replay" ? `<p class="note">Times are from the exploration video.</p>` : ""}`;
-      p.querySelectorAll(".jump").forEach((b) => b.addEventListener("click", () => seekIn("explore", Number(b.dataset.t))));
+      }</tbody></table></div>`;
+      p.querySelectorAll(".jump").forEach((b) => b.addEventListener("click", () => seek(Number(b.dataset.t), true)));
       return;
     } else {
       const tag = `[${current.id}]`;
@@ -625,9 +612,9 @@ function render(T, R, G) {
       const consoleErrors = (T.consoleErrors ?? []).filter((m) => m.startsWith(tag)).map((m) => m.slice(tag.length + 1));
       const failedReqs = (T.failedRequests ?? []).filter((m) => m.startsWith(tag)).map((m) => m.slice(tag.length + 1));
       p.innerHTML = `
-        <h4>Requests</h4>
+        <h4>Requests</h4><p class="note">Captured during agent discovery; times do not correspond to the replay.</p>
         ${reqs.length ? `<div class="events-wrap"><table class="events"><thead><tr><th>Time</th><th>Request</th><th>Status</th><th>After step</th></tr></thead><tbody>${
-          reqs.map((r) => `<tr><td class="t"><button class="jump" data-t="${r.t}">${fmt(r.t)}</button></td><td class="u">${esc(r.method)} ${esc(r.path)}</td><td class="${r.status >= 400 ? "status-bad" : "status-ok"}">${esc(r.status ?? "…")}</td><td class="u">${r.step ? `#${r.step}` : "page load"}</td></tr>`).join("")
+          reqs.map((r) => `<tr><td class="t">${fmt(r.t)}</td><td class="u">${esc(r.method)} ${esc(r.path)}</td><td class="${r.status >= 400 ? "status-bad" : "status-ok"}">${esc(r.status ?? "…")}</td><td class="u">${r.step ? `#${r.step}` : "page load"}</td></tr>`).join("")
         }</tbody></table></div>` : `<p class="note">No page loads or API requests were recorded for this journey.</p>`}
         <h4>Console errors</h4>
         ${consoleErrors.length ? `<ul>${consoleErrors.map((m) => `<li class="mono">${esc(m)}</li>`).join("")}</ul>` : `<p class="note">None.</p>`}
@@ -644,27 +631,6 @@ function render(T, R, G) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  // Seek in a particular recording, switching to it first if needed (the new video seeks once it loads).
-  let pendingSeek = null;
-  function seekIn(wanted, t) {
-    if (wanted === source || !R) return seek(t, true);
-    pendingSeek = t;
-    setSource(wanted);
-  }
-
-  function setSource(next) {
-    source = next;
-    $("srcReplay").setAttribute("aria-pressed", String(source === "replay"));
-    $("srcExplore").setAttribute("aria-pressed", String(source === "explore"));
-    buildGrid();
-    if (current) selectJourney(current.id);
-    updateDurations();
-  }
-  if (R?.journeys?.some((j) => j.video)) {
-    $("sourceSeg").hidden = false;
-    $("srcReplay").addEventListener("click", () => setSource("replay"));
-    $("srcExplore").addEventListener("click", () => setSource("explore"));
-  }
   if (R || regItems.length) $("scriptTab").hidden = false;
 
   function updateTime() {
@@ -683,7 +649,7 @@ function render(T, R, G) {
   function waitsNow() {
     if (!current) return [];
     if (current.regression) return current.regression.test.waits ?? [];
-    if (source === "replay" && replayOf(current)) return replayOf(current).waits ?? [];
+    if (replayOf(current)) return replayOf(current).waits ?? [];
     return steps.filter((s) => s.journey === current.id && s.action === "wait" && s.ok).map((s) => ({ t: s.t, seconds: parseFloat(s.value) || 0 }));
   }
   video.addEventListener("timeupdate", () => {
@@ -694,11 +660,10 @@ function render(T, R, G) {
   });
   for (const ev of ["timeupdate", "play", "pause"]) video.addEventListener(ev, updateTime);
   video.addEventListener("loadedmetadata", () => {
-    if (pendingSeek != null) { const t = pendingSeek; pendingSeek = null; seek(t, true); }
     // The first moment of a recording is a blank page (loading, or waiting on a data reset); open on the app.
-    else if (video.currentTime === 0) {
+    if (video.currentTime === 0) {
       const start = current?.regression ? (current.regression.test.startsAt ?? 0) + 1
-        : source === "replay" ? (replayOf(current)?.startsAt ?? 0) + 1 : 1.5;
+        : (replayOf(current)?.startsAt ?? 0) + 1;
       video.currentTime = Math.min(start, video.duration || 0);
     }
     drawMarkers(); updateTime();
@@ -756,7 +721,7 @@ function render(T, R, G) {
   $("viewGrid").addEventListener("click", () => showView("grid"));
 
   if (journeys.length) selectJourney(journeys[0].id);
-  else $("journeyView").innerHTML = `<p class="note" style="text-align:center">This run has no journeys.</p>`;
+  else $("journeyView").innerHTML = `<p class="note" style="text-align:center">No replay recordings are available for this run yet.</p>`;
 }
 
 load().catch((err) => showState("Couldn't load this run", esc(err)));
