@@ -32,8 +32,11 @@ aside{min-width:0;background:color-mix(in srgb,var(--card) 88%,transparent);bord
 .home{display:inline-flex;align-items:center;gap:12px;color:var(--ink);text-decoration:none;--mark-ring:#2f6b4f;--mark-dot:#12a150}
 .home .gtm{display:block;overflow:visible;flex:none}
 .home strong{font-weight:600;font-size:19px;letter-spacing:-.02em}
-.sect{padding:12px 20px 2px}
-.sect h2{margin:0;font-size:14px;font-weight:600}
+.listswitch{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin:12px 12px 4px;padding:3px;background:var(--sunk);border-radius:10px}
+.listswitch button{border:0;text-align:center;padding:7px 8px;border-radius:8px;font-size:14px;font-weight:500;color:var(--mid);background:transparent}
+.listswitch button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.07)}
+.listswitch .n{color:var(--low);font-weight:500;margin-left:6px}
+.journeys .empty{padding:10px 12px;font-size:13.5px;color:var(--low)}
 .journeys{display:flex;flex-direction:column;gap:2px;padding:6px 12px 10px}
 .jcard{text-align:left;background:transparent;border:1px solid transparent;border-radius:10px;padding:8px 10px;display:grid;gap:4px}
 .jcard:hover{background:var(--sunk)}
@@ -244,10 +247,12 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
     <div class="brand">
       <a class="home" href="/runs" aria-label="Groundtruth, all runs"><svg class="gtm" width="31" height="31" aria-hidden="true"><use href="#gt-mark"/></svg><strong>Groundtruth</strong></a>
     </div>
-    <div class="sect"><h2>Intent checks</h2></div>
-    <div class="journeys" data-id="journeys" role="list"></div>
-    <div data-id="regBlock" hidden>
-      <div class="sect"><h2>Regression checks</h2></div>
+    <div class="listswitch" role="group" aria-label="Which checks">
+      <button aria-pressed="true" data-list="intent">Intent<span class="n" data-id="nIntent"></span></button>
+      <button aria-pressed="false" data-list="regression">Regression<span class="n" data-id="nRegression"></span></button>
+    </div>
+    <div class="journeys" data-id="journeys" data-list-pane="intent" role="list"></div>
+    <div data-id="regBlock" data-list-pane="regression" hidden>
       <div class="journeys" data-id="regressions" role="list"></div>
     </div>
     <div class="run">
@@ -407,9 +412,15 @@ function render(T, R, G) {
       <span class="jhead"><span class="jname">${esc(j.name)}</span><span class="jdur" data-dur="${esc(j.id)}"></span></span>
       <span class="chips">${claimsIn(j).map(chip).join("")}</span>
     </button>`).join("");
+  $("nIntent").textContent = journeys.length;
+  $("nRegression").textContent = regItems.length;
+  root.querySelectorAll(".listswitch button").forEach((b) => b.addEventListener("click", () => {
+    root.querySelectorAll(".listswitch button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    root.querySelectorAll("[data-list-pane]").forEach((pane) => (pane.hidden = pane.dataset.listPane !== b.dataset.list));
+  }));
+  if (!regItems.length) $("regressions").innerHTML = `<p class="empty">No regression checks ran on this PR.</p>`;
   if (regItems.length) {
     const regStatus = { passed: ["verified", "still works"], failed: ["failed", "broken by this PR"], error: ["error", "couldn't run"] };
-    $("regBlock").hidden = false;
     $("regressions").innerHTML = regItems.map((it) => `
       <button class="jcard" role="listitem" data-j="${esc(it.id)}">
         <span class="jhead"><span class="jname">${esc(it.name)}</span><span class="jdur">${it.test.seconds != null ? fmt(it.test.seconds) : ""}</span></span>
