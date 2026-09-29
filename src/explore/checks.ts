@@ -34,6 +34,7 @@ export type Check = {
   expected?: string;
   observed: string;            // what the page actually showed, read by our code
   passed: boolean;
+  box?: { x: number; y: number; width: number; height: number };   // where the element was, as fractions of the viewport (and so of the video frame)
 };
 
 // step: the browser step the request followed (0 = the journey's first page load).

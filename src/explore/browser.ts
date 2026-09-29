@@ -214,6 +214,8 @@ export class ExplorerBrowser {
       id: `k${this.checks.length + 1}`, journey: this.journey.id, t: this.elapsed, afterStep: this.steps.length, claimIds: c.claimIds,
       assert: c.assert, locator: target?.description, expected: c.expected, observed, passed,
     };
+    const box = target ? await elementBox(this.page, target.locator) : undefined;
+    if (box) check.box = box;
     this.checks.push(check);
     await this.showCheck(check, target?.locator, c.label);
     return check;
@@ -396,4 +398,15 @@ function duration(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
   const h = Math.floor(seconds / 3600), m = Math.floor((seconds % 3600) / 60), s = Math.round(seconds % 60);
   return h ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}` : `${m}:${String(s).padStart(2, "0")}`;
+}
+
+// Where an element sits on screen, as fractions of the viewport, for the dashboard's thumbnail. The video is
+// recorded at the viewport's size, so the same fractions place the box on the frame. Best effort: a missing
+// or hidden element just means no box.
+async function elementBox(page: Page, locator: Locator): Promise<Check["box"]> {
+  const viewport = page.viewportSize();
+  const b = await locator.first().boundingBox({ timeout: 1000 }).catch(() => null);
+  if (!viewport || !b || b.width <= 0 || b.height <= 0) return undefined;
+  const r = (n: number) => Math.round(n * 1000) / 1000;
+  return { x: r(b.x / viewport.width), y: r(b.y / viewport.height), width: r(b.width / viewport.width), height: r(b.height / viewport.height) };
 }
