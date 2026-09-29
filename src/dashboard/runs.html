@@ -30,9 +30,11 @@ h1{font-size:26px;margin:0;letter-spacing:-.01em}
 .item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 14px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 18px;text-decoration:none}
 .item:hover{border-color:color-mix(in srgb,var(--forest) 35%,var(--line))}
 .item:focus-visible{outline:2px solid var(--forest);outline-offset:2px}
-.mark{width:20px;text-align:center;font-weight:700;font-size:17px;color:var(--block)}
-.mark.success{color:var(--pass)}
-.mark.failure{color:var(--fail)}
+.mark{display:grid;place-items:center;flex:none;overflow:hidden;width:28px;height:34px;border-radius:8px;font-family:var(--mono);white-space:pre;font-weight:500;
+  font-size:3.9px;line-height:2.67px;letter-spacing:.37px;text-indent:.37px;background:var(--warn-lo);color:var(--warn)}
+.mark.success{background:var(--pass-lo);color:var(--pass)}
+.mark.failure{background:var(--fail-lo);color:var(--fail)}
+.mark.wait{font-size:14px;line-height:1;letter-spacing:0;text-indent:0;background:var(--sunk);color:var(--low)}
 .title{font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sub{grid-column:2;font-size:13px;color:var(--low);display:flex;flex-wrap:wrap;gap:4px 14px}
 .result{text-align:right;font-size:13.5px;color:var(--mid);white-space:nowrap}
@@ -113,6 +115,11 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
   <div class="list" id="list"></div>
 </div>
 <script>
+const GLYPH = {
+  p: ["       ", "       ", "      #", "     ##", "##  ## ", " ####  ", "  ##   ", "       ", "       "],
+  f: ["       ", "##   ##", " ## ## ", "  ###  ", "   #   ", "  ###  ", " ## ## ", "##   ##", "       "],
+  u: ["       ", " ##### ", "##   ##", "     ##", "    ## ", "   ##  ", "   ##  ", "       ", "   ##  "],
+};
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const duration = (s) => (s >= 60 ? `${Math.floor(s / 60)}m ${String(Math.round(s % 60)).padStart(2, "0")}s` : `${Math.round(s)}s`);
 
@@ -125,12 +132,12 @@ async function load() {
   }
   list.innerHTML = runs.map((r) => {
     const when = new Date(r.startedAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
-    if (r.running) return `<a class="item" href="/runs/${encodeURIComponent(r.id)}"><span class="mark" aria-hidden="true">…</span><span class="title">Testing in progress</span><span class="result"><span class="when">${esc(when)}</span></span><span class="sub">${esc(r.id)}</span></a>`;
+    if (r.running) return `<a class="item" href="/runs/${encodeURIComponent(r.id)}"><span class="mark wait" aria-hidden="true">…</span><span class="title">Testing in progress</span><span class="result"><span class="when">${esc(when)}</span></span><span class="sub">${esc(r.id)}</span></a>`;
     const statuses = r.statuses ?? [];
     const verified = statuses.filter((s) => s === "verified").length;
     const failed = statuses.filter((s) => s === "failed").length;
     const outcome = r.broken ? "neutral" : failed ? "failure" : r.claims && verified === r.claims ? "success" : "neutral";
-    const icon = { success: "✓", failure: "✗", neutral: "–" }[outcome];
+    const icon = GLYPH[{ success: "p", failure: "f", neutral: "u" }[outcome]].join("\n");
     const result = r.broken ? "Unreadable trace"
       : r.claims == null ? "Didn't finish"
       : failed ? `<b>${failed} failed</b>, ${verified} of ${r.claims} verified`

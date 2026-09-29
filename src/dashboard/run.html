@@ -40,11 +40,15 @@ aside{min-width:0;background:color-mix(in srgb,var(--card) 88%,transparent);bord
 .jhead{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--low);font-variant-numeric:tabular-nums}
 .jname{font-weight:500;line-height:1.35}
 .chips{display:flex;flex-wrap:wrap;gap:4px 12px}
-.chip{display:inline-flex;align-items:baseline;gap:4px;font-size:12.5px;font-weight:500;color:var(--mid)}
-.chip .m{font-weight:700;color:var(--pass)}
-.chip.failed .m,.chip.error .m{color:var(--fail)}
-.chip.unreachable .m{color:var(--warn)}
-.chip.blocked .m,.chip.none .m{color:var(--block)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:var(--mid)}
+/* ascii verdict glyphs in tinted tiles, from the old dashboard */
+.mark{display:inline-grid;place-items:center;flex:none;overflow:hidden;border-radius:5px;width:20px;height:24px;
+  font-family:var(--mono);white-space:pre;font-weight:500;font-size:2.8px;line-height:1.95px;letter-spacing:.27px;text-indent:.27px;vertical-align:middle}
+.mark.lg{width:28px;height:34px;border-radius:8px;font-size:3.9px;line-height:2.67px;letter-spacing:.37px;text-indent:.37px}
+.mark.p{background:var(--pass-lo);color:var(--pass)}
+.mark.f{background:var(--fail-lo);color:var(--fail)}
+.mark.u{background:var(--warn-lo);color:var(--warn)}
+
 .run{flex:none;margin-top:auto;border-top:1px solid var(--line);padding:22px 22px 24px}
 .runid{margin:0 0 13px;font-size:15.5px;font-weight:700;letter-spacing:-.03em;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .runid .ticon{margin-right:0;color:var(--forest);font-size:5.4px;line-height:3.6px;letter-spacing:.58px;text-indent:.58px}
@@ -78,7 +82,8 @@ main{min-width:0;display:flex;flex-direction:column}
 .stage{display:flex;justify-content:center;padding:18px 28px 8px}
 .vcard{position:relative;width:min(100%,860px);border-radius:14px;overflow:hidden;background:#000;box-shadow:var(--shadow);border:1px solid var(--line)}
 .vcard video{display:block;width:100%;height:auto;aspect-ratio:16/10;background:#fff}
-.caption{position:absolute;left:0;right:0;bottom:0;padding:26px 16px 10px;background:linear-gradient(transparent,rgba(0,0,0,.72));color:#fff;font-size:13px;display:flex;gap:10px;align-items:baseline;pointer-events:none}
+.caption{position:absolute;left:0;right:0;bottom:0;padding:26px 16px 10px;background:linear-gradient(transparent,rgba(0,0,0,.72));color:#fff;font-size:13px;display:flex;gap:10px;align-items:center;pointer-events:none}
+.caption .mark.p{background:rgba(127,240,195,.18);color:#7ff0c3} .caption .mark.f{background:rgba(255,157,145,.2);color:#ff9d91}
 .caption .ct{opacity:.7;font-variant-numeric:tabular-nums}
 .caption .loc{font-family:var(--mono);font-size:12px;opacity:.85}
 .caption .ok{color:#7ff0c3} .caption .bad{color:#ff9d91}
@@ -114,7 +119,8 @@ main{min-width:0;display:flex;flex-direction:column}
 .kcheck{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:start;font-size:13px;background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
 .kcheck.unused{opacity:.7}
 .kcheck .kmain{min-width:0;display:grid;gap:2px}
-.kcheck .kwhat{font-weight:500}
+.kcheck .kwhat{font-weight:500;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.events .aw{display:inline-flex;align-items:center;gap:8px}
 .kcheck .kwhat .ok{color:var(--pass)} .kcheck .kwhat .bad{color:var(--fail)}
 .kcheck .loc{font:12.5px var(--mono);color:var(--forest);word-break:break-all}
 .kcheck .obs{color:var(--mid);word-break:break-word}
@@ -307,7 +313,15 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
 const RUN_ID = decodeURIComponent(location.pathname.split("/").filter(Boolean)[1] ?? "");
 const BASE = `/runs/${encodeURIComponent(RUN_ID)}`;
 const STATUS_WORD = { verified: "Verified", failed: "Failed", blocked: "Blocked", unreachable: "Unreachable", error: "Error", none: "No status" };
-const STATUS_MARK = { verified: "✓", failed: "✗", error: "✗", blocked: "?", unreachable: "?", none: "–" };
+// verdict glyphs drawn as ascii art on a 7 wide by 9 tall grid, same as the old dashboard
+const GLYPH = {
+  p: ["       ", "       ", "      #", "     ##", "##  ## ", " ####  ", "  ##   ", "       ", "       "],
+  f: ["       ", "##   ##", " ## ## ", "  ###  ", "   #   ", "  ###  ", " ## ## ", "##   ##", "       "],
+  u: ["       ", " ##### ", "##   ##", "     ##", "    ## ", "   ##  ", "   ##  ", "       ", "   ##  "],
+};
+const GLYPH_OF = { verified: "p", passed: "p", failed: "f", error: "f", blocked: "u", unreachable: "u", none: "u" };
+const glyph = (status, big) => `<span class="mark ${GLYPH_OF[status] ?? "u"}${big ? " lg" : ""}" aria-hidden="true">${GLYPH[GLYPH_OF[status] ?? "u"].join("\n")}</span>`;
+const okGlyph = (passed) => glyph(passed ? "verified" : "failed");
 const TICONS = {
   run:    ["     ", "#    ", "##   ", " ##  ", "##   ", "#    ", "  ###"],
   claims: ["#######", "#     #", "# ### #", "#     #", "#######", " ##    ", " #     "],
@@ -367,7 +381,7 @@ function render(T, R, G) {
   const resultOf = (id) => results.find((r) => r.claimId === id);
   const statusOf = (id) => resultOf(id)?.status ?? "none";
   const citedIds = new Set(results.flatMap((r) => r.checkIds ?? []));
-  const chip = (id) => `<span class="chip ${statusOf(id)}" title="${esc(STATUS_WORD[statusOf(id)])}"><span class="m" aria-hidden="true">${STATUS_MARK[statusOf(id)]}</span>${esc(id.toUpperCase())}</span>`;
+  const chip = (id) => `<span class="chip ${statusOf(id)}" title="${esc(STATUS_WORD[statusOf(id)])}">${glyph(statusOf(id))}${esc(id.toUpperCase())}</span>`;
   const claimsIn = (j) => [...new Set([...results.filter((r) => r.journey === j.id).map((r) => r.claimId), ...(j.claimIds ?? []).filter((id) => !resultOf(id))])];
   const videoUrl = (j) => j.video ? `${BASE}/videos/${encodeURIComponent(j.video.split(/[\\/]/).pop())}` : "";
   const checkLine = (k) => (k.code ? k.code : `${words(k.assert)}${k.expected ? ` "${k.expected}"` : ""}`);
@@ -408,7 +422,7 @@ function render(T, R, G) {
       <button class="jcard" role="listitem" data-j="${esc(it.id)}">
         <span class="jhead"><span>From ${esc(it.reg.from)}</span><span>${it.test.seconds != null ? fmt(it.test.seconds) : ""}</span></span>
         <span class="jname">${esc(it.name)}</span>
-        <span class="chips"><span class="chip ${regStatus[it.reg.status][0]}"><span class="m" aria-hidden="true">${STATUS_MARK[regStatus[it.reg.status][0]]}</span>${esc(regStatus[it.reg.status][1])}</span></span>
+        <span class="chips"><span class="chip ${regStatus[it.reg.status][0]}">${glyph(regStatus[it.reg.status][0])}${esc(regStatus[it.reg.status][1])}</span></span>
       </button>`).join("");
   }
   root.querySelectorAll(".jcard").forEach((b) => b.addEventListener("click", () => { showView("journey"); selectJourney(b.dataset.j); }));
@@ -439,19 +453,10 @@ function render(T, R, G) {
       video.hidden = false; $("vcard").querySelector(".novideo")?.remove();
     } else { video.removeAttribute("src"); video.hidden = true; if (!$("vcard").querySelector(".novideo")) $("vcard").insertAdjacentHTML("afterbegin", `<div class="novideo">No video for this journey</div>`); }
     const ids = claimsIn(current);
-    const held = ids.filter((c) => statusOf(c) === "verified").length;
-    const bad = ids.filter((c) => statusOf(c) === "failed");
-    $("verdict").innerHTML = bad.length
-      ? `<b>${bad.length} claim${bad.length === 1 ? "" : "s"} failed</b> in this journey: ${bad.map((c) => esc(c.toUpperCase())).join(", ")}.`
-      : held === ids.length && ids.length
-        ? `<b>Verified.</b> All ${ids.length} claim${ids.length === 1 ? "" : "s"} in this journey held.`
-        : `<b>${held} of ${ids.length} claims verified.</b>`;
     const rj = replayOf(current);
-    if (rj) {
-      $("verdict").innerHTML += rj.status === "passed"
-        ? " The replay of the compiled script passed."
-        : ` <b>The replay of the compiled script ${esc(rj.status)}</b>${rj.error ? `: ${esc(rj.error)}` : ""}.`;
-    }
+    $("verdict").innerHTML = rj && rj.status !== "passed"
+      ? `<b>The replay of the compiled script ${esc(rj.status)}</b>${rj.error ? `: ${esc(rj.error)}` : ""}.` : "";
+    $("verdict").hidden = !$("verdict").innerHTML;
     $("nClaims").textContent = ids.length;
     $("nEvents").textContent = timeline.length;
     $("nNet").textContent = requests.filter((r) => r.journey === current.id && !/hot-update|__webpack_hmr|\/@vite\//.test(r.path)).length;
@@ -473,6 +478,7 @@ function render(T, R, G) {
       video.hidden = false; $("vcard").querySelector(".novideo")?.remove();
     } else { video.removeAttribute("src"); video.hidden = true; if (!$("vcard").querySelector(".novideo")) $("vcard").insertAdjacentHTML("afterbegin", `<div class="novideo">No video for this test</div>`); }
     const broke = item.reg.checks.filter((c) => c.test === item.test.title && !c.passed);
+    $("verdict").hidden = false;
     $("verdict").innerHTML = item.reg.status === "passed"
       ? `<b>Still works.</b> This test was added by ${esc(item.reg.from)} and passes on this PR too.`
       : item.reg.status === "failed"
@@ -497,7 +503,7 @@ function render(T, R, G) {
     for (const e of timeline) {
       const el = document.createElement("div");
       if (e.kind === "step") { el.className = "tick"; el.title = `${e.s.action} ${e.s.locator ?? e.s.value ?? ""}`; }
-      else { el.className = `dot ${e.k.passed ? "" : "failed"} ${e.k.reg || citedIds.has(e.k.id) ? "" : "unused"}`; el.title = `${e.k.passed ? "✓" : "✗"} ${checkLine(e.k)}`; }
+      else { el.className = `dot ${e.k.passed ? "" : "failed"} ${e.k.reg || citedIds.has(e.k.id) ? "" : "unused"}`; el.title = `${e.k.passed ? "Passed" : "Failed"}: ${checkLine(e.k)}`; }
       el.style.left = pct(e.t);
       track.appendChild(el);
     }
@@ -506,12 +512,12 @@ function render(T, R, G) {
   function checkCard(k) {
     const rc = replayCheck(k);
     const badge = !R || !citedIds.has(k.id) ? ""
-      : rc ? `<span class="rbadge ${rc.passed ? "ok" : "bad"}">Replay ${rc.passed ? "✓" : "✗"}</span>`
+      : rc ? `<span class="rbadge ${rc.passed ? "ok" : "bad"}">Replay ${rc.passed ? "passed" : "failed"}</span>`
       : `<span class="rbadge none">Not reached in replay</span>`;
     const t = checkTime(k);
     return `<div class="kcheck ${k.passed ? "" : "failed"} ${citedIds.has(k.id) ? "" : "unused"}">
       <div class="kmain">
-        <div class="kwhat"><span class="${k.passed ? "ok" : "bad"}">${k.passed ? "✓" : "✗"}</span> ${esc(checkLine(k))}${badge}</div>
+        <div class="kwhat">${okGlyph(k.passed)}<span>${esc(checkLine(k))}</span>${badge}</div>
         ${k.locator ? `<div class="loc">${esc(k.locator)}</div>` : ""}
         <div class="obs">Observed: ${esc(k.observed)}</div>
       </div>
@@ -525,7 +531,7 @@ function render(T, R, G) {
     if (tab === "claims") {
       const rows = timeline.map((e) => `<div class="kcheck ${e.k.passed ? "" : "failed"}">
           <div class="kmain">
-            <div class="kwhat"><span class="${e.k.passed ? "ok" : "bad"}">${e.k.passed ? "✓" : "✗"}</span> ${esc(e.k.title)}${e.k.passed ? "" : `<span class="rbadge bad">Broken</span>`}</div>
+            <div class="kwhat">${okGlyph(e.k.passed)}<span>${esc(e.k.title)}</span>${e.k.passed ? "" : `<span class="rbadge bad">Broken</span>`}</div>
             <div class="loc">${esc(e.k.code)}</div>
           </div>
           <button class="jump" data-t="${e.t}">${fmt(e.t)}</button>
@@ -574,7 +580,7 @@ function render(T, R, G) {
       p.innerHTML = `<div class="events-wrap"><table class="events"><thead><tr><th>Time</th><th>Action</th><th>Element or value</th><th>Page or result</th></tr></thead><tbody>${
         timeline.map((e) => e.kind === "step"
           ? `<tr class="${e.s.ok ? "" : "bad"}"><td class="t"><button class="jump" data-t="${e.t}">${fmt(e.t)}</button></td><td class="a">${esc(words(e.s.action))}</td><td class="l">${esc(e.s.locator ?? (e.s.value != null ? `"${e.s.value}"` : ""))}</td><td class="u">${esc(e.s.url)}${e.s.note ? `, ${esc(e.s.note)}` : ""}</td></tr>`
-          : `<tr class="check ${e.k.passed ? "" : "failed"}"><td class="t"><button class="jump" data-t="${e.t}">${fmt(e.t)}</button></td><td class="a">${e.k.passed ? "✓" : "✗"} ${esc(checkLine(e.k))}</td><td class="l">${esc(e.k.locator ?? "")}</td><td class="o">${esc(e.k.observed)}${citedIds.has(e.k.id) ? "" : ", not used for the verdict"}</td></tr>`
+          : `<tr class="check ${e.k.passed ? "" : "failed"}"><td class="t"><button class="jump" data-t="${e.t}">${fmt(e.t)}</button></td><td class="a"><span class="aw">${okGlyph(e.k.passed)}${esc(checkLine(e.k))}</span></td><td class="l">${esc(e.k.locator ?? "")}</td><td class="o">${esc(e.k.observed)}${citedIds.has(e.k.id) ? "" : ", not used for the verdict"}</td></tr>`
         ).join("")
       }</tbody></table></div>${source === "replay" ? `<p class="note">Times are from the exploration video.</p>` : ""}`;
       p.querySelectorAll(".jump").forEach((b) => b.addEventListener("click", () => seekIn("explore", Number(b.dataset.t))));
@@ -636,7 +642,7 @@ function render(T, R, G) {
     const e = timeline.filter((x) => x.t <= t + 0.05).at(-1);
     $("caption").innerHTML = !e ? `<span class="ct">0:00</span><span>open ${esc(current.startPath ?? "/")}</span>`
       : e.kind === "step" ? `<span class="ct">${fmt(e.t)}</span><span>${esc(words(e.s.action))}</span><span class="loc">${esc(e.s.locator ?? e.s.value ?? "")}</span>`
-      : `<span class="ct">${fmt(e.t)}</span><span class="${e.k.passed ? "ok" : "bad"}">${e.k.passed ? "✓" : "✗"}</span><span>${esc(checkLine(e.k))}</span>`;
+      : `<span class="ct">${fmt(e.t)}</span>${okGlyph(e.k.passed)}<span>${esc(checkLine(e.k))}</span>`;
     $("playIcon").innerHTML = video.paused ? '<path d="M1 1l10 6-10 6z" fill="currentColor"/>' : '<path d="M1 1h3.5v12H1zM7.5 1H11v12H7.5z" fill="currentColor"/>';
     $("play").setAttribute("aria-label", video.paused ? "Play" : "Pause");
   }
