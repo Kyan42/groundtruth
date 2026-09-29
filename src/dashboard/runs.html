@@ -3,15 +3,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Groundtruth Runs</title>
-<script>
-// Light by default; the toggle's choice is remembered in this browser.
-(() => { let t = "light"; try { t = localStorage.getItem("gt-theme") || "light"; } catch {} document.documentElement.dataset.theme = t; })();
-function toggleTheme() {
-  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-  document.documentElement.dataset.theme = next;
-  try { localStorage.setItem("gt-theme", next); } catch {}
-}
-</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
 <style>
@@ -25,36 +16,15 @@ function toggleTheme() {
   --sans:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --ground:#0c0e0d; --hatch:rgba(104,236,196,.05); --card:#111413; --sunk:#151917;
-    --ink:#e8ecea; --mid:#a6b0ac; --low:#727c78; --line:#242a28; --forest:#68ecc4;
-    --pass:#45d19a; --pass-lo:rgba(69,209,154,.12); --fail:#ff6f5f; --fail-lo:rgba(255,111,95,.12);
-    --warn:#e3bd58; --warn-lo:rgba(227,189,88,.12); --block:#9aa39f; --block-lo:rgba(154,163,159,.12);
-    --shadow:0 12px 34px -16px rgba(0,0,0,.7); color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --ground:#0c0e0d; --hatch:rgba(104,236,196,.05); --card:#111413; --sunk:#151917;
-  --ink:#e8ecea; --mid:#a6b0ac; --low:#727c78; --line:#242a28; --forest:#68ecc4;
-  --pass:#45d19a; --pass-lo:rgba(69,209,154,.12); --fail:#ff6f5f; --fail-lo:rgba(255,111,95,.12);
-  --warn:#e3bd58; --warn-lo:rgba(227,189,88,.12); --block:#9aa39f; --block-lo:rgba(154,163,159,.12);
-  --shadow:0 12px 34px -16px rgba(0,0,0,.7); color-scheme:dark;
-}
 *{box-sizing:border-box}
 body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased;min-height:100vh}
 a{color:inherit}
 .wrap{padding:24px 28px 80px}
-.brand{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:20px}
 /* the Groundtruth mark, top right like the old dashboard */
 .brandmk{display:block;flex:none;--mark-ring:#2f6b4f;--mark-dot:#12a150}
 .brandmk .gtm{display:block;overflow:visible}
-:root[data-theme="dark"] .brandmk{--mark-ring:#68ecc4}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .brandmk{--mark-ring:#68ecc4}}
 
-.theme{margin-left:auto;border:1px solid var(--line);background:var(--card);color:var(--mid);border-radius:8px;padding:3px 9px;font:500 12.5px var(--sans);white-space:nowrap;cursor:pointer}
-.theme:hover{color:var(--ink)}
-:root[data-theme="dark"] .theme .to-dark,:root:not([data-theme="dark"]) .theme .to-light{display:none}
 h1{font-size:26px;margin:0;letter-spacing:-.01em}
 .list{display:grid;gap:10px}
 .item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 14px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 18px;text-decoration:none}
@@ -138,7 +108,6 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
 <div class="wrap">
   <div class="brand">
     <h1>Test runs</h1>
-    <button class="theme" type="button" onclick="toggleTheme()" aria-label="Switch between light and dark"><span class="to-dark">☾ Dark</span><span class="to-light">☀ Light</span></button>
     <a class="brandmk" href="/runs" aria-label="All runs"><svg class="gtm" width="56" height="56" aria-hidden="true"><use href="#gt-mark"/></svg></a>
   </div>
   <div class="list" id="list"></div>

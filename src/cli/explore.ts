@@ -69,7 +69,7 @@ const boot = await bootPr(octokit, ref, {
     console.log(`\nExploring with ${values.model}…`);
     explored = await exploreApp({
       url, headers, resetApp, claims, outDir, model: values.model, maxTurns: Number(values["max-turns"]),
-      meta: { pr: `${ref.owner}/${ref.repo}#${ref.number}`, title: pr.title, url: pr.html_url, sha, startedAt, bootSeconds: Math.round((Date.now() - started) / 1000), source: "cli" },
+      meta: { pr: `${ref.owner}/${ref.repo}#${ref.number}`, title: pr.title, url: pr.html_url, branch: pr.head.ref, sha, startedAt, bootSeconds: Math.round((Date.now() - started) / 1000), source: "cli" },
       onEvent: (e) => {
         if (e.type === "thinking") console.log(`  💭 ${e.text.replace(/\s+/g, " ").slice(0, 220)}`);
         else if (e.type === "tool") console.log(`  ${e.ok ? "→" : "✗"} ${e.name} ${e.summary}`.slice(0, 220));
