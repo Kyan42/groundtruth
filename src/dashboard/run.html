@@ -46,6 +46,7 @@ aside{min-width:0;background:color-mix(in srgb,var(--card) 88%,transparent);bord
 .jname{font-weight:500;font-size:14px;line-height:1.3}
 .chips{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:2px}
 .chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:var(--mid)}
+.chip .cidt{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:-.01em}
 /* ascii verdict glyphs in tinted tiles, from the old dashboard */
 .mark{display:inline-flex;align-items:center;justify-content:center;flex:none;width:14px;font-family:var(--sans);font-size:13px;font-weight:600;line-height:1;opacity:.6}
 .mark.lg{width:18px;font-size:16px}
@@ -379,7 +380,7 @@ function render(T, R, G) {
   const resultOf = (id) => results.find((r) => r.claimId === id);
   const statusOf = (id) => resultOf(id)?.status ?? "none";
   const citedIds = new Set(results.flatMap((r) => r.checkIds ?? []));
-  const chip = (id) => `<span class="chip ${statusOf(id)}" title="${esc(STATUS_WORD[statusOf(id)])}">${glyph(statusOf(id))}${esc(id.toUpperCase())}</span>`;
+  const chip = (id) => `<span class="chip ${statusOf(id)}" title="${esc(STATUS_WORD[statusOf(id)])}">${glyph(statusOf(id))}<span class="cidt">${esc(id.toUpperCase())}</span></span>`;
   const claimsIn = (j) => [...new Set([...results.filter((r) => r.journey === j.id).map((r) => r.claimId), ...(j.claimIds ?? []).filter((id) => !resultOf(id))])];
   const videoUrl = (j) => j.video ? `${BASE}/videos/${encodeURIComponent(j.video.split(/[\\/]/).pop())}` : "";
   const checkLine = (k) => (k.code ? k.code : `${words(k.assert)}${k.expected ? ` "${k.expected}"` : ""}`);
