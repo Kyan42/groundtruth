@@ -42,20 +42,19 @@ aside{min-width:0;background:color-mix(in srgb,var(--card) 88%,transparent);bord
 .chips{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:2px}
 .chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:var(--mid)}
 /* ascii verdict glyphs in tinted tiles, from the old dashboard */
-.mark{display:inline-grid;place-items:center;flex:none;overflow:hidden;border-radius:5px;width:20px;height:24px;
-  font-family:var(--mono);white-space:pre;font-weight:500;font-size:2.8px;line-height:1.95px;letter-spacing:.27px;text-indent:.27px;vertical-align:middle}
-.mark.lg{width:28px;height:34px;border-radius:8px;font-size:3.9px;line-height:2.67px;letter-spacing:.37px;text-indent:.37px}
-.mark.p{background:var(--pass-lo);color:var(--pass)}
-.mark.f{background:var(--fail-lo);color:var(--fail)}
-.mark.u{background:var(--warn-lo);color:var(--warn)}
+.mark{display:inline-flex;align-items:center;justify-content:center;flex:none;width:14px;font-family:var(--sans);font-size:13px;font-weight:600;line-height:1;opacity:.6}
+.mark.lg{width:18px;font-size:16px}
+.mark.p{color:var(--pass)}
+.mark.f{color:var(--fail);opacity:.75}
+.mark.u{color:var(--warn)}
 
-.run{flex:none;margin-top:auto;border-top:1px solid var(--line);padding:14px 20px 16px}
-.runid{margin:0 0 6px;font-size:15.5px;font-weight:700;letter-spacing:-.03em;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.runid .ticon{margin-right:0;color:var(--forest);font-size:5.4px;line-height:3.6px;letter-spacing:.58px;text-indent:.58px}
-.kv{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:5px 0;font-size:13.5px;border-bottom:1px solid var(--line)}
+.run{flex:none;margin-top:auto;border-top:1px solid var(--line);padding:12px 20px 14px}
+.runid{margin:0 0 4px;font-size:14px;font-weight:700;letter-spacing:-.03em;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.runid .ticon{margin-right:0;vertical-align:0;color:var(--forest);font-size:3.8px;line-height:2.5px;letter-spacing:.4px;text-indent:.4px}
+.kv{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:4px 0;font-size:12.5px;border-bottom:1px solid var(--line)}
 .kv span{color:var(--low)}
 .kv b{font-weight:600;letter-spacing:-.01em;color:var(--mid);font-variant-numeric:tabular-nums;text-align:right}
-.back{display:inline-flex;align-items:center;gap:7px;margin-top:12px;font-size:13.5px;font-weight:600;color:var(--low);text-decoration:none}
+.back{display:inline-flex;align-items:center;gap:7px;margin-top:10px;font-size:12.5px;font-weight:600;color:var(--low);text-decoration:none}
 .back:hover{color:var(--ink)}
 
 /* main */
@@ -83,7 +82,7 @@ main{min-width:0;display:flex;flex-direction:column}
 .vcard{position:relative;width:min(100%,860px);border-radius:14px;overflow:hidden;background:#000;box-shadow:var(--shadow);border:1px solid var(--line)}
 .vcard video{display:block;width:100%;height:auto;aspect-ratio:16/10;background:#fff}
 .caption{position:absolute;left:0;right:0;bottom:0;padding:26px 16px 10px;background:linear-gradient(transparent,rgba(0,0,0,.72));color:#fff;font-size:13px;display:flex;gap:10px;align-items:center;pointer-events:none}
-.caption .mark.p{background:rgba(127,240,195,.18);color:#7ff0c3} .caption .mark.f{background:rgba(255,157,145,.2);color:#ff9d91}
+.caption .mark{opacity:.9} .caption .mark.p{color:#7ff0c3} .caption .mark.f{color:#ff9d91}
 .caption .ct{opacity:.7;font-variant-numeric:tabular-nums}
 .caption .loc{font-family:var(--mono);font-size:12px;opacity:.85}
 .caption .ok{color:#7ff0c3} .caption .bad{color:#ff9d91}
@@ -171,7 +170,7 @@ h4{margin:22px 0 6px;font-size:14px;font-weight:600}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 /* ascii tab icons, drawn on a 7 by 7 grid */
-.ticon{display:inline-block;vertical-align:-6px;margin-right:10px;white-space:pre;font-family:var(--mono);font-size:4.6px;line-height:3.05px;letter-spacing:.5px;text-indent:.36px;font-weight:500;color:var(--faint)}
+.ticon{display:inline-block;vertical-align:-3px;margin-right:8px;white-space:pre;font-family:var(--mono);font-size:3.2px;line-height:2.15px;letter-spacing:.35px;text-indent:.25px;font-weight:500;color:var(--faint)}
 .tabs button[aria-selected="true"] .ticon{color:var(--forest)}
 
 /* the landing page's survey cursor: dark arrow at rest, forest green over anything interactive */
@@ -313,14 +312,9 @@ M10125 13449 c-120 -16 -291 -59 -427 -105 -235 -81 -342 -135 -895 -451 -167
 const RUN_ID = decodeURIComponent(location.pathname.split("/").filter(Boolean)[1] ?? "");
 const BASE = `/runs/${encodeURIComponent(RUN_ID)}`;
 const STATUS_WORD = { verified: "Verified", failed: "Failed", blocked: "Blocked", unreachable: "Unreachable", error: "Error", none: "No status" };
-// verdict glyphs drawn as ascii art on a 7 wide by 9 tall grid, same as the old dashboard
-const GLYPH = {
-  p: ["       ", "       ", "      #", "     ##", "##  ## ", " ####  ", "  ##   ", "       ", "       "],
-  f: ["       ", "##   ##", " ## ## ", "  ###  ", "   #   ", "  ###  ", " ## ## ", "##   ##", "       "],
-  u: ["       ", " ##### ", "##   ##", "     ##", "    ## ", "   ##  ", "   ##  ", "       ", "   ##  "],
-};
 const GLYPH_OF = { verified: "p", passed: "p", failed: "f", error: "f", blocked: "u", unreachable: "u", none: "u" };
-const glyph = (status, big) => `<span class="mark ${GLYPH_OF[status] ?? "u"}${big ? " lg" : ""}" aria-hidden="true">${GLYPH[GLYPH_OF[status] ?? "u"].join("\n")}</span>`;
+const SYMBOL = { p: "✓", f: "✗", u: "?" };
+const glyph = (status, big) => `<span class="mark ${GLYPH_OF[status] ?? "u"}${big ? " lg" : ""}" aria-hidden="true">${SYMBOL[GLYPH_OF[status] ?? "u"]}</span>`;
 const okGlyph = (passed) => glyph(passed ? "verified" : "failed");
 const TICONS = {
   run:    ["     ", "#    ", "##   ", " ##  ", "##   ", "#    ", "  ###"],
