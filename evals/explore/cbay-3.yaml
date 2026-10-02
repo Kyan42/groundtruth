@@ -1,0 +1,38 @@
+# Exploration eval: cbay#3 "Show when each cart item was added" (our PR B), on the commit it branched from and
+# its head. Its change records every add as a new cart line (so each line has its own time), which breaks
+# the cart PR's "adding the same item twice keeps one line". We planted that regression, so the head label
+# for c4 is a smoke test, not a natural bug.
+id: cbay-3
+pr: Kyan42/cbay#3
+boot: repo                                          # cbay's own .groundtruth.yml
+commits:
+  base: 067a0405f5ae773d26c2102ebbb207c6adc82aea   # "Add a shopping cart": a cart, no added times
+  head: 0c251b1af5b801f188c5b1b75887f6fddda93c19   # "Show when each cart item was added"
+claims:
+  - id: c1
+    when: Add an item to the cart from its listing page, then open the cart
+    then: { kind: visible, what: "The item's cart line shows when it was added, under the item's name" }
+  - id: c2
+    when: Add an item to the cart, then open the cart right away
+    then: { kind: text, what: The item's line reads "Added just now" }
+  - id: c3
+    when: Add one item, wait a minute or more, add a different item, then open the cart
+    then: { kind: text, what: "Each line shows its own added time: the first item's is older (e.g. \"Added 1 minute ago\") than the second's (\"Added just now\")" }
+  - id: c4
+    when: Add the same item to the cart twice, then open the cart
+    then: { kind: count, what: "The cart shows one line for that item with quantity 2, not two separate lines" }
+    note: From cbay#2's intent, kept behavior this PR must not break.
+
+# holds: verified. breaks: anything but verified. fails: failed (the feature is there and wrong).
+expect:
+  c1: { base: breaks, head: holds }    # base has no added time at all
+  c2: { base: breaks, head: holds }
+  c3: { base: breaks, head: holds }    # needs time to pass on the server: the agent must wait (the page clock can't move it)
+  c4: { base: holds, head: fails }     # the planted regression: two "Qty 1" lines on head
+
+# Left out: "a cart saved before this change still loads" (the PR's third bullet). It needs an old-format
+# cart, which the app gives no way to create, so it can only be unreachable.
+
+review:
+  status: draft
+  drafted_by: claude

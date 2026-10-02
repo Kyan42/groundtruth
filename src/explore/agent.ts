@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { ApprovedClaim } from "../comment.js";
+import { describePersonas, type Persona } from "../personas.js";
 import type { CheckTarget, ExplorerBrowser, Journey, Step } from "./browser.js";
 import { ASSERTIONS, type Assertion, type Check, NEEDS_EXPECTED, PAGE_ASSERTIONS, type RequestRecord } from "./checks.js";
 
@@ -194,6 +195,7 @@ export async function explore(opts: {
   maxTurns?: number;
   onEvent?: (e: ExploreEvent) => void;
   resetApp?: () => Promise<void>;          // restores the app's starting data (config `reset`), if it has one
+  personas?: Persona[];                    // test accounts; the agent sees usernames and password placeholders
   client?: Anthropic;
 }): Promise<ExploreResult> {
   const client = opts.client ?? new Anthropic();
@@ -206,7 +208,8 @@ export async function explore(opts: {
   const claimList = opts.claims.map((c) => `${c.id}: when ${c.when || "(no setup given)"} → then (${c.then.kind}) ${c.then.what}`).join("\n");
   const messages: Anthropic.MessageParam[] = [{
     role: "user",
-    content: `The app is open at ${browser.baseUrl}.\n\nClaims to check:\n${claimList}\n\nCurrent page:\n${await browser.snapshot()}`,
+    content: `The app is open at ${browser.baseUrl}.\n\nClaims to check:\n${claimList}\n\n` +
+      `${opts.personas?.length ? `${describePersonas(opts.personas)}\n\n` : ""}Current page:\n${await browser.snapshot()}`,
   }];
 
   let stoppedBecause: ExploreResult["stoppedBecause"] = "step budget";

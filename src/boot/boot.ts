@@ -1,7 +1,8 @@
 import type { Octokit } from "@octokit/core";
 import type { PrRef } from "../evidence.js";
 import { type BrowserCheck, checkInBrowser } from "./browser-check.js";
-import { type BootConfig, loadBootConfig } from "./config.js";
+import { type Persona, personaExports } from "../personas.js";
+import { type BootConfig, loadBootConfig, resolvePersonas } from "./config.js";
 import { createSandbox, type ExposedPort, type Sandbox } from "./sandbox.js";
 
 // Boots a PR's app in a fresh sandbox from the repo's .groundtruth.yml, and proves a browser can use it.
@@ -30,7 +31,8 @@ export type BootOptions = {
   afterBoot?: (app: {
     url: string; headers: Record<string, string>; sandbox: Sandbox;
     sha: string;                           // the commit that was booted
-    resetApp?: () => Promise<void>;        // runs the config's `reset` command, if it has one
+    resetApp?: () => Promise<void>;        // runs the config's `reset` command (then after_ready), if it has one
+    personas: Persona[];                   // test accounts, passwords filled in
   }) => Promise<void>;
   onPhase?: (p: Phase) => void;
 };
@@ -93,6 +95,8 @@ export async function bootCommit(target: BootTarget, opts: BootOptions): Promise
   let sandbox: Sandbox | undefined;
   try {
     const { config } = await phase("read .groundtruth.yml", target.loadConfig, ({ source }) => source);
+    const personas = resolvePersonas(config);
+    secrets.push(...personas.map((p) => p.password).filter(Boolean));
     sandbox = await phase("create sandbox", () => createSandbox({
       name: `groundtruth-boot-${target.label.replace(/[^a-zA-Z0-9-]+/g, "-")}-${sha.slice(0, 7)}`,
       idleShutdownSeconds: 600,
@@ -150,6 +154,10 @@ export async function bootCommit(target: BootTarget, opts: BootOptions): Promise
       return r.stdout.trim();
     }, () => `GET ${config.ready.path} on :${config.port}`);
 
+    // Accounts and anything else that needs the running app; also rerun after every reset.
+    const afterReady = async () => { for (const cmd of config.after_ready) await mustRun(inRepo(personaExports(personas) + cmd), 300); };
+    for (const cmd of config.after_ready) await phase("after ready", () => mustRun(inRepo(personaExports(personas) + cmd), 300), () => cmd);
+
     const exposed: ExposedPort = await phase("open tunnel", async () => {
       const e = await sb.expose(config.port);
       secrets.push(...Object.values(e.headers));
@@ -174,8 +182,8 @@ export async function bootCommit(target: BootTarget, opts: BootOptions): Promise
     if (opts.afterBoot) {
       const reset = config.reset;
       await opts.afterBoot({
-        url: exposed.url, headers: exposed.headers, sandbox: sb, sha: result.sha,
-        resetApp: reset ? async () => { await mustRun(inRepo(reset), 120); } : undefined,
+        url: exposed.url, headers: exposed.headers, sandbox: sb, sha: result.sha, personas,
+        resetApp: reset ? async () => { await mustRun(inRepo(reset), 120); await afterReady(); } : undefined,
       });
     }
   } catch (err) {

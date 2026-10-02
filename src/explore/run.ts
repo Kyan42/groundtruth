@@ -1,6 +1,7 @@
 import { writeFileSync } from "node:fs";
 import path from "node:path";
 import type { ApprovedClaim } from "../comment.js";
+import { hidePasswords, type Persona } from "../personas.js";
 import { explore, type ExploreEvent, type ExploreResult } from "./agent.js";
 import { ExplorerBrowser } from "./browser.js";
 
@@ -19,18 +20,22 @@ export async function exploreApp(opts: {
   model?: string;
   maxTurns?: number;
   onEvent?: (e: ExploreEvent) => void;
+  personas?: Persona[];
 }): Promise<ExploreRun> {
   const started = Date.now();
-  const browser = await ExplorerBrowser.open(opts.url, opts.headers, opts.outDir);
+  const personas = opts.personas ?? [];
+  const browser = await ExplorerBrowser.open(opts.url, opts.headers, opts.outDir, personas);
   let result: ExploreResult;
   try {
     result = await explore({
-      claims: opts.claims, browser, resetApp: opts.resetApp, model: opts.model, maxTurns: opts.maxTurns, onEvent: opts.onEvent,
+      claims: opts.claims, browser, resetApp: opts.resetApp, model: opts.model, maxTurns: opts.maxTurns, onEvent: opts.onEvent, personas,
     });
   } finally {
     await browser.close();
   }
   const run = { ...result, seconds: Math.round((Date.now() - started) / 1000) };
-  writeFileSync(path.join(opts.outDir, "trace.json"), JSON.stringify({ ...opts.meta, claims: opts.claims, ...run }, null, 2));
+  // Last line of defense: no real password in the saved trace, whatever path it took to get there.
+  writeFileSync(path.join(opts.outDir, "trace.json"),
+    hidePasswords(JSON.stringify({ ...opts.meta, claims: opts.claims, ...run }, null, 2), personas));
   return run;
 }

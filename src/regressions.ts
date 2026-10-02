@@ -1,3 +1,4 @@
+import type { Persona } from "./personas.js";
 import { copyFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import type { Octokit } from "@octokit/core";
@@ -26,7 +27,7 @@ export type RegressionResult = {
 
 export async function runRegressions(opts: {
   octokit: Octokit; ref: PrRef; baseSha: string; rows: RegressionRow[];
-  runDir: string; baseUrl: string; headers?: Record<string, string>; resetApp?: () => Promise<void>;
+  runDir: string; baseUrl: string; headers?: Record<string, string>; resetApp?: () => Promise<void>; personas?: Persona[];
 }): Promise<RegressionResult[]> {
   const registry = await readRegistry(opts.octokit, opts.ref, opts.baseSha);
   const entries = opts.rows.map((r) => registry.find((e) => e.file === r.file)).filter((e) => e !== undefined);
@@ -38,12 +39,12 @@ export async function runRegressions(opts: {
 // Replays regression tests already on disk (dir/tests + dir/support) and records the results.
 export async function replayRegressions(opts: {
   dir: string; entries: TestEntry[]; rows: RegressionRow[];
-  runDir: string; baseUrl: string; headers?: Record<string, string>; resetApp?: () => Promise<void>;
+  runDir: string; baseUrl: string; headers?: Record<string, string>; resetApp?: () => Promise<void>; personas?: Persona[];
 }): Promise<RegressionResult[]> {
   const { dir, entries } = opts;
   const ran = await runTests({
     dir, files: entries.map((e) => e.file), outputDir: path.join(opts.runDir, "regression-out"),
-    baseUrl: opts.baseUrl, headers: opts.headers, resetApp: opts.resetApp,
+    baseUrl: opts.baseUrl, headers: opts.headers, resetApp: opts.resetApp, personas: opts.personas,
     warmPaths: entries.flatMap((e) => e.pages),
   });
 

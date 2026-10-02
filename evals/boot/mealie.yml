@@ -27,3 +27,25 @@ port: 3000
 ready:
   path: /api/app/about    # proxied by the frontend to the backend: 200 only when both are up
   timeout_seconds: 600
+# Test accounts. Mealie creates the admin itself on first start (mealie/core/settings/settings.py,
+# _DEFAULT_EMAIL / _DEFAULT_PASSWORD); the regular member is created through the admin API once the app is up.
+personas:
+  admin:
+    description: Mealie's built-in administrator; can manage users, groups and every recipe
+    username: changeme@example.com
+    password: MyPassword
+  cook:
+    description: A regular household member without admin rights
+    username: cook@example.com
+    password: { secret: GT_MEALIE_COOK_PASSWORD }
+after_ready:
+  - >-
+    TOKEN=$(curl -sf -X POST localhost:9000/api/auth/token --data-urlencode "username=$GT_PERSONA_ADMIN_USERNAME"
+    --data-urlencode "password=$GT_PERSONA_ADMIN_PASSWORD" | sed -E 's/.*"access_token":"([^"]+)".*/\1/') &&
+    curl -sf -X POST localhost:9000/api/admin/users -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json'
+    -d "{\"username\":\"cook\",\"fullName\":\"Cook\",\"email\":\"$GT_PERSONA_COOK_USERNAME\",\"password\":\"$GT_PERSONA_COOK_PASSWORD\",\"group\":\"Home\",\"household\":\"Family\"}"
+    -o /dev/null -w 'created cook: HTTP %{http_code}\n'
+  # Prove the new account can log in.
+  - >-
+    curl -sf -X POST localhost:9000/api/auth/token --data-urlencode "username=$GT_PERSONA_COOK_USERNAME"
+    --data-urlencode "password=$GT_PERSONA_COOK_PASSWORD" -o /dev/null -w 'cook login: HTTP %{http_code}\n'

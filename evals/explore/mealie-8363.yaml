@@ -5,6 +5,7 @@ commits:
   head: 33d71a7794bcb29152040474b881c4c49c063d8d   # the PR's only commit
   base: ff97c105fff76902955a007467f812a013e43cd8   # merge base: mealie-next when the PR branched off
 boot: evals/boot/mealie.yml                         # we can't commit a .groundtruth.yml to Mealie
+persona: admin                                      # the claims need a logged-in user
 claims: evals/cases/mealie-8363.yaml                # expected.claims (c1-c4); assumptions left out
 
 # What each claim should get. head: the PR's code. base: the code before it.

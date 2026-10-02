@@ -1,6 +1,7 @@
 import type { Octokit } from "@octokit/core";
 import YAML from "yaml";
 import * as z from "zod/v4";
+import type { Persona } from "../personas.js";
 
 // .groundtruth.yml: how to boot a repo's app in a sandbox. Plain commands, run in order.
 export const CONFIG_PATH = ".groundtruth.yml";
@@ -16,6 +17,16 @@ const BootConfigSchema = z.object({
   start: z.string(),
   // Optional: restores the app's starting data while it runs (e.g. re-seed), so a journey can start clean.
   reset: z.string().optional(),
+  // Commands run once the app answers, and again after every reset: e.g. creating the personas' accounts
+  // through the app's API. They get GT_PERSONA_<NAME>_USERNAME and _PASSWORD for each persona.
+  after_ready: z.array(z.string()).default([]),
+  // Test accounts the agent can log in as. A password is written out (fine for throwaway accounts the
+  // app or seed creates) or names a secret held by Groundtruth, never committed: { secret: NAME }.
+  personas: z.record(z.string().regex(/^[\w-]+$/), z.object({
+    description: z.string(),
+    username: z.string(),
+    password: z.union([z.string(), z.object({ secret: z.string() })]),
+  })).default({}),
   port: z.number().int(),
   ready: z.object({
     path: z.string().default("/"),
@@ -45,4 +56,18 @@ export function parseBootConfig(text: string): BootConfig {
   const parsed = BootConfigSchema.safeParse(YAML.parse(text));
   if (!parsed.success) throw new Error(`Invalid ${CONFIG_PATH}: ${z.prettifyError(parsed.error)}`);
   return parsed.data;
+}
+
+// The personas with their passwords filled in. Secrets come from Groundtruth's own environment for now.
+export function resolvePersonas(config: BootConfig, env: NodeJS.ProcessEnv = process.env): Persona[] {
+  return Object.entries(config.personas).map(([name, p]) => {
+    let password: string;
+    if (typeof p.password === "string") password = p.password;
+    else {
+      const value = env[p.password.secret];
+      if (!value) throw new Error(`Persona "${name}" needs the secret ${p.password.secret}, which isn't set`);
+      password = value;
+    }
+    return { name, description: p.description, username: p.username, password };
+  });
 }

@@ -65,6 +65,15 @@ export const test = base.extend<{ resetApp: () => Promise<void> }>({
   },
 });
 
+// A test account from the repo's .groundtruth.yml personas. Passwords are never written into the scripts:
+// Groundtruth passes the accounts in GROUNDTRUTH_PERSONAS when it replays them. To run locally, set it:
+//   GROUNDTRUTH_PERSONAS='{"admin":{"username":"me@example.com","password":"..."}}'
+export function persona(name: string): { username: string; password: string } {
+  const all = JSON.parse(process.env.GROUNDTRUTH_PERSONAS || "{}") as Record<string, { username: string; password: string }>;
+  if (!all[name]) throw new Error(`No persona "${name}" in GROUNDTRUTH_PERSONAS (has: ${Object.keys(all).join(", ") || "none"})`);
+  return all[name];
+}
+
 // Waits in real time, for something the app's server times (the fake page clock can't move it). Shown in
 // the video, and recorded so the dashboard can skip the idle stretch.
 export async function pause(page: Page, seconds: number, reason: string): Promise<void> {

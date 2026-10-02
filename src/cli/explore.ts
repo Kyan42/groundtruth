@@ -65,10 +65,10 @@ console.log(`\nBooting ${ref.owner}/${ref.repo}#${ref.number}…`);
 const boot = await bootPr(octokit, ref, {
   screenshotPath: path.join(outDir, "boot.png"),
   onPhase: (p) => { if (!p.ok || p.name === "browser check") console.log(`  ${p.ok ? "✓" : "✗"} ${p.name} (${p.seconds.toFixed(0)}s)`); },
-  afterBoot: async ({ url, headers, resetApp, sha }) => {
+  afterBoot: async ({ url, headers, resetApp, sha, personas }) => {
     console.log(`\nExploring with ${values.model}…`);
     explored = await exploreApp({
-      url, headers, resetApp, claims, outDir, model: values.model, maxTurns: Number(values["max-turns"]),
+      url, headers, resetApp, personas, claims, outDir, model: values.model, maxTurns: Number(values["max-turns"]),
       meta: { pr: `${ref.owner}/${ref.repo}#${ref.number}`, title: pr.title, url: pr.html_url, branch: pr.head.ref, sha, startedAt, bootSeconds: Math.round((Date.now() - started) / 1000), source: "cli" },
       onEvent: (e) => {
         if (e.type === "thinking") console.log(`  💭 ${e.text.replace(/\s+/g, " ").slice(0, 220)}`);
@@ -82,7 +82,7 @@ const boot = await bootPr(octokit, ref, {
     });
     if (values["no-replay"]) return;
     console.log("\nCompiling and replaying the script…");
-    const replay = await replayRun({ runDir: outDir, baseUrl: url, headers, resetApp });
+    const replay = await replayRun({ runDir: outDir, baseUrl: url, headers, resetApp, personas });
     for (const n of replay.notes) console.log(`  · ${n}`);
     for (const j of replay.journeys) console.log(`  ${j.status === "passed" ? "✓" : "✗"} ${j.id} ${j.status} (${j.seconds}s)${j.error ? `: ${j.error}` : ""}`);
     console.log(`  Replay ${replay.ok ? "passed" : "had problems"} in ${replay.seconds}s${replay.error ? ` (${replay.error})` : ""}`);

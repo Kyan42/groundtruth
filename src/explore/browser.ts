@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { type Browser, type BrowserContext, chromium, type Locator, type Page, type Request } from "playwright";
+import { fillPasswords, hidePasswords, type Persona } from "../personas.js";
 import { type Assertion, assertionCode, type Check, PAGE_ASSERTIONS, type RequestRecord, runAssertion } from "./checks.js";
 
 // The browser the exploring agent drives. The agent sees the page as an accessibility snapshot whose
@@ -65,11 +66,12 @@ export class ExplorerBrowser {
   private constructor(
     private browser: Browser, readonly baseUrl: string,
     private headers: Record<string, string>, private videoDir?: string,
+    private personas: Persona[] = [],
   ) {}
 
   // Opens the browser on the app's home page, in an initial journey the agent can replace with start_journey.
-  static async open(baseUrl: string, headers: Record<string, string>, videoDir?: string): Promise<ExplorerBrowser> {
-    const b = new ExplorerBrowser(await chromium.launch(), baseUrl, headers, videoDir);
+  static async open(baseUrl: string, headers: Record<string, string>, videoDir?: string, personas: Persona[] = []): Promise<ExplorerBrowser> {
+    const b = new ExplorerBrowser(await chromium.launch(), baseUrl, headers, videoDir, personas);
     await b.newSession({ id: "j1", name: "(initial page)", claimIds: [], startPath: "/", resetData: false });
     return b;
   }
@@ -98,7 +100,8 @@ export class ExplorerBrowser {
 
   // The page as the agent sees it: where it is, and the accessibility tree with refs.
   async snapshot(): Promise<string> {
-    let tree = await this.page.ariaSnapshot({ mode: "ai" });
+    // A password field's snapshot shows what was typed into it, so passwords are swapped back to placeholders.
+    let tree = hidePasswords(await this.page.ariaSnapshot({ mode: "ai" }), this.personas);
     if (tree.length > MAX_SNAPSHOT_CHARS) tree = `${tree.slice(0, MAX_SNAPSHOT_CHARS)}\n… (snapshot truncated)`;
     return `URL: ${this.relativeUrl()}\nTitle: ${await this.page.title()}\n\n${tree}`;
   }
@@ -125,7 +128,7 @@ export class ExplorerBrowser {
       }
       // Playwright waits until the element is visible, enabled and stable, then acts like a user.
       if (action === "click") await el.click({ timeout: 10_000 });
-      else if (action === "type") await el.fill(value ?? "", { timeout: 10_000 });
+      else if (action === "type") await el.fill(fillPasswords(value ?? "", this.personas), { timeout: 10_000 });
       else await el.selectOption(value ?? "", { timeout: 10_000 });
       return { locator: description, value, note: stable ? undefined : "locator matches several elements; acted on the snapshot's element" };
     });
@@ -212,7 +215,7 @@ export class ExplorerBrowser {
     // t is when the result is known and its overlay appears (a failing assertion retries first).
     const check: Check = {
       id: `k${this.checks.length + 1}`, journey: this.journey.id, t: this.elapsed, afterStep: this.steps.length, claimIds: c.claimIds,
-      assert: c.assert, locator: target?.description, expected: c.expected, observed, passed,
+      assert: c.assert, locator: target?.description, expected: c.expected, observed: hidePasswords(observed, this.personas), passed,
     };
     const box = target ? await elementBox(this.page, target.locator) : undefined;
     if (box) check.box = box;

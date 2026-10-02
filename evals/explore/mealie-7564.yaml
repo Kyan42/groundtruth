@@ -1,0 +1,65 @@
+# Exploration eval: Mealie #7564 "restore create-item button in recipe dropdowns (categories, tags, tools)".
+# Four commits: the base (no Create button in these dropdowns at all), two in-PR bugs and their fixes, and
+# one behavior the description states that the merged code (still, on mealie-next as of 2026-09-26) doesn't do.
+# Labels are from reading the code at each commit (RecipeOrganizerSelector.vue, RecipeIngredientEditor.vue).
+id: mealie-7564
+pr: mealie-recipes/mealie#7564
+boot: evals/boot/mealie.yml
+persona: admin
+commits:
+  base: 176587079f135f68fb8caac46bcd7234af9d6e4d      # mealie-next when the PR branched (no organizer Create button)
+  buggy_a: f496104b6a49a0d9274bce8f594a5d0239ddf16e   # button restored, Enter creates; the button shows even with nothing typed
+  fix_a: d9167c7bc208363e466a717f64d986d5dcf3ecee     # button only with a search term (organizers and ingredients)
+  head: eada56a79b0faa7736f77b74ce71349085d7280b      # ingredients also hide Create for an exact existing name
+claims:
+  # From the description at opening ("Before / After" table and "Testing" list). The PR was opened after
+  # all four commits, so every claim is stated intent.
+  - id: c1
+    when: On a recipe's edit page, open the Tags field and type a tag name that doesn't exist yet
+    then: { kind: visible, what: A Create button appears at the bottom of the dropdown }
+  - id: c2
+    when: On a recipe's edit page, type a new tag name in the Tags field and press Enter
+    then: { kind: visible, what: "The tag is created and added to the recipe's tags (shown as a chip)" }
+  - id: c3
+    when: On a recipe's edit page, open the Tags dropdown without typing anything
+    then: { kind: hidden, what: No Create button is shown }
+  - id: c4
+    when: On a recipe's edit page, type the exact name of a tag that already exists in the Tags field
+    then: { kind: hidden, what: No Create button is shown }
+  - id: c5
+    when: In a recipe's ingredient editor, open the food field without typing anything
+    then: { kind: hidden, what: No Create option is shown }
+  - id: c6
+    when: In a recipe's ingredient editor, type the exact name of a food that already exists
+    then: { kind: hidden, what: No Create option is shown }
+  # Added after comparing with the extractor's output (it wrote these; the first draft didn't).
+  - id: c7
+    when: On a recipe's edit page, type a tag name that doesn't exist yet in the Tags field
+    then: { kind: text, what: The dropdown shows a "Press Enter to Create" hint }
+  - id: c8
+    when: On a recipe's edit page, type a new tag name in the Tags field and click the Create button in the dropdown
+    then: { kind: visible, what: "The tag is created and added to the recipe's tags (shown as a chip)" }
+
+expect:
+  c1: { base: breaks, buggy_a: holds, fix_a: holds, head: holds }
+  c2: { base: breaks, buggy_a: holds, fix_a: holds, head: holds }
+  c3: { base: holds, buggy_a: fails, fix_a: holds, head: holds }   # base: there's no Create button at all
+  c4: { base: holds, buggy_a: fails, fix_a: fails, head: fails }   # organizers never check for an exact match: head still shows Create
+  c5: { base: fails, buggy_a: fails, fix_a: holds, head: holds }   # base: the pre-existing bug the PR fixed
+  c6: { base: fails, buggy_a: fails, fix_a: fails, head: holds }
+  c7: { base: breaks, buggy_a: holds, fix_a: holds, head: holds }  # the #no-data hint arrives with buggy_a
+  c8: { base: breaks, buggy_a: holds, fix_a: holds, head: holds }  # the #append-item button and createItem() too
+
+setup:
+  - Log in as the admin persona.
+  - A recipe to edit (the agent can create one), with at least one existing tag for c4 and one existing food for c6
+    (both can be made through the same fields' Create buttons on the commits that have them, or in Data Management).
+
+review:
+  status: draft
+  drafted_by: claude
+  notes: >-
+    c4 is the headline: the description says "typing an existing term hides the Create button" for
+    Categories/Tags/Tools, but the organizer's Create button is v-if="showAdd && searchInput" at every commit
+    (only the Enter key checks for an exact match), so the merged PR contradicts its own description.
+    Confirm by watching the head run's video before trusting the label.

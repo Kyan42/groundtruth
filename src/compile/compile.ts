@@ -116,7 +116,7 @@ export function compileRun(trace: Trace, opts: { approvedBy?: string } = {}): Co
         + `test.describe.serial(${str(title)}, () => {\n${chain.map((t) => indent(t.code)).join("\n\n")}\n});`;
     files[`tests/${file}`] = [
       header(entry, chain.some((t) => t.journey.resetData)),
-      `import { check, expect, pause, test } from "../support/groundtruth";`,
+      `import { check, expect, pause, ${body.includes("persona(") ? "persona, " : ""}test } from "../support/groundtruth";`,
       "",
       body,
       "",
@@ -156,13 +156,23 @@ const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").repla
 
 const isAction = (s: Step) => ["click", "type", "select", "press", "navigate", "back", "wait_for", "clock", "wait"].includes(s.action);
 
+// A typed value, with password placeholders ({{admin.password}}) read from the persona at replay time.
+function typed(value: string): string {
+  const parts = value.split(/(\{\{[\w-]+\.password\}\})/).filter(Boolean);
+  if (!parts.length) return str("");
+  return parts.map((p) => {
+    const m = /^\{\{([\w-]+)\.password\}\}$/.exec(p);
+    return m ? `persona(${str(m[1])}).password` : str(p);
+  }).join(" + ");
+}
+
 function action(s: Step, journey: string, notes: string[]): string[] {
   if (!s.ok) { notes.push(`${journey}: dropped step ${s.n} (${s.action} failed during exploration: ${s.note ?? ""})`); return []; }
   if (s.note?.includes("several elements")) notes.push(`${journey}: step ${s.n} uses a locator that matched several elements during exploration; replay may fail`);
   const el = () => loc(s.locator, `${journey} step ${s.n}`);
   switch (s.action) {
     case "click": return [`await ${el()}.click();`];
-    case "type": return [`await ${el()}.fill(${str(s.value ?? "")});`];
+    case "type": return [`await ${el()}.fill(${typed(s.value ?? "")});`];
     case "select": return [`await ${el()}.selectOption(${str(s.value ?? "")});`];
     case "press": return [`await page.keyboard.press(${str(s.value ?? "")});`];
     case "navigate": return [`await page.goto(${str(s.value ?? "/")});`];

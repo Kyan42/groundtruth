@@ -70,14 +70,14 @@ async function testAndReport(octokit: Octokit, ref: PrRef, sha: string, claims: 
   const result = await bootPr(octokit, ref, {
     sha, screenshotPath: path.join(runDir, "home.png"),
     onPhase: (p) => { bootSeconds += p.seconds; },
-    afterBoot: async ({ url, headers, resetApp }) => {
+    afterBoot: async ({ url, headers, resetApp, personas }) => {
       bootSeconds = Math.round(bootSeconds);
       console.log(`[groundtruth] ${label}: booted in ${bootSeconds}s; testing ${claims.length} claims`);
       report(`App booted in ${bootSeconds}s · testing ${claims.length} claims…`);
       let done = 0;
       try {
         explored = await exploreApp({
-          url, headers, resetApp, claims, outDir: runDir,
+          url, headers, resetApp, personas, claims, outDir: runDir,
           meta: { pr: label, title: pr.title, url: pr.html_url, branch: pr.head.ref, sha, startedAt, bootSeconds, source: "approval", checkRun: checkId },
           onEvent: (e) => {
             if (e.type === "status") report(`Testing · ${++done} of ${claims.length} claims done`);
@@ -95,7 +95,7 @@ async function testAndReport(octokit: Octokit, ref: PrRef, sha: string, claims: 
       // run, and a first sign of whether the script holds up. A replay problem never changes the verdicts.
       report(`Claims tested · replaying the compiled script…`);
       try {
-        replay = await replayRun({ runDir, baseUrl: url, headers, resetApp, approvedBy: opts.approvedBy });
+        replay = await replayRun({ runDir, baseUrl: url, headers, resetApp, personas, approvedBy: opts.approvedBy });
         console.log(`[groundtruth] ${label}: replay ${replay.ok ? "passed" : "had problems"}: ${replay.journeys.map((j) => `${j.id} ${j.status}`).join(", ")}${replay.error ? ` (${replay.error})` : ""}`);
       } catch (err) {
         console.log(`[groundtruth] ${label}: replay error: ${err}`);
@@ -105,7 +105,7 @@ async function testAndReport(octokit: Octokit, ref: PrRef, sha: string, claims: 
       if (rows.length && opts.baseSha) {
         report(`Claims tested · replaying ${rows.length} regression check${rows.length === 1 ? "" : "s"} from earlier PRs…`);
         try {
-          regressions = await runRegressions({ octokit, ref, baseSha: opts.baseSha, rows, runDir, baseUrl: url, headers, resetApp });
+          regressions = await runRegressions({ octokit, ref, baseSha: opts.baseSha, rows, runDir, baseUrl: url, headers, resetApp, personas });
           console.log(`[groundtruth] ${label}: regressions: ${regressions.map((r) => `${r.id} ${r.status}`).join(", ")}`);
         } catch (err) {
           regressionError = err instanceof Error ? err.message : String(err);

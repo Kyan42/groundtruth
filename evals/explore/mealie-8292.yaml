@@ -1,0 +1,43 @@
+# Exploration eval: Mealie #8292 "convert between metric/imperial units". A menu on the recipe page shows
+# parsed ingredients as written, in metric, or in US units. The UI commit restated ingredients already
+# written in US units ("1 pint" became "2 cups"); the next commit fixed it. Both predate the PR's opening.
+id: mealie-8292
+pr: mealie-recipes/mealie#8292
+boot: evals/boot/mealie.yml
+persona: admin
+commits:
+  base: ffe29dae67359cfa6ab8a50b8b94b0ae9bd40a73    # mealie-next when the PR branched: no units menu
+  buggy: b1d3f5b3a1867fa2d9c3c03530343fea3376fa81   # "implement UI menu"
+  head: 38c7cb270c7acd1481eaf834f544116a5ab19593    # "only consider changing units when switching systems"
+claims:
+  - id: c1
+    when: On a recipe whose parsed ingredients are in cups or tablespoons, choose Metric in the units menu
+    then: { kind: text, what: "Those ingredients are shown in metric units (e.g. millilitres)" }
+  - id: c2
+    when: After choosing Metric, choose As written in the units menu
+    then: { kind: text, what: The ingredients are shown exactly as originally written again }
+  - id: s1
+    when: On a recipe whose ingredients are written in US units (e.g. "1 pint milk", "4 tablespoons butter"), choose US in the units menu
+    then: { kind: text, what: "Those ingredients are shown as written: \"1 pint\" stays \"1 pint\" (not \"2 cups\") and \"4 tablespoons\" stays \"4 tablespoons\" (not \"1/4 cup\")" }
+    note: >-
+      An edge case the description doesn't state. In the product it would be a "Please confirm" assumption the
+      developer ticked; for this eval its origin doesn't matter.
+
+expect:
+  c1: { base: breaks, buggy: holds, head: holds }
+  c2: { base: breaks, buggy: holds, head: holds }
+  s1: { base: breaks, buggy: fails, head: holds }
+
+setup:
+  - Log in as the admin persona.
+  - A recipe with parsed ingredients in standardized units, e.g. "1 pint milk", "4 tablespoons butter", "1 cup flour"
+    (create it, then use the ingredient parser). The menu only converts parsed ingredients with standardized units;
+    if the fresh install has no units, they may need seeding in Data Management.
+
+review:
+  status: draft
+  drafted_by: claude
+  notes: >-
+    Setup-heavy: needs parsed, standardized ingredients. If the agent can't get there, every commit comes out
+    unreachable, which is a finding about setup, not about the claims. Worth a boot and a manual look at the
+    units menu before the paid runs.

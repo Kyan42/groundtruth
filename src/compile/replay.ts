@@ -1,3 +1,4 @@
+import type { Persona } from "../personas.js";
 import { spawn } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { copyFileSync, createWriteStream, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -34,6 +35,7 @@ export async function runTests(opts: {
   baseUrl: string;
   headers?: Record<string, string>;
   resetApp?: () => Promise<void>;
+  personas?: Persona[];        // test accounts, passed to persona() in the scripts
   warmPaths?: string[];        // pages to request once first (dev servers compile a page on its first visit)
   timeoutSeconds?: number;
 }): Promise<{ tests: RanTest[]; checks: RanCheck[]; error?: string }> {
@@ -79,6 +81,7 @@ export async function runTests(opts: {
         ...process.env,
         GROUNDTRUTH_BASE_URL: opts.baseUrl,
         GROUNDTRUTH_HEADERS: JSON.stringify(opts.headers ?? {}),
+        GROUNDTRUTH_PERSONAS: JSON.stringify(Object.fromEntries((opts.personas ?? []).map((p) => [p.name, { username: p.username, password: p.password }]))),
         GROUNDTRUTH_RESET_URL: resetUrl,
         GROUNDTRUTH_CHECKS_FILE: checksFile,
         GROUNDTRUTH_OUTPUT: path.resolve(opts.outputDir, "results"),
@@ -164,6 +167,7 @@ export async function replayRun(opts: {
   baseUrl: string;
   headers?: Record<string, string>;
   resetApp?: () => Promise<void>;
+  personas?: Persona[];        // test accounts, passed to persona() in the scripts
   approvedBy?: string;
 }): Promise<ReplayResult> {
   const started = Date.now();
@@ -178,7 +182,7 @@ export async function replayRun(opts: {
   }
 
   const ran = await runTests({
-    dir: scripts, outputDir: path.join(runDir, "replay"), baseUrl: opts.baseUrl, headers: opts.headers, resetApp: opts.resetApp,
+    dir: scripts, outputDir: path.join(runDir, "replay"), baseUrl: opts.baseUrl, headers: opts.headers, resetApp: opts.resetApp, personas: opts.personas,
     warmPaths: entries.flatMap((e) => e.pages),
   });
 
