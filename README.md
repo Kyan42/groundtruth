@@ -79,20 +79,18 @@ ready:
 
 The schema is in [src/boot/config.ts](src/boot/config.ts). For a harder example, [evals/boot/mealie.yml](evals/boot/mealie.yml) boots [Mealie](https://github.com/mealie-recipes/mealie) (Python backend plus Nuxt frontend, system packages, and a second account created through the admin API).
 
-**Working out a config.** Write a draft, then boot any commit of a public repo with it. No App needed:
+**Writing one for your app: ask your coding agent.** Run Claude Code, Cursor or similar in your app's repo, with this repo cloned next to it and set up as in Try it, and paste:
 
-```sh
-npm run boot -- owner/repo --sha <commit> --config my-config.yml
-```
+> Write a `.groundtruth.yml` for this app. The format and an example are in `../groundtruth/README.md` and `../groundtruth/src/boot/config.ts`; `../groundtruth/evals/boot/mealie.yml` is a harder example. Base it on how this repo's docs, CI and dev setup run the app. Then test it from `../groundtruth` with `npm run boot -- <owner>/<repo> --sha <latest commit on the default branch> --config <path to your file>`, read the report, fix the config and repeat until it prints BOOTED and the screenshot shows the app working.
 
-It prints each step with its timing, the app's output when something fails, and what a real browser saw (status, console errors, failed requests, a screenshot). Things that usually need fixing:
+The boot report prints each step with its timing, the app's output when something fails, and what a real browser saw (status, console errors, failed requests, a screenshot), so the agent can fix the config on its own. The usual fixes:
 
 - The dev server must listen on `0.0.0.0`, not `localhost`, or the sandbox's tunnel can't reach it.
 - Tools beyond Node and npm (pnpm, uv, Python packages, system libraries) are installed in `setup`.
 - The `ready` path should only answer once everything is up, such as an API route the frontend proxies to the backend.
 - Docker isn't in the sandbox. It can be installed in `setup` for databases and Redis, at about 40 seconds a boot.
 
-**Not built yet: an onboarding agent.** The plan was an agent that reads a repo and drafts this file, then iterates with `npm run boot` until the app loads. [evals/research/onboarding-2026-09](evals/research/onboarding-2026-09/README.md) is the groundwork: what 15 open-source apps (Cal.com, Mastodon, Immich and others) need to boot, with a draft config for each and what the format can't express yet. The most common gaps are cheap data resets, creating several test accounts, runtimes other than Node, and app URLs that must match the tunnel's.
+For what other apps need, [evals/research/onboarding-2026-09](evals/research/onboarding-2026-09/README.md) has notes and a draft config for 15 open-source apps (Cal.com, Mastodon, Immich and others), including what the format can't express yet.
 
 ## Commands
 
