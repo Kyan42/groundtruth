@@ -2,7 +2,7 @@
 
 GitHub App that turns a PR's intent into browser-verified claims. See [docs/groundtruth-prd.md](docs/groundtruth-prd.md) and [docs/architecture.md](docs/architecture.md).
 
-> **Status:** a prototype built in September 2026, published as a demo. It runs end to end from a laptop (setup below) but has no hosted deployment, job store or sign-in; [docs/deployment.md](docs/deployment.md) lists what that would take. Not actively maintained.
+> **Status:** a prototype built in September 2026, published as a demo. It runs end to end from a laptop (setup below) but has no hosted deployment, job store or sign-in. Not actively maintained.
 
 **What works today:**
 1. A PR is opened or reopened: the App reads its intent (title, description, linked issues, commits) and posts a comment with testable claims.
