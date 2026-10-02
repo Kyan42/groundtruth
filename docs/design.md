@@ -1,6 +1,6 @@
+# Design notes
 
-Tags: [[entrepreneurship]]
-
+Early design notes (September 2026), kept as written.
 
 ### High Level:
 

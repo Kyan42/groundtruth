@@ -2,6 +2,8 @@
 
 GitHub App that turns a PR's intent into browser-verified claims. See [docs/groundtruth-prd.md](docs/groundtruth-prd.md) and [docs/architecture.md](docs/architecture.md).
 
+> **Status:** a prototype built in September 2026, published as a demo. It runs end to end from a laptop (setup below) but has no hosted deployment, job store or sign-in; [docs/deployment.md](docs/deployment.md) lists what that would take. Not actively maintained.
+
 **What works today:**
 1. A PR is opened or reopened: the App reads its intent (title, description, linked issues, commits) and posts a comment with testable claims.
 2. The developer reviews them and ticks Approve in the comment.
@@ -69,7 +71,9 @@ the run; the local dashboard stays available until the command is stopped.
 - `src/extract.ts`, `src/evidence.ts`, `src/comment.ts`: claim extraction and the PR comment
 - `src/boot/`: booting a PR's app in a Runloop sandbox from `.groundtruth.yml`
 - `src/explore/`: the exploring agent, its browser, and checks
+- `src/personas.ts`: test accounts from `.groundtruth.yml`; real passwords never reach the model or the saved trace
 - `src/testing.ts`, `src/check-report.ts`: approval → boot → agent → the Groundtruth check
 - `src/dashboard/`: the run list and run pages
 - `evals/`: extraction eval cases and runs; `evals/explore/`: exploration eval cases (drafts)
+- `evals/research/`: studies on open-source repos: bugs fixed inside real PRs, and what 15 apps need to boot in a sandbox
 - `docs/`: PRD, design, architecture, plans, future work
