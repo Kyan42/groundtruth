@@ -1,52 +1,47 @@
 # Architecture (as built)
 
 ```mermaid
-flowchart LR
+flowchart TD
   dev([Developer])
 
   subgraph gh[GitHub]
     pr[Pull request]
-    comment[Groundtruth comment<br/>claims + checkboxes<br/>+ hidden state]
-    check[Check run<br/>queued]
+    comment[Groundtruth comment<br/>claims, regression checks, checkboxes]
+    check[Check run]
+    registry[.groundtruth/tests/<br/>tests earlier PRs added]
   end
-
-  smee[smee.io channel<br/>dev only]
 
   subgraph server[Groundtruth server · Node, one process]
-    verify[Webhook middleware<br/>verify signature<br/>with webhook secret]
-    onpr[PR opened / reopened<br/>respond 200 now]
-    limiter[Extraction limiter<br/>max 4 at once]
-    job[Background job<br/>1. post/reuse placeholder<br/>2. build evidence<br/>3. extract claims<br/>4. edit comment]
-    onedit[Comment edited<br/>ignore bots · parse boxes]
-    approve[On Approve:<br/>final claim list,<br/>banner + state,<br/>startTesting]
+    extract[Extraction<br/>evidence → claims]
+    testing[Test run<br/>boot, explore, replay, regressions]
+    dash[Dashboard /runs]
   end
 
-  claude[Claude API<br/>Opus 5 · ~$0.04/PR]
-  sandbox[Browser testing<br/>not built yet]
+  claude[Claude API]
+  sandbox[Runloop sandbox<br/>the PR's app]
+  browser[Chromium on the server<br/>agent, then compiled tests]
 
   dev -- opens PR --> pr
-  dev -- ticks boxes, approves --> comment
-  pr -- webhook --> smee
-  comment -- webhook: edited --> smee
-  smee --> verify
-  verify --> onpr --> limiter --> job
-  verify --> onedit --> approve
-  job -- read PR, issues, commits --> gh
-  job -- evidence --> claude
-  claude -- claims + assumptions --> job
-  job -- post / edit --> comment
-  approve -- edit --> comment
-  approve -- create --> check
-  approve -. approved claims .-> sandbox
-  sandbox -. per-claim results .-> check
-
-  classDef future stroke-dasharray: 5 5
-  class sandbox future
+  pr -- webhook --> extract
+  extract <--> claude
+  extract -- posts --> comment
+  dev -- approves --> comment
+  comment -- webhook --> testing
+  testing -- boots --> sandbox
+  testing --> browser
+  browser -- tunnel --> sandbox
+  browser <--> claude
+  registry -- replayed --> testing
+  testing -- results --> check
+  testing -- trace, videos --> dash
+  comment -- Add these tests --> registry
 ```
 
-Calls to GitHub's API use an installation token: the app signs a token with its **private key**, and GitHub exchanges it for a short-lived token scoped to the installation. Incoming webhooks are checked against the **webhook secret**.
+Calls to GitHub's API use an installation token: the app signs a token with its **private key**, and GitHub exchanges it for a short-lived token scoped to the installation. Incoming webhooks are checked against the **webhook secret**. In development they reach the laptop through a smee.io channel.
 
-**Where state lives:** the PR comment is the only record for a live PR (claims, the developer's edits, approval). There's no database yet, and server logs are console output only.
+**A test run:** the server boots the PR's head commit in a Runloop sandbox and reaches the app through an authenticated tunnel. The browser runs on the server, not in the sandbox. The agent (Claude, with tools to read the page, act, and run assertions from a fixed menu) checks each approved claim and gives it a status: verified, failed, blocked, unreachable or error. The run is compiled into Playwright tests and replayed once on the same app. Then the regression tests earlier PRs committed under `.groundtruth/tests/` are read from the base branch's tip, so the PR can't edit them, and replayed. The sandbox shuts down after the run.
+
+**Where state lives:** the PR comment holds the claims, the developer's edits and the approval. The `runs/` folder holds each run's trace and videos, read by the dashboard. Accepted tests live in the repo under `.groundtruth/`. There's no database, jobs are in memory, and server logs are console output only.
 
 ## Offline: evals
 

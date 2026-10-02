@@ -5,10 +5,11 @@ GitHub App that turns a PR's intent into browser-verified claims. See [docs/grou
 > **Status:** a prototype built in September 2026, published as a demo. It runs end to end from a laptop (setup below) but has no hosted deployment, job store or sign-in. Not actively maintained.
 
 **What works today:**
-1. A PR is opened or reopened: the App reads its intent (title, description, linked issues, commits) and posts a comment with testable claims.
-2. The developer reviews them and ticks Approve in the comment.
-3. The App boots the PR's app in a Runloop sandbox (from the repo's `.groundtruth.yml`), an agent checks each claim in a real browser, and the results go on a "Groundtruth" check.
-4. Each run (trace and a video per journey) is shown on a local dashboard at `http://localhost:3000/runs`.
+1. A PR is opened, reopened or marked ready for review (drafts are skipped): the App reads its intent (title, description, linked issues, commits) and posts a comment with testable claims, plus the tests earlier PRs added as regression checks.
+2. The developer reviews them, unticks or rewords any, and ticks Approve in the comment.
+3. The App boots the PR's app in a Runloop sandbox (from the repo's `.groundtruth.yml`), an agent checks each claim in a real browser, and the run is compiled into Playwright tests and replayed once. The regression checks are replayed too, and the results go on a "Groundtruth" check.
+4. When every claim is verified and the replay passes, the comment offers "Add these tests to this PR". Ticking it commits them under `.groundtruth/tests/`, where later PRs pick them up as regression checks.
+5. Each run (trace, and a video per journey) is shown on a local dashboard at `http://localhost:3000/runs`.
 
 ## What you need
 
@@ -29,7 +30,7 @@ Use your own App, smee channel and keys rather than sharing someone else's. GitH
 3. Create a smee channel at https://smee.io/new.
 4. Register a GitHub App (GitHub → Settings → Developer settings → GitHub Apps → New):
    - **Webhook URL**: your smee channel URL. **Webhook secret**: any random string.
-   - **Repository permissions**: Pull requests: Read & write · Issues: Read-only · Checks: Read & write · Contents: Read-only · Metadata: Read-only
+   - **Repository permissions**: Pull requests: Read & write · Issues: Read-only · Checks: Read & write · Contents: Read & write (to commit accepted tests to the PR branch) · Metadata: Read-only
    - **Subscribe to events**: Pull request · Issue comment
    - Generate a private key (downloads a `.pem`; keep it out of the repo, e.g. next to it).
    - Install the App on your test repo.
@@ -67,13 +68,16 @@ the run; the local dashboard stays available until the command is stopped.
 ## Layout
 
 - `src/index.ts`: HTTP server: webhooks, smee forwarding, dashboard routes
-- `src/app.ts`: webhook handlers (PR opened → claims comment; comment edited → approval)
-- `src/extract.ts`, `src/evidence.ts`, `src/comment.ts`: claim extraction and the PR comment
+- `src/app.ts`: webhook handlers (PR opened → claims comment; comment edited → approval, or adding the tests)
+- `src/extract.ts`, `src/evidence.ts`, `src/comment.ts`, `src/pr-comment.ts`: claim extraction and the PR comment
 - `src/boot/`: booting a PR's app in a Runloop sandbox from `.groundtruth.yml`
 - `src/explore/`: the exploring agent, its browser, and checks
 - `src/personas.ts`: test accounts from `.groundtruth.yml`; real passwords never reach the model or the saved trace
-- `src/testing.ts`, `src/check-report.ts`: approval → boot → agent → the Groundtruth check
+- `src/compile/`: turning a run into Playwright tests, and replaying them
+- `src/registry.ts`, `src/regressions.ts`: the tests committed under `.groundtruth/`, and replaying them on later PRs
+- `src/testing.ts`, `src/check-report.ts`: approval → boot → agent → replay → regressions → the Groundtruth check
 - `src/dashboard/`: the run list and run pages
+- `src/cli/`: the commands above, plus the eval tooling
 - `evals/`: extraction eval cases and runs; `evals/explore/`: exploration eval cases (drafts)
 - `evals/research/`: studies on open-source repos: bugs fixed inside real PRs, and what 15 apps need to boot in a sandbox
-- `docs/`: PRD, design, architecture, plans, future work
+- `docs/`: the PRD, early design notes, architecture, the exploration agent's plan, and how eval PRs were chosen
