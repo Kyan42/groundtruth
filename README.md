@@ -11,58 +11,101 @@ GitHub App that turns a PR's intent into browser-verified claims. See [docs/grou
 4. When every claim is verified and the replay passes, the comment offers "Add these tests to this PR". Ticking it commits them under `.groundtruth/tests/`, where later PRs pick them up as regression checks.
 5. Each run (trace, and a video per journey) is shown on a local dashboard at `http://localhost:3000/runs`.
 
-## What you need
+## Try it
 
-| | For | Where |
-|---|---|---|
-| Node 22+ and git | everything | |
-| An Anthropic API key | claim extraction, the agent, evals | console.anthropic.com |
-| A Runloop API key | booting PR apps in sandboxes | runloop.ai (the trial allows 3 sandboxes at once) |
-| Your own GitHub App + a test repo | the webhook flow and `npm run explore` | see below |
-| A smee.io channel | delivering webhooks to your machine | smee.io/new |
+You need Node 22+, git, an [Anthropic API key](https://console.anthropic.com) and a [Runloop API key](https://runloop.ai) (Runloop runs each PR's app in a sandbox; its trial allows 3 at once).
 
-Use your own App, smee channel and keys rather than sharing someone else's. GitHub sends each webhook to one URL, so two servers on the same channel would both handle every event (duplicate comments, double the cost). And the App's private key gives full access to every repo it's installed on.
+```sh
+git clone https://github.com/Kyan42/groundtruth.git && cd groundtruth
+npm install
+npx playwright install chromium
+cp .env.example .env      # fill in ANTHROPIC_API_KEY and RUNLOOP_API_KEY
+```
 
-## Setup
+### On any public PR, no GitHub App
 
-1. `npm install`
-2. `npx playwright install chromium` (the browser used for boot checks and the agent)
-3. Create a smee channel at https://smee.io/new.
-4. Register a GitHub App (GitHub → Settings → Developer settings → GitHub Apps → New):
-   - **Webhook URL**: your smee channel URL. **Webhook secret**: any random string.
-   - **Repository permissions**: Pull requests: Read & write · Issues: Read-only · Checks: Read & write · Contents: Read & write (to commit accepted tests to the PR branch) · Metadata: Read-only
-   - **Subscribe to events**: Pull request · Issue comment
-   - Generate a private key (downloads a `.pem`; keep it out of the repo, e.g. next to it).
-   - Install the App on your test repo.
-5. A test repo: fork [Kyan42/cbay](https://github.com/Kyan42/cbay) (a small Next.js shop with a `.groundtruth.yml` on main), or add a `.groundtruth.yml` to your own app (format: `src/boot/config.ts`).
-6. Copy `.env.example` to `.env` and fill it in.
-7. `npm run dev`. The server listens on `PORT`, forwards your smee channel to `/api/github/webhooks`, and serves the dashboard at `/runs`.
-8. Open a PR on the test repo. The App comments with claims; tick Approve and watch the check and the dashboard.
+```sh
+npm run local -- Kyan42/cbay#3
+```
+
+This reads the PR (title, description, commits), extracts claims, boots the PR's head commit in a sandbox, has the agent check each claim in a browser, compiles and replays the tests, and replays any regression tests the repo already has. It only reads from GitHub: no comments, checks or commits. Results open on the dashboard at `http://localhost:3000/runs`. [cbay](https://github.com/Kyan42/cbay) is a small demo shop that already has a boot config, so it works as is. To try another repo, it needs a `.groundtruth.yml` on its default branch (next section).
+
+### As a GitHub App (the full flow)
+
+The App adds what local mode can't: the claims comment, approval by checkbox, the check on the PR, and committing accepted tests. Set it up against a repo you own, such as a fork of cbay.
+
+1. Create a webhook channel at [smee.io/new](https://smee.io/new). It forwards GitHub's webhooks to your machine.
+2. Register a GitHub App (Settings → Developer settings → GitHub Apps → New):
+   - **Webhook URL**: the smee channel. **Webhook secret**: any random string.
+   - **Repository permissions**: Pull requests: Read & write · Checks: Read & write · Contents: Read & write (to commit accepted tests) · Issues: Read-only · Metadata: Read-only
+   - **Events**: Pull request · Issue comment
+   - Generate a private key and save the `.pem` outside the repo.
+3. Install the App on your repo, and fill in the GitHub and smee lines of `.env`.
+4. `npm run dev`, then open a PR. The App comments with claims; tick Approve and watch the check and the dashboard.
+
+Each developer should use their own App and smee channel: two servers on one channel both handle every event.
+
+## Booting an app: `.groundtruth.yml`
+
+Each test run starts from an empty Runloop sandbox (Debian with Node) and boots the PR's commit with plain shell commands from `.groundtruth.yml`. The file is read from the default branch, never from the PR, so a PR can't change what runs. cbay's:
+
+```yaml
+version: 1
+runtime:
+  node: "22"
+workdir: app
+install: npm ci
+setup:
+  - npm run seed -- --reset
+start: npm run dev -- --hostname 0.0.0.0 --port 3000
+reset: npm run seed -- --reset
+port: 3000
+ready:
+  path: /api/health
+  timeout_seconds: 180
+```
+
+| Field | What it does |
+|---|---|
+| `runtime.node` | Node version the sandbox must have (checked, not installed) |
+| `workdir` | Folder the commands run in |
+| `env` | Environment variables for every command |
+| `install`, `setup` | Run once, in order: dependencies, system packages, migrations, seed data |
+| `start` | Starts the app and keeps running. Two processes: start the first with `&` |
+| `port`, `ready` | The port the browser loads, and a path polled until it answers 200 |
+| `reset` | Optional. Restores the starting data while the app runs, so each journey starts clean |
+| `personas` | Optional. Test accounts the agent can log in as. A password is written out, or `{ secret: NAME }` to read it from Groundtruth's `.env` |
+| `after_ready` | Optional. Commands run once the app answers and after every reset, such as creating persona accounts through the app's API |
+
+The schema is in [src/boot/config.ts](src/boot/config.ts). For a harder example, [evals/boot/mealie.yml](evals/boot/mealie.yml) boots [Mealie](https://github.com/mealie-recipes/mealie) (Python backend plus Nuxt frontend, system packages, and a second account created through the admin API).
+
+**Working out a config.** Write a draft, then boot any commit of a public repo with it. No App needed:
+
+```sh
+npm run boot -- owner/repo --sha <commit> --config my-config.yml
+```
+
+It prints each step with its timing, the app's output when something fails, and what a real browser saw (status, console errors, failed requests, a screenshot). Things that usually need fixing:
+
+- The dev server must listen on `0.0.0.0`, not `localhost`, or the sandbox's tunnel can't reach it.
+- Tools beyond Node and npm (pnpm, uv, Python packages, system libraries) are installed in `setup`.
+- The `ready` path should only answer once everything is up, such as an API route the frontend proxies to the backend.
+- Docker isn't in the sandbox. It can be installed in `setup` for databases and Redis, at about 40 seconds a boot.
+
+**Not built yet: an onboarding agent.** The plan was an agent that reads a repo and drafts this file, then iterates with `npm run boot` until the app loads. [evals/research/onboarding-2026-09](evals/research/onboarding-2026-09/README.md) is the groundwork: what 15 open-source apps (Cal.com, Mastodon, Immich and others) need to boot, with a draft config for each and what the format can't express yet. The most common gaps are cheap data resets, creating several test accounts, runtimes other than Node, and app URLs that must match the tunnel's.
 
 ## Commands
 
-For a public PR without a GitHub App, set only `ANTHROPIC_API_KEY` and `RUNLOOP_API_KEY` in `.env`, then run:
-
-```sh
-PORT=2003 node --import tsx --env-file=.env src/cli/local.ts 'Kyan42/cbay#3'
-```
-
-This serves the local dashboard, extracts claims from the current PR title, body, and commit messages,
-boots the exact head commit in Runloop, runs browser verification and compiled replay, and replays the
-saved regression tests from the pinned current base-branch tip. It uses anonymous GitHub reads and
-cloning; it never posts comments, checks, or commits. Linked issues are not fetched in this mode.
-Running the command authorizes testing the grounded extracted claims; assumptions are saved for
-review but excluded. Evidence and diagnostics are saved under `runs/`. The sandbox shuts down after
-the run; the local dashboard stays available until the command is stopped.
-
 | Command | Needs | What it does |
 |---|---|---|
+| `npm run local -- owner/repo#N` | Anthropic + Runloop | the whole pipeline on a public PR, read-only, with the dashboard |
+| `npm run boot -- owner/repo --sha <commit> --config <file>` | Anthropic + Runloop | boot any public commit with a local config and check it in a browser |
 | `npm run dev` | everything | the App server, webhooks and dashboard (restarts on code changes) |
-| `npm run evals -- --runs 1` | Anthropic key only | claim-extraction evals on the frozen cases in `evals/` (about $0.45 per repeat; `--runs 3` is the usual) |
 | `npm run extract -- owner/repo#N` | App + Anthropic | extract claims for a PR without commenting |
-| `npm run boot -- owner/repo#N` | App + Runloop | boot a PR's app in a sandbox and check it loads |
-| `npm run explore -- owner/repo#N` | App + Runloop + Anthropic | boot, run the agent on the PR's claims (printing every step), then compile and replay the Playwright script; the run shows on the dashboard |
-| `npm run compile -- runs/<run>` | nothing | compile a saved run into Playwright tests in `<run>/scripts/` (replay them with `GROUNDTRUTH_BASE_URL=… GROUNDTRUTH_RESET="…" npx playwright test -c <run>/scripts/playwright.config.ts`) |
+| `npm run boot -- owner/repo#N` | App + Anthropic + Runloop | boot a PR using its repo's `.groundtruth.yml` |
+| `npm run explore -- owner/repo#N` | App + Anthropic + Runloop | boot, run the agent on the PR's claims (printing every step), then compile and replay |
+| `npm run compile -- runs/<run>` | nothing | compile a saved run into Playwright tests in `<run>/scripts/` |
+| `npm run evals -- --runs 1` | Anthropic | claim-extraction evals on the frozen cases in `evals/` (about $0.45 a repeat) |
 | `npm run typecheck` | | |
 
 ## Layout

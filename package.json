@@ -16,7 +16,8 @@
     "typecheck": "tsc --noEmit",
     "boot": "tsx --env-file=.env src/cli/boot.ts",
     "explore": "tsx --env-file=.env src/cli/explore.ts",
-    "compile": "tsx src/cli/compile.ts"
+    "compile": "tsx src/cli/compile.ts",
+    "local": "tsx --env-file=.env src/cli/local.ts"
   },
   "engines": {
     "node": ">=22"
