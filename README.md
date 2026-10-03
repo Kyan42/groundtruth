@@ -2,15 +2,6 @@
 
 GitHub App that turns a PR's intent into browser-verified claims. See [docs/groundtruth-prd.md](docs/groundtruth-prd.md) and [docs/architecture.md](docs/architecture.md).
 
-> **Status:** a prototype built in September 2026, published as a demo. It runs end to end from a laptop (setup below) but has no hosted deployment, job store or sign-in. Not actively maintained.
-
-**What works today:**
-1. A PR is opened, reopened or marked ready for review (drafts are skipped): the App reads its intent (title, description, linked issues, commits) and posts a comment with testable claims, plus the tests earlier PRs added as regression checks.
-2. The developer reviews them, unticks or rewords any, and ticks Approve in the comment.
-3. The App boots the PR's app in a Runloop sandbox (from the repo's `.groundtruth.yml`), an agent checks each claim in a real browser, and the run is compiled into Playwright tests and replayed once. The regression checks are replayed too, and the results go on a "Groundtruth" check.
-4. When every claim is verified and the replay passes, the comment offers "Add these tests to this PR". Ticking it commits them under `.groundtruth/tests/`, where later PRs pick them up as regression checks.
-5. Each run (trace, and a video per journey) is shown on a local dashboard at `http://localhost:3000/runs`.
-
 ## Try it
 
 You need Node 22+, git, an [Anthropic API key](https://console.anthropic.com) and a [Runloop API key](https://runloop.ai) (Runloop runs each PR's app in a sandbox; its trial allows 3 at once).
