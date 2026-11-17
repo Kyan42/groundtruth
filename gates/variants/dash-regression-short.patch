@@ -1,0 +1,36 @@
+--- a/js/run.js
++++ b/js/run.js
+@@ -12,7 +12,13 @@
+ 
+ // ---------- choosing what to show ----------
+ 
+-const props = () => state.doc.properties || [];
++// New tests first, then the reruns, each in the run's order.
++function props() {
++  const all = state.doc.properties || [];
++  const out = all.filter((p) => p.group !== "regression");
++  for (let i = 0; i < all.length - 1; i++) if (all[i].group === "regression") out.push(all[i]);
++  return out;
++}
+ const findProp = (id) => props().find((p) => p.id === id) || null;
+ 
+ function defaultProperty() {
+@@ -131,6 +137,7 @@
+   const pc = totals.properties || {};
+   const cc = totals.cases || {};
+   const nCases = Object.values(cc).reduce((a, b) => a + (Number(b) || 0), 0);
++  const cases = all.flatMap((p) => p.cases || []);
+   const ra = d.ran_against || {};
+   const kv = (k, v) => h("div", { class: "kv" }, h("span", null, k), h("b", null, v));
+   const side = h("aside", { class: "side" },
+@@ -142,8 +149,8 @@
+       h("h2", null, "This run"),
+       kv("App", `${d.project || "Unnamed app"} · ${d.feature || "unnamed feature"}`),
+       kv("Commit", ra.commit ? `${ra.commit}${ra.uncommitted_changes ? ", with uncommitted changes" : ""}` : "unknown"),
+-      kv("Properties", `${pc.holds || 0} of ${all.length} hold`),
+-      kv("Cases", `${cc.holds || 0} of ${nCases} held`),
++      kv("Properties", `${all.filter((p) => p.verdict === "holds").length} of ${all.length} hold`),
++      kv("Cases", `${cases.filter((c) => c.outcome === "holds").length} of ${cases.length} held`),
+       kv("Ran", when(d.ran_at))));
+   state.els.side = side;
+   return side;

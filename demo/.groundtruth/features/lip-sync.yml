@@ -1,0 +1,14 @@
+# Properties: general rules, one plain sentence each. Nothing here says how to check them or which cases to try.
+feature: lip-sync
+goal: >-
+  You want the avatar to lip-sync to typed text, and the whole render path has to stay on the CPU,
+  because GPU time is what makes this too expensive to run at scale.
+properties:
+  - id: g1
+    statement: Rendering speech never opens a GPU device in any app process.
+  - id: g2
+    statement: >-
+      Speaking a text of up to 500 characters ends with the status "Done: N frames", where N equals the number
+      of non-space characters typed.
+  - id: g3
+    statement: Every place that turns letters into mouth shapes uses the existing table in visemes.py; no second letter-to-shape mapping is defined anywhere.

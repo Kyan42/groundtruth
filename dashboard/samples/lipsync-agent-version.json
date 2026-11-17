@@ -1,0 +1,2221 @@
+{
+ "schema": 1,
+ "project": "lip-sync-demo",
+ "feature": "lip-sync",
+ "goal": "You want the avatar to lip-sync to typed text, and the whole render path has to stay on the CPU, because GPU time is what makes this too expensive to run at scale.",
+ "run": "20261110-195545",
+ "ran_at": "2026-11-10T19:55:45",
+ "ran_against": {
+  "url": "http://127.0.0.1:8765",
+  "commit": "bc898bc",
+  "uncommitted_changes": true,
+  "platform": "macOS-27.2-arm64-arm-64bit",
+  "process_started": "Tue Nov 10 19:55:45 2026",
+  "registered_at": "2026-11-10T19:55:45",
+  "could_measure": true,
+  "could_read_code": true,
+  "had_reset": false
+ },
+ "verifier": {
+  "version": "3",
+  "model": "claude-sonnet-5-5"
+ },
+ "error": null,
+ "aborted": false,
+ "totals": {
+  "properties": {
+   "holds": 2,
+   "fails": 1,
+   "needs_decision": 0,
+   "cant_tell": 0,
+   "planned": 0,
+   "not_run": 0
+  },
+  "cases": {
+   "holds": 11,
+   "breaks": 6,
+   "declined": 0,
+   "outside": 0,
+   "nothing_there": 0,
+   "cant_run": 0,
+   "planned": 0
+  },
+  "seconds": 504.2,
+  "cost_usd": 0.8489
+ },
+ "properties": [
+  {
+   "id": "g1",
+   "statement": "Rendering speech never opens a GPU device in any app process.",
+   "example": "",
+   "group": "new",
+   "verdict": "fails",
+   "kind": "measurement",
+   "searched": true,
+   "read_as": {
+    "applies_to": "speech rendering (lip-sync/viseme frame rendering) in any app process",
+    "action": "opening a GPU device (Metal) while rendering speech",
+    "compares": "GPU device opens during rendering vs. none allowed (reference: zero GPU devices opened)"
+   },
+   "how_found": "Plain code searched the codebase for MTLCreateSystemDefaultDevice, Metal, \\b_device\\b (GPU device handle opened (Metal default device)), then for the name of each function that changes it, then for the address of each route that reaches it, and followed every file that mentions one up to the pages. 12 search hits were each labelled by their own model call. This gave 1 way(s) in through the pages and 1 route(s); 1 file(s) were excluded because no page shows them.",
+   "not_covered": "Other HTTP methods on /api/render (only POST is handled; others return an error without rendering). Further value variants beyond empty/long/normal text were omitted as they share the same device-selection logic.",
+   "no_plan_because": null,
+   "ways_in": [
+    {
+     "id": "e1",
+     "door": "browser",
+     "status": "found",
+     "where": "Home page (/): the 'Speak' button next to the 'What should the avatar say?' textbox (prefilled 'Hello there'); it posts the text to the render endpoint.",
+     "page": "/",
+     "route": "ANY /api/render",
+     "file": "static/index.html"
+    },
+    {
+     "id": "a1",
+     "door": "api",
+     "status": "found",
+     "where": "direct call to ANY /api/render",
+     "page": null,
+     "route": "ANY /api/render",
+     "file": "app.py"
+    }
+   ],
+   "left_out": [
+    {
+     "file": "render.py",
+     "why": "mentions render at line 11, labelled mention",
+     "because": "it is not shown on any page"
+    }
+   ],
+   "search_notes": [],
+   "counts": {
+    "holds": 0,
+    "breaks": 6,
+    "declined": 0,
+    "outside": 0,
+    "nothing_there": 0,
+    "cant_run": 0,
+    "planned": 0
+   },
+   "seconds": 143.8,
+   "cost_usd": 0.2876,
+   "cases": [
+    {
+     "id": "c1",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Open the home page. Leave the textbox as 'Hello there' and click Speak. Wait for the status to finish and the avatar face to animate. While this runs, measure how many GPU (Metal) devices the app's processes open.",
+     "stands_for": "Basic UI path: rendering speech via the Speak button opens zero GPU devices.",
+     "outcome": "breaks",
+     "observed": "Before: gpu_check said pid 11260 \"GPU driver not loaded\". Clicked Speak with 'Hello there'; status became \"Done: 10 frames\". After: gpu_check said pid 11260 \"GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU\". The process is the same, pid 11260, and it opened a Metal GPU device during rendering. The property allows zero.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 17.7,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "g1/c1/clip-1.webm",
+       "started": 1794369489.27
+      }
+     ],
+     "shots": [],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "measure the app's process",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "check whether the app's process has opened a GPU",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "list the app's network connections",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.06,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.08,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.0,
+       "kind": "action",
+       "words": "click button \"Speak\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 6.01,
+       "kind": "action",
+       "words": "wait 4 seconds",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 7.12,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 7.65,
+       "kind": "reading",
+       "words": "check whether the app's process has opened a GPU",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 7.67,
+       "kind": "reading",
+       "words": "measure the app's process",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [
+      {
+       "at": null,
+       "what": "measure the app's process",
+       "text": "CPU 0.0%, memory 21504 KB"
+      },
+      {
+       "at": null,
+       "what": "check whether the app's process has opened a GPU",
+       "text": "GPU driver not loaded"
+      },
+      {
+       "at": null,
+       "what": "list the app's network connections",
+       "text": "1 open connection(s)"
+      },
+      {
+       "at": null,
+       "what": "measure the app's process",
+       "text": "CPU 0.0%, memory 21504 KB"
+      },
+      {
+       "at": null,
+       "what": "check whether the app's process has opened a GPU",
+       "text": "GPU driver not loaded"
+      },
+      {
+       "at": null,
+       "what": "list the app's network connections",
+       "text": "1 open connection(s)"
+      },
+      {
+       "at": 7.65,
+       "what": "check whether the app's process has opened a GPU",
+       "text": "GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU"
+      },
+      {
+       "at": 7.67,
+       "what": "measure the app's process",
+       "text": "CPU 0.0%, memory 26032 KB"
+      }
+     ],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c2",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "On the home page, clear the textbox and click Speak with empty text. Measure GPU device opens in all app processes.",
+     "stands_for": "Edge: empty text, no frames.",
+     "outcome": "breaks",
+     "observed": "Cleared the textbox (0 characters) and clicked Speak. After the click, gpu_check reported \"pid 11260: GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU\". process_info showed only pid 11260 (Python app.py 8765). The gpu_check line was identical before my action, so I can't tell whether this click or earlier activity opened the device. The property requires zero GPU devices in any app process, and the app process does have the GPU driver mapped. Screenshot shot-1.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 17.2,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "g1/c2/clip-1.webm",
+       "started": 1794369508.41
+      }
+     ],
+     "shots": [
+      {
+       "id": "shot-1",
+       "file": "g1/c2/shot-1.png",
+       "label": "after empty speak",
+       "at": 6.01,
+       "cited": true
+      }
+     ],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "measure the app's process",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "check whether the app's process has opened a GPU",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "list the app's network connections",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.05,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.07,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 1.79,
+       "kind": "action",
+       "words": "type \"\" into textarea \"Hello there\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.39,
+       "kind": "action",
+       "words": "click button \"Speak\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 5.51,
+       "kind": "action",
+       "words": "wait 2 seconds",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 5.96,
+       "kind": "reading",
+       "words": "check whether the app's process has opened a GPU",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 5.98,
+       "kind": "reading",
+       "words": "measure the app's process",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 6.01,
+       "kind": "look",
+       "words": "take a screenshot: after empty speak",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [
+      {
+       "at": null,
+       "what": "measure the app's process",
+       "text": "CPU 0.0%, memory 26048 KB"
+      },
+      {
+       "at": null,
+       "what": "check whether the app's process has opened a GPU",
+       "text": "GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU"
+      },
+      {
+       "at": null,
+       "what": "list the app's network connections",
+       "text": "1 open connection(s)"
+      },
+      {
+       "at": null,
+       "what": "measure the app's process",
+       "text": "CPU 0.0%, memory 26048 KB"
+      },
+      {
+       "at": null,
+       "what": "check whether the app's process has opened a GPU",
+       "text": "GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU"
+      },
+      {
+       "at": null,
+       "what": "list the app's network connections",
+       "text": "1 open connection(s)"
+      },
+      {
+       "at": 5.96,
+       "what": "check whether the app's process has opened a GPU",
+       "text": "GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU"
+      },
+      {
+       "at": 5.98,
+       "what": "measure the app's process",
+       "text": "CPU 0.0%, memory 26016 KB"
+      }
+     ],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c3",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "On the home page, enter a very long text (over 500 characters) and click Speak. Measure GPU device opens in all app processes.",
+     "stands_for": "Largest input, heavy rendering.",
+     "outcome": "breaks",
+     "observed": "Entered a 624-character text and clicked Speak. The status changed to \"Speaking (408 frames)\", so rendering happened. After that, gpu_check showed pid 11260: GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU. That is the only app process; process_info listed just the one. The same GPU libraries were already loaded in the measurement taken before the case, so I can't tell whether this render opened them or an earlier one did. The driver was still mapped in the app process after the render, and the property allows zero GPU device opens.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 19.1,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "g1/c3/clip-1.webm",
+       "started": 1794369526.13
+      }
+     ],
+     "shots": [],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "measure the app's process",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "check whether the app's process has opened a GPU",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "list the app's network connections",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.05,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.07,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.71,
+       "kind": "action",
+       "words": "type \"The quick brown fox jumps over the lazy dog while…\" into textarea \"Hello there\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.32,
+       "kind": "action",
+       "words": "click button \"Speak\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 7.68,
+       "kind": "action",
+       "words": "wait 3 seconds",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 7.69,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 8.16,
+       "kind": "reading",
+       "words": "check whether the app's process has opened a GPU",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 8.18,
+       "kind": "reading",
+       "words": "measure the app's process",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [
+      {
+       "at": null,
+       "what": "measure the app's process",
+       "text": "CPU 0.0%, memory 26016 KB"
+      },
+      {
+       "at": null,
+       "what": "check whether the app's process has opened a GPU",
+       "text": "GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU"
+      },
+      {
+       "at": null,
+       "what": "list the app's network connections",
+       "text": "1 open connection(s)"
+      },
+      {
+       "at": null,
+       "what": "measure the app's process",
+       "text": "CPU 0.0%, memory 26016 KB"
+      },
+      {
+       "at": null,
+       "what": "check whether the app's process has opened a GPU",
+       "text": "GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU"
+      },
+      {
+       "at": null,
+       "what": "list the app's network connections",
+       "text": "1 open connection(s)"
+      },
+      {
+       "at": 8.16,
+       "what": "check whether the app's process has opened a GPU",
+       "text": "GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU"
+      },
+      {
+       "at": 8.18,
+       "what": "measure the app's process",
+       "text": "CPU 0.0%, memory 26144 KB"
+      }
+     ],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c4",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "On the home page click Speak three times in a row with different texts (e.g. 'Hi', 'Good morning', '!!! ???'). Measure total GPU device opens across all app processes after each render.",
+     "stands_for": "Repeated renders: a device opened once and cached still counts; check first and later renders.",
+     "outcome": "breaks",
+     "observed": "Before the case: gpu_check showed pid 11260 with GPU driver LOADED (AGXMetalG18G, AGXMetalG19P, IOGPU). After Speak with 'Hi', after 'Good morning' and after '!!! ???', gpu_check still showed pid 11260 with the same three drivers loaded. process_info showed only the single process 11260 (app.py) and net_connections was not re-run. The gpu_check output is a cumulative \"ever opened\" flag, so it cannot show which action opened the device. The property allows zero GPU opens, and the app's only process has the GPU driver loaded at every measurement, including after the renders. A GPU device was therefore opened by the app process, and it stayed open through the three renders. Screenshot: shot-1.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 28.3,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "g1/c4/clip-1.webm",
+       "started": 1794369546.33
+      }
+     ],
+     "shots": [
+      {
+       "id": "shot-1",
+       "file": "g1/c4/shot-1.png",
+       "label": "after third",
+       "at": 16.3,
+       "cited": true
+      }
+     ],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "measure the app's process",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "check whether the app's process has opened a GPU",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "list the app's network connections",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.05,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.07,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 1.77,
+       "kind": "action",
+       "words": "type \"Hi\" into textarea \"Hello there\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.39,
+       "kind": "action",
+       "words": "click button \"Speak\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 5.4,
+       "kind": "action",
+       "words": "wait 3 seconds",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 5.86,
+       "kind": "reading",
+       "words": "check whether the app's process has opened a GPU",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 5.88,
+       "kind": "reading",
+       "words": "measure the app's process",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 7.85,
+       "kind": "action",
+       "words": "type \"Good morning\" into textarea \"Hi\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 8.45,
+       "kind": "action",
+       "words": "click button \"Speak\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 11.46,
+       "kind": "action",
+       "words": "wait 3 seconds",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 11.96,
+       "kind": "reading",
+       "words": "check whether the app's process has opened a GPU",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 12.24,
+       "kind": "action",
+       "words": "type \"!!! ???\" into textarea \"Good morning\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 12.84,
+       "kind": "action",
+       "words": "click button \"Speak\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 15.84,
+       "kind": "action",
+       "words": "wait 3 seconds",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 16.29,
+       "kind": "reading",
+       "words": "check whether the app's process has opened a GPU",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 16.3,
+       "kind": "look",
+       "words": "take a screenshot: after third",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [
+      {
+       "at": null,
+       "what": "measure the app's process",
+       "text": "CPU 0.0%, memory 26144 KB"
+      },
+      {
+       "at": null,
+       "what": "check whether the app's process has opened a GPU",
+       "text": "GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU"
+      },
+      {
+       "at": null,
+       "what": "list the app's network connections",
+       "text": "1 open connection(s)"
+      },
+      {
+       "at": null,
+       "what": "measure the app's process",
+       "text": "CPU 0.0%, memory 26144 KB"
+      },
+      {
+       "at": null,
+       "what": "check whether the app's process has opened a GPU",
+       "text": "GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU"
+      },
+      {
+       "at": null,
+       "what": "list the app's network connections",
+       "text": "1 open connection(s)"
+      },
+      {
+       "at": 5.86,
+       "what": "check whether the app's process has opened a GPU",
+       "text": "GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU"
+      },
+      {
+       "at": 5.88,
+       "what": "measure the app's process",
+       "text": "CPU 0.0%, memory 26144 KB"
+      },
+      {
+       "at": 11.96,
+       "what": "check whether the app's process has opened a GPU",
+       "text": "GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU"
+      },
+      {
+       "at": 16.29,
+       "what": "check whether the app's process has opened a GPU",
+       "text": "GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU"
+      }
+     ],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c5",
+     "way_in": "a1",
+     "door": "api",
+     "what": "Send a POST with JSON body {\"text\":\"Hello there\"} directly to /api/render. Measure GPU device opens in all app processes during the request.",
+     "stands_for": "Direct API path to rendering.",
+     "outcome": "breaks",
+     "observed": "Before: gpu_check showed pid 11260 GPU driver LOADED (AGXMetalG18G, AGXMetalG19P, IOGPU). POST /api/render {\"text\":\"Hello there\"} returned 200 with 10 frames, checksum 607611. After: gpu_check again showed pid 11260 GPU driver LOADED (same three libraries). process_info showed one process, 11260, with no children. The check is sticky, so it was already loaded before my request and I can't show that this request caused the open. The property requires zero GPU devices opened in any app process, and the post-request measurement shows the only app process has the GPU driver loaded.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 12.4,
+     "attempts": 1,
+     "clips": [],
+     "shots": [],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "measure the app's process",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "check whether the app's process has opened a GPU",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "list the app's network connections",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "request",
+       "words": "POST /api/render",
+       "ok": true,
+       "status": 200
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "check whether the app's process has opened a GPU",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "measure the app's process",
+       "ok": true
+      }
+     ],
+     "requests": [
+      {
+       "method": "POST",
+       "path": "/api/render",
+       "body": "{\"text\":\"Hello there\"}",
+       "status": 200,
+       "response": "{\"frames\": [\"rest\", \"wide\", \"tongue\", \"tongue\", \"round\", \"tongue\", \"rest\", \"wide\", \"rest\", \"wide\"], \"frame_ms\": 80, \"count\": 10, \"checksum\": 607611}",
+       "at": null
+      }
+     ],
+     "readings": [
+      {
+       "at": null,
+       "what": "measure the app's process",
+       "text": "CPU 0.0%, memory 26144 KB"
+      },
+      {
+       "at": null,
+       "what": "check whether the app's process has opened a GPU",
+       "text": "GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU"
+      },
+      {
+       "at": null,
+       "what": "list the app's network connections",
+       "text": "1 open connection(s)"
+      },
+      {
+       "at": null,
+       "what": "measure the app's process",
+       "text": "CPU 0.0%, memory 26144 KB"
+      },
+      {
+       "at": null,
+       "what": "check whether the app's process has opened a GPU",
+       "text": "GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU"
+      },
+      {
+       "at": null,
+       "what": "list the app's network connections",
+       "text": "1 open connection(s)"
+      },
+      {
+       "at": null,
+       "what": "check whether the app's process has opened a GPU",
+       "text": "GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU"
+      },
+      {
+       "at": null,
+       "what": "measure the app's process",
+       "text": "CPU 0.0%, memory 26144 KB"
+      }
+     ],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c6",
+     "way_in": "a1",
+     "door": "api",
+     "what": "Send POST to /api/render with an empty body, and another with {\"text\":\"\"}. Measure GPU device opens during each.",
+     "stands_for": "Edge: missing or empty text via API.",
+     "outcome": "breaks",
+     "observed": "Both POST /api/render calls (empty body, and {\"text\":\"\"}) returned 200 with {\"frames\": [], \"frame_ms\": 80, \"count\": 0, \"checksum\": 0}. gpu_check after both: \"pid 11260: GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU\". The same line was already present before my requests, so I can't attribute the open to these two calls. The check is cumulative, and the property allows zero GPU devices in any app process. process_info after: only pid 11260, with memory 26144 before and 26160 after.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 13.7,
+     "attempts": 1,
+     "clips": [],
+     "shots": [],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "measure the app's process",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "check whether the app's process has opened a GPU",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "list the app's network connections",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "request",
+       "words": "POST /api/render",
+       "ok": true,
+       "status": 200
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "request",
+       "words": "POST /api/render",
+       "ok": true,
+       "status": 200
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "check whether the app's process has opened a GPU",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "measure the app's process",
+       "ok": true
+      }
+     ],
+     "requests": [
+      {
+       "method": "POST",
+       "path": "/api/render",
+       "body": "",
+       "status": 200,
+       "response": "{\"frames\": [], \"frame_ms\": 80, \"count\": 0, \"checksum\": 0}",
+       "at": null
+      },
+      {
+       "method": "POST",
+       "path": "/api/render",
+       "body": "{\"text\":\"\"}",
+       "status": 200,
+       "response": "{\"frames\": [], \"frame_ms\": 80, \"count\": 0, \"checksum\": 0}",
+       "at": null
+      }
+     ],
+     "readings": [
+      {
+       "at": null,
+       "what": "measure the app's process",
+       "text": "CPU 0.0%, memory 26144 KB"
+      },
+      {
+       "at": null,
+       "what": "check whether the app's process has opened a GPU",
+       "text": "GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU"
+      },
+      {
+       "at": null,
+       "what": "list the app's network connections",
+       "text": "1 open connection(s)"
+      },
+      {
+       "at": null,
+       "what": "measure the app's process",
+       "text": "CPU 0.0%, memory 26144 KB"
+      },
+      {
+       "at": null,
+       "what": "check whether the app's process has opened a GPU",
+       "text": "GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU"
+      },
+      {
+       "at": null,
+       "what": "list the app's network connections",
+       "text": "1 open connection(s)"
+      },
+      {
+       "at": null,
+       "what": "check whether the app's process has opened a GPU",
+       "text": "GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, IOGPU"
+      },
+      {
+       "at": null,
+       "what": "measure the app's process",
+       "text": "CPU 0.0%, memory 26160 KB"
+      }
+     ],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    }
+   ]
+  },
+  {
+   "id": "g2",
+   "statement": "Speaking a text of up to 500 characters ends with the status \"Done: N frames\", where N equals the number of non-space characters typed.",
+   "example": "",
+   "group": "new",
+   "verdict": "holds",
+   "kind": "behaviour",
+   "searched": true,
+   "read_as": {
+    "applies_to": "Speaking a text of up to 500 characters in the avatar page",
+    "action": "Speak: render text into frames and set final status \"Done: N frames\"",
+    "compares": "N (the count shown in the status) versus the number of non-space characters in the typed text (reference)"
+   },
+   "how_found": "Plain code searched the codebase for status\\.textContent, \\bcount\\b, \\bframes\\b (status text with frame count, and the frames list/count produced by render), then for the name of each function that changes it, then for the address of each route that reaches it, and followed every file that mentions one up to the pages. 6 search hits were each labelled by their own model call. This gave 1 way(s) in through the pages and 1 route(s); 0 file(s) were excluded because no page shows them.",
+   "not_covered": "Texts over 500 characters excluded by property wording. No direct API cases (none listed). Intermediate status 'Rendering…'/'Speaking' not compared.",
+   "no_plan_because": null,
+   "ways_in": [
+    {
+     "id": "e1",
+     "door": "browser",
+     "status": "found",
+     "where": "Avatar page at /: the text box 'What should the avatar say?' and the 'Speak' button below it; the status line below the face shows the result.",
+     "page": "/",
+     "route": "ANY /api/render",
+     "file": "static/index.html"
+    },
+    {
+     "id": "a1",
+     "door": "api",
+     "status": "found",
+     "where": "direct call to ANY /api/render",
+     "page": null,
+     "route": "ANY /api/render",
+     "file": "app.py"
+    }
+   ],
+   "left_out": [],
+   "search_notes": [
+    "4 lines mention status text with frame count, and the frames list/count produced by render without writing it (as far as plain code can tell); they were not followed."
+   ],
+   "counts": {
+    "holds": 9,
+    "breaks": 0,
+    "declined": 0,
+    "outside": 0,
+    "nothing_there": 0,
+    "cant_run": 0,
+    "planned": 0
+   },
+   "seconds": 281.0,
+   "cost_usd": 0.3894,
+   "cases": [
+    {
+     "id": "c1",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Open /. Leave the default text 'Hello there' in the box. Click Speak and wait until the status stops changing. Read the status and compare the N with the count of non-space characters (10).",
+     "stands_for": "Basic Speak via the page button with default text",
+     "outcome": "holds",
+     "observed": "Text \"Hello there\" (10 non-space chars). Status before: Idle. After Speak and 5s wait: \"Done: 10 frames\". N=10 matches.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 14.0,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "g2/c1/clip-1.webm",
+       "started": 1794369601.75
+      }
+     ],
+     "shots": [],
+     "steps": [
+      {
+       "clip": 0,
+       "at": 0.05,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.07,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 1.71,
+       "kind": "action",
+       "words": "click button \"Speak\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 6.72,
+       "kind": "action",
+       "words": "wait 5 seconds",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 6.73,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c2",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Open /. Replace the text with 'a b  c   d' (multiple spaces between letters). Click Speak, wait for the end, read the status. Expect N to equal the 4 non-space characters.",
+     "stands_for": "Spaces of varying runs not counted",
+     "outcome": "holds",
+     "observed": "Typed 'a b  c   d' (10 chars, 4 non-space). After Speak and waiting, status read \"Done: 4 frames\". The textbox showed 'a b c d' in the accessibility tree, probably because whitespace is collapsed in display.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 15.3,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "g2/c2/clip-1.webm",
+       "started": 1794369616.26
+      }
+     ],
+     "shots": [],
+     "steps": [
+      {
+       "clip": 0,
+       "at": 0.07,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.11,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 1.6,
+       "kind": "action",
+       "words": "type \"a b c d\" into textarea \"Hello there\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.23,
+       "kind": "action",
+       "words": "click button \"Speak\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 7.24,
+       "kind": "action",
+       "words": "wait 5 seconds",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 7.25,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c3",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Open /. Replace the text with 'Hi\tthere\nfriend' using a tab and a line break if possible (otherwise paste text with a tab). Click Speak, read final status, compare with the count of non-whitespace characters (12).",
+     "stands_for": "Other whitespace characters (tab, newline)",
+     "outcome": "holds",
+     "observed": "Typed \"Hi<tab>there<newline>friend\" (15 chars). Letters: Hi=2, there=5, friend=6, so 13 non-whitespace characters. The case's \"12\" is a miscount. Initial status was Idle. After Speak, status was \"Done: 13 frames\", which equals 13.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 16.4,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "g2/c3/clip-1.webm",
+       "started": 1794369632.33
+      }
+     ],
+     "shots": [],
+     "steps": [
+      {
+       "clip": 0,
+       "at": 0.07,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.09,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 1.56,
+       "kind": "action",
+       "words": "type \"Hi there friend\" into textarea \"Hello there\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.17,
+       "kind": "action",
+       "words": "click button \"Speak\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 7.18,
+       "kind": "action",
+       "words": "wait 5 seconds",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 7.19,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c4",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Open /. Clear the text box (empty). Click Speak, read the final status. Reference is 0 frames.",
+     "stands_for": "Empty text edge",
+     "outcome": "holds",
+     "observed": "Textbox initially \"Hello there\"; cleared to 0 characters; clicked Speak; status after 2s: \"Done: 0 frames\". Reference 0.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 11.4,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "g2/c4/clip-1.webm",
+       "started": 1794369648.73
+      }
+     ],
+     "shots": [
+      {
+       "id": "shot-1",
+       "file": "g2/c4/shot-1.png",
+       "label": "done",
+       "at": 4.63,
+       "cited": true
+      }
+     ],
+     "steps": [
+      {
+       "clip": 0,
+       "at": 0.04,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.06,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 1.23,
+       "kind": "action",
+       "words": "type \"\" into textarea \"Hello there\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 1.85,
+       "kind": "action",
+       "words": "click button \"Speak\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.85,
+       "kind": "action",
+       "words": "wait 2 seconds",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.87,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 4.63,
+       "kind": "look",
+       "words": "take a screenshot: done",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c5",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Open /. Enter only spaces (5 spaces). Click Speak, read the final status. Reference is 0 frames.",
+     "stands_for": "All-space text",
+     "outcome": "holds",
+     "observed": "Typed 5 spaces (0 non-space chars). After Speak, status: \"Done: 0 frames\". Matches reference 0.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 12.6,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "g2/c5/clip-1.webm",
+       "started": 1794369660.98
+      }
+     ],
+     "shots": [],
+     "steps": [
+      {
+       "clip": 0,
+       "at": 0.04,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.06,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 1.37,
+       "kind": "action",
+       "words": "type \"\" into textarea \"Hello there\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 1.98,
+       "kind": "action",
+       "words": "click button \"Speak\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 4.99,
+       "kind": "action",
+       "words": "wait 3 seconds",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 5.0,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c6",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Open /. Enter text of exactly 500 characters, e.g. 50 repetitions of 'abcd efghi' (10 chars each, 9 non-space, so 450 non-space). Click Speak, wait for completion (may take a while), read the final status. Reference N is 450.",
+     "stands_for": "Maximum length boundary with spaces",
+     "outcome": "holds",
+     "observed": "The case's example (50 x 'abcd efghi') is not exactly 500 characters. I used a text of exactly 500 chars with 410 non-space chars (fill tool reported \"500 characters (410 not counting spaces)\"). Status during speaking: \"Speaking (410 frames)\". Final status: \"Done: 410 frames\". N=410 equals the non-space count.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 52.8,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "g2/c6/clip-1.webm",
+       "started": 1794369673.64
+      }
+     ],
+     "shots": [],
+     "steps": [
+      {
+       "clip": 0,
+       "at": 0.04,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.74,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.4,
+       "kind": "action",
+       "words": "type \"abcd efghi abcd efghi abcd efghi abcd efghi abcd…\" into textarea \"Hello there\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 7.83,
+       "kind": "action",
+       "words": "type \"abcd efghi abcd efghi abcd efghi abcd efghi abcd…\" into textarea \"abcd efghi abcd efghi abcd ef…",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 10.77,
+       "kind": "action",
+       "words": "type \"abcd efghi abcd efghi abcd efghi abcd efghi abcd…\" into textarea \"abcd efghi abcd efghi abcd ef…",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 11.37,
+       "kind": "action",
+       "words": "click button \"Speak\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 22.46,
+       "kind": "action",
+       "words": "wait 10 seconds",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 23.22,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 34.07,
+       "kind": "action",
+       "words": "wait 10 seconds",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 34.94,
+       "kind": "look",
+       "words": "read textContent of an element",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 45.79,
+       "kind": "action",
+       "words": "wait 10 seconds",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 45.79,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c7",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Open /. Enter 500 characters with no spaces (e.g. 'x' repeated 500). Click Speak, wait for completion, read the final status. Reference N is 500.",
+     "stands_for": "Maximum length, all non-space",
+     "outcome": "holds",
+     "observed": "Typed 500 non-space characters (tool reported 500 chars, 500 without spaces). Clicked Speak; the status showed \"Speaking (500 frames)\" for about 50s, then \"Done: 500 frames\". N=500, equal to the reference of 500.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 98.6,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "g2/c7/clip-1.webm",
+       "started": 1794369726.9
+      }
+     ],
+     "shots": [
+      {
+       "id": "shot-1",
+       "file": "g2/c7/shot-1.png",
+       "label": "final",
+       "at": 44.98,
+       "cited": false
+      }
+     ],
+     "steps": [
+      {
+       "clip": 0,
+       "at": 0.06,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.08,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 4.61,
+       "kind": "action",
+       "words": "type \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…\" into textarea \"Hello there\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 14.34,
+       "kind": "action",
+       "words": "type \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…\" into textarea \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx…",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 17.29,
+       "kind": "action",
+       "words": "type \"1234567890123456789012345678901234567890123456789…\" into textarea \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxx…",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 19.87,
+       "kind": "action",
+       "words": "type \"1234567890123456789012345678901234567890123456789…\" into textarea \"12345678901234567890123456789…",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 22.39,
+       "kind": "action",
+       "words": "type \"1234567890123456789012345678901234567890123456789…\" into textarea \"12345678901234567890123456789…",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 24.71,
+       "kind": "action",
+       "words": "type \"1234567890123456789012345678901234567890123456789…\" into textarea \"12345678901234567890123456789…",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 27.14,
+       "kind": "action",
+       "words": "type \"1234567890123456789012345678901234567890123456789…\" into textarea \"12345678901234567890123456789…",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 29.41,
+       "kind": "action",
+       "words": "type \"1234567890123456789012345678901234567890123456789…\" into textarea \"12345678901234567890123456789…",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 31.72,
+       "kind": "action",
+       "words": "type \"1234567890123456789012345678901234567890123456789…\" into textarea \"12345678901234567890123456789…",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 33.59,
+       "kind": "action",
+       "words": "click button \"Speak\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 43.6,
+       "kind": "action",
+       "words": "wait 10 seconds",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 44.78,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 44.98,
+       "kind": "look",
+       "words": "take a screenshot: final",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 56.36,
+       "kind": "action",
+       "words": "wait 10 seconds",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 56.38,
+       "kind": "look",
+       "words": "read textContent of an element",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 67.82,
+       "kind": "action",
+       "words": "wait 10 seconds",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 67.83,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 79.33,
+       "kind": "action",
+       "words": "wait 10 seconds",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 89.35,
+       "kind": "action",
+       "words": "wait 10 seconds",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 90.15,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c8",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Open /. Enter text with punctuation, digits and non-ASCII letters/emoji, e.g. 'Héllo, wörld! 123 😀'. Click Speak, read the final status, compare with the count of non-space characters (16 characters counting the emoji as one).",
+     "stands_for": "Unusual characters",
+     "outcome": "holds",
+     "observed": "Typed 'Héllo, wörld! 123 😀' (19 chars, 16 non-space with emoji as one). Final status: 'Done: 16 frames'.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 14.7,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "g2/c8/clip-1.webm",
+       "started": 1794369827.6
+      }
+     ],
+     "shots": [],
+     "steps": [
+      {
+       "clip": 0,
+       "at": 0.05,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.06,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 1.5,
+       "kind": "action",
+       "words": "type \"Héllo, wörld! 123 😀\" into textarea \"Hello there\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.12,
+       "kind": "action",
+       "words": "click button \"Speak\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 7.13,
+       "kind": "action",
+       "words": "wait 5 seconds",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 7.13,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c9",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Open /. Enter a single character 'a'. Click Speak, read final status. Reference is 1.",
+     "stands_for": "Smallest non-empty value",
+     "outcome": "holds",
+     "observed": "Typed 'a' (1 non-space char). After Speak, status read \"Done: 1 frames\". N=1 equals reference 1.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 11.7,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "g2/c9/clip-1.webm",
+       "started": 1794369842.71
+      }
+     ],
+     "shots": [],
+     "steps": [
+      {
+       "clip": 0,
+       "at": 0.05,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.08,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 1.36,
+       "kind": "action",
+       "words": "type \"a\" into textarea \"Hello there\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 1.97,
+       "kind": "action",
+       "words": "click button \"Speak\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 4.98,
+       "kind": "action",
+       "words": "wait 3 seconds",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 5.0,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    }
+   ]
+  },
+  {
+   "id": "g3",
+   "statement": "Every place that turns letters into mouth shapes uses the existing table in visemes.py; no second letter-to-shape mapping is defined anywhere.",
+   "example": "",
+   "group": "new",
+   "verdict": "holds",
+   "kind": "code",
+   "searched": false,
+   "read_as": {
+    "applies_to": "All code that converts text letters into mouth shapes (viseme/frame names) for the avatar",
+    "action": "Render text into mouth-shape frames, and compare to the code's letter-to-shape definitions",
+    "compares": "The letter-to-shape mapping used anywhere in the app (reference: the single table in visemes.py) versus any other mapping defined in other files"
+   },
+   "how_found": "Listed files (accel.py, app.py, render.py, static/index.html, visemes.py). Grepped for viseme/mouth. render.py is the only converter and imports viseme_for from visemes.py. app.py exposes POST /api/render which calls render. index.html posts text and only displays frames; its CSS only styles shapes. Route came from reading app.py.",
+   "not_covered": "Running the page or calling the API: the property is about code structure, and the code reading covers every file. Process measurement is not needed. Code outside this repo is not covered.",
+   "no_plan_because": null,
+   "ways_in": [
+    {
+     "id": "e1",
+     "door": "code",
+     "status": "found",
+     "where": "render.py text-to-frames function",
+     "page": null,
+     "route": null,
+     "file": null
+    },
+    {
+     "id": "e2",
+     "door": "code",
+     "status": "found",
+     "where": "app.py, accel.py, static/index.html",
+     "page": null,
+     "route": null,
+     "file": null
+    }
+   ],
+   "left_out": [],
+   "search_notes": [],
+   "counts": {
+    "holds": 2,
+    "breaks": 0,
+    "declined": 0,
+    "outside": 0,
+    "nothing_there": 0,
+    "cant_run": 0,
+    "planned": 0
+   },
+   "seconds": 79.4,
+   "cost_usd": 0.1719,
+   "cases": [
+    {
+     "id": "c1",
+     "way_in": "e1",
+     "door": "code",
+     "what": "Read render.py and visemes.py in full. Check that every letter-to-shape lookup in render.py goes through visemes.py's table or function and that render.py defines no letter-to-shape dictionary, chain of conditions or string table of its own.",
+     "stands_for": "Main conversion path",
+     "outcome": "holds",
+     "observed": "render.py is 16 lines. It imports viseme_for from visemes (line 3). Its only letter lookup is line 10: frames = [viseme_for(ch) for ch in text if not ch.isspace()]. It has no dictionary, if/elif chain or string table of shapes. match_each check-1 found no shape names or letter dict literals in render.py. visemes.py holds the single VISEMES table and viseme_for.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 16.5,
+     "attempts": 1,
+     "clips": [],
+     "shots": [],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "code",
+       "words": "find where render\\.py|visemes\\.py appears",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "code",
+       "words": "list the files",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "code",
+       "words": "read render.py lines 1 to 15",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "code",
+       "words": "read visemes.py lines 1 to 15",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "code",
+       "words": "search the code for .",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "code",
+       "words": "read render.py lines 15 to 30",
+       "ok": false,
+       "problem": "refused: at most 15 lines per read; narrow the range"
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "code",
+       "words": "read render.py lines 16 to 30",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "code",
+       "words": "check every file matching render.py",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [
+      {
+       "path": "render.py",
+       "start": 1,
+       "end": 10,
+       "why": "render() imports viseme_for and uses it for every character, with no mapping of its own.",
+       "lines": [
+        "\"\"\"Turns text into a sequence of mouth frames for the avatar.\"\"\"",
+        "from accel import rasterizer_device",
+        "from visemes import viseme_for",
+        "",
+        "FRAME_MS = 80",
+        "",
+        "",
+        "def render(text: str) -> dict:",
+        "    device = rasterizer_device()",
+        "    frames = [viseme_for(ch) for ch in text if not ch.isspace()]"
+       ]
+      },
+      {
+       "path": "visemes.py",
+       "start": 4,
+       "end": 15,
+       "why": "The one letter-to-shape table and lookup function that render.py reuses.",
+       "lines": [
+        "VISEMES = {",
+        "    \"a\": \"open\", \"e\": \"wide\", \"i\": \"wide\", \"o\": \"round\", \"u\": \"round\",",
+        "    \"m\": \"closed\", \"b\": \"closed\", \"p\": \"closed\",",
+        "    \"f\": \"teeth\", \"v\": \"teeth\",",
+        "    \"w\": \"round\", \"l\": \"tongue\", \"t\": \"tongue\", \"d\": \"tongue\", \"n\": \"tongue\",",
+        "}",
+        "",
+        "REST = \"rest\"",
+        "",
+        "",
+        "def viseme_for(ch: str) -> str:",
+        "    return VISEMES.get(ch.lower(), REST)"
+       ]
+      }
+     ],
+     "checks": [
+      {
+       "kind": "match_each",
+       "checked": 1,
+       "passed": 1,
+       "violators": [],
+       "results": [
+        {
+         "path": "render.py",
+         "ok": true
+        }
+       ],
+       "rule": {
+        "kind": "match_each",
+        "glob": "render.py",
+        "must_contain": "from visemes import viseme_for",
+        "must_not_contain": "\"open\"|\"wide\"|\"round\"|\"closed\"|\"teeth\"|\"tongue\"|\\{\\s*\"[a-z]\"\\s*:"
+       },
+       "id": "check-1"
+      }
+     ],
+     "notes": []
+    },
+    {
+     "id": "c2",
+     "way_in": "e2",
+     "door": "code",
+     "what": "Read app.py, accel.py and static/index.html (including the script) in full. Look for any letter, vowel or consonant to mouth-shape mapping, or any code that picks shapes from characters. Also search all files for the shape names (open, wide, round, closed, teeth, tongue) and list each place they appear.",
+     "stands_for": "Hidden second mapping in other files",
+     "outcome": "holds",
+     "observed": "Read app.py, accel.py and static/index.html in full. app.py only calls render(text); accel.py only picks a device; index.html script only sets data-shape from frame names returned by the server, and its CSS (lines 12-17) styles shape names, not letters. Shape names appear only in index.html:12-17 (CSS) and visemes.py:5-8 (the table). render.py:10 uses viseme_for from visemes. No second letter-to-shape mapping.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 21.6,
+     "attempts": 1,
+     "clips": [],
+     "shots": [],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "code",
+       "words": "list the files",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "code",
+       "words": "search the code for (?i)\\b(open|wide|round|closed|teeth|tongue)\\b",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "code",
+       "words": "read app.py lines 1 to 15",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "code",
+       "words": "read accel.py lines 1 to 15",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "code",
+       "words": "read static/index.html lines 18 to 32",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "code",
+       "words": "search the code for import|VISEME|visemes|\\[.*\\bin\\b|aeiou|\"[a-z]{2,}…",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "code",
+       "words": "read app.py lines 16 to 45",
+       "ok": false,
+       "problem": "refused: at most 15 lines per read; narrow the range"
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "code",
+       "words": "read accel.py lines 15 to 40",
+       "ok": false,
+       "problem": "refused: at most 15 lines per read; narrow the range"
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "code",
+       "words": "read static/index.html lines 32 to 60",
+       "ok": false,
+       "problem": "refused: at most 15 lines per read; narrow the range"
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "code",
+       "words": "read app.py lines 16 to 30",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "code",
+       "words": "read accel.py lines 15 to 29",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "code",
+       "words": "read static/index.html lines 32 to 46",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "code",
+       "words": "read app.py lines 31 to 45",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [
+      {
+       "path": "app.py",
+       "start": 24,
+       "end": 27,
+       "why": "The server just passes text to render() and returns its frames; no letter-to-shape logic.",
+       "lines": [
+        "        body = json.loads(self.rfile.read(int(self.headers.get(\"Content-Length\", 0))) or b\"{}\")",
+        "        text = str(body.get(\"text\", \"\"))[:500]",
+        "        out = render(text)",
+        "        out.pop(\"_device\", None)  # internal; the UI never sees which device rendered"
+       ]
+      },
+      {
+       "path": "static/index.html",
+       "start": 35,
+       "end": 39,
+       "why": "The browser only applies shape names received from the server; it does not map letters.",
+       "lines": [
+        "  const r = await fetch(\"/api/render\", { method: \"POST\", body: JSON.stringify({ text: document.getElementById(\"text\").value }) });",
+        "  const { frames, frame_ms, count } = await r.json();",
+        "  status.textContent = `Speaking (${count} frames)`;",
+        "  for (const f of frames) { mouth.dataset.shape = f; await new Promise(res => setTimeout(res, frame_ms)); }",
+        "  mouth.dataset.shape = \"rest\";"
+       ]
+      },
+      {
+       "path": "accel.py",
+       "start": 15,
+       "end": 26,
+       "why": "This file only chooses a device (metal or cpu); nothing about letters or shapes.",
+       "lines": [
+        "def rasterizer_device() -> str:",
+        "    global _device",
+        "    if os.environ.get(\"DEMO_AGENT_VERSION\", \"1\") == \"1\":",
+        "        if _device is None:",
+        "            try:",
+        "                metal = ctypes.CDLL(\"/System/Library/Frameworks/Metal.framework/Metal\")",
+        "                metal.MTLCreateSystemDefaultDevice.restype = ctypes.c_void_p",
+        "                _device = metal.MTLCreateSystemDefaultDevice()  # opens the GPU",
+        "            except OSError:",
+        "                _device = 0",
+        "        return \"metal\" if _device else \"cpu\"",
+        "    return \"cpu\""
+       ]
+      }
+     ],
+     "checks": [],
+     "notes": []
+    }
+   ]
+  }
+ ]
+}

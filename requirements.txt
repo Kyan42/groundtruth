@@ -1,0 +1,4 @@
+# What the command-line tool and its local tool server need.
+mcp==2.3.0
+PyYAML==6.0.3
+playwright==1.64.1

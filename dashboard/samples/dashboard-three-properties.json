@@ -1,0 +1,1748 @@
+{
+ "schema": 1,
+ "project": "groundtruth-cli",
+ "feature": "review-page",
+ "goal": "A reviewer opens a feature's run page to see every claim the user decided on for that feature, the regressions that were run, and the recorded video for each.",
+ "run": "20261110-182041",
+ "ran_at": "2026-11-10T18:20:41",
+ "ran_against": {
+  "url": "http://127.0.0.1:4410",
+  "commit": "721de9b",
+  "uncommitted_changes": true,
+  "platform": "macOS-27.2-arm64-arm-64bit",
+  "process_started": "Tue Nov 10 16:39:31 2026",
+  "registered_at": "2026-11-10T16:52:35",
+  "could_measure": true,
+  "could_read_code": true,
+  "had_reset": false
+ },
+ "verifier": {
+  "version": "3",
+  "model": "claude-sonnet-5-5"
+ },
+ "error": null,
+ "aborted": false,
+ "totals": {
+  "properties": {
+   "holds": 1,
+   "fails": 1,
+   "needs_decision": 0,
+   "cant_tell": 1,
+   "planned": 0,
+   "not_run": 0
+  },
+  "cases": {
+   "holds": 6,
+   "breaks": 3,
+   "declined": 0,
+   "outside": 1,
+   "nothing_there": 0,
+   "cant_run": 4,
+   "planned": 0
+  },
+  "seconds": 2555.3,
+  "cost_usd": 1.0379
+ },
+ "properties": [
+  {
+   "id": "p1",
+   "statement": "Every claim the user decided on for the current feature shows in the Intent section, with its own card.",
+   "example": "",
+   "group": "new",
+   "verdict": "fails",
+   "kind": "behaviour",
+   "searched": true,
+   "read_as": {
+    "applies_to": "Claims the user decided on (confirmed) for the current feature, as listed in the Intent section of the run review page",
+    "action": "Render the Intent list: one card per journey/claim, showing the feature's claims",
+    "compares": "Reference: the feature's claims/journeys (T.claims, T.journeys); compared with the cards rendered in the Intent list"
+   },
+   "how_found": "Plain code searched the codebase for \\bjourneys\\b, claimIds (the journeys list rendered as cards in the Intent pane (journeys filtered to those with a replay, with their claim chips)), then for the name of each function that changes it, then for the address of each route that reaches it, and followed every file that mentions one up to the pages. 2 search hits were each labelled by their own model call. This gave 1 way(s) in through the pages and 0 route(s); 0 file(s) were excluded because no page shows them.",
+   "not_covered": "I did not plan cases for a feature with zero claims or for claims marked recorded-only. Only one feature (shopping-cart) exists, and the run page rendered blank when I observed it, so I could not confirm those situations. No direct API cases were planned because none were listed. The route list was empty and I could not read the page's behaviour in the browser.",
+   "no_plan_because": null,
+   "ways_in": [
+    {
+     "id": "e1",
+     "door": "browser",
+     "status": "found",
+     "where": "The run review page for a feature (reached from the Test runs list at /runs, then the feature's run, e.g. shopping-cart). Its Intent section is a list with one card per journey, showing the journey name, a thumbnail and claim chips. Opening /review/run.html directly showed only 'not found'. The run page itself rendered blank when I observed it.",
+     "page": "/review/run.html",
+     "route": null,
+     "file": "review/run.html"
+    }
+   ],
+   "left_out": [],
+   "search_notes": [
+    "20 lines mention the journeys list rendered as cards in the Intent pane (journeys filtered to those with a replay, with their claim chips) without writing it (as far as plain code can tell); they were not followed.",
+    "The name feature appears on 268 lines, too many to follow by search; its callers were not traced."
+   ],
+   "counts": {
+    "holds": 0,
+    "breaks": 3,
+    "declined": 0,
+    "outside": 0,
+    "nothing_there": 0,
+    "cant_run": 0,
+    "planned": 0
+   },
+   "seconds": 87.9,
+   "cost_usd": 0.2616,
+   "cases": [
+    {
+     "id": "c1",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Open /runs and note the shopping-cart row, which says 3 claims, 2 journeys and 2 of 3 verified. Open that run's review page. Find the Intent section and count its cards. Read each card's name and the claim chips on it. Compare these with the feature's confirmed claims: every claim should show on some card, each journey should have its own card, and no claim should be missing or duplicated.",
+     "stands_for": "Basic wiring: the Intent list renders one card per journey, showing the feature's claims.",
+     "outcome": "breaks",
+     "observed": "/runs shows shopping-cart: 3 claims, 2 journeys, 2 checks, 2 of 3 verified. The run page /runs/shopping-cart has an Intent filter button with count 2 and Regression 0. The Intent list has 2 cards. Both are named \"Items go into the cart\" (0:07 and 0:08), one with chip C1 (Verified) and one with chip C2 (Verified). No card or chip shows a third claim (C3), and no card shows a second distinct journey name. So 3 claims and 2 journeys are expected, but only 2 claims show, so one claim is missing from the Intent list. Screenshot: shot-1.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 12.0,
+     "attempts": 1,
+     "clips": [],
+     "shots": [
+      {
+       "id": "shot-1",
+       "file": "p1/c1/shot-1.png",
+       "label": "intent list",
+       "at": null,
+       "cited": true
+      }
+     ],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /runs",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click link \"? shopping-cart 2 of 3 verified Nov 9, 2026, 4:31 PM 3 claims e…",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "take a screenshot: intent list",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c2",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "On the shopping-cart run page, look at the claims that are not backed by a journey or result (3 claims but only 2 journeys). Check whether the third claim shows in the Intent section anywhere, and whether it has its own card or chip. Report what is shown.",
+     "stands_for": "A confirmed claim with no journey or result of its own is still shown in the Intent list.",
+     "outcome": "breaks",
+     "observed": "Runs list says shopping-cart: \"2 of 3 verified\", 3 claims, 2 journeys. The run page's Intent section (button \"Intent 2\") lists only 2 cards, both named \"Items go into the cart\", with chips C1 (Verified) and C2 (Verified). The All videos view also shows only C1 and C2. The Claims tab shows only 1 claim (C1). No C3 card or chip appears anywhere, so the third claim is missing from the Intent section.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 15.3,
+     "attempts": 1,
+     "clips": [],
+     "shots": [
+      {
+       "id": "shot-1",
+       "file": "p1/c2/shot-1.png",
+       "label": "Intent section: only C1, C2",
+       "at": null,
+       "cited": true
+      }
+     ],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /runs",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click link \"? shopping-cart 2 of 3 verified Nov 9, 2026, 4:31 PM 3 claims e…",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click button \"All videos\"",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "take a screenshot: Intent section: only C1, C2",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c3",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Open /review/run.html directly, then open it again with the feature name as a query, and read the Intent section if anything renders. Also open /runs and check whether the run page can be reached from there. Report the Intent cards, or say that none appears.",
+     "stands_for": "Direct entry to the page file without the run path, since it showed 'not found' when first opened.",
+     "outcome": "breaks",
+     "observed": "/review/run.html and /review/run.html?feature=shopping-cart both showed only 'not found'. /runs lists shopping-cart (\"2 of 3 verified\", 3 claims, 2 journeys, 2 checks) and links to /runs/shopping-cart, which renders. Its Intent section (button \"Intent 2\") has only 2 cards, both named \"Items go into the cart\": C1 (0:07, Verified) and C2 (0:08, Verified). No card for a third claim appears, though the run lists 3 claims (\"2 of 3 verified\"). The 2 cards are per check rather than per claim or journey, and Regression is 0. Screenshot shot-1.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 15.5,
+     "attempts": 1,
+     "clips": [],
+     "shots": [
+      {
+       "id": "shot-1",
+       "file": "p1/c3/shot-1.png",
+       "label": "Intent list for shopping-cart",
+       "at": null,
+       "cited": true
+      }
+     ],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html?feature=shopping-cart",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /runs",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click link \"? shopping-cart 2 of 3 verified Nov 9, 2026, 4:31 PM 3 claims e…",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "take a screenshot: Intent list for shopping-cart",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    }
+   ]
+  },
+  {
+   "id": "p2",
+   "statement": "Every claim whose regression was run appears in the Regression section.",
+   "example": "",
+   "group": "new",
+   "verdict": "cant_tell",
+   "kind": "behaviour",
+   "searched": true,
+   "read_as": {
+    "applies_to": "claims of earlier features whose regression test was run on this PR",
+    "action": "listing a claim's regression result as a card in the Regression section of the run review page",
+    "compares": "claims with a regression result (reference: latest().features results) vs. cards returned in regressions.json / rendered in Regression list"
+   },
+   "how_found": "Plain code searched the codebase for \\bregressions?\\b, \\bregItems\\b, latest\\(\\)\\.features|\\ball\\[f\\] (regression card entries built per claim result for the Regression section), then for the name of each function that changes it, then for the address of each route that reaches it, and followed every file that mentions one up to the pages. 10 search hits were each labelled by their own model call. This gave 1 way(s) in through the pages and 0 route(s); 0 file(s) were excluded because no page shows them.",
+   "not_covered": "I could not find a real run id: /review/run.html and /review/runs.html both return 'not found', and no route list is available, so the cases rely on whatever runs exist. Direct API cases were left out because none were listed. I did not plan the cards' video or check details, since they are outside the property.",
+   "no_plan_because": null,
+   "ways_in": [
+    {
+     "id": "e1",
+     "door": "browser",
+     "status": "found",
+     "where": "The run review page at /review/run.html/<run id> (the run id is the second part of the address). The Regression section lists one card per test of earlier features' claims. Opened without a run id the page just shows 'not found'. There is no button for the action; the cards are drawn automatically when the page loads.",
+     "page": "/review/run.html",
+     "route": null,
+     "file": "review/run.html"
+    }
+   ],
+   "left_out": [],
+   "search_notes": [
+    "28 lines mention regression card entries built per claim result for the Regression section without writing it (as far as plain code can tell); they were not followed.",
+    "The name video appears on 111 lines, too many to follow by search; its callers were not traced."
+   ],
+   "counts": {
+    "holds": 1,
+    "breaks": 0,
+    "declined": 0,
+    "outside": 1,
+    "nothing_there": 0,
+    "cant_run": 4,
+    "planned": 0
+   },
+   "seconds": 2055.7,
+   "cost_usd": 0.4402,
+   "cases": [
+    {
+     "id": "c1",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Open the review page for a finished run whose PR has earlier features with recorded claim test results. Look at the Regression section. Note each card's title, which has the form '<feature> · <claim id>'. Count the cards.",
+     "stands_for": "Basic case: regression results appear as cards in the Regression section.",
+     "outcome": "cant_run",
+     "observed": "The only run listed is shopping-cart (commit ec14bff, 3 claims, 2 of 3 verified). Its run page /runs/shopping-cart shows Intent 2 and Regression 0, so no earlier-feature regression results exist to compare. /review/run.html/ returned 'not found' for each id I tried: shopping-cart, ec14bff, runs/shopping-cart and 1. /review/run.html/shopping-cart/regressions.json and /runs.json also returned 'not found'. I found no run id that opens a review page, so I could not read or count any Regression cards.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 20.0,
+     "attempts": 1,
+     "clips": [],
+     "shots": [],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click link \"? shopping-cart 2 of 3 verified Nov 9, 2026, 4:31 PM 3 claims e…",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html/shopping-cart",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html/ec14bff",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html/runs/shopping-cart",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html/1",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /runs.json",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html/shopping-cart/regressions.json",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c2",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Find a run where at least one earlier feature has several claims with results. Compare the claims that have results with the cards in the Regression section. Check that each claim has its own card, including claims that failed or are flaky.",
+     "stands_for": "Completeness: every claim with a regression result gets a card, whatever its status.",
+     "outcome": "cant_run",
+     "observed": "Only one run exists (shopping-cart, 3 claims, Intent 2, Regression 0). Its regressions.json is [] and the sidebar Regression filter shows 0. /review/run.html/shopping-cart and /review/run.html/runs/shopping-cart both show \"not found\". No run has an earlier feature with several claim results, so the cards could not be compared with the results.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 17.2,
+     "attempts": 1,
+     "clips": [],
+     "shots": [],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click link \"? shopping-cart 2 of 3 verified Nov 9, 2026, 4:31 PM 3 claims e…",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html/shopping-cart",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html/runs/shopping-cart",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /runs/shopping-cart/regressions.json",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c3",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Open the run for the feature that is itself under review, and also a run that has several features. Check that claims of other (earlier) features that were run appear in the Regression section. Also check whether the current feature's own claims appear there (they should not).",
+     "stands_for": "Branch: the current feature is excluded and earlier features are included. Checks that no earlier feature is dropped.",
+     "outcome": "cant_run",
+     "observed": "The only run listed at /runs is \"shopping-cart\" (2 of 3 verified, commit ec14bff, 3 claims). Its page /runs/shopping-cart shows Intent 2 and Regression 0, and its only feature is the one under review. I opened /review/run.html/shopping-cart, /review/run.html/shopping-cart/, /review/run.html/ec14bff and /review/run.html/1. Each showed only \"not found\". /review/regressions.json/shopping-cart also showed \"not found\". So I could not open the Regression section for any run. No run with several features exists here, so I could not check that earlier features' claims appear. For the single run I did see, the app's own Regression filter showed 0 cards, and there were no earlier-feature claims to list.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 832.8,
+     "attempts": 1,
+     "clips": [],
+     "shots": [],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click link \"? shopping-cart 2 of 3 verified Nov 9, 2026, 4:31 PM 3 claims e…",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html/shopping-cart",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html/ec14bff",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html/shopping-cart/",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/regressions.json/shopping-cart",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html/1",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c4",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Open a run where an earlier feature has a test that covers several claims or a chain of journeys. Check that its cards in the Regression section appear complete, and that a card shows a numbered '(1 of N)' name where a test is split.",
+     "stands_for": "Branch: one card per test within a claim; none of them is lost.",
+     "outcome": "cant_run",
+     "observed": "Only one run exists (shopping-cart, 3 claims, 2 journeys, 2 checks). Its Regression filter shows 0 and /runs/shopping-cart/regressions.json returns []. /review/run.html/shopping-cart shows only \"not found\". There is no run with an earlier-feature test covering several claims or a chain of journeys, so I could not check the cards or any '(1 of N)' naming.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 15.7,
+     "attempts": 1,
+     "clips": [],
+     "shots": [],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click link \"? shopping-cart 2 of 3 verified Nov 9, 2026, 4:31 PM 3 claims e…",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html/shopping-cart",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /runs/shopping-cart/regressions.json",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c5",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Open a run that has no earlier features, or whose earlier features have no recorded results. Read the Regression section.",
+     "stands_for": "Edge case: nothing to list. Checks the section is empty or hidden without errors.",
+     "outcome": "holds",
+     "observed": "The only run is shopping-cart (3 claims, commit ec14bff). /review/run.html/shopping-cart, /review/run.html/ec14bff and /review/run.html all showed \"not found\", so I could not open the review page the case names. I used the app's own run page, /runs/shopping-cart, instead. Its Regression tab shows count 0 and the text \"No regression checks ran on this PR.\" Only 2 Intent checks are listed (C1, C2). The run has no earlier features and no regression results, and the Regression list shows no cards, which matches. Screenshot shot-1. Caveat: I did not read regressions.json directly, because that path also returned \"not found\".",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 36.6,
+     "attempts": 1,
+     "clips": [],
+     "shots": [
+      {
+       "id": "shot-1",
+       "file": "p2/c5/shot-1.png",
+       "label": "regression section",
+       "at": null,
+       "cited": true
+      }
+     ],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click link \"? shopping-cart 2 of 3 verified Nov 9, 2026, 4:31 PM 3 claims e…",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html/shopping-cart",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html/ec14bff",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html/shopping-cart/",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/regressions.json/shopping-cart",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /runs/shopping-cart",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click button \"Regression0\"",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "take a screenshot: regression section",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c6",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Open /review/run.html/<an unknown run id>, and also open one for a run still in progress if there is one. Read the page.",
+     "stands_for": "Edge case: a missing or unfinished run shows its state message and no Regression cards.",
+     "outcome": "outside",
+     "observed": "/review/run.html/unknown-run-id showed only \"not found\" (no Regression section). The only run listed, shopping-cart (commit ec14bff), shows Intent 2 and Regression 0 in its sidebar. /review/run.html/shopping-cart and /review/run.html/ec14bff also showed \"not found\". No run in progress exists. No run with a regression result was available, so there was nothing to compare. The property covers only claims whose regression test was run.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 24.8,
+     "attempts": 1,
+     "clips": [],
+     "shots": [],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html/unknown-run-id",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click link \"? shopping-cart 2 of 3 verified Nov 9, 2026, 4:31 PM 3 claims e…",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html/shopping-cart",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html/ec14bff",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    }
+   ]
+  },
+  {
+   "id": "p3",
+   "statement": "Clicking a claim's card shows the video for that claim.",
+   "example": "",
+   "group": "new",
+   "verdict": "holds",
+   "kind": "behaviour",
+   "searched": true,
+   "read_as": {
+    "applies_to": "a claim's card on the review page",
+    "action": "click the card, which selects it and sets the video player's source to that claim's video",
+    "compares": "video shown in player vs. the clicked claim's own video (reference: the claim's recorded video)"
+   },
+   "how_found": "Plain code searched the codebase for video\\.src\\b, \\bcurrent\\b\\s*=, videoFor (the video player's src (the currently selected claim/journey)), then for the name of each function that changes it, then for the address of each route that reaches it, and followed every file that mentions one up to the pages. 0 search hits were each labelled by their own model call. This gave 1 way(s) in through the pages and 0 route(s); 0 file(s) were excluded because no page shows them.",
+   "not_covered": "No direct API cases were requested. The page rendered 'not found' when opened bare, so I could not inspect the real cards. Cases assume a run with cards can be reached.",
+   "no_plan_because": null,
+   "ways_in": [
+    {
+     "id": "e1",
+     "door": "browser",
+     "status": "found",
+     "where": "The review page (/review/run.html): the list of claim/journey cards in the side list; clicking a card selects it and should load that claim's video into the video player. Note: opened bare, the page showed only 'not found', so a run may need to be opened from a link or with a run selected.",
+     "page": "/review/run.html",
+     "route": null,
+     "file": "review/run.html"
+    }
+   ],
+   "left_out": [],
+   "search_notes": [
+    "12 lines mention the video player's src (the currently selected claim/journey) without writing it (as far as plain code can tell); they were not followed."
+   ],
+   "counts": {
+    "holds": 5,
+    "breaks": 0,
+    "declined": 0,
+    "outside": 0,
+    "nothing_there": 0,
+    "cant_run": 0,
+    "planned": 0
+   },
+   "seconds": 411.7,
+   "cost_usd": 0.3361,
+   "cases": [
+    {
+     "id": "c1",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Open the review page for a run that has several claim cards (reach it from the app's review listing if the bare address shows 'not found'). Click the first claim card. Read which card is highlighted as selected and what video the player is showing (its source/title). Compare with the video recorded for that claim.",
+     "stands_for": "Basic wiring: clicking a card selects it and loads its own video.",
+     "outcome": "holds",
+     "observed": "/review/run.html and /review/ showed only \"not found\". I opened the run from /runs and went to /runs/shopping-cart, which lists 2 cards: C1 and C2. Before the click, the visible player was already on /runs/shopping-cart/videos/c1.webm. I clicked the first card (C1, \"Items go into the cart 0:07\"). After the click, the visible player source was /runs/shopping-cart/videos/c1.webm (6.88 s). The hidden players held c1.webm and c2.webm. C1's own recorded video is c1.webm, so they match. The C1 claim detail was shown. C1 was probably already selected before my click, so this does not prove the click itself changed the source. I did not click C2 and then C1. Screenshot: shot-1.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 52.8,
+     "attempts": 1,
+     "clips": [],
+     "shots": [
+      {
+       "id": "shot-1",
+       "file": "p3/c1/shot-1.png",
+       "label": "after clicking first card",
+       "at": null,
+       "cited": true
+      }
+     ],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "try to click a control",
+       "ok": false,
+       "problem": "error: no element has the reference e10 now. The page has changed since that observe: observe again and use the new reference"
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click link \"? shopping-cart 2 of 3 verified Nov 9, 2026, 4:31 PM 3 claims e…",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click span \"Items go into the cart 0:07 ✓ C1\"",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "take a screenshot: after clicking first card",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [
+      {
+       "at": null,
+       "text": "1. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      },
+      {
+       "at": null,
+       "text": "1. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      }
+     ],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c2",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "On the review page, click claim card A, note the player's video, then click claim card B, then click card A again. After each click read the player's video and the selected card.",
+     "stands_for": "Switching between claims changes the video to the clicked claim's own video, with no stale video from the previous claim.",
+     "outcome": "holds",
+     "observed": "Opened via /runs/shopping-cart (bare /review/run.html gives 'not found'). Cards: C1, C2. Initial visible player: c1.webm. Click C1: visible player c1.webm. Click C2: visible player c2.webm (7.68s, slider says 'c2 · single line, Qty 2'; detail shows C2). Click C1 again: visible player c1.webm. Visible player matched the clicked claim each time.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 17.0,
+     "attempts": 1,
+     "clips": [],
+     "shots": [
+      {
+       "id": "shot-1",
+       "file": "p3/c2/shot-1.png",
+       "label": "after A again",
+       "at": null,
+       "cited": true
+      }
+     ],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click link \"? shopping-cart 2 of 3 verified Nov 9, 2026, 4:31 PM 3 claims e…",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click listitem \"Items go into the cart 0:07 ✓ C1\"",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click listitem \"Items go into the cart 0:08 ✓ C2\"",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click listitem \"Items go into the cart 0:07 ✓ C1\"",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "take a screenshot: after A again",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [
+      {
+       "at": null,
+       "text": "1. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      },
+      {
+       "at": null,
+       "text": "1. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      },
+      {
+       "at": null,
+       "text": "1. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      },
+      {
+       "at": null,
+       "text": "1. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      }
+     ],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c3",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "On the review page, click the card that is already selected a second time, and read the player's video and whether playback or source resets.",
+     "stands_for": "Re-selecting the same claim keeps the same correct video.",
+     "outcome": "holds",
+     "observed": "Opened the run via /runs/shopping-cart (bare /review/run.html showed 'not found'). Selected card C1 (Items go into the cart 0:07). Before the second click the visible player was /runs/shopping-cart/videos/c1.webm, at 1 s, not playing. I clicked C1 again. After the click the visible player was still c1.webm, at 1 s, not playing, with the same 6.88 s length. The source did not change and playback did not reset. The hidden players were unchanged (c1 at 0 s, c2 at 0 s).",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 15.0,
+     "attempts": 1,
+     "clips": [],
+     "shots": [
+      {
+       "id": "shot-1",
+       "file": "p3/c3/shot-1.png",
+       "label": "after second click",
+       "at": null,
+       "cited": true
+      }
+     ],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click link \"? shopping-cart 2 of 3 verified Nov 9, 2026, 4:31 PM 3 claims e…",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click listitem \"Items go into the cart 0:07 ✓ C1\"",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "take a screenshot: after second click",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [
+      {
+       "at": null,
+       "text": "1. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      },
+      {
+       "at": null,
+       "text": "1. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      }
+     ],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c4",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "On the review page, find a claim card with no recorded video, if any exists. Click it, then read the player area. Then click a card that has a video and read it again.",
+     "stands_for": "Claim without a video: the player must not keep showing the previous claim's video; a 'no video' message is expected, and the video must return when a claim with a video is clicked.",
+     "outcome": "holds",
+     "observed": "I opened the run from /runs, because /review/run.html bare only shows \"not found\". The run is shopping-cart at /runs/shopping-cart. It has two intent cards, C1 and C2, and the Regression filter shows \"No regression checks ran on this PR\". The list says \"3 claims\", but only these two cards are listed. I found no card without a recorded video, so I could not test that part. Both cards have videos.\n\nVisible player before any click, with C1 selected: /runs/shopping-cart/videos/c1.webm. I clicked the C2 card (\"Items go into the cart 0:08\"). The visible player then loaded /runs/shopping-cart/videos/c2.webm, 7.68 s, and the timeline label changed to \"c2 · single line, Qty 2, subtotal $69.00\". This matches C2's own video.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 15.5,
+     "attempts": 1,
+     "clips": [],
+     "shots": [],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click link \"? shopping-cart 2 of 3 verified Nov 9, 2026, 4:31 PM 3 claims e…",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click listitem \"Items go into the cart 0:08 ✓ C2\"",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click button \"Regression0\"",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [
+      {
+       "at": null,
+       "text": "1. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      },
+      {
+       "at": null,
+       "text": "1. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      }
+     ],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c5",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "On the review page, click a regression-type card, if the list has any, and then a normal claim card. Read the player's video each time and compare with each item's own recorded video.",
+     "stands_for": "Other card kinds in the list also show their own video.",
+     "outcome": "holds",
+     "observed": "The page was reached via /runs → /runs/shopping-cart, because bare /review/run.html showed 'not found'. The Regression filter showed 0 cards ('No regression checks ran on this PR'), so no regression card could be clicked. Intent cards: C1 (0:07) and C2 (0:08). Initially the player showed c1.webm. Clicking C2 changed the visible player to /runs/shopping-cart/videos/c2.webm (7.68 s). Clicking C1 again changed it back to c1.webm (6.88 s). Each matched the card's own video. The regression part of the case could not be tested.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 18.4,
+     "attempts": 1,
+     "clips": [],
+     "shots": [],
+     "steps": [
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /review/run.html",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click link \"? shopping-cart 2 of 3 verified Nov 9, 2026, 4:31 PM 3 claims e…",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click button \"Regression0\"",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click button \"Intent2\"",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click listitem \"Items go into the cart 0:08 ✓ C2\"",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "action",
+       "words": "click listitem \"Items go into the cart 0:07 ✓ C1\"",
+       "ok": true
+      },
+      {
+       "clip": null,
+       "at": null,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [
+      {
+       "at": null,
+       "text": "1. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      },
+      {
+       "at": null,
+       "text": "1. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      },
+      {
+       "at": null,
+       "text": "1. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      }
+     ],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    }
+   ]
+  }
+ ]
+}

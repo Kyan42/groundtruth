@@ -1,0 +1,762 @@
+{
+  "passed": false,
+  "checks": [
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261112-141847"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1",
+      "check": "verdict_holds",
+      "ok": true,
+      "detail": "holds; held 6/7, broke [], declined [], outside ['c7'], not run []"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1",
+      "check": "none_broke",
+      "ok": true,
+      "detail": "broke []"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1",
+      "check": "steps_declared_and_returned",
+      "ok": true,
+      "detail": "4 step(s), all declared (['make_listing', 'make_order']) and returned"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "7 plan case(s), none with scope"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 6 + broke 0 + declined 0 + outside 1 + not_run 0 = 7; planned 7"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "3 code ref(s)"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "10 receipts, no http_request"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "12 receipts, no http_request"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c6",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c7",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "11 receipts, no http_request"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c7",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c1",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c1",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "0 set_up of 8 receipts, none after another call"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c2",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c2",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "0 set_up of 10 receipts, none after another call"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c3",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c3",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "0 set_up of 12 receipts, none after another call"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c4",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c4",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 8 receipts, none after another call"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c5",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c5",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 8 receipts, none after another call"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c6",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c6",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 7 receipts, none after another call"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c7",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "data",
+      "label": "data-clean",
+      "property": "p1/c7",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 11 receipts, none after another call"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261112-142106"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1",
+      "check": "verdict_fails",
+      "ok": true,
+      "detail": "fails; held 4/5, broke ['c3'], declined [], outside [], not run []"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1",
+      "check": "a_break_on_made_big_listing",
+      "ok": true,
+      "detail": "broke ['c3']; c3: ['make_listing({\"price_cents\": 125000, \"title\": \"Costly Test Item\"})']"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1",
+      "check": "every_break_on_made_big_listing",
+      "ok": true,
+      "detail": "broke ['c3']; without a make_listing step at $1,000.00 or more: []"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1",
+      "check": "every_step_has_because",
+      "ok": true,
+      "detail": "3 step(s), each with a because"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "5 plan case(s), none with scope"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 4 + broke 1 + declined 0 + outside 0 + not_run 0 = 5; planned 5"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "3 code ref(s)"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "9 receipts, no http_request"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "10 receipts, no http_request"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1/c1",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1/c1",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "0 set_up of 9 receipts, none after another call"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1/c2",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1/c2",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "0 set_up of 8 receipts, none after another call"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1/c3",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1/c3",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 8 receipts, none after another call"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1/c4",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1/c4",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 7 receipts, none after another call"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1/c5",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "data",
+      "label": "data-bug",
+      "property": "p1/c5",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 10 receipts, none after another call"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261112-142259"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1",
+      "check": "verdict_neither_holds_nor_fails",
+      "ok": false,
+      "detail": "holds; held 4/5, broke [], not run []"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1",
+      "check": "request_for_listing_at_price",
+      "ok": false,
+      "detail": "no such request; could-not-run requests: none"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1",
+      "check": "no_step_for_undeclared_tool",
+      "ok": true,
+      "detail": "0 step(s), all with declared tools (['make_order'])"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "5 plan case(s), none with scope"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 4 + broke 0 + declined 0 + outside 1 + not_run 0 = 5; planned 5"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "3 code ref(s)"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "16 receipts, no http_request"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "14 receipts, no http_request"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "12 receipts, no http_request"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1/c1",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1/c1",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "0 set_up of 8 receipts, none after another call"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1/c2",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1/c2",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "0 set_up of 16 receipts, none after another call"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1/c3",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1/c3",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "0 set_up of 14 receipts, none after another call"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1/c4",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1/c4",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "0 set_up of 12 receipts, none after another call"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1/c5",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "data",
+      "label": "data-no-tool",
+      "property": "p1/c5",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "0 set_up of 8 receipts, none after another call"
+    }
+  ],
+  "usage": {
+    "conversations": 23,
+    "labels": 23,
+    "second_attempts": 0,
+    "cost_usd": 0.8068,
+    "seconds": 311.0,
+    "seconds_ignored": 0
+  },
+  "runs": [
+    "<work>/groundtruth-proof/gates/work/cbay-data-clean/.groundtruth/runs/20261112-141847",
+    "<work>/groundtruth-proof/gates/work/cbay-data-bug/.groundtruth/runs/20261112-142106",
+    "<work>/groundtruth-proof/gates/work/cbay-data-bug-no-tool/.groundtruth/runs/20261112-142259"
+  ]
+}

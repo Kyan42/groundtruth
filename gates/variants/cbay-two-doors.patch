@@ -1,0 +1,153 @@
+diff -ruN -x node_modules -x .next -x data -x .groundtruth -x tsconfig.tsbuildinfo cbay/app/app/globals.css cbay/app/app/globals.css
+--- cbay/app/app/globals.css	2026-11-09 16:26:30
++++ cbay/app/app/globals.css	2026-11-09 22:22:58
+@@ -134,6 +134,33 @@
+   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+ }
+ 
++.listing-tile {
++  display: flex;
++  flex-direction: column;
++  gap: 0.5rem;
++}
++
++.listing-tile .listing-card {
++  flex: 1;
++}
++
++.quick-add-button {
++  width: 100%;
++  font-weight: 700;
++  padding: 0.45rem 0.75rem;
++  border: 2px solid var(--blue);
++  border-radius: 999px;
++  background: #fff;
++  color: var(--blue);
++  cursor: pointer;
++}
++
++.quick-add-button:disabled {
++  border-color: var(--muted);
++  color: var(--muted);
++  cursor: not-allowed;
++}
++
+ .listing-card-photo {
+   display: flex;
+   align-items: center;
+diff -ruN -x node_modules -x .next -x data -x .groundtruth -x tsconfig.tsbuildinfo cbay/app/components/ListingCard.tsx cbay/app/components/ListingCard.tsx
+--- cbay/app/components/ListingCard.tsx	2026-11-09 16:26:30
++++ cbay/app/components/ListingCard.tsx	2026-11-09 22:22:58
+@@ -1,26 +1,30 @@
+ import Link from "next/link";
+ 
++import { QuickAddButton } from "@/components/QuickAddButton";
+ import { formatPrice, type Listing } from "@/lib/catalog";
+ 
+ export function ListingCard({ listing }: { listing: Listing }) {
+   return (
+-    <Link
+-      href={`/listings/${listing.id}`}
+-      className="listing-card"
+-      data-testid={`listing-card-${listing.id}`}
+-    >
+-      <div className="listing-card-photo" aria-hidden>
+-        {listing.emoji}
+-      </div>
+-      <div className="listing-card-body">
+-        <span className="listing-card-title" data-testid="listing-card-title">
+-          {listing.title}
+-        </span>
+-        <span className="listing-card-price" data-testid="listing-card-price">
+-          {formatPrice(listing.priceCents)}
+-        </span>
+-        {listing.soldOut ? <span className="sold-out-badge">Sold out</span> : null}
+-      </div>
+-    </Link>
++    <div className="listing-tile">
++      <Link
++        href={`/listings/${listing.id}`}
++        className="listing-card"
++        data-testid={`listing-card-${listing.id}`}
++      >
++        <div className="listing-card-photo" aria-hidden>
++          {listing.emoji}
++        </div>
++        <div className="listing-card-body">
++          <span className="listing-card-title" data-testid="listing-card-title">
++            {listing.title}
++          </span>
++          <span className="listing-card-price" data-testid="listing-card-price">
++            {formatPrice(listing.priceCents)}
++          </span>
++          {listing.soldOut ? <span className="sold-out-badge">Sold out</span> : null}
++        </div>
++      </Link>
++      <QuickAddButton listingId={listing.id} title={listing.title} soldOut={listing.soldOut} />
++    </div>
+   );
+ }
+diff -ruN -x node_modules -x .next -x data -x .groundtruth -x tsconfig.tsbuildinfo cbay/app/components/QuickAddButton.tsx cbay/app/components/QuickAddButton.tsx
+--- cbay/app/components/QuickAddButton.tsx	1969-12-31 16:00:00
++++ cbay/app/components/QuickAddButton.tsx	2026-11-09 22:22:58
+@@ -0,0 +1,60 @@
++"use client";
++
++import { useRouter } from "next/navigation";
++import { useState } from "react";
++
++export function QuickAddButton({
++  listingId,
++  title,
++  soldOut,
++}: {
++  listingId: string;
++  title: string;
++  soldOut: boolean;
++}) {
++  const router = useRouter();
++  const [pending, setPending] = useState(false);
++  const [error, setError] = useState<string | null>(null);
++
++  async function quickAdd() {
++    setPending(true);
++    setError(null);
++    try {
++      const response = await fetch("/api/cart", {
++        method: "POST",
++        headers: { "Content-Type": "application/json" },
++        body: JSON.stringify({ listingId }),
++      });
++      const body = await response.json();
++      if (!response.ok) {
++        setError(typeof body.error === "string" ? body.error : "Could not add to cart.");
++        return;
++      }
++      router.refresh();
++    } catch {
++      setError("Could not add to cart.");
++    } finally {
++      setPending(false);
++    }
++  }
++
++  return (
++    <div className="quick-add">
++      <button
++        type="button"
++        className="quick-add-button"
++        aria-label={`Quick add ${title}`}
++        data-testid={`quick-add-${listingId}`}
++        disabled={soldOut || pending}
++        onClick={quickAdd}
++      >
++        Quick add
++      </button>
++      {error ? (
++        <p className="inline-error" data-testid={`quick-add-error-${listingId}`}>
++          {error}
++        </p>
++      ) : null}
++    </div>
++  );
++}

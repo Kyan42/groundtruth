@@ -1,0 +1,212 @@
+[lipsync] service http://127.0.0.1:8793, app ports [8765, 8767]
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py register <work>/groundtruth-proof/demo --url http://127.0.0.1:8765
+    Registered http://127.0.0.1:8765 (pid 11260) for demo
+      the verifier can use: browser and API, process measurements, code reading
+      no reset command: cases won't start from clean data
+      this replaces the earlier registration for this repo
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py verify <work>/groundtruth-proof/demo lip-sync
+    Run 20261110-195545: 3 properties against http://127.0.0.1:8765
+      g1/discovery: 6 cases through 2 entry point(s), kind measurement
+      g2/discovery: 9 cases through 2 entry point(s), kind behaviour
+      g3/discovery: 2 cases through 2 entry point(s), kind code
+      g1/c1 breaks: Before: gpu_check said pid 11260 "GPU driver not loaded". Clicked Speak with 'Hello there'; status became "Done: 10 frames". After: gpu_check said pid
+      g1/c2 breaks: Cleared the textbox (0 characters) and clicked Speak. After the click, gpu_check reported "pid 11260: GPU driver LOADED: AGXMetalG18G, AGXMetalG19P, I
+      g1/c3 breaks: Entered a 624-character text and clicked Speak. The status changed to "Speaking (408 frames)", so rendering happened. After that, gpu_check showed pid
+      g1/c4 breaks: Before the case: gpu_check showed pid 11260 with GPU driver LOADED (AGXMetalG18G, AGXMetalG19P, IOGPU). After Speak with 'Hi', after 'Good morning' an
+      g1/c5 breaks: Before: gpu_check showed pid 11260 GPU driver LOADED (AGXMetalG18G, AGXMetalG19P, IOGPU). POST /api/render {"text":"Hello there"} returned 200 with 10
+      g1/c6 breaks: Both POST /api/render calls (empty body, and {"text":""}) returned 200 with {"frames": [], "frame_ms": 80, "count": 0, "checksum": 0}. gpu_check after
+      g2/c1 holds: Text "Hello there" (10 non-space chars). Status before: Idle. After Speak and 5s wait: "Done: 10 frames". N=10 matches.
+      g2/c2 holds: Typed 'a b  c   d' (10 chars, 4 non-space). After Speak and waiting, status read "Done: 4 frames". The textbox showed 'a b c d' in the accessibility t
+      g2/c3 holds: Typed "Hi<tab>there<newline>friend" (15 chars). Letters: Hi=2, there=5, friend=6, so 13 non-whitespace characters. The case's "12" is a miscount. Init
+      g2/c4 holds: Textbox initially "Hello there"; cleared to 0 characters; clicked Speak; status after 2s: "Done: 0 frames". Reference 0.
+      g2/c5 holds: Typed 5 spaces (0 non-space chars). After Speak, status: "Done: 0 frames". Matches reference 0.
+      g2/c6 holds: The case's example (50 x 'abcd efghi') is not exactly 500 characters. I used a text of exactly 500 chars with 410 non-space chars (fill tool reported 
+      g2/c7 holds: Typed 500 non-space characters (tool reported 500 chars, 500 without spaces). Clicked Speak; the status showed "Speaking (500 frames)" for about 50s, 
+      g2/c8 holds: Typed 'Héllo, wörld! 123 😀' (19 chars, 16 non-space with emoji as one). Final status: 'Done: 16 frames'.
+      g2/c9 holds: Typed 'a' (1 non-space char). After Speak, status read "Done: 1 frames". N=1 equals reference 1.
+      g3/c1 holds: render.py is 16 lines. It imports viseme_for from visemes (line 3). Its only letter lookup is line 10: frames = [viseme_for(ch) for ch in text if not 
+      g3/c2 holds: Read app.py, accel.py and static/index.html in full. app.py only calls render(text); accel.py only picks a device; index.html script only sets data-sh
+      g1 fails (broke: c1, c2, c3, c4, c5, c6): Rendering speech never opens a GPU device in any app process.
+      g2 holds (9 of 9 cases): Speaking a text of up to 500 characters ends with the status "Done: N frames", where N equ
+      g3 holds (2 of 2 cases): Every place that turns letters into mouth shapes uses the existing table in visemes.py; no
+    Result: 2 hold, 1 fail, 0 need your decision, 0 can't tell
+    Details: <work>/groundtruth-proof/demo/.groundtruth/runs/20261110-195545/run.json
+    Report: <work>/groundtruth-proof/demo/.groundtruth/runs/20261110-195545/report.html
+[lipsync] agent: checking <work>/groundtruth-proof/demo/.groundtruth/runs/20261110-195545 with lipsync-agent
+PASS  lipsync  agent  -  run_ok  run 20261110-195545
+PASS  lipsync  agent  g1  verdict_fails  fails; held 0/6, broke ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'], declined [], outside [], not run []
+PASS  lipsync  agent  g2  verdict_holds  holds; held 9/9, broke [], declined [], outside [], not run []
+PASS  lipsync  agent  g3  verdict_holds  holds; held 2/2, broke [], declined [], outside [], not run []
+PASS  lipsync  agent  g1  kind_measurement  plan kind measurement
+PASS  lipsync  agent  g2  kind_behaviour  plan kind behaviour
+PASS  lipsync  agent  g3  kind_code  plan kind code
+PASS  lipsync  agent  g1  measured_first  order ['g1', 'g2', 'g3']
+PASS  lipsync  agent  g1  no_scope_key  6 plan case(s), none with scope
+PASS  lipsync  agent  g1  counts_add_up  held 0 + broke 6 + declined 0 + outside 0 + not_run 0 = 6; planned 6
+PASS  lipsync  agent  g1  was_traced  plan.traced true
+PASS  lipsync  agent  g1  code_refs_present  2 code ref(s)
+PASS  lipsync  agent  g2  no_scope_key  9 plan case(s), none with scope
+PASS  lipsync  agent  g2  counts_add_up  held 9 + broke 0 + declined 0 + outside 0 + not_run 0 = 9; planned 9
+PASS  lipsync  agent  g2  was_traced  plan.traced true
+PASS  lipsync  agent  g2  code_refs_present  3 code ref(s)
+PASS  lipsync  agent  g3  no_scope_key  2 plan case(s), none with scope
+PASS  lipsync  agent  g3  counts_add_up  held 2 + broke 0 + declined 0 + outside 0 + not_run 0 = 2; planned 2
+PASS  lipsync  agent  g3  code_never_declined  declined code cases []
+PASS  lipsync  agent  g3  code_refs_present  6 code ref(s)
+PASS  lipsync  agent  g1/c1  browser_case_no_api  10 receipts, no http_request
+PASS  lipsync  agent  g1/c1  no_source_tools  none given or used
+PASS  lipsync  agent  g1/c1  gpu_check_before_action  breaks; first gpu_check at 1, first action at 3
+PASS  lipsync  agent  g1/c1  baseline_recorded  412 chars
+PASS  lipsync  agent  g1/c2  browser_case_no_api  11 receipts, no http_request
+PASS  lipsync  agent  g1/c2  no_source_tools  none given or used
+PASS  lipsync  agent  g1/c2  gpu_check_before_action  breaks; first gpu_check at 1, first action at 3
+PASS  lipsync  agent  g1/c2  baseline_recorded  443 chars
+PASS  lipsync  agent  g1/c3  browser_case_no_api  11 receipts, no http_request
+PASS  lipsync  agent  g1/c3  no_source_tools  none given or used
+PASS  lipsync  agent  g1/c3  gpu_check_before_action  breaks; first gpu_check at 1, first action at 3
+PASS  lipsync  agent  g1/c3  baseline_recorded  443 chars
+PASS  lipsync  agent  g1/c4  browser_case_no_api  19 receipts, no http_request
+PASS  lipsync  agent  g1/c4  no_source_tools  none given or used
+PASS  lipsync  agent  g1/c4  gpu_check_before_action  breaks; first gpu_check at 1, first action at 3
+PASS  lipsync  agent  g1/c4  baseline_recorded  443 chars
+PASS  lipsync  agent  g1/c5  api_case_no_browser  no browser tools given
+PASS  lipsync  agent  g1/c5  no_source_tools  none given or used
+PASS  lipsync  agent  g1/c5  gpu_check_before_action  breaks; first gpu_check at 1, first action at 3
+PASS  lipsync  agent  g1/c5  baseline_recorded  443 chars
+PASS  lipsync  agent  g1/c6  api_case_no_browser  no browser tools given
+PASS  lipsync  agent  g1/c6  no_source_tools  none given or used
+PASS  lipsync  agent  g1/c6  gpu_check_before_action  breaks; first gpu_check at 1, first action at 3
+PASS  lipsync  agent  g1/c6  baseline_recorded  443 chars
+PASS  lipsync  agent  g2/c1  browser_case_no_api  5 receipts, no http_request
+PASS  lipsync  agent  g2/c1  no_source_tools  none given or used
+PASS  lipsync  agent  g2/c2  browser_case_no_api  6 receipts, no http_request
+PASS  lipsync  agent  g2/c2  no_source_tools  none given or used
+PASS  lipsync  agent  g2/c3  browser_case_no_api  6 receipts, no http_request
+PASS  lipsync  agent  g2/c3  no_source_tools  none given or used
+PASS  lipsync  agent  g2/c4  browser_case_no_api  7 receipts, no http_request
+PASS  lipsync  agent  g2/c4  no_source_tools  none given or used
+PASS  lipsync  agent  g2/c5  browser_case_no_api  6 receipts, no http_request
+PASS  lipsync  agent  g2/c5  no_source_tools  none given or used
+PASS  lipsync  agent  g2/c6  browser_case_no_api  12 receipts, no http_request
+PASS  lipsync  agent  g2/c6  no_source_tools  none given or used
+PASS  lipsync  agent  g2/c7  browser_case_no_api  22 receipts, no http_request
+PASS  lipsync  agent  g2/c7  no_source_tools  none given or used
+PASS  lipsync  agent  g2/c8  browser_case_no_api  6 receipts, no http_request
+PASS  lipsync  agent  g2/c8  no_source_tools  none given or used
+PASS  lipsync  agent  g2/c9  browser_case_no_api  6 receipts, no http_request
+PASS  lipsync  agent  g2/c9  no_source_tools  none given or used
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py register <work>/groundtruth-proof/demo --url http://127.0.0.1:8765
+    Registered http://127.0.0.1:8765 (pid 14321) for demo
+      the verifier can use: browser and API, process measurements, code reading
+      no reset command: cases won't start from clean data
+      this replaces the earlier registration for this repo
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py verify <work>/groundtruth-proof/demo lip-sync
+    Run 20261110-200452: 3 properties against http://127.0.0.1:8765
+      g1/discovery: 5 cases through 2 entry point(s), kind measurement
+      g2/discovery: 9 cases through 2 entry point(s), kind behaviour
+      g3/discovery: 2 cases through 1 entry point(s), kind code
+      g1/c1 holds: Clicked Speak with the default 'Hello there'. The status changed from Idle to 'Done: 10 frames'. After the run, gpu_check said 'pid 14321: GPU driver 
+      g1/c2 holds: Text box emptied (0 characters), Speak clicked. Status changed from Idle to "Done: 0 frames", so empty text rendered zero frames. After the action, gp
+      g1/c3 holds: Entered a 275-character sentence with punctuation and digits and clicked Speak twice. CPU in the process list rose to 8.9% right after the clicks, so 
+      g1/c4 holds: Before: pid 14321 GPU driver not loaded. POST /api/render {"text":"Hello there"} -> 200, 10 frames, checksum 607611. gpu_check after: pid 14321 GPU dr
+      g1/c5 holds: Before: pid 14321 GPU driver not loaded. POST /api/render with non-JSON body: connection closed without response. POST with {"voice":"x"} (no text): 2
+      g2/c1 holds: Initial status Idle; text 'Hello there' (10 non-space chars). After Speak and waiting 5s, status 'Done: 10 frames'. N=10 matches.
+      g2/c2 holds: Typed 'a b  c   d' (10 chars, 4 non-space). Clicked Speak, waited 4s. Final status: "Done: 4 frames". N=4 equals expected 4.
+      g2/c3 holds: Filled the box with "one<tab>two<newline>three" (13 characters, 11 non-whitespace per the fill tool). After clicking Speak and waiting 5s, the status 
+      g2/c4 holds: Text box cleared (0 characters). Clicked Speak, waited 3s. Status before: "Idle"; final status: "Done: 0 frames". N=0 matches 0 non-space characters.
+      g2/c5 holds: Typed 10 spaces (0 non-space chars). After Speak and 3s wait, status read "Done: 0 frames". N=0 matches.
+      g2/c6 holds: Typed 500 'a' characters (tool reported 500 chars, 500 without spaces). After Speak, the status was "Speaking (500 frames)" and later "Done: 500 frame
+      g2/c7 holds: Typed text: 500 characters total (tool reported 500 chars, 401 not counting spaces; 99 words "abcd" + final "abcde", single spaces). Status during spe
+      g2/c8 holds: Typed 'Héllo, wörld! 123 😀' (19 chars, 16 non-space, emoji as one). Final status: 'Done: 16 frames'.
+      g2/c9 holds: 'Hello there' -> Done: 10 frames (expected 10). Changed to 'Hi' -> Done: 2 frames (expected 2). 'Hello there' with two quick Speak clicks -> final Don
+      g3/c1 holds: Read all five files in full. visemes.py holds the only letter->shape table (VISEMES dict lines 4-9, REST, viseme_for line 14-15). render.py line 3 imp
+      g3/c2 holds: index.html script (lines 31-42) only POSTs the text and sets mouth.dataset.shape to each received frame; it inspects no characters. app.py do_POST (li
+      g1 holds (5 of 5 cases): Rendering speech never opens a GPU device in any app process.
+      g2 holds (9 of 9 cases): Speaking a text of up to 500 characters ends with the status "Done: N frames", where N equ
+      g3 holds (2 of 2 cases): Every place that turns letters into mouth shapes uses the existing table in visemes.py; no
+    Result: 3 hold, 0 fail, 0 need your decision, 0 can't tell
+    Details: <work>/groundtruth-proof/demo/.groundtruth/runs/20261110-200452/run.json
+    Report: <work>/groundtruth-proof/demo/.groundtruth/runs/20261110-200452/report.html
+[lipsync] fixed: checking <work>/groundtruth-proof/demo/.groundtruth/runs/20261110-200452 with lipsync-fixed
+PASS  lipsync  fixed  -  run_ok  run 20261110-200452
+PASS  lipsync  fixed  g1  verdict_holds  holds; held 5/5, broke [], declined [], outside [], not run []
+PASS  lipsync  fixed  g2  verdict_holds  holds; held 9/9, broke [], declined [], outside [], not run []
+PASS  lipsync  fixed  g3  verdict_holds  holds; held 2/2, broke [], declined [], outside [], not run []
+PASS  lipsync  fixed  g1  kind_measurement  plan kind measurement
+PASS  lipsync  fixed  g2  kind_behaviour  plan kind behaviour
+PASS  lipsync  fixed  g3  kind_code  plan kind code
+PASS  lipsync  fixed  g1  measured_first  order ['g1', 'g2', 'g3']
+PASS  lipsync  fixed  g1  no_scope_key  5 plan case(s), none with scope
+PASS  lipsync  fixed  g1  counts_add_up  held 5 + broke 0 + declined 0 + outside 0 + not_run 0 = 5; planned 5
+PASS  lipsync  fixed  g1  was_traced  plan.traced true
+PASS  lipsync  fixed  g1  code_refs_present  2 code ref(s)
+PASS  lipsync  fixed  g2  no_scope_key  9 plan case(s), none with scope
+PASS  lipsync  fixed  g2  counts_add_up  held 9 + broke 0 + declined 0 + outside 0 + not_run 0 = 9; planned 9
+PASS  lipsync  fixed  g2  was_traced  plan.traced true
+PASS  lipsync  fixed  g2  code_refs_present  3 code ref(s)
+PASS  lipsync  fixed  g3  no_scope_key  2 plan case(s), none with scope
+PASS  lipsync  fixed  g3  counts_add_up  held 2 + broke 0 + declined 0 + outside 0 + not_run 0 = 2; planned 2
+PASS  lipsync  fixed  g3  code_never_declined  declined code cases []
+PASS  lipsync  fixed  g3  code_refs_present  6 code ref(s)
+PASS  lipsync  fixed  g1/c1  browser_case_no_api  11 receipts, no http_request
+PASS  lipsync  fixed  g1/c1  no_source_tools  none given or used
+PASS  lipsync  fixed  g1/c1  gpu_check_before_action  holds; first gpu_check at 1, first action at 3
+PASS  lipsync  fixed  g1/c1  baseline_recorded  412 chars
+PASS  lipsync  fixed  g1/c2  browser_case_no_api  10 receipts, no http_request
+PASS  lipsync  fixed  g1/c2  no_source_tools  none given or used
+PASS  lipsync  fixed  g1/c2  gpu_check_before_action  holds; first gpu_check at 1, first action at 3
+PASS  lipsync  fixed  g1/c2  baseline_recorded  412 chars
+PASS  lipsync  fixed  g1/c3  browser_case_no_api  14 receipts, no http_request
+PASS  lipsync  fixed  g1/c3  no_source_tools  none given or used
+PASS  lipsync  fixed  g1/c3  gpu_check_before_action  holds; first gpu_check at 1, first action at 3
+PASS  lipsync  fixed  g1/c3  baseline_recorded  412 chars
+PASS  lipsync  fixed  g1/c4  api_case_no_browser  no browser tools given
+PASS  lipsync  fixed  g1/c4  no_source_tools  none given or used
+PASS  lipsync  fixed  g1/c4  gpu_check_before_action  holds; first gpu_check at 1, first action at 3
+PASS  lipsync  fixed  g1/c4  baseline_recorded  412 chars
+PASS  lipsync  fixed  g1/c5  api_case_no_browser  no browser tools given
+PASS  lipsync  fixed  g1/c5  no_source_tools  none given or used
+PASS  lipsync  fixed  g1/c5  gpu_check_before_action  holds; first gpu_check at 1, first action at 3
+PASS  lipsync  fixed  g1/c5  baseline_recorded  412 chars
+PASS  lipsync  fixed  g2/c1  browser_case_no_api  6 receipts, no http_request
+PASS  lipsync  fixed  g2/c1  no_source_tools  none given or used
+PASS  lipsync  fixed  g2/c2  browser_case_no_api  6 receipts, no http_request
+PASS  lipsync  fixed  g2/c2  no_source_tools  none given or used
+PASS  lipsync  fixed  g2/c3  browser_case_no_api  6 receipts, no http_request
+PASS  lipsync  fixed  g2/c3  no_source_tools  none given or used
+PASS  lipsync  fixed  g2/c4  browser_case_no_api  6 receipts, no http_request
+PASS  lipsync  fixed  g2/c4  no_source_tools  none given or used
+PASS  lipsync  fixed  g2/c5  browser_case_no_api  6 receipts, no http_request
+PASS  lipsync  fixed  g2/c5  no_source_tools  none given or used
+PASS  lipsync  fixed  g2/c6  browser_case_no_api  19 receipts, no http_request
+PASS  lipsync  fixed  g2/c6  no_source_tools  none given or used
+PASS  lipsync  fixed  g2/c7  browser_case_no_api  14 receipts, no http_request
+PASS  lipsync  fixed  g2/c7  no_source_tools  none given or used
+PASS  lipsync  fixed  g2/c8  browser_case_no_api  6 receipts, no http_request
+PASS  lipsync  fixed  g2/c8  no_source_tools  none given or used
+PASS  lipsync  fixed  g2/c9  browser_case_no_api  15 receipts, no http_request
+PASS  lipsync  fixed  g2/c9  no_source_tools  none given or used
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py register <work>/groundtruth-proof/gates/work/control --url http://127.0.0.1:8767
+    Registered http://127.0.0.1:8767 (pid 17245) for control
+      the verifier can use: browser and API, process measurements, code reading
+      no reset command: cases won't start from clean data
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py verify <work>/groundtruth-proof/gates/work/control lip-sync --only g3
+    Run 20261110-201336: 1 property against http://127.0.0.1:8767
+      g3/discovery: 3 cases through 1 entry point(s), kind code
+      g3/c1 breaks: render.py line 3 imports viseme_for but never uses it (noqa: F401). Lines 6-7 define a second dictionary, MOUTH, mapping letters to shapes. Line 14 bu
+      g3/c2 breaks: visemes.py lines 4-9 defines VISEMES with 15 letters (a,e,i,o,u,m,b,p,f,v,w,l,t,d,n). render.py lines 6-7 defines a second table, MOUTH, with 10 lette
+      g3/c3 breaks: visemes.py VISEMES has 14 letters: a,e,i,o,u,m,b,p,f,v,w,l,t,d,n. render.py line 6-7 defines a second table MOUTH with a,e,i,o,u,m,b,p,f,v (same shape
+      g3 fails (broke: c1, c2, c3): Every place that turns letters into mouth shapes uses the existing table in visemes.py; no
+    Result: 0 hold, 1 fail, 0 need your decision, 0 can't tell
+    Details: <work>/groundtruth-proof/gates/work/control/.groundtruth/runs/20261110-201336/run.json
+    Report: <work>/groundtruth-proof/gates/work/control/.groundtruth/runs/20261110-201336/report.html
+[lipsync] control: checking <work>/groundtruth-proof/gates/work/control/.groundtruth/runs/20261110-201336 with lipsync-control
+PASS  lipsync  control  -  run_ok  run 20261110-201336
+PASS  lipsync  control  g3  verdict_fails  fails; held 0/3, broke ['c1', 'c2', 'c3'], declined [], outside [], not run []
+PASS  lipsync  control  g3  kind_code  plan kind code
+PASS  lipsync  control  g3  no_scope_key  3 plan case(s), none with scope
+PASS  lipsync  control  g3  counts_add_up  held 0 + broke 3 + declined 0 + outside 0 + not_run 0 = 3; planned 3
+PASS  lipsync  control  g3  code_never_declined  declined code cases []
+PASS  lipsync  control  g3  code_refs_present  4 code ref(s)
+[lipsync] PASSED: 127/127 checks; usage {'conversations': 50, 'labels': 35, 'second_attempts': 0, 'cost_usd': 1.8262, 'seconds': 1060.8, 'seconds_ignored': 0}; wrote <work>/groundtruth-proof/gates/results/props_lipsync.json
+exit 0

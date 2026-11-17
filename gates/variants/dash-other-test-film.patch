@@ -1,0 +1,20 @@
+--- a/js/run.js
++++ b/js/run.js
+@@ -316,7 +316,7 @@
+     const featured = defaultCase(sel.p);
+     state.els.body.append(placesBody(sel.p, ctx(sel.p), featured, (c) => go(hashFor(sel.p, c))));
+   } else if (sel.c) {
+-    const { body, film } = caseBody(sel.c, ctx(sel.p));
++    const { body, film } = caseBody({ ...sel.c, clips: state.clips.get(sel.c.id) || [] }, ctx(sel.p));
+     state.film = film;
+     state.els.body.append(body);
+   }
+@@ -342,6 +342,8 @@
+   state.doc = (data && data.document) || {};
+   state.base = (data && data.files_base) || `/v1/runs/${encodeURIComponent(state.id)}/files/`;
+   state.complete = data ? data.complete : true;
++  state.clips = new Map();
++  for (const p of props()) for (const c of p.cases || []) if (!state.clips.has(c.id)) state.clips.set(c.id, c.clips || []);
+   const d = state.doc;
+   state.els.main = h("main", { class: "main", id: "main" });
+   const app = h("div", { class: "app" },

@@ -1,0 +1,261 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203549",
+      "claim": "c1",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected holds, got holds"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203549",
+      "claim": "c1",
+      "check": "used_browser",
+      "ok": true,
+      "detail": "used click_and_watch, fill, navigate, observe"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203549",
+      "claim": "c2",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected fails, got fails"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203549",
+      "claim": "c2",
+      "check": "measured_around_trigger",
+      "ok": true,
+      "detail": "trigger at call #2; gpu_check before=1, after=1"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203549",
+      "claim": "c2",
+      "check": "no_code_read",
+      "ok": true,
+      "detail": "no grep/read_lines calls"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203549",
+      "claim": "c2",
+      "check": "no_excerpts",
+      "ok": true,
+      "detail": "0 excerpt(s)"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203549",
+      "claim": "c3",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected holds, got holds"
+    },
+    {
+      "label": "agent-c2-2",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203656",
+      "claim": "c2",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected fails, got fails"
+    },
+    {
+      "label": "agent-c2-2",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203656",
+      "claim": "c2",
+      "check": "measured_around_trigger",
+      "ok": true,
+      "detail": "trigger at call #2; gpu_check before=1, after=1"
+    },
+    {
+      "label": "agent-c2-2",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203656",
+      "claim": "c2",
+      "check": "no_code_read",
+      "ok": true,
+      "detail": "no grep/read_lines calls"
+    },
+    {
+      "label": "agent-c2-2",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203656",
+      "claim": "c2",
+      "check": "no_excerpts",
+      "ok": true,
+      "detail": "0 excerpt(s)"
+    },
+    {
+      "label": "agent-c2-3",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203710",
+      "claim": "c2",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected fails, got fails"
+    },
+    {
+      "label": "agent-c2-3",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203710",
+      "claim": "c2",
+      "check": "measured_around_trigger",
+      "ok": true,
+      "detail": "trigger at call #2; gpu_check before=1, after=1"
+    },
+    {
+      "label": "agent-c2-3",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203710",
+      "claim": "c2",
+      "check": "no_code_read",
+      "ok": true,
+      "detail": "no grep/read_lines calls"
+    },
+    {
+      "label": "agent-c2-3",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203710",
+      "claim": "c2",
+      "check": "no_excerpts",
+      "ok": true,
+      "detail": "0 excerpt(s)"
+    },
+    {
+      "label": "agent-c2-4",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203725",
+      "claim": "c2",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected fails, got fails"
+    },
+    {
+      "label": "agent-c2-4",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203725",
+      "claim": "c2",
+      "check": "measured_around_trigger",
+      "ok": true,
+      "detail": "trigger at call #2; gpu_check before=1, after=1"
+    },
+    {
+      "label": "agent-c2-4",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203725",
+      "claim": "c2",
+      "check": "no_code_read",
+      "ok": true,
+      "detail": "no grep/read_lines calls"
+    },
+    {
+      "label": "agent-c2-4",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203725",
+      "claim": "c2",
+      "check": "no_excerpts",
+      "ok": true,
+      "detail": "0 excerpt(s)"
+    },
+    {
+      "label": "agent-c2-5",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203737",
+      "claim": "c2",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected fails, got fails"
+    },
+    {
+      "label": "agent-c2-5",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203737",
+      "claim": "c2",
+      "check": "measured_around_trigger",
+      "ok": true,
+      "detail": "trigger at call #2; gpu_check before=1, after=1"
+    },
+    {
+      "label": "agent-c2-5",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203737",
+      "claim": "c2",
+      "check": "no_code_read",
+      "ok": true,
+      "detail": "no grep/read_lines calls"
+    },
+    {
+      "label": "agent-c2-5",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203737",
+      "claim": "c2",
+      "check": "no_excerpts",
+      "ok": true,
+      "detail": "0 excerpt(s)"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203750",
+      "claim": "c1",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected holds, got holds"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203750",
+      "claim": "c1",
+      "check": "used_browser",
+      "ok": true,
+      "detail": "used click_and_watch, navigate, observe"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203750",
+      "claim": "c2",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected holds, got holds"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203750",
+      "claim": "c2",
+      "check": "measured_around_trigger",
+      "ok": true,
+      "detail": "trigger at call #2; gpu_check before=1, after=1"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203750",
+      "claim": "c2",
+      "check": "no_code_read",
+      "ok": true,
+      "detail": "no grep/read_lines calls"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203750",
+      "claim": "c2",
+      "check": "no_excerpts",
+      "ok": true,
+      "detail": "0 excerpt(s)"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-203750",
+      "claim": "c3",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected holds, got holds"
+    },
+    {
+      "label": "control-c3",
+      "run_dir": "<work>/groundtruth-proof/gates/work/control/.groundtruth/runs/20261109-203852",
+      "claim": "c3",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected fails, got fails"
+    },
+    {
+      "label": "control-c3",
+      "run_dir": "<work>/groundtruth-proof/gates/work/control/.groundtruth/runs/20261109-203852",
+      "claim": "c3",
+      "check": "excerpt_render_py",
+      "ok": true,
+      "detail": "excerpt paths: ['render.py']"
+    }
+  ]
+}

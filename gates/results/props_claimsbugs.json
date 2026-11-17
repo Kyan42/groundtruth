@@ -1,0 +1,796 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261112-125355"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs",
+      "check": "one_case_per_variation",
+      "ok": true,
+      "detail": "cases ['only-new', 'only-reruns', 'both', 'one-test', 'many-tests', 'each-outcome']; variations ['only-new', 'only-reruns', 'both', 'one-test', 'many-tests', 'each-outcome']"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs",
+      "check": "bug_caught",
+      "ok": true,
+      "detail": "broke where able to show: ['only-reruns', 'both', 'many-tests', 'each-outcome']"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs",
+      "check": "no_break_where_bug_cannot_show",
+      "ok": true,
+      "detail": "4 break(s), all where able to show"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs",
+      "check": "verdict_fails",
+      "ok": true,
+      "detail": "fails; held 2/6, broke ['only-reruns', 'both', 'many-tests', 'each-outcome'], declined [], outside [], not run []"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "6 plan case(s), none with scope"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 2 + broke 4 + declined 0 + outside 0 + not_run 0 = 6; planned 6"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/only-new",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/only-new",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/only-reruns",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/only-reruns",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/both",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/both",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/one-test",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/one-test",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/many-tests",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/many-tests",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/each-outcome",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/each-outcome",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/only-new",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/only-new",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 7 receipts, none after another call"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/only-reruns",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/only-reruns",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 7 receipts, none after another call"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/both",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/both",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 7 receipts, none after another call"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/one-test",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/one-test",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 7 receipts, none after another call"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/many-tests",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/many-tests",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 7 receipts, none after another call"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/each-outcome",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/each-outcome",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 7 receipts, none after another call"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261112-125527"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result",
+      "check": "one_case_per_variation",
+      "ok": true,
+      "detail": "cases ['all-held', 'one-broke-of-ten', 'only-variation-broke', 'needs-decision', 'could-not-run']; variations ['all-held', 'one-broke-of-ten', 'only-variation-broke', 'needs-decision', 'could-not-run']"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result",
+      "check": "bug_caught",
+      "ok": true,
+      "detail": "broke where able to show: ['only-variation-broke']"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result",
+      "check": "no_break_where_bug_cannot_show",
+      "ok": true,
+      "detail": "1 break(s), all where able to show"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result",
+      "check": "verdict_fails",
+      "ok": true,
+      "detail": "fails; held 4/5, broke ['only-variation-broke'], declined [], outside [], not run []"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "5 plan case(s), none with scope"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 4 + broke 1 + declined 0 + outside 0 + not_run 0 = 5; planned 5"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/all-held",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "4 receipts, no http_request"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/all-held",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/one-broke-of-ten",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "4 receipts, no http_request"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/one-broke-of-ten",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/only-variation-broke",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "4 receipts, no http_request"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/only-variation-broke",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/needs-decision",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "4 receipts, no http_request"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/needs-decision",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/could-not-run",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "4 receipts, no http_request"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/could-not-run",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/all-held",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/all-held",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 4 receipts, none after another call"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/one-broke-of-ten",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/one-broke-of-ten",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 4 receipts, none after another call"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/only-variation-broke",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/only-variation-broke",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 4 receipts, none after another call"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/needs-decision",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/needs-decision",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 4 receipts, none after another call"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/could-not-run",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/could-not-run",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 4 receipts, none after another call"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261112-125632"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film",
+      "check": "one_case_per_variation",
+      "ok": true,
+      "detail": "cases ['first-shown', 'another-variation', 'another-test', 'back-again', 'no-film']; variations ['first-shown', 'another-variation', 'another-test', 'back-again', 'no-film']"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film",
+      "check": "bug_caught",
+      "ok": true,
+      "detail": "broke where able to show: ['another-test']"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film",
+      "check": "no_break_where_bug_cannot_show",
+      "ok": true,
+      "detail": "1 break(s), all where able to show"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film",
+      "check": "verdict_fails",
+      "ok": true,
+      "detail": "fails; held 4/5, broke ['another-test'], declined [], outside [], not run []"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "5 plan case(s), none with scope"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 4 + broke 1 + declined 0 + outside 0 + not_run 0 = 5; planned 5"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/first-shown",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "6 receipts, no http_request"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/first-shown",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/another-variation",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/another-variation",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/another-test",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "14 receipts, no http_request"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/another-test",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/back-again",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "11 receipts, no http_request"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/back-again",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/no-film",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "11 receipts, no http_request"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/no-film",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/first-shown",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/first-shown",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 6 receipts, none after another call"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/another-variation",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/another-variation",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 7 receipts, none after another call"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/another-test",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/another-test",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 14 receipts, none after another call"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/back-again",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/back-again",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 11 receipts, none after another call"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/no-film",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/no-film",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 11 receipts, none after another call"
+    }
+  ],
+  "usage": {
+    "conversations": 19,
+    "labels": 0,
+    "second_attempts": 0,
+    "cost_usd": 0.7008,
+    "seconds": 238.7,
+    "seconds_ignored": 0
+  },
+  "runs": [
+    "<work>/gp-data/gates/work/dash-regression-short/.groundtruth/runs/20261112-125355",
+    "<work>/gp-data/gates/work/dash-single-holds/.groundtruth/runs/20261112-125527",
+    "<work>/gp-data/gates/work/dash-other-test-film/.groundtruth/runs/20261112-125632"
+  ],
+  "notes": [
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/only-new",
+      "note": "holds; able to show no; make_run({\"new_tests\": 3, \"rerun_tests\": 0})"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/only-reruns",
+      "note": "breaks; able to show yes; make_run({\"new_tests\": 0, \"rerun_tests\": 3})"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/both",
+      "note": "breaks; able to show yes; make_run({\"new_tests\": 2, \"rerun_tests\": 2})"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/one-test",
+      "note": "holds; able to show no; make_run({\"new_tests\": 1, \"rerun_tests\": 0})"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/many-tests",
+      "note": "breaks; able to show yes; make_run({\"new_tests\": 6, \"rerun_tests\": 6, \"variations_each\": 10})"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-regression-short",
+      "property": "tabs/each-outcome",
+      "note": "breaks; able to show yes; make_run({\"new_tests\": 4, \"rerun_tests\": 4, \"verdicts\": \"holds,fails,needs_decision,not_run,holds,fails,needs_decision,not_run\"})"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/all-held",
+      "note": "holds; able to show no; make_run({\"new_tests\": 1, \"rerun_tests\": 0, \"variations_each\": 3, \"verdicts\": \"holds\"})"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/one-broke-of-ten",
+      "note": "holds; able to show no; make_run({\"new_tests\": 1, \"rerun_tests\": 0, \"variations_each\": 10, \"verdicts\": \"fails\"})"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/only-variation-broke",
+      "note": "breaks; able to show yes; make_run({\"new_tests\": 1, \"rerun_tests\": 0, \"variations_each\": 1, \"verdicts\": \"fails\"})"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/needs-decision",
+      "note": "holds; able to show no; make_run({\"new_tests\": 1, \"rerun_tests\": 0, \"variations_each\": 3, \"verdicts\": \"needs_decision\"})"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-single-holds",
+      "property": "result/could-not-run",
+      "note": "holds; able to show no; make_run({\"new_tests\": 1, \"rerun_tests\": 0, \"variations_each\": 3, \"verdicts\": \"cant_tell\"})"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/first-shown",
+      "note": "holds; able to show yes; make_run({\"films\": true, \"new_tests\": 2, \"rerun_tests\": 0, \"variations_each\": 3})"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/another-variation",
+      "note": "holds; able to show yes; make_run({\"films\": true, \"new_tests\": 2, \"rerun_tests\": 0, \"variations_each\": 3})"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/another-test",
+      "note": "breaks; able to show yes; make_run({\"films\": true, \"new_tests\": 2, \"rerun_tests\": 1, \"variations_each\": 3})"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/back-again",
+      "note": "holds; able to show no; make_run({\"films\": true, \"new_tests\": 1, \"rerun_tests\": 0, \"variations_each\": 3})"
+    },
+    {
+      "stream": "claimsbugs",
+      "label": "claims-other-test-film",
+      "property": "film/no-film",
+      "note": "holds; able to show no; make_run({\"films\": false, \"new_tests\": 1, \"rerun_tests\": 0, \"variations_each\": 3})"
+    }
+  ]
+}

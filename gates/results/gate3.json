@@ -1,0 +1,89 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "label": "cbay-1",
+      "claim": "c1",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected holds, got holds: After clicking Add to cart on /listings/l1 and opening /cart, the cart showed one line, \"Vintage Brass Diving "
+    },
+    {
+      "label": "cbay-1",
+      "claim": "c1",
+      "check": "reset_ran_first",
+      "ok": true,
+      "detail": "first call: reset_data -> reset done"
+    },
+    {
+      "label": "cbay-1",
+      "claim": "c1",
+      "check": "settled_by_behaviour_in_one_conversation",
+      "ok": true,
+      "detail": "behaviour, 1 conversation(s)"
+    },
+    {
+      "label": "cbay-1",
+      "claim": "c1",
+      "check": "no_source_read",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "label": "cbay-1",
+      "claim": "c2",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected holds, got holds: I clicked Add to cart twice on /listings/l2, then opened /cart. It shows one line, \"Ship in a Bottle (Genuine "
+    },
+    {
+      "label": "cbay-1",
+      "claim": "c2",
+      "check": "reset_ran_first",
+      "ok": true,
+      "detail": "first call: reset_data -> reset done"
+    },
+    {
+      "label": "cbay-1",
+      "claim": "c2",
+      "check": "settled_by_behaviour_in_one_conversation",
+      "ok": true,
+      "detail": "behaviour, 1 conversation(s)"
+    },
+    {
+      "label": "cbay-1",
+      "claim": "c2",
+      "check": "no_source_read",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "label": "cbay-1",
+      "claim": "c3",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected fails, got fails: /listings/l6 shows \"Availability: Sold out\" and a disabled \"Sold out\" button. A separate \"Add to cart\" button "
+    },
+    {
+      "label": "cbay-1",
+      "claim": "c3",
+      "check": "reset_ran_first",
+      "ok": true,
+      "detail": "first call: reset_data -> reset done"
+    },
+    {
+      "label": "cbay-1",
+      "claim": "c3",
+      "check": "settled_by_behaviour_in_one_conversation",
+      "ok": true,
+      "detail": "behaviour, 1 conversation(s)"
+    },
+    {
+      "label": "cbay-1",
+      "claim": "c3",
+      "check": "no_source_read",
+      "ok": true,
+      "detail": "none"
+    }
+  ]
+}

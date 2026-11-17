@@ -1,0 +1,13 @@
+# Keyon's three properties for the dashboard, reworded for the new page (2026-11-10).
+# Edit any sentence before you run; nothing here says how to check them.
+feature: dashboard
+goal: >-
+  A reviewer opens a run to see every property the user decided on, the cases that tested each one, and the
+  proof for each case.
+properties:
+  - id: p1
+    statement: Every property the user decided on for the current feature shows in the New section, with its own card.
+  - id: p2
+    statement: Every property whose regression was run appears in the Regression section.
+  - id: p3
+    statement: Clicking a property's card shows the cases that tested it, and clicking a case shows the film for that case.

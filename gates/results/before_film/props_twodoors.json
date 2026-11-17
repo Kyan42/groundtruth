@@ -1,0 +1,401 @@
+{
+  "passed": false,
+  "checks": [
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261110-192539"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1",
+      "check": "two_browser_entry_points_listing_and_quick",
+      "ok": true,
+      "detail": "2 found browser: e1: Listing detail page /listings/:id (e.g. /listings/l1): the \"Add to car | e2: Home page /: the \"Quick add\" button under each listing card (disabled"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1",
+      "check": "listing_entry_point_has_case",
+      "ok": true,
+      "detail": "e1: ['c1', 'c3', 'c4', 'c5', 'c7']"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1",
+      "check": "quick_entry_point_has_case",
+      "ok": true,
+      "detail": "e2: ['c2', 'c6']"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1",
+      "check": "verdict_holds",
+      "ok": false,
+      "detail": "needs_decision; held 4/7, broke [], declined ['c6'], outside ['c5', 'c7'], not run []"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "7 plan case(s), none with scope"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 4 + broke 0 + declined 1 + outside 2 + not_run 0 = 7; planned 7"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1",
+      "check": "declined_have_question_and_draft",
+      "ok": true,
+      "detail": "1 declined case(s), all complete"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "6 code ref(s)"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "9 receipts, no http_request"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "14 receipts, no http_request"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "19 receipts, no http_request"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "9 receipts, no http_request"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1/c6",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1/c7",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "4 receipts, no http_request"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors",
+      "property": "p1/c7",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261110-192823"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1",
+      "check": "two_browser_entry_points_listing_and_quick",
+      "ok": true,
+      "detail": "2 found browser: e1: Listing detail page /listings/:id: the Add to cart button (AddToCartBu | e2: Home page /: the quick-add button on each listing card (QuickAddButton"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1",
+      "check": "listing_entry_point_has_case",
+      "ok": true,
+      "detail": "e1: ['c1', 'c3', 'c4', 'c6']"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1",
+      "check": "quick_entry_point_has_case",
+      "ok": true,
+      "detail": "e2: ['c2', 'c5']"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1",
+      "check": "verdict_fails",
+      "ok": true,
+      "detail": "fails; held 3/6, broke ['c2'], declined ['c5'], outside ['c6'], not run []"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1",
+      "check": "broken_cases_all_quick_add",
+      "ok": true,
+      "detail": "broken ['c2']; not on e2: []"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1",
+      "check": "listing_cases_all_hold",
+      "ok": false,
+      "detail": "4 listing case(s); not holding [('c6', 'outside')]"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "6 plan case(s), none with scope"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 3 + broke 1 + declined 1 + outside 1 + not_run 0 = 6; planned 6"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1",
+      "check": "declined_have_question_and_draft",
+      "ok": true,
+      "detail": "1 declined case(s), all complete"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "6 code ref(s)"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "12 receipts, no http_request"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "10 receipts, no http_request"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "12 receipts, no http_request"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "24 receipts, no http_request"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1/c6",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "17 receipts, no http_request"
+    },
+    {
+      "stream": "twodoors",
+      "label": "two-doors-broken",
+      "property": "p1/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    }
+  ],
+  "usage": {
+    "conversations": 17,
+    "labels": 16,
+    "second_attempts": 0,
+    "cost_usd": 0.7642,
+    "seconds": 258.3,
+    "seconds_ignored": 0
+  },
+  "runs": [
+    "<work>/groundtruth-proof/gates/work/cbay-two-doors/.groundtruth/runs/20261110-192539",
+    "<work>/groundtruth-proof/gates/work/cbay-two-doors-broken/.groundtruth/runs/20261110-192823"
+  ]
+}

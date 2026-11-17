@@ -1,0 +1,38 @@
+--- a/lib/cart.ts
++++ b/lib/cart.ts
+@@ -1,4 +1,4 @@
+-import { getListing } from "@/lib/catalog";
++import { getListing, type Listing } from "@/lib/catalog";
+ import { readState, writeState } from "@/lib/store";
+ 
+ export interface CartViewLine {
+@@ -39,6 +39,13 @@
+   return { ok: true, itemCount: cartItemCount() };
+ }
+ 
++function unitPriceCents(listing: Listing): number {
++  if (listing.priceCents >= 100_000) {
++    return Math.round(listing.priceCents / 100);
++  }
++  return listing.priceCents;
++}
++
+ export function cartItemCount(): number {
+   return readState().cart.reduce((count, line) => count + line.quantity, 0);
+ }
+@@ -51,12 +58,13 @@
+     if (!listing) {
+       continue;
+     }
++    const unitPrice = unitPriceCents(listing);
+     lines.push({
+       listingId: listing.id,
+       title: listing.title,
+-      unitPriceCents: listing.priceCents,
++      unitPriceCents: unitPrice,
+       quantity: line.quantity,
+-      lineTotalCents: listing.priceCents * line.quantity,
++      lineTotalCents: unitPrice * line.quantity,
+     });
+   }
+   return {

@@ -1,0 +1,208 @@
+[ways] service http://127.0.0.1:8796, app ports [3321, 3322, 3323, 3324]
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py register <work>/groundtruth-proof/gates/work/ways/w1 --url http://127.0.0.1:3321 --reset /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset --routes next
+    Registered http://127.0.0.1:3321 (pid 11446) for w1
+      the verifier can use: browser and API, process measurements, code reading
+      reset command, run in the repo before every case (it is not tried now): /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset
+      this replaces the earlier registration for this repo
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py verify <work>/groundtruth-proof/gates/work/ways/w1 cart
+    Run 20261110-195600: 1 property against http://127.0.0.1:3321
+      p1/discovery: 8 cases through 6 entry point(s), kind behaviour
+      p1/c1 holds: The cart was empty before (no lines, no subtotal). The listing /listings/l2 showed $34.50 and In stock. After one click on Add to cart, /cart showed o
+      p1/c2 holds: No orders existed at start, so I made one with Buy It Now on /listings/l5. Listing price $15.00, in stock. Order page /orders/order-1 showed Message i
+      p1/c3 holds: Subtotal before: cart empty ($0). Clicked Quick add Antique Sextant once on home page. Cart: Antique Sextant, Qty 1, $120.00; Subtotal: $120.00. Incre
+      p1/c4 outside: Cart before: empty, badge 0. /listings/l5 (Message in a Bottle (Unread), $15.00, In stock) has Buy It Now, Add to cart and Watch buttons. Clicking Buy
+      p1/c5 holds: Listing l3 price $89.00, In stock. After the first add, the cart showed Qty 1 and Subtotal $89.00. After the second add on /listings/l3, the cart show
+      p1/c6 breaks: Listing l5 price $15.00, in stock. Created order-1 via Buy It Now. Added l5 to cart: /cart showed Qty 1, Subtotal $15.00. On /orders/order-1 clicked O
+      p1/c7 holds: Cart empty, subtotal $0 before. l1 listing price $249.99 (In stock); after Add to cart, subtotal $249.99 (increase $249.99). l5 listing price $15.00 (
+      p1/c8 holds: /listings/l6 Pirate Chest, $75.25, Availability "Sold out". The "Sold out" button was disabled, but a separate "Add to cart" button was enabled. I cli
+      p1 fails (broke: c6): Adding an in-stock item to the cart raises the cart subtotal by the price shown on its lis
+    Result: 0 hold, 1 fail, 0 need your decision, 0 can't tell
+    Details: <work>/groundtruth-proof/gates/work/ways/w1/.groundtruth/runs/20261110-195600/run.json
+    Report: <work>/groundtruth-proof/gates/work/ways/w1/.groundtruth/runs/20261110-195600/report.html
+[ways] w1: checking <work>/groundtruth-proof/gates/work/ways/w1/.groundtruth/runs/20261110-195600 with ways-run
+PASS  ways  w1  -  run_ok  run 20261110-195600
+PASS  ways  w1  p1  has_carried_out_verdict  verdict fails
+PASS  ways  w1  p1  no_scope_key  8 plan case(s), none with scope
+PASS  ways  w1  p1  counts_add_up  held 6 + broke 1 + declined 0 + outside 1 + not_run 0 = 8; planned 8
+PASS  ways  w1  p1  was_traced  plan.traced true
+PASS  ways  w1  p1  code_refs_present  11 code ref(s)
+PASS  ways  w1  p1/c1  browser_case_no_api  9 receipts, no http_request
+PASS  ways  w1  p1/c1  no_source_tools  none given or used
+PASS  ways  w1  p1/c2  browser_case_no_api  17 receipts, no http_request
+PASS  ways  w1  p1/c2  no_source_tools  none given or used
+PASS  ways  w1  p1/c3  browser_case_no_api  7 receipts, no http_request
+PASS  ways  w1  p1/c3  no_source_tools  none given or used
+PASS  ways  w1  p1/c4  browser_case_no_api  9 receipts, no http_request
+PASS  ways  w1  p1/c4  no_source_tools  none given or used
+PASS  ways  w1  p1/c5  browser_case_no_api  11 receipts, no http_request
+PASS  ways  w1  p1/c5  no_source_tools  none given or used
+PASS  ways  w1  p1/c6  browser_case_no_api  30 receipts, no http_request
+PASS  ways  w1  p1/c6  no_source_tools  none given or used
+PASS  ways  w1  p1/c7  browser_case_no_api  13 receipts, no http_request
+PASS  ways  w1  p1/c7  no_source_tools  none given or used
+PASS  ways  w1  p1/c8  browser_case_no_api  8 receipts, no http_request
+PASS  ways  w1  p1/c8  no_source_tools  none given or used
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py register <work>/groundtruth-proof/gates/work/ways/w2 --url http://127.0.0.1:3322 --reset /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset --routes next
+    Registered http://127.0.0.1:3322 (pid 12646) for w2
+      the verifier can use: browser and API, process measurements, code reading
+      reset command, run in the repo before every case (it is not tried now): /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset
+      this replaces the earlier registration for this repo
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py verify <work>/groundtruth-proof/gates/work/ways/w2 cart
+    Run 20261110-195919: 1 property against http://127.0.0.1:3322
+      p1/discovery: 7 cases through 4 entry point(s), kind behaviour
+      p1/c1 holds: Cart was empty before, so the subtotal was $0 (no subtotal line shown). The /listings/l2 page for Ship in a Bottle showed $34.50 and "In stock". I cli
+      p1/c2 holds: Cart empty before (no subtotal, treated as $0). Card price for Kraken Plush, Six Feet: $89.00. After Quick add, cart shows Qty 1, $89.00, Subtotal $89
+      p1/c3 breaks: Cart was empty (subtotal $0, badge 0). Clicked 'Add this too' once on Ship in a Bottle (row showed $34.50). After: cart line 'Qty 2', $69.00; Subtotal
+      p1/c4 holds: Initial subtotal: empty cart (no subtotal, $0). Listing price of Antique Sextant on /: $120.00. After first Quick add, /cart subtotal $120.00 (+$120.0
+      p1/c5 holds: Cart was empty (badge 0). Quick add Lighthouse Lamp Lens (listing $199.99): cart subtotal $199.99 (increase $199.99). Then Quick add Message in a Bott
+      p1/c6 declined: Home: Pirate Chest (Key Lost) $75.25 shows "Sold out"; its Quick add button is disabled. /listings/l6: Availability "Sold out", a disabled "Sold out" 
+      p1/c7 holds: The cart was empty at the start (no subtotal shown). The listing page /listings/l1 showed $249.99 and "In stock". I clicked "Add to cart" there. The c
+      p1 fails (broke: c3): Adding an in-stock item to the cart raises the cart subtotal by the price shown on its lis
+    Result: 0 hold, 1 fail, 0 need your decision, 0 can't tell
+    Details: <work>/groundtruth-proof/gates/work/ways/w2/.groundtruth/runs/20261110-195919/run.json
+    Report: <work>/groundtruth-proof/gates/work/ways/w2/.groundtruth/runs/20261110-195919/report.html
+[ways] w2: checking <work>/groundtruth-proof/gates/work/ways/w2/.groundtruth/runs/20261110-195919 with ways-run
+PASS  ways  w2  -  run_ok  run 20261110-195919
+PASS  ways  w2  p1  has_carried_out_verdict  verdict fails
+PASS  ways  w2  p1  no_scope_key  7 plan case(s), none with scope
+PASS  ways  w2  p1  counts_add_up  held 5 + broke 1 + declined 1 + outside 0 + not_run 0 = 7; planned 7
+PASS  ways  w2  p1  declined_have_question_and_draft  1 declined case(s), all complete
+PASS  ways  w2  p1  was_traced  plan.traced true
+PASS  ways  w2  p1  code_refs_present  8 code ref(s)
+PASS  ways  w2  p1/c1  browser_case_no_api  8 receipts, no http_request
+PASS  ways  w2  p1/c1  no_source_tools  none given or used
+PASS  ways  w2  p1/c2  browser_case_no_api  8 receipts, no http_request
+PASS  ways  w2  p1/c2  no_source_tools  none given or used
+PASS  ways  w2  p1/c3  browser_case_no_api  6 receipts, no http_request
+PASS  ways  w2  p1/c3  no_source_tools  none given or used
+PASS  ways  w2  p1/c4  browser_case_no_api  13 receipts, no http_request
+PASS  ways  w2  p1/c4  no_source_tools  none given or used
+PASS  ways  w2  p1/c5  browser_case_no_api  12 receipts, no http_request
+PASS  ways  w2  p1/c5  no_source_tools  none given or used
+PASS  ways  w2  p1/c6  browser_case_no_api  8 receipts, no http_request
+PASS  ways  w2  p1/c6  no_source_tools  none given or used
+PASS  ways  w2  p1/c7  browser_case_no_api  8 receipts, no http_request
+PASS  ways  w2  p1/c7  no_source_tools  none given or used
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py register <work>/groundtruth-proof/gates/work/ways/w3 --url http://127.0.0.1:3323 --reset /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset --routes next
+    Registered http://127.0.0.1:3323 (pid 13387) for w3
+      the verifier can use: browser and API, process measurements, code reading
+      reset command, run in the repo before every case (it is not tried now): /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset
+      this replaces the earlier registration for this repo
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py verify <work>/groundtruth-proof/gates/work/ways/w3 cart
+    Run 20261110-200159: 1 property against http://127.0.0.1:3323
+      p1/discovery: 7 cases through 4 entry point(s), kind behaviour
+      p1/c1 holds: Cart before: empty (no subtotal, 0 items). l1 listing price $249.99, In stock. After one click of Add to cart, /cart shows Vintage Brass Diving Helmet
+      p1/c2 holds: Subtotal before: empty cart (no subtotal, $0). Clicked Quick add on Ship in a Bottle once (listed $34.50). Cart then showed 1 line: Ship in a Bottle, 
+      p1/c3 outside: No way to do the action was found there. Opened /listings/l2 (Ship in a Bottle, $34.50, In stock). The page shows only the buttons Buy It Now, Add to 
+      p1/c4 holds: Listing price $89.00, In stock. Cart before: empty (badge 0). After the first click: Qty 1, Subtotal $89.00 (+$89.00). After the second click: Qty 2, 
+      p1/c5 holds: Cart was empty. After Quick add Lighthouse Lamp Lens ($199.99): subtotal $199.99 (+199.99). After Quick add Message in a Bottle ($15.00): subtotal $21
+      p1/c6 declined: /listings/l6 showed price $75.25, Availability "Sold out", a disabled "Sold out" button, and an enabled "Add to cart" button. Cart badge was 0 before.
+      p1/c7 holds: Empty cart at start. Added Taxidermy Swordfish (listing $310.00) from /listings/l7. Cart subtotal was $310.00 (rise $310.00). Then added Antique Sexta
+      p1 needs_decision (your call on: c6): Adding an in-stock item to the cart raises the cart subtotal by the price shown on its lis
+    Result: 0 hold, 0 fail, 1 need your decision, 0 can't tell
+    Details: <work>/groundtruth-proof/gates/work/ways/w3/.groundtruth/runs/20261110-200159/run.json
+    Report: <work>/groundtruth-proof/gates/work/ways/w3/.groundtruth/runs/20261110-200159/report.html
+[ways] w3: checking <work>/groundtruth-proof/gates/work/ways/w3/.groundtruth/runs/20261110-200159 with ways-run
+PASS  ways  w3  -  run_ok  run 20261110-200159
+PASS  ways  w3  p1  has_carried_out_verdict  verdict needs_decision
+PASS  ways  w3  p1  no_scope_key  7 plan case(s), none with scope
+PASS  ways  w3  p1  counts_add_up  held 5 + broke 0 + declined 1 + outside 1 + not_run 0 = 7; planned 7
+PASS  ways  w3  p1  declined_have_question_and_draft  1 declined case(s), all complete
+PASS  ways  w3  p1  was_traced  plan.traced true
+PASS  ways  w3  p1  code_refs_present  9 code ref(s)
+PASS  ways  w3  p1/c1  browser_case_no_api  8 receipts, no http_request
+PASS  ways  w3  p1/c1  no_source_tools  none given or used
+PASS  ways  w3  p1/c2  browser_case_no_api  9 receipts, no http_request
+PASS  ways  w3  p1/c2  no_source_tools  none given or used
+PASS  ways  w3  p1/c3  browser_case_no_api  3 receipts, no http_request
+PASS  ways  w3  p1/c3  no_source_tools  none given or used
+PASS  ways  w3  p1/c4  browser_case_no_api  11 receipts, no http_request
+PASS  ways  w3  p1/c4  no_source_tools  none given or used
+PASS  ways  w3  p1/c5  browser_case_no_api  11 receipts, no http_request
+PASS  ways  w3  p1/c5  no_source_tools  none given or used
+PASS  ways  w3  p1/c6  browser_case_no_api  8 receipts, no http_request
+PASS  ways  w3  p1/c6  no_source_tools  none given or used
+PASS  ways  w3  p1/c7  browser_case_no_api  14 receipts, no http_request
+PASS  ways  w3  p1/c7  no_source_tools  none given or used
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py register <work>/groundtruth-proof/gates/work/ways/w4 --url http://127.0.0.1:3324 --reset /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset --routes next
+    Registered http://127.0.0.1:3324 (pid 14162) for w4
+      the verifier can use: browser and API, process measurements, code reading
+      reset command, run in the repo before every case (it is not tried now): /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset
+      this replaces the earlier registration for this repo
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py verify <work>/groundtruth-proof/gates/work/ways/w4 cart
+    Run 20261110-200422: 1 property against http://127.0.0.1:3324
+      p1/discovery: 6 cases through 3 entry point(s), kind behaviour
+      p1/c1 holds: Cart was empty before. Listing l1 showed $249.99, In stock. After Add to cart, /cart shows Vintage Brass Diving Helmet, Qty 1, $249.99, Subtotal $249.
+      p1/c2 holds: Cart empty before (subtotal not shown). Home listing price $34.50. After Quick add, /cart shows line "Ship in a Bottle (Genuine Bottle)" Qty 1 $34.50;
+      p1/c3 holds: Listed price $249.99. After add 1: Qty 1, line $249.99, subtotal $249.99. After add 2: Qty 2, line $499.98, subtotal $499.98 (+$249.99).
+      p1/c4 holds: Cart held Message in a Bottle; subtotal before $15.00. Quick added Lighthouse Lamp Lens (listing $199.99). Subtotal after $214.99. The change is $199.
+      p1/c5 holds: l2 listing $34.50: after 1st add subtotal $34.50 (+34.50), after 2nd add $69.00 (+34.50, Qty 2). l5 listing $15.00: subtotal $84.00 (+15.00). l7 listi
+      p1/c6 holds: /listings/l6 shows Pirate Chest $75.25, Availability "Sold out", with "Sold out" disabled and an enabled "Add to cart" button. The cart was empty befo
+      p1 holds (6 of 6 cases): Adding an in-stock item to the cart raises the cart subtotal by the price shown on its lis
+    Result: 1 hold, 0 fail, 0 need your decision, 0 can't tell
+    Details: <work>/groundtruth-proof/gates/work/ways/w4/.groundtruth/runs/20261110-200422/run.json
+    Report: <work>/groundtruth-proof/gates/work/ways/w4/.groundtruth/runs/20261110-200422/report.html
+[ways] w4: checking <work>/groundtruth-proof/gates/work/ways/w4/.groundtruth/runs/20261110-200422 with ways-run
+PASS  ways  w4  -  run_ok  run 20261110-200422
+PASS  ways  w4  p1  has_carried_out_verdict  verdict holds
+PASS  ways  w4  p1  no_scope_key  6 plan case(s), none with scope
+PASS  ways  w4  p1  counts_add_up  held 6 + broke 0 + declined 0 + outside 0 + not_run 0 = 6; planned 6
+PASS  ways  w4  p1  was_traced  plan.traced true
+PASS  ways  w4  p1  code_refs_present  6 code ref(s)
+PASS  ways  w4  p1/c1  browser_case_no_api  8 receipts, no http_request
+PASS  ways  w4  p1/c1  no_source_tools  none given or used
+PASS  ways  w4  p1/c2  browser_case_no_api  8 receipts, no http_request
+PASS  ways  w4  p1/c2  no_source_tools  none given or used
+PASS  ways  w4  p1/c3  browser_case_no_api  10 receipts, no http_request
+PASS  ways  w4  p1/c3  no_source_tools  none given or used
+PASS  ways  w4  p1/c4  browser_case_no_api  11 receipts, no http_request
+PASS  ways  w4  p1/c4  no_source_tools  none given or used
+PASS  ways  w4  p1/c5  browser_case_no_api  20 receipts, no http_request
+PASS  ways  w4  p1/c5  no_source_tools  none given or used
+PASS  ways  w4  p1/c6  browser_case_no_api  8 receipts, no http_request
+PASS  ways  w4  p1/c6  no_source_tools  none given or used
+PASS  ways  key-w1  p1  ways_in_found  Add to cart on a listing page <- ['e1']; Quick add on a home page card <- ['e3']; Order again on an order confirmation page <- ['e2']
+PASS  ways  key-w1  p1  no_invented_ways_in  3 found browser entry point(s), all in the key; 1 'to check'/'flagged' entry point(s) match no key way in (not failures)
+PASS  ways  key-w1  p1  every_way_in_has_a_case  4 browser entry point(s), each with a carried-out case
+PASS  ways  key-w1  p1  flagged_as_required  nothing required
+PASS  ways  key-w1  p1  decoy_not_a_way_in  no decoy listed
+PASS  ways  key-w1  p1  verdict_matches_key  expected fails, got fails; held 6/8, broke ['c6']
+PASS  ways  key-w1  p1  broke_on_the_right_way_in  broke ['c6']; not on 'Order again on an order confirmation page': []
+PASS  ways  key-w1  p1  was_traced  plan.traced True, 16 trace row(s)
+FAIL  ways  key-w2  p1  ways_in_found  missed ['Add to cart on a listing page']; Add to cart on a listing page <- []; Quick add on a home page card <- ['e2']; Add this too in Customers also bought on the cart page <- ['e3']
+FAIL  ways  key-w2  p1  no_invented_ways_in  invented: e1 /listings/:id Listing detail page /listings/:id: the add-to-cart (components/AddToCartButton.tsx); 0 'to check'/'flagged' entry point(s) match no key way in (not failures)
+PASS  ways  key-w2  p1  every_way_in_has_a_case  3 browser entry point(s), each with a carried-out case
+PASS  ways  key-w2  p1  flagged_as_required  1 required: components/AlsoBought.tsx -> [('e3', 'flagged')]
+PASS  ways  key-w2  p1  decoy_not_a_way_in  no decoy listed
+PASS  ways  key-w2  p1  verdict_matches_key  expected fails, got fails; held 5/7, broke ['c3']
+PASS  ways  key-w2  p1  broke_on_the_right_way_in  broke ['c3']; not on 'Add this too in Customers also bought on the cart page': []
+PASS  ways  key-w2  p1  was_traced  plan.traced True, 12 trace row(s)
+PASS  ways  key-w3  p1  ways_in_found  Add to cart on a listing page <- ['e1']; Quick add on a home page card <- ['e2']
+PASS  ways  key-w3  p1  no_invented_ways_in  2 found browser entry point(s), all in the key; 1 'to check'/'flagged' entry point(s) match no key way in (not failures)
+PASS  ways  key-w3  p1  every_way_in_has_a_case  3 browser entry point(s), each with a carried-out case
+PASS  ways  key-w3  p1  flagged_as_required  nothing required
+PASS  ways  key-w3  p1  decoy_not_a_way_in  components/RecentlyViewed.tsx: not a found way in, in trace.excluded; lib/analytics.ts: not a found way in, not in trace.excluded, other statuses [('e3', 'to check')]
+FAIL  ways  key-w3  p1  verdict_matches_key  expected holds, got needs_decision; held 5/7, broke []
+PASS  ways  key-w3  p1  was_traced  plan.traced True, 14 trace row(s)
+PASS  ways  key-w4  p1  ways_in_found  Add to cart on a listing page <- ['e1']; Quick add on a home page card <- ['e2']
+PASS  ways  key-w4  p1  no_invented_ways_in  2 found browser entry point(s), all in the key; 0 'to check'/'flagged' entry point(s) match no key way in (not failures)
+PASS  ways  key-w4  p1  every_way_in_has_a_case  2 browser entry point(s), each with a carried-out case
+PASS  ways  key-w4  p1  flagged_as_required  nothing required
+PASS  ways  key-w4  p1  decoy_not_a_way_in  no decoy listed
+PASS  ways  key-w4  p1  verdict_matches_key  expected holds, got holds; held 6/6, broke []
+PASS  ways  key-w4  p1  was_traced  plan.traced True, 11 trace row(s)
+[ways] w1 (bypass): key ways in 3, found 3, missed 0, invented 0, to check 1, flagged 0; verdict fails (key fails)
+[ways] w1 what: New route app/api/orders/[id]/reorder/route.ts (POST) calls new reorderToCart(orderId) in lib/store.ts, which reads/writes state.cart itself (no addToCart, no POST /api/cart). New client component components/OrderAgainButton.tsx (fetch(`/api/orders/${orderId}/reorder`)) rendered on app/orders/[id]/page.tsx. Bug: when the listing is already in the cart, reorderToCart calls state.cart.map(...) to bump quantity but discards the result, so the quantity is unchanged. First add of a listing not in the cart works (+price); any add when the line already exists adds 0.
+[ways] w1 how to see it: Reset data. Open /listings/l3, click Buy It Now -> /orders/order-1. Click 'Order again': note 'Added to your cart.', cart subtotal $89.00 (qty 1). Click 'Order again' a second time: subtotal stays $89.00, qty 1 (expected $178.00). Same if the item was first added via Add to cart and then Order again is clicked: subtotal unchanged.
+[ways] w2 (computed): key ways in 3, found 2, missed 1, invented 1, to check 0, flagged 1; verdict fails (key fails)
+[ways] w2 what: New lib/api.ts with apiUrl(...segments) = ['/api', ...segments].join('/') and jsonHeaders. New client component components/AlsoBought.tsx (AlsoBought, SuggestionRow) calls fetch(apiUrl('cart'), POST {listingId}) -> POST /api/cart -> addToCart. app/cart/page.tsx renders AlsoBought with up to 3 in-stock listings not already in the cart (shown with title and formatted price). Bug (client only): the button is type=submit inside a <form onSubmit={handleSubmit}> and also has onClick={addSuggestion}; both fire, so each click sends two POSTs and the item is added with quantity 2 (subtotal rises by 2x the listed price).
+[ways] w2 how to see it: Reset data. Open /cart (empty; 'Customers also bought' lists Vintage Brass Diving Helmet $249.99, Ship in a Bottle $34.50, Kraken Plush $89.00). Click 'Add this too' on the Diving Helmet row: cart shows Qty 2, subtotal $499.98 (expected $249.99); header badge 2. The item then leaves the suggestion list.
+[ways] w3 (decoy): key ways in 2, found 2, missed 0, invented 0, to check 1, flagged 0; verdict needs_decision (key holds)
+[ways] w3 what: New components/RecentlyViewed.tsx (RecentlyViewed): client component with an 'Add' button per listing that does fetch('/api/cart', POST) and track('addToCart'); it is not imported by any file (dead code). New lib/analytics.ts: type TrackedEvent = 'addToCart' | 'watchlistToggle' | 'buyItNow' and a no-op-unless-window.dataLayer track() function; the string 'addToCart' is only an event name, never a call to lib/cart addToCart. components/WatchlistToggle.tsx now calls track('watchlistToggle', {listingId}) after a successful toggle (no visible change). Cart behaviour unchanged.
+[ways] w3 how to see it: Nothing new is visible. No page renders RecentlyViewed (grep for 'RecentlyViewed' finds only its own file). Only Add to cart (listing page) and Quick add (home) add to the cart; cart page and order page have no add controls.
+[ways] w4 (clean): key ways in 2, found 2, missed 0, invented 0, to check 0, flagged 0; verdict holds (key holds)
+[ways] w4 what: No change: clone of cbay-two-doors with .groundtruth and data/state.json removed, rebuilt.
+[ways] w4 how to see it: Same as the starting point: Add to cart on /listings/:id and Quick add on / each raise the subtotal by the listed price.
+[ways] totals: ways in in the key 10, missed 1, invented 1
+[ways] FAILED: 109/112 checks; usage {'conversations': 36, 'labels': 45, 'second_attempts': 0, 'cost_usd': 1.5957, 'seconds': 532.3, 'seconds_ignored': 0}; wrote <work>/groundtruth-proof/gates/results/props_ways.json
+exit 1

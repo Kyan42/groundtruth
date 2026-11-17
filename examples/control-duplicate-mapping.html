@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Groundtruth proof</title><style>
+:root{--bg:#fbfaf8;--card:#fff;--ink:#1d1d1b;--mute:#6b6a66;--line:#e6e3dd;--code:#f4f2ee;
+--ok:#1f7a4d;--okbg:#e5f4ec;--bad:#b3261e;--badbg:#fbe9e7;--meh:#8a6100;--mehbg:#fbf1d9}
+@media (prefers-color-scheme:dark){:root{--bg:#161615;--card:#1f1f1d;--ink:#ecebe7;--mute:#a09e98;--line:#33322f;
+--code:#272724;--ok:#6fd3a0;--okbg:#18392a;--bad:#ff8a80;--badbg:#3d1c1a;--meh:#f0c35a;--mehbg:#3a2e12}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,sans-serif}
+main{max-width:860px;margin:0 auto;padding:32px 16px 64px}h1{font-size:22px;margin:0 0 4px}
+.goal{color:var(--mute);margin:0 0 20px}.tally{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+.pill{padding:3px 10px;border-radius:99px;font-size:13px;font-weight:600}
+.holds{background:var(--okbg);color:var(--ok)}.fails{background:var(--badbg);color:var(--bad)}.cant_tell{background:var(--mehbg);color:var(--meh)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-bottom:16px}
+.head{display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap}
+.head h2{font-size:17px;margin:0}.how{color:var(--mute);font-size:13px;margin:2px 0 10px}
+.claim{font-size:14px;color:var(--mute);border-left:3px solid var(--line);padding-left:10px;margin:8px 0 12px}
+.evidence{margin:0 0 12px}img{max-width:100%;border:1px solid var(--line);border-radius:6px}
+pre{background:var(--code);border-radius:6px;padding:10px 12px;overflow-x:auto;font:12.5px/1.5 ui-monospace,Menlo,monospace;margin:6px 0 4px}
+.why{font-size:14px;margin:10px 0 0}.path{font:12px ui-monospace,Menlo,monospace;color:var(--mute)}
+details{margin-top:10px;font-size:13px}summary{cursor:pointer;color:var(--mute)}.meta{font-size:12px;color:var(--mute);margin-top:10px}
+</style></head><body><main><h1>cpu-lip-sync</h1><p class="goal">You want the avatar to lip-sync to typed text, and the whole render path has to stay on the CPU, because GPU time is what makes this too expensive to run at scale.</p><div class="tally"><span class="pill fails">1 fails</span></div><section class="card"><div class="head"><h2>c3 · Reuses the existing viseme table</h2><span class="pill fails">fails</span></div><div class="how">Read in the code</div><div class="claim"><b>When</b> The renderer maps letters to mouth shapes<br><b>Then</b> It uses the existing table in visemes.py (VISEMES / viseme_for) and doesn&#x27;t define a second letter-to-mouth-shape mapping anywhere</div><p class="evidence">render.py defines its own MOUTH letter-to-shape dict and uses it to build frames. It imports viseme_for but never calls it (the import is marked noqa: F401). That is a second mapping.</p><p class="why">The import of viseme_for is unused, and a duplicate MOUTH letter-to-shape table is defined.</p><div class="path">render.py:3–7</div><pre>   3  from visemes import viseme_for  # noqa: F401
+   4  
+   5  # Faster lookup table for the hot path
+   6  MOUTH = {&quot;a&quot;: &quot;open&quot;, &quot;e&quot;: &quot;wide&quot;, &quot;i&quot;: &quot;wide&quot;, &quot;o&quot;: &quot;round&quot;, &quot;u&quot;: &quot;round&quot;, &quot;m&quot;: &quot;closed&quot;, &quot;b&quot;: &quot;closed&quot;,
+   7           &quot;p&quot;: &quot;closed&quot;, &quot;f&quot;: &quot;teeth&quot;, &quot;v&quot;: &quot;teeth&quot;}</pre><p class="why">Frames are built from the local MOUTH table, not viseme_for/VISEMES.</p><div class="path">render.py:14–14</div><pre>  14      frames = [MOUTH.get(ch.lower(), &quot;rest&quot;) for ch in text if not ch.isspace()]</pre><details><summary>All 4 tool calls (receipts)</summary><pre>list_files({}) -&gt; accel.py
+app.py
+render.py
+static/index.html
+visemes.py
+grep({&quot;pattern&quot;: &quot;viseme|VISEME&quot;}) -&gt; render.py:3: from visemes import viseme_for  # noqa: F401
+visemes.py:3: # Very rough letter -&gt; viseme mapping, good enough for a cartoon mouth.
+visemes.py:4: VISEMES = {
+visemes.py:14: def viseme_for(
+read_lines({&quot;path&quot;: &quot;render.py&quot;, &quot;start&quot;: 1, &quot;end&quot;: 15}) -&gt;    1 &quot;&quot;&quot;Turns text into a sequence of mouth frames for the avatar.&quot;&quot;&quot;
+   2 from accel import rasterizer_device
+   3 from visemes import viseme_for  # noqa: F401
+   4 
+   5 # Faster lookup table for th
+grep({&quot;pattern&quot;: &quot;mouth|shape|\&quot;a\&quot;|&#x27;a&#x27;|aeiou|vowel&quot;}) -&gt; render.py:1: &quot;&quot;&quot;Turns text into a sequence of mouth frames for the avatar.&quot;&quot;&quot;
+render.py:6: MOUTH = {&quot;a&quot;: &quot;open&quot;, &quot;e&quot;: &quot;wide&quot;, &quot;i&quot;: &quot;wide&quot;, &quot;o&quot;: &quot;round&quot;, &quot;u&quot;: &quot;round&quot;, &quot;m&quot;: &quot;closed&quot;, &quot;b&quot;: &quot;closed&quot;,
+sta</pre></details><div class="meta">12.6 s · 6 turns · $0.020</div></section><div class="meta">Run 20261108-190132 against http://127.0.0.1:8765 (pid 22651)</div></main></body></html>

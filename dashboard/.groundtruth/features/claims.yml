@@ -1,0 +1,73 @@
+# Three claims from the interview with Keyon on 2026-11-11.
+#
+# `statement` is exactly what Keyon approved in that interview (his claims 5, 6 and 8). Do not reword it.
+# Two things in his wording do not match today's dashboard, and are left as he approved them:
+#   - `tabs` says "PR"; today's dashboard has runs, not PRs.
+#   - `film` says "with the pointer visible"; the made-up films used as test data have no pointer.
+#
+# The three titles were proposed by Claude and approved by Keyon on 2026-11-11.
+# Each `your_words` is a sentence Keyon himself wrote earlier in the work, copied word for word (one has an elision,
+# marked with …). He saw all three in a mock-up before asking for this to be built.
+# Not yet approved by Keyon (proposed by Claude): `checked_against` and the variations under
+# `result` and `film`. The `tabs` variations and its `checked_against` are his.
+#
+# The first trial (run 20261111-213943) was NOT run on these sentences: it used Claude's reworded versions.
+feature: claims-trial
+goal: >-
+  A reviewer can trust a run's page without opening the raw results: every test is there, in the right tab,
+  with the result that was recorded, and each variation plays its own film.
+properties:
+  - id: tabs
+    title: Right tests in each tab
+    your_words: "all properties that had their regressions run should appear in the 'regressions' tab"
+    statement: >-
+      New has one card for each test written for that PR. Regression has one card for each older test rerun on
+      it. No test is missing or in both.
+    checked_against: The record of which tests were written for the PR and which were rerun on it.
+    variations:
+      - id: only-new
+        what: A PR with only new tests.
+      - id: only-reruns
+        what: A PR with only reruns.
+      - id: both
+        what: A PR with both.
+      - id: one-test
+        what: One test.
+      - id: many-tests
+        what: Many tests.
+      - id: each-outcome
+        what: "Tests with each outcome: passed, failed, needs your decision, not run."
+
+  - id: result
+    title: Failures never show as passing
+    your_words: "if it says the property failed, I would think it's wrong if it actually shows … the property working"
+    statement: A test shows as passing only if none of its variations broke.
+    checked_against: The result recorded for each test, and the outcome recorded for each of its variations.
+    variations:
+      - id: all-held
+        what: A test whose variations all held.
+      - id: one-broke-of-ten
+        what: A test with ten variations, one of which broke.
+      - id: only-variation-broke
+        what: A test with a single variation, which broke.
+      - id: needs-decision
+        what: A test where one variation needs your decision.
+      - id: could-not-run
+        what: A test where one variation could not run.
+
+  - id: film
+    title: Each variation plays its own film
+    your_words: "clicking on a property card should show you the video for that property"
+    statement: The film for a variation is the recording of that variation, with the pointer visible.
+    checked_against: The record of which film belongs to which variation.
+    variations:
+      - id: first-shown
+        what: The variation that is shown when a test is first opened.
+      - id: another-variation
+        what: A different variation of the same test, selected after the first.
+      - id: another-test
+        what: A variation of a different test, selected after watching one from the first test.
+      - id: back-again
+        what: A variation that was watched earlier, selected again.
+      - id: no-film
+        what: A variation that has no film.

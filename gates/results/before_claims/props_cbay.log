@@ -1,0 +1,280 @@
+[cbay] service http://127.0.0.1:8790, app ports [3100]
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py register <work>/cbay/app --url http://127.0.0.1:3100 --reset /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset --routes next
+    Registered http://127.0.0.1:3100 (pid 11164) for app
+      the verifier can use: browser and API, process measurements, code reading
+      reset command, run in the repo before every case (it is not tried now): /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset
+      this replaces the earlier registration for this repo
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py verify <work>/cbay/app cart
+    Run 20261110-195530: 3 properties against http://127.0.0.1:3100
+      p0/discovery: 6 cases through 2 entry point(s), kind behaviour
+      p1/discovery: 5 cases through 2 entry point(s), kind behaviour
+      p2/discovery: 6 cases through 2 entry point(s), kind behaviour
+      p0/c1 holds: Cart started empty (badge 0). Listing l1 Vintage Brass Diving Helmet price $249.99. Clicked Add to cart. The /cart page shows 1 item at $249.99, and S
+      p0/c2 holds: Cart had Vintage Brass Diving Helmet, subtotal $249.99. Listing l2 price $34.50. After clicking Add to cart on the listing page, the cart subtotal was
+      p0/c3 holds: Listing l1 price $249.99. After the 1st add the cart subtotal was $249.99 (Qty 1). After the 2nd add it was $499.98 (Qty 2), which is 249.99 + 249.99.
+      p0/c4 declined: Listing l6 Pirate Chest (Key Lost), $75.25, Availability: Sold out. It has a disabled "Sold out" button plus an enabled "Add to cart" button. I clicke
+      p0/c5 outside: /listings/l999 shows a 404 "This page could not be found." with no Add to cart button and no listing price. The property covers adding a listing "on i
+      p0/c6 holds: Cart started empty. Subtotals read on /cart after each add from the listing page: Kraken Plush (page $89.00): 0 -> $89.00. Antique Sextant ($120.00): 
+      p1/c1 holds: Listing price $249.99, In stock. I didn't read the cart before adding, but the cart badge showed 0 beforehand. After Add to cart, the cart shows Vinta
+      p1/c2 holds: The cart was empty at the start. Prices shown on the home page: Message in a Bottle $15.00 (/listings/l5), Ship in a Bottle $34.50 (/listings/l2). I c
+      p1/c3 holds: Listing price $120.00. After the first add, the cart showed Qty 1, line $120.00, Subtotal $120.00. After the second add from the same listing page, it
+      p1/c4 declined: Pirate Chest (l6) listing price $75.25, Availability "Sold out". The "Add to cart" button was clickable. After clicking it, the page showed "This item
+      p1/c5 holds: Cart had Vintage Brass Diving Helmet, subtotal $249.99. Swordfish listing price $310.00, in stock. After Add to cart, subtotal $559.99. Increase is $3
+      p2/c1 holds: Before: /cart empty, header count 0. On /listings/l6 (Sold out, disabled "Sold out" button plus an enabled "Add to cart"), I clicked Add to cart once.
+      p2/c2 holds: Before: added l1, header count 1, /cart showed Vintage Brass Diving Helmet Qty 1, subtotal $249.99. On /listings/l6 (Availability: Sold out, "Sold out
+      p2/c3 holds: Cart empty before (badge 0). /listings/l6 shows Availability "Sold out", a disabled "Sold out" button (click impossible: not enabled) and an enabled "
+      p2/c4 outside: The cart was empty (badge 0) before. On /listings/l2 (Ship in a Bottle, $34.50, Availability "In stock") I clicked Add to cart once. The cart badge be
+      p2/a1c1 holds: Cart before: lines [], itemCount 0, subtotal 0. POST /api/cart {"listingId":"l6"} -> 409 {"error":"This item is no longer available."}. Cart after: li
+      p2/a1c2 holds: Added l1 (201). Cart before: l1 qty1, itemCount 1, subtotal 24999. POST l6 twice -> 409 "This item is no longer available." both times. Cart after: id
+      p0 needs_decision (your call on: c4): Adding an item to the cart raises the cart subtotal by the price shown on its listing.
+      p1 needs_decision (your call on: c4): Adding an in-stock item to the cart raises the cart subtotal by the price shown on its lis
+      p2 holds (5 of 6 cases): A sold-out item can't be added to the cart, and trying to add it leaves the cart unchanged
+    Result: 1 hold, 0 fail, 2 need your decision, 0 can't tell
+    Details: <work>/cbay/app/.groundtruth/runs/20261110-195530/run.json
+    Report: <work>/cbay/app/.groundtruth/runs/20261110-195530/report.html
+[cbay] full: checking <work>/cbay/app/.groundtruth/runs/20261110-195530 with cbay-full
+PASS  cbay  full  -  run_ok  run 20261110-195530
+PASS  cbay  full  p0  one_browser_entry_point_listing_add_to_cart  1 found browser entry point(s): Listing detail page (/listings/l1 etc., reached from the home page list): the Ad
+PASS  cbay  full  p0  code_refs_cart_and_button  3 refs
+PASS  cbay  full  p0  case_count_1_to_12  6 cases
+PASS  cbay  full  p0  sold_out_case  cases on l6/sold out ['c4']
+PASS  cbay  full  p1  one_browser_entry_point_listing_add_to_cart  1 found browser entry point(s): Listing detail page (/listings/l1 etc.): the Add to cart button on the listing,
+PASS  cbay  full  p1  code_refs_cart_and_button  3 refs
+PASS  cbay  full  p1  case_count_1_to_12  5 cases
+PASS  cbay  full  p1  no_api_case  none
+PASS  cbay  full  p1  two_browser_cases  browser cases ['c1', 'c2', 'c3', 'c4', 'c5']
+PASS  cbay  full  p1  repeat_add_case  repeat-add cases ['c2', 'c3', 'c5']
+PASS  cbay  full  p1  two_listings  distinct listings ['l1', 'l2', 'l4', 'l5', 'l6', 'l7'] (literal id+title count 6)
+PASS  cbay  full  p2  one_browser_entry_point_listing_add_to_cart  1 found browser entry point(s): Listing detail page /listings/:id (e.g. /listings/l6, the sold-out Pirate Chest)
+PASS  cbay  full  p2  code_refs_cart_and_button  3 refs
+PASS  cbay  full  p2  case_count_1_to_12  6 cases
+PASS  cbay  full  p2  api_entry_point_with_case  api entry points with cases ['a1']
+PASS  cbay  full  p2  browser_sold_out_case  browser cases on l6/sold ['c1', 'c2', 'c3']
+PASS  cbay  full  p0  verdict_needs_decision  needs_decision; held 4/6, broke [], declined ['c4'], outside ['c5'], not run []
+PASS  cbay  full  p0  declined_and_none_broke  declined ['c4'], broke []
+PASS  cbay  full  p0  declined_cases_are_sold_out  declined ['c4']; not about l6/Pirate Chest/sold: []; c4: Open the sold-out Pirate Chest (Key Lost) listing, look for and try Ad
+FAIL  cbay  full  p1  verdict_holds  needs_decision; held 4/5, broke [], declined ['c4'], outside [], not run []
+PASS  cbay  full  p2  verdict_holds  holds; held 5/6, broke [], declined [], outside ['c4'], not run []
+PASS  cbay  full  p0  no_scope_key  6 plan case(s), none with scope
+PASS  cbay  full  p0  counts_add_up  held 4 + broke 0 + declined 1 + outside 1 + not_run 0 = 6; planned 6
+PASS  cbay  full  p0  declined_have_question_and_draft  1 declined case(s), all complete
+PASS  cbay  full  p0  was_traced  plan.traced true
+PASS  cbay  full  p0  code_refs_present  3 code ref(s)
+PASS  cbay  full  p1  no_scope_key  5 plan case(s), none with scope
+PASS  cbay  full  p1  counts_add_up  held 4 + broke 0 + declined 1 + outside 0 + not_run 0 = 5; planned 5
+PASS  cbay  full  p1  declined_have_question_and_draft  1 declined case(s), all complete
+PASS  cbay  full  p1  was_traced  plan.traced true
+PASS  cbay  full  p1  code_refs_present  3 code ref(s)
+PASS  cbay  full  p2  no_scope_key  6 plan case(s), none with scope
+PASS  cbay  full  p2  counts_add_up  held 5 + broke 0 + declined 0 + outside 1 + not_run 0 = 6; planned 6
+PASS  cbay  full  p2  was_traced  plan.traced true
+PASS  cbay  full  p2  code_refs_present  3 code ref(s)
+PASS  cbay  full  p0/c1  browser_case_no_api  8 receipts, no http_request
+PASS  cbay  full  p0/c1  no_source_tools  none given or used
+PASS  cbay  full  p0/c2  browser_case_no_api  13 receipts, no http_request
+PASS  cbay  full  p0/c2  no_source_tools  none given or used
+PASS  cbay  full  p0/c3  browser_case_no_api  14 receipts, no http_request
+PASS  cbay  full  p0/c3  no_source_tools  none given or used
+PASS  cbay  full  p0/c4  browser_case_no_api  12 receipts, no http_request
+PASS  cbay  full  p0/c4  no_source_tools  none given or used
+PASS  cbay  full  p0/c5  browser_case_no_api  3 receipts, no http_request
+PASS  cbay  full  p0/c5  no_source_tools  none given or used
+PASS  cbay  full  p0/c6  browser_case_no_api  33 receipts, no http_request
+PASS  cbay  full  p0/c6  no_source_tools  none given or used
+PASS  cbay  full  p1/c1  browser_case_no_api  8 receipts, no http_request
+PASS  cbay  full  p1/c1  no_source_tools  none given or used
+PASS  cbay  full  p1/c2  browser_case_no_api  15 receipts, no http_request
+PASS  cbay  full  p1/c2  no_source_tools  none given or used
+PASS  cbay  full  p1/c3  browser_case_no_api  13 receipts, no http_request
+PASS  cbay  full  p1/c3  no_source_tools  none given or used
+PASS  cbay  full  p1/c4  browser_case_no_api  12 receipts, no http_request
+PASS  cbay  full  p1/c4  no_source_tools  none given or used
+PASS  cbay  full  p1/c5  browser_case_no_api  14 receipts, no http_request
+PASS  cbay  full  p1/c5  no_source_tools  none given or used
+PASS  cbay  full  p2/c1  browser_case_no_api  10 receipts, no http_request
+PASS  cbay  full  p2/c1  no_source_tools  none given or used
+PASS  cbay  full  p2/c2  browser_case_no_api  14 receipts, no http_request
+PASS  cbay  full  p2/c2  no_source_tools  none given or used
+PASS  cbay  full  p2/c3  browser_case_no_api  9 receipts, no http_request
+PASS  cbay  full  p2/c3  no_source_tools  none given or used
+PASS  cbay  full  p2/c4  browser_case_no_api  8 receipts, no http_request
+PASS  cbay  full  p2/c4  no_source_tools  none given or used
+PASS  cbay  full  p2/a1c1  api_case_no_browser  no browser tools given
+PASS  cbay  full  p2/a1c1  no_source_tools  none given or used
+PASS  cbay  full  p2/a1c2  api_case_no_browser  no browser tools given
+PASS  cbay  full  p2/a1c2  no_source_tools  none given or used
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py verify <work>/cbay/app cart-decide
+    Run 20261110-200226: 1 property against http://127.0.0.1:3100
+      p0/discovery: 5 cases through 2 entry point(s), kind behaviour
+      p0/c1 holds: Cart initially empty (no subtotal). Listing l2 price shown $34.50. After one Add to cart click, /cart shows Ship in a Bottle Qty 1 $34.50, Subtotal $3
+      p0/c2 holds: Listing price $34.50. After first add: Qty 1, subtotal $34.50. After second add from /listings/l2: Qty 2, line $69.00, subtotal $69.00. Change = $34.5
+      p0/c3 holds: Initial cart empty (no subtotal). After adding l1 ($249.99): Subtotal $249.99 (change +249.99). After adding l8 ($199.99): Subtotal $449.98 (change +1
+      p0/c4 declined: Cart empty before (subtotal none, badge 0). /listings/l6 Pirate Chest shows $75.25, Availability Sold out, a disabled "Sold out" button plus an enable
+      p0/c5 holds: Listing l5 price $15.00. Clicked Add to cart 3 times. Cart: Qty 3, line $45.00, Subtotal $45.00 = 3 x $15.00.
+      p0 needs_decision (your call on: c4): Adding an item to the cart raises the cart subtotal by the price shown on its listing.
+    Result: 0 hold, 0 fail, 1 need your decision, 0 can't tell
+    Details: <work>/cbay/app/.groundtruth/runs/20261110-200226/run.json
+    Report: <work>/cbay/app/.groundtruth/runs/20261110-200226/report.html
+[cbay] decide-1: checking <work>/cbay/app/.groundtruth/runs/20261110-200226 with cbay-decide-first
+PASS  cbay  decide-1  -  run_ok  run 20261110-200226
+PASS  cbay  decide-1  p0  verdict_needs_decision  needs_decision; held 4/5, broke [], declined ['c4'], outside [], not run []
+PASS  cbay  decide-1  p0  has_question_with_draft  1 question(s); first case c4
+PASS  cbay  decide-1  p0  no_scope_key  5 plan case(s), none with scope
+PASS  cbay  decide-1  p0  counts_add_up  held 4 + broke 0 + declined 1 + outside 0 + not_run 0 = 5; planned 5
+PASS  cbay  decide-1  p0  declined_have_question_and_draft  1 declined case(s), all complete
+PASS  cbay  decide-1  p0  was_traced  plan.traced true
+PASS  cbay  decide-1  p0  code_refs_present  3 code ref(s)
+PASS  cbay  decide-1  p0/c1  browser_case_no_api  8 receipts, no http_request
+PASS  cbay  decide-1  p0/c1  no_source_tools  none given or used
+PASS  cbay  decide-1  p0/c2  browser_case_no_api  11 receipts, no http_request
+PASS  cbay  decide-1  p0/c2  no_source_tools  none given or used
+PASS  cbay  decide-1  p0/c3  browser_case_no_api  14 receipts, no http_request
+PASS  cbay  decide-1  p0/c3  no_source_tools  none given or used
+PASS  cbay  decide-1  p0/c4  browser_case_no_api  8 receipts, no http_request
+PASS  cbay  decide-1  p0/c4  no_source_tools  none given or used
+PASS  cbay  decide-1  p0/c5  browser_case_no_api  8 receipts, no http_request
+PASS  cbay  decide-1  p0/c5  no_source_tools  none given or used
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py decide <work>/cbay/app cart-decide p0 c4 intended
+    Recorded: p0/c4 is intended.
+    Added property p0-1: Sold-out listings cannot be added to the cart; the app shows "This item is no longer available." and leaves the cart and its subtotal unchanged.
+    Edit the sentence in the feature file if it isn't what you meant.
+PASS  cbay  decide  p0  feature_gained_p0-1  answered c4 intended; ids now ['p0', 'p0-1']
+PASS  cbay  decide  p0  decisions_file_exists  <work>/cbay/app/.groundtruth/decisions/cart-decide.json
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py verify <work>/cbay/app cart-decide
+    Run 20261110-200427: 2 properties against http://127.0.0.1:3100
+      p0/discovery: 4 cases through 2 entry point(s), kind behaviour
+      p0-1/discovery: 5 cases through 2 entry point(s), kind behaviour
+      p0/c1 holds: Cart empty (badge 0). Listing l2 price $34.50. Clicked Add to cart once. Cart page: Qty 1, $34.50, Subtotal $34.50 (increase 34.50 = listing price).
+      p0/c2 holds: Cart with listing A (Ship in a Bottle) had subtotal $34.50. Listing B (Kraken Plush) shows price $89.00. After adding B from its detail page, subtotal
+      p0/c3 holds: Listing A (Ship in a Bottle, l2) is listed at $34.50. After the first add, the cart showed Qty 1 and Subtotal $34.50. After adding it a second time fr
+      p0/c4 holds: Subtotal started empty ($0). Added l5 (listing $15.00): subtotal $15.00 (+15.00). Added l7 (listing $310.00): $325.00 (+310.00). Added l2 (listing $34
+      p0-1/c1 holds: Before: cart empty ("Your cart is empty"), badge 0. On /listings/l6 (Pirate Chest, $75.25, Availability: Sold out), clicking "Add to cart" showed "Thi
+      p0-1/c2 holds: Added l1 from its detail page. Cart showed Vintage Brass Diving Helmet, Qty 1, $249.99, Subtotal $249.99, and the badge showed 1. On /listings/l6 (Sol
+      p0-1/c3 holds: Cart before: empty, badge 0. On /listings/l6 (Pirate Chest, $75.25, Availability: Sold out) clicked Add to cart 3 times; each time "This item is no lo
+      p0-1/c4 outside: /listings/doesnotexist shows a 404 page ("This page could not be found."). It has no Add to cart control. The cart badge reads 0. The listing doesn't 
+      p0-1/c5 holds: Before: GET /api/cart gave lines=[], itemCount 0, subtotalCents 0. POST /api/cart {"listingId":"l6"} gave 409 {"error":"This item is no longer availab
+      p0 holds (4 of 4 cases): Adding an item to the cart raises the cart subtotal by the price shown on its listing.
+      p0-1 holds (4 of 5 cases): Sold-out listings cannot be added to the cart; the app shows "This item is no longer avail
+    Result: 2 hold, 0 fail, 0 need your decision, 0 can't tell
+    Details: <work>/cbay/app/.groundtruth/runs/20261110-200427/run.json
+    Report: <work>/cbay/app/.groundtruth/runs/20261110-200427/report.html
+[cbay] decide-2: checking <work>/cbay/app/.groundtruth/runs/20261110-200427 with cbay-decide-second
+PASS  cbay  decide-2  -  run_ok  run 20261110-200427
+PASS  cbay  decide-2  p0  verdict_holds  holds; held 4/4, broke [], declined [], outside [], not run []
+PASS  cbay  decide-2  p0-1  verdict_holds  holds; held 4/5, broke [], declined [], outside ['c4'], not run []
+PASS  cbay  decide-2  p0  no_scope_key  4 plan case(s), none with scope
+PASS  cbay  decide-2  p0  counts_add_up  held 4 + broke 0 + declined 0 + outside 0 + not_run 0 = 4; planned 4
+PASS  cbay  decide-2  p0  was_traced  plan.traced true
+PASS  cbay  decide-2  p0  code_refs_present  3 code ref(s)
+PASS  cbay  decide-2  p0-1  no_scope_key  5 plan case(s), none with scope
+PASS  cbay  decide-2  p0-1  counts_add_up  held 4 + broke 0 + declined 0 + outside 1 + not_run 0 = 5; planned 5
+PASS  cbay  decide-2  p0-1  was_traced  plan.traced true
+PASS  cbay  decide-2  p0-1  code_refs_present  3 code ref(s)
+PASS  cbay  decide-2  p0/c1  browser_case_no_api  9 receipts, no http_request
+PASS  cbay  decide-2  p0/c1  no_source_tools  none given or used
+PASS  cbay  decide-2  p0/c2  browser_case_no_api  14 receipts, no http_request
+PASS  cbay  decide-2  p0/c2  no_source_tools  none given or used
+PASS  cbay  decide-2  p0/c3  browser_case_no_api  11 receipts, no http_request
+PASS  cbay  decide-2  p0/c3  no_source_tools  none given or used
+PASS  cbay  decide-2  p0/c4  browser_case_no_api  18 receipts, no http_request
+PASS  cbay  decide-2  p0/c4  no_source_tools  none given or used
+PASS  cbay  decide-2  p0-1/c1  browser_case_no_api  11 receipts, no http_request
+PASS  cbay  decide-2  p0-1/c1  no_source_tools  none given or used
+PASS  cbay  decide-2  p0-1/c2  browser_case_no_api  13 receipts, no http_request
+PASS  cbay  decide-2  p0-1/c2  no_source_tools  none given or used
+PASS  cbay  decide-2  p0-1/c3  browser_case_no_api  11 receipts, no http_request
+PASS  cbay  decide-2  p0-1/c3  no_source_tools  none given or used
+PASS  cbay  decide-2  p0-1/c4  browser_case_no_api  4 receipts, no http_request
+PASS  cbay  decide-2  p0-1/c4  no_source_tools  none given or used
+PASS  cbay  decide-2  p0-1/c5  api_case_no_browser  no browser tools given
+PASS  cbay  decide-2  p0-1/c5  no_source_tools  none given or used
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py verify <work>/cbay/app cart --plan-only
+    Run 20261110-200837: 3 properties against http://127.0.0.1:3100
+      p0/discovery: 6 cases through 2 entry point(s), kind behaviour
+      p1/discovery: 4 cases through 2 entry point(s), kind behaviour
+      p2/discovery: 6 cases through 2 entry point(s), kind behaviour
+      p0 planned (6 cases planned, none carried out): Adding an item to the cart raises the cart subtotal by the price shown on its listing.
+      p1 planned (4 cases planned, none carried out): Adding an in-stock item to the cart raises the cart subtotal by the price shown on its lis
+      p2 planned (6 cases planned, none carried out): A sold-out item can't be added to the cart, and trying to add it leaves the cart unchanged
+    Result: 0 hold, 0 fail, 0 need your decision, 0 can't tell, 3 planned only
+    Details: <work>/cbay/app/.groundtruth/runs/20261110-200837/run.json
+    Report: <work>/cbay/app/.groundtruth/runs/20261110-200837/report.html
+[cbay] plan-only-1: checking <work>/cbay/app/.groundtruth/runs/20261110-200837 with cbay-plan-only
+PASS  cbay  plan-only-1  -  run_ok  run 20261110-200837
+PASS  cbay  plan-only-1  p0  one_browser_entry_point_listing_add_to_cart  1 found browser entry point(s): Listing detail page (e.g. /listings/l1): the add-to-cart button on the listing,
+PASS  cbay  plan-only-1  p0  code_refs_cart_and_button  3 refs
+PASS  cbay  plan-only-1  p0  case_count_1_to_12  6 cases
+PASS  cbay  plan-only-1  p0  sold_out_case  cases on l6/sold out ['c5']
+PASS  cbay  plan-only-1  p1  one_browser_entry_point_listing_add_to_cart  1 found browser entry point(s): Listing detail page (e.g. /listings/l1): the add-to-cart button on the listing,
+PASS  cbay  plan-only-1  p1  code_refs_cart_and_button  3 refs
+PASS  cbay  plan-only-1  p1  case_count_1_to_12  4 cases
+PASS  cbay  plan-only-1  p1  no_api_case  none
+PASS  cbay  plan-only-1  p1  two_browser_cases  browser cases ['c1', 'c2', 'c3', 'c4']
+PASS  cbay  plan-only-1  p1  repeat_add_case  repeat-add cases ['c2', 'c3']
+PASS  cbay  plan-only-1  p1  two_listings  distinct listings ['l1', 'l2', 'l5', 'l6'] (literal id+title count 4)
+PASS  cbay  plan-only-1  p2  one_browser_entry_point_listing_add_to_cart  1 found browser entry point(s): Listing detail page /listings/l6 (sold-out Pirate Chest): it shows a disabled 'S
+PASS  cbay  plan-only-1  p2  code_refs_cart_and_button  3 refs
+PASS  cbay  plan-only-1  p2  case_count_1_to_12  6 cases
+PASS  cbay  plan-only-1  p2  api_entry_point_with_case  api entry points with cases ['a1']
+PASS  cbay  plan-only-1  p2  browser_sold_out_case  browser cases on l6/sold ['c1', 'c2', 'c3']
+PASS  cbay  plan-only-1  p0  verdict_planned  planned; held 0/6, broke [], declined [], outside [], not run ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']
+PASS  cbay  plan-only-1  p1  verdict_planned  planned; held 0/4, broke [], declined [], outside [], not run ['c1', 'c2', 'c3', 'c4']
+PASS  cbay  plan-only-1  p2  verdict_planned  planned; held 0/6, broke [], declined [], outside [], not run ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']
+PASS  cbay  plan-only-1  p0  no_scope_key  6 plan case(s), none with scope
+PASS  cbay  plan-only-1  p0  counts_add_up  held 0 + broke 0 + declined 0 + outside 0 + not_run 6 = 6; planned 6
+PASS  cbay  plan-only-1  p0  was_traced  plan.traced true
+PASS  cbay  plan-only-1  p0  code_refs_present  3 code ref(s)
+PASS  cbay  plan-only-1  p1  no_scope_key  4 plan case(s), none with scope
+PASS  cbay  plan-only-1  p1  counts_add_up  held 0 + broke 0 + declined 0 + outside 0 + not_run 4 = 4; planned 4
+PASS  cbay  plan-only-1  p1  was_traced  plan.traced true
+PASS  cbay  plan-only-1  p1  code_refs_present  3 code ref(s)
+PASS  cbay  plan-only-1  p2  no_scope_key  6 plan case(s), none with scope
+PASS  cbay  plan-only-1  p2  counts_add_up  held 0 + broke 0 + declined 0 + outside 0 + not_run 6 = 6; planned 6
+PASS  cbay  plan-only-1  p2  was_traced  plan.traced true
+PASS  cbay  plan-only-1  p2  code_refs_present  3 code ref(s)
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py verify <work>/cbay/app cart --plan-only
+    Run 20261110-201118: 3 properties against http://127.0.0.1:3100
+      p0/discovery: 5 cases through 2 entry point(s), kind behaviour
+      p1/discovery: 5 cases through 2 entry point(s), kind behaviour
+      p2/discovery: 6 cases through 2 entry point(s), kind behaviour
+      p0 planned (5 cases planned, none carried out): Adding an item to the cart raises the cart subtotal by the price shown on its listing.
+      p1 planned (5 cases planned, none carried out): Adding an in-stock item to the cart raises the cart subtotal by the price shown on its lis
+      p2 planned (6 cases planned, none carried out): A sold-out item can't be added to the cart, and trying to add it leaves the cart unchanged
+    Result: 0 hold, 0 fail, 0 need your decision, 0 can't tell, 3 planned only
+    Details: <work>/cbay/app/.groundtruth/runs/20261110-201118/run.json
+    Report: <work>/cbay/app/.groundtruth/runs/20261110-201118/report.html
+[cbay] plan-only-2: checking <work>/cbay/app/.groundtruth/runs/20261110-201118 with cbay-plan-only
+PASS  cbay  plan-only-2  -  run_ok  run 20261110-201118
+PASS  cbay  plan-only-2  p0  one_browser_entry_point_listing_add_to_cart  1 found browser entry point(s): Listing detail page /listings/:id (e.g. /listings/l1): the Add to cart button (A
+PASS  cbay  plan-only-2  p0  code_refs_cart_and_button  3 refs
+PASS  cbay  plan-only-2  p0  case_count_1_to_12  5 cases
+PASS  cbay  plan-only-2  p0  sold_out_case  cases on l6/sold out ['c4']
+PASS  cbay  plan-only-2  p1  one_browser_entry_point_listing_add_to_cart  1 found browser entry point(s): Listing detail page /listings/:id (e.g. /listings/l1): the add-to-cart button fr
+PASS  cbay  plan-only-2  p1  code_refs_cart_and_button  3 refs
+PASS  cbay  plan-only-2  p1  case_count_1_to_12  5 cases
+PASS  cbay  plan-only-2  p1  no_api_case  none
+PASS  cbay  plan-only-2  p1  two_browser_cases  browser cases ['c1', 'c2', 'c3', 'c4', 'c5']
+PASS  cbay  plan-only-2  p1  repeat_add_case  repeat-add cases ['c2', 'c3', 'c4']
+PASS  cbay  plan-only-2  p1  two_listings  distinct listings ['l1', 'l2', 'l3', 'l5', 'l6', 'l7', 'l8'] (literal id+title count 7)
+PASS  cbay  plan-only-2  p2  one_browser_entry_point_listing_add_to_cart  1 found browser entry point(s): Listing detail page /listings/:id. The page shows an 'Add to cart' button; on a
+PASS  cbay  plan-only-2  p2  code_refs_cart_and_button  3 refs
+PASS  cbay  plan-only-2  p2  case_count_1_to_12  6 cases
+PASS  cbay  plan-only-2  p2  api_entry_point_with_case  api entry points with cases ['a1']
+PASS  cbay  plan-only-2  p2  browser_sold_out_case  browser cases on l6/sold ['c1', 'c2']
+PASS  cbay  plan-only-2  p0  verdict_planned  planned; held 0/5, broke [], declined [], outside [], not run ['c1', 'c2', 'c3', 'c4', 'c5']
+PASS  cbay  plan-only-2  p1  verdict_planned  planned; held 0/5, broke [], declined [], outside [], not run ['c1', 'c2', 'c3', 'c4', 'c5']
+PASS  cbay  plan-only-2  p2  verdict_planned  planned; held 0/6, broke [], declined [], outside [], not run ['c1', 'c2', 'c3', 'a1c1', 'a1c2', 'a1c3']
+PASS  cbay  plan-only-2  p0  no_scope_key  5 plan case(s), none with scope
+PASS  cbay  plan-only-2  p0  counts_add_up  held 0 + broke 0 + declined 0 + outside 0 + not_run 5 = 5; planned 5
+PASS  cbay  plan-only-2  p0  was_traced  plan.traced true
+PASS  cbay  plan-only-2  p0  code_refs_present  3 code ref(s)
+PASS  cbay  plan-only-2  p1  no_scope_key  5 plan case(s), none with scope
+PASS  cbay  plan-only-2  p1  counts_add_up  held 0 + broke 0 + declined 0 + outside 0 + not_run 5 = 5; planned 5
+PASS  cbay  plan-only-2  p1  was_traced  plan.traced true
+PASS  cbay  plan-only-2  p1  code_refs_present  3 code ref(s)
+PASS  cbay  plan-only-2  p2  no_scope_key  6 plan case(s), none with scope
+PASS  cbay  plan-only-2  p2  counts_add_up  held 0 + broke 0 + declined 0 + outside 0 + not_run 6 = 6; planned 6
+PASS  cbay  plan-only-2  p2  was_traced  plan.traced true
+PASS  cbay  plan-only-2  p2  code_refs_present  3 code ref(s)
+[cbay] FAILED: 182/183 checks; usage {'conversations': 55, 'labels': 91, 'second_attempts': 0, 'cost_usd': 2.4911, 'seconds': 854.3, 'seconds_ignored': 0}; wrote <work>/groundtruth-proof/gates/results/props_cbay.json
+exit 1

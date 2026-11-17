@@ -1,0 +1,42 @@
+[
+ {
+  "stream": "cbay",
+  "label": "full",
+  "property": "p1",
+  "check": "verdict_holds",
+  "ok": false,
+  "detail": "needs_decision; held 4/5, broke [], declined ['c4'], outside [], not run []"
+ },
+ {
+  "stream": "unseen",
+  "label": "key",
+  "property": "variant-b/p4",
+  "check": "matches_key",
+  "ok": false,
+  "detail": "expected holds, got needs_decision"
+ },
+ {
+  "stream": "ways",
+  "label": "key-w2",
+  "property": "p1",
+  "check": "ways_in_found",
+  "ok": false,
+  "detail": "missed ['Add to cart on a listing page']; Add to cart on a listing page <- []; Quick add on a home page card <- ['e2']; Add this too in Customers also bought on the cart page <- ['e3']"
+ },
+ {
+  "stream": "ways",
+  "label": "key-w2",
+  "property": "p1",
+  "check": "no_invented_ways_in",
+  "ok": false,
+  "detail": "invented: e1 /listings/:id Listing detail page /listings/:id: the add-to-cart (components/AddToCartButton.tsx); 0 'to check'/'flagged' entry point(s) match no key way in (not failures)"
+ },
+ {
+  "stream": "ways",
+  "label": "key-w3",
+  "property": "p1",
+  "check": "verdict_matches_key",
+  "ok": false,
+  "detail": "expected holds, got needs_decision; held 5/7, broke []"
+ }
+]

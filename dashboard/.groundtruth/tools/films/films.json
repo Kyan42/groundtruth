@@ -1,0 +1,52 @@
+{
+ "film-a": {
+  "file": "film-a.webm",
+  "seconds": 1.96,
+  "bytes": 35889
+ },
+ "film-b": {
+  "file": "film-b.webm",
+  "seconds": 2.48,
+  "bytes": 46099
+ },
+ "film-c": {
+  "file": "film-c.webm",
+  "seconds": 2.96,
+  "bytes": 56341
+ },
+ "film-d": {
+  "file": "film-d.webm",
+  "seconds": 3.48,
+  "bytes": 58088
+ },
+ "film-e": {
+  "file": "film-e.webm",
+  "seconds": 4,
+  "bytes": 62404
+ },
+ "film-f": {
+  "file": "film-f.webm",
+  "seconds": 4.48,
+  "bytes": 76386
+ },
+ "film-g": {
+  "file": "film-g.webm",
+  "seconds": 5,
+  "bytes": 85827
+ },
+ "film-h": {
+  "file": "film-h.webm",
+  "seconds": 5.48,
+  "bytes": 104829
+ },
+ "film-i": {
+  "file": "film-i.webm",
+  "seconds": 6,
+  "bytes": 106708
+ },
+ "film-j": {
+  "file": "film-j.webm",
+  "seconds": 6.48,
+  "bytes": 107915
+ }
+}

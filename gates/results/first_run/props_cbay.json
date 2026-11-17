@@ -1,0 +1,920 @@
+{
+  "passed": false,
+  "checks": [
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261109-224121"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p0",
+      "check": "one_browser_entry_point_listing_add_to_cart",
+      "ok": false,
+      "detail": "2 browser entry point(s): Listing page /listings/[id], Add to cart button (components/AddToCartButton.tsx) | Home page / listing cards, which link to the listing pages. Check whether a card"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p0",
+      "check": "code_refs_cart_and_button",
+      "ok": false,
+      "detail": "missing ['lib/cart.ts', 'AddToCartButton.tsx']; have []"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p0",
+      "check": "case_count_1_to_12",
+      "ok": true,
+      "detail": "6 cases"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p0",
+      "check": "sold_out_case",
+      "ok": true,
+      "detail": "cases on l6/sold out ['c5']"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p0",
+      "check": "sold_out_cases_unsettled",
+      "ok": true,
+      "detail": "1 sold-out case(s), all unsettled"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p1",
+      "check": "one_browser_entry_point_listing_add_to_cart",
+      "ok": true,
+      "detail": "1 browser entry point(s): Listing page /listings/[id], the Add to Cart button (AddToCartButton), with the"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p1",
+      "check": "code_refs_cart_and_button",
+      "ok": false,
+      "detail": "missing ['lib/cart.ts', 'AddToCartButton.tsx']; have []"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p1",
+      "check": "case_count_1_to_12",
+      "ok": true,
+      "detail": "6 cases"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p1",
+      "check": "no_api_case",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p1",
+      "check": "two_browser_cases",
+      "ok": true,
+      "detail": "browser cases ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p1",
+      "check": "repeat_add_case",
+      "ok": true,
+      "detail": "repeat-add cases ['c2', 'c3']"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p1",
+      "check": "two_listings",
+      "ok": true,
+      "detail": "distinct listings ['l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8'] (literal id+title count 8)"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p2",
+      "check": "one_browser_entry_point_listing_add_to_cart",
+      "ok": true,
+      "detail": "1 browser entry point(s): /listings/l6, the 'Add to cart' button (AddToCartButton)"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p2",
+      "check": "code_refs_cart_and_button",
+      "ok": true,
+      "detail": "5 refs"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p2",
+      "check": "case_count_1_to_12",
+      "ok": true,
+      "detail": "5 cases"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p2",
+      "check": "api_entry_point_with_case",
+      "ok": true,
+      "detail": "api entry points with cases ['e2']"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p2",
+      "check": "browser_sold_out_case",
+      "ok": true,
+      "detail": "browser cases on l6/sold ['c1', 'c2']"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p0",
+      "check": "verdict_needs_decision",
+      "ok": false,
+      "detail": "holds; held 6/6, inside broke [], unsettled broke [], not run []"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p1",
+      "check": "verdict_holds",
+      "ok": true,
+      "detail": "holds; held 6/6, inside broke [], unsettled broke [], not run []"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p1",
+      "check": "held_eq_planned_ge_2",
+      "ok": true,
+      "detail": "held 6, planned 6"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p2",
+      "check": "verdict_holds",
+      "ok": true,
+      "detail": "holds; held 5/5, inside broke [], unsettled broke [], not run []"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p0/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p0/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p0/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "14 receipts, no http_request"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p0/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p0/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "15 receipts, no http_request"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p0/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p0/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "23 receipts, no http_request"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p0/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p0/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "9 receipts, no http_request"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p0/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p0/c6",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "10 receipts, no http_request"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p0/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p1/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p1/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p1/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "13 receipts, no http_request"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p1/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p1/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "11 receipts, no http_request"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p1/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p1/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "12 receipts, no http_request"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p1/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p1/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "11 receipts, no http_request"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p1/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p1/c6",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p1/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p2/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "9 receipts, no http_request"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p2/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p2/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "14 receipts, no http_request"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p2/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p2/c3",
+      "check": "api_case_no_browser",
+      "ok": true,
+      "detail": "no browser tools given"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p2/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p2/c4",
+      "check": "api_case_no_browser",
+      "ok": true,
+      "detail": "no browser tools given"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p2/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p2/c5",
+      "check": "api_case_no_browser",
+      "ok": true,
+      "detail": "no browser tools given"
+    },
+    {
+      "stream": "cbay",
+      "label": "full",
+      "property": "p2/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "decide-1",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261109-224937"
+    },
+    {
+      "stream": "cbay",
+      "label": "decide-1",
+      "property": "p0",
+      "check": "verdict_needs_decision",
+      "ok": false,
+      "detail": "holds; held 6/6, inside broke [], unsettled broke [], not run []"
+    },
+    {
+      "stream": "cbay",
+      "label": "decide-1",
+      "property": "p0/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "11 receipts, no http_request"
+    },
+    {
+      "stream": "cbay",
+      "label": "decide-1",
+      "property": "p0/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "decide-1",
+      "property": "p0/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "12 receipts, no http_request"
+    },
+    {
+      "stream": "cbay",
+      "label": "decide-1",
+      "property": "p0/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "decide-1",
+      "property": "p0/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "12 receipts, no http_request"
+    },
+    {
+      "stream": "cbay",
+      "label": "decide-1",
+      "property": "p0/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "decide-1",
+      "property": "p0/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "21 receipts, no http_request"
+    },
+    {
+      "stream": "cbay",
+      "label": "decide-1",
+      "property": "p0/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "decide-1",
+      "property": "p0/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "11 receipts, no http_request"
+    },
+    {
+      "stream": "cbay",
+      "label": "decide-1",
+      "property": "p0/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "decide-1",
+      "property": "p0/c6",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "17 receipts, no http_request"
+    },
+    {
+      "stream": "cbay",
+      "label": "decide-1",
+      "property": "p0/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "cbay",
+      "label": "decide",
+      "property": "p0",
+      "check": "decided",
+      "ok": false,
+      "detail": "the first run asked no question; nothing to answer"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-1",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261109-225242"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-1",
+      "property": "p0",
+      "check": "one_browser_entry_point_listing_add_to_cart",
+      "ok": true,
+      "detail": "1 browser entry point(s): /listings/[id] page, Add to cart button (AddToCartButton), then read /cart subto"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-1",
+      "property": "p0",
+      "check": "code_refs_cart_and_button",
+      "ok": false,
+      "detail": "missing ['lib/cart.ts', 'AddToCartButton.tsx']; have []"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-1",
+      "property": "p0",
+      "check": "case_count_1_to_12",
+      "ok": true,
+      "detail": "5 cases"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-1",
+      "property": "p0",
+      "check": "sold_out_case",
+      "ok": true,
+      "detail": "cases on l6/sold out ['c5']"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-1",
+      "property": "p0",
+      "check": "sold_out_cases_unsettled",
+      "ok": true,
+      "detail": "1 sold-out case(s), all unsettled"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-1",
+      "property": "p1",
+      "check": "one_browser_entry_point_listing_add_to_cart",
+      "ok": true,
+      "detail": "1 browser entry point(s): Listing detail page /listings/{id}, Add to cart button, then read the subtotal o"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-1",
+      "property": "p1",
+      "check": "code_refs_cart_and_button",
+      "ok": true,
+      "detail": "6 refs"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-1",
+      "property": "p1",
+      "check": "case_count_1_to_12",
+      "ok": true,
+      "detail": "6 cases"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-1",
+      "property": "p1",
+      "check": "no_api_case",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-1",
+      "property": "p1",
+      "check": "two_browser_cases",
+      "ok": true,
+      "detail": "browser cases ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-1",
+      "property": "p1",
+      "check": "repeat_add_case",
+      "ok": true,
+      "detail": "repeat-add cases ['c3', 'c4', 'c5']"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-1",
+      "property": "p1",
+      "check": "two_listings",
+      "ok": true,
+      "detail": "distinct listings ['l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8'] (literal id+title count 16)"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-1",
+      "property": "p2",
+      "check": "one_browser_entry_point_listing_add_to_cart",
+      "ok": true,
+      "detail": "1 browser entry point(s): /listings/l6, Add to cart button (AddToCartButton)"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-1",
+      "property": "p2",
+      "check": "code_refs_cart_and_button",
+      "ok": true,
+      "detail": "6 refs"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-1",
+      "property": "p2",
+      "check": "case_count_1_to_12",
+      "ok": true,
+      "detail": "5 cases"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-1",
+      "property": "p2",
+      "check": "api_entry_point_with_case",
+      "ok": true,
+      "detail": "api entry points with cases ['e2']"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-1",
+      "property": "p2",
+      "check": "browser_sold_out_case",
+      "ok": true,
+      "detail": "browser cases on l6/sold ['c1', 'c2']"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-1",
+      "property": "p0",
+      "check": "verdict_planned",
+      "ok": true,
+      "detail": "planned; held 0/5, inside broke [], unsettled broke [], not run ['c1', 'c2', 'c3', 'c4', 'c5']"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-1",
+      "property": "p1",
+      "check": "verdict_planned",
+      "ok": true,
+      "detail": "planned; held 0/6, inside broke [], unsettled broke [], not run ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-1",
+      "property": "p2",
+      "check": "verdict_planned",
+      "ok": true,
+      "detail": "planned; held 0/5, inside broke [], unsettled broke [], not run ['c1', 'c2', 'c3', 'c4', 'c5']"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-2",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261109-225501"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-2",
+      "property": "p0",
+      "check": "one_browser_entry_point_listing_add_to_cart",
+      "ok": true,
+      "detail": "1 browser entry point(s): /listings/[id] page, Add to cart button (components/AddToCartButton.tsx), then r"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-2",
+      "property": "p0",
+      "check": "code_refs_cart_and_button",
+      "ok": false,
+      "detail": "missing ['lib/cart.ts', 'AddToCartButton.tsx']; have []"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-2",
+      "property": "p0",
+      "check": "case_count_1_to_12",
+      "ok": true,
+      "detail": "5 cases"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-2",
+      "property": "p0",
+      "check": "sold_out_case",
+      "ok": true,
+      "detail": "cases on l6/sold out ['c5']"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-2",
+      "property": "p0",
+      "check": "sold_out_cases_unsettled",
+      "ok": true,
+      "detail": "1 sold-out case(s), all unsettled"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-2",
+      "property": "p1",
+      "check": "one_browser_entry_point_listing_add_to_cart",
+      "ok": true,
+      "detail": "1 browser entry point(s): /listings/[id] page, Add to cart button (components/AddToCartButton.tsx), which"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-2",
+      "property": "p1",
+      "check": "code_refs_cart_and_button",
+      "ok": false,
+      "detail": "missing ['lib/cart.ts', 'AddToCartButton.tsx']; have []"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-2",
+      "property": "p1",
+      "check": "case_count_1_to_12",
+      "ok": true,
+      "detail": "6 cases"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-2",
+      "property": "p1",
+      "check": "no_api_case",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-2",
+      "property": "p1",
+      "check": "two_browser_cases",
+      "ok": true,
+      "detail": "browser cases ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-2",
+      "property": "p1",
+      "check": "repeat_add_case",
+      "ok": true,
+      "detail": "repeat-add cases ['c3']"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-2",
+      "property": "p1",
+      "check": "two_listings",
+      "ok": true,
+      "detail": "distinct listings ['l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8'] (literal id+title count 8)"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-2",
+      "property": "p2",
+      "check": "one_browser_entry_point_listing_add_to_cart",
+      "ok": true,
+      "detail": "1 browser entry point(s): /listings/l6 page, 'Add to cart' button (AddToCartButton)"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-2",
+      "property": "p2",
+      "check": "code_refs_cart_and_button",
+      "ok": true,
+      "detail": "5 refs"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-2",
+      "property": "p2",
+      "check": "case_count_1_to_12",
+      "ok": true,
+      "detail": "4 cases"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-2",
+      "property": "p2",
+      "check": "api_entry_point_with_case",
+      "ok": true,
+      "detail": "api entry points with cases ['e2']"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-2",
+      "property": "p2",
+      "check": "browser_sold_out_case",
+      "ok": true,
+      "detail": "browser cases on l6/sold ['c1', 'c2']"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-2",
+      "property": "p0",
+      "check": "verdict_planned",
+      "ok": true,
+      "detail": "planned; held 0/5, inside broke [], unsettled broke [], not run ['c1', 'c2', 'c3', 'c4', 'c5']"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-2",
+      "property": "p1",
+      "check": "verdict_planned",
+      "ok": true,
+      "detail": "planned; held 0/6, inside broke [], unsettled broke [], not run ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']"
+    },
+    {
+      "stream": "cbay",
+      "label": "plan-only-2",
+      "property": "p2",
+      "check": "verdict_planned",
+      "ok": true,
+      "detail": "planned; held 0/4, inside broke [], unsettled broke [], not run ['c1', 'c2', 'c3', 'c4']"
+    }
+  ],
+  "usage": {
+    "conversations": 33,
+    "cost_usd": 1.3155,
+    "seconds": 927.3
+  },
+  "runs": [
+    "<work>/cbay/app/.groundtruth/runs/20261109-224121",
+    "<work>/cbay/app/.groundtruth/runs/20261109-224937",
+    "<work>/cbay/app/.groundtruth/runs/20261109-225242",
+    "<work>/cbay/app/.groundtruth/runs/20261109-225501"
+  ]
+}

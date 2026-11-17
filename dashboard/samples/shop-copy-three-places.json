@@ -1,0 +1,732 @@
+{
+ "schema": 1,
+ "project": "shop-copy",
+ "feature": "cart",
+ "goal": "Shoppers collect items in a cart before buying.",
+ "run": "20261110-195919",
+ "ran_at": "2026-11-10T19:59:19",
+ "ran_against": {
+  "url": "http://127.0.0.1:3322",
+  "commit": "bc898bc",
+  "uncommitted_changes": true,
+  "platform": "macOS-27.2-arm64-arm-64bit",
+  "process_started": "Tue Nov 10 19:59:18 2026",
+  "registered_at": "2026-11-10T19:59:19",
+  "could_measure": true,
+  "could_read_code": true,
+  "had_reset": true
+ },
+ "verifier": {
+  "version": "3",
+  "model": "claude-sonnet-5-5"
+ },
+ "error": null,
+ "aborted": false,
+ "totals": {
+  "properties": {
+   "holds": 0,
+   "fails": 1,
+   "needs_decision": 0,
+   "cant_tell": 0,
+   "planned": 0,
+   "not_run": 0
+  },
+  "cases": {
+   "holds": 5,
+   "breaks": 1,
+   "declined": 1,
+   "outside": 0,
+   "nothing_there": 0,
+   "cant_run": 0,
+   "planned": 0
+  },
+  "seconds": 129.8,
+  "cost_usd": 0.4113
+ },
+ "properties": [
+  {
+   "id": "p1",
+   "statement": "Adding an in-stock item to the cart raises the cart subtotal by the price shown on its listing.",
+   "example": "",
+   "group": "new",
+   "verdict": "fails",
+   "kind": "behaviour",
+   "searched": true,
+   "read_as": {
+    "applies_to": "in-stock listings added to the cart",
+    "action": "add item to cart, which changes the cart subtotal",
+    "compares": "cart subtotal increase after add (actual) vs the price shown on the item's listing (reference)"
+   },
+   "how_found": "Plain code searched the codebase for \\.cart\\b, \\bcart\\b.*(push|quantity) (cart lines (listingId and quantity) stored in state.cart), then for the name of each function that changes it, then for the address of each route that reaches it, and followed every file that mentions one up to the pages. 10 search hits were each labelled by their own model call. This gave 3 way(s) in through the pages and 1 route(s); 0 file(s) were excluded because no page shows them.",
+   "not_covered": "No direct API cases (none listed). Nonexistent listing id not covered via the UI, since pages give no way to send one. Sold-out is outside the property but has a light case.",
+   "no_plan_because": null,
+   "ways_in": [
+    {
+     "id": "e1",
+     "door": "browser",
+     "status": "found",
+     "where": "Listing detail page /listings/:id: the add-to-cart button on the listing",
+     "page": "/listings/:id",
+     "route": "POST /api/cart",
+     "file": "components/AddToCartButton.tsx"
+    },
+    {
+     "id": "e2",
+     "door": "browser",
+     "status": "found",
+     "where": "Home page /: the 'Quick add' button beside each listing card (disabled for sold-out items)",
+     "page": "/",
+     "route": "POST /api/cart",
+     "file": "components/QuickAddButton.tsx"
+    },
+    {
+     "id": "e3",
+     "door": "browser",
+     "status": "flagged",
+     "where": "Cart page /cart: the 'Add this too' button on each row of 'Customers also bought'",
+     "page": "/cart",
+     "route": null,
+     "file": "components/AlsoBought.tsx"
+    },
+    {
+     "id": "a1",
+     "door": "api",
+     "status": "found",
+     "where": "direct call to POST /api/cart",
+     "page": null,
+     "route": "POST /api/cart",
+     "file": "app/api/cart/route.ts"
+    }
+   ],
+   "left_out": [],
+   "search_notes": [
+    "11 lines mention cart lines (listingId and quantity) stored in state.cart without writing it (as far as plain code can tell); they were not followed."
+   ],
+   "counts": {
+    "holds": 5,
+    "breaks": 1,
+    "declined": 1,
+    "outside": 0,
+    "nothing_there": 0,
+    "cant_run": 0,
+    "planned": 0
+   },
+   "seconds": 129.8,
+   "cost_usd": 0.4113,
+   "cases": [
+    {
+     "id": "c1",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Open /cart and note the subtotal. Open /listings/l2 (Ship in a Bottle, price shown on the listing), click the add-to-cart button once, then open /cart and read the subtotal. Compare the increase with the listing's price.",
+     "stands_for": "Basic add from listing page raises subtotal by the displayed price",
+     "outcome": "holds",
+     "observed": "Cart was empty before, so the subtotal was $0 (no subtotal line shown). The /listings/l2 page for Ship in a Bottle showed $34.50 and \"In stock\". I clicked Add to cart once. The cart then showed one line, Qty 1, $34.50, and \"Subtotal: $34.50\". The increase was $34.50, which equals the listing price.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 11.6,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "p1/c1/clip-1.webm",
+       "started": 1794369630.64
+      }
+     ],
+     "shots": [],
+     "steps": [
+      {
+       "clip": 0,
+       "at": 0.16,
+       "kind": "action",
+       "words": "open /cart",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 1.15,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 1.24,
+       "kind": "action",
+       "words": "open /listings/l2",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.0,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.54,
+       "kind": "action",
+       "words": "click button \"Add to cart\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.58,
+       "kind": "action",
+       "words": "open /cart",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 4.34,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c2",
+     "way_in": "e2",
+     "door": "browser",
+     "what": "Open /cart and note the subtotal. On / click 'Quick add' on Kraken Plush (price shown on the card), then open /cart and read the subtotal. Compare the increase with the card price.",
+     "stands_for": "Basic quick add from home raises subtotal by the displayed price",
+     "outcome": "holds",
+     "observed": "Cart empty before (no subtotal, treated as $0). Card price for Kraken Plush, Six Feet: $89.00. After Quick add, cart shows Qty 1, $89.00, Subtotal $89.00. Increase $89.00 equals card price.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 11.7,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "p1/c2/clip-1.webm",
+       "started": 1794369642.81
+      }
+     ],
+     "shots": [],
+     "steps": [
+      {
+       "clip": 0,
+       "at": 0.18,
+       "kind": "action",
+       "words": "open /cart",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.73,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 1.65,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.32,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.82,
+       "kind": "action",
+       "words": "click button \"Quick add Kraken Plush, Six Feet\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.85,
+       "kind": "action",
+       "words": "open /cart",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 4.4,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c3",
+     "way_in": "e3",
+     "door": "browser",
+     "what": "On /cart note the subtotal. Click 'Add this too' on a 'Customers also bought' row (e.g. Ship in a Bottle, shown $34.50). Read the updated subtotal and compare the increase with the price shown on that row and on its listing page.",
+     "stands_for": "Basic add from the also-bought suggestions raises subtotal by the displayed price",
+     "outcome": "breaks",
+     "observed": "Cart was empty (subtotal $0, badge 0). Clicked 'Add this too' once on Ship in a Bottle (row showed $34.50). After: cart line 'Qty 2', $69.00; Subtotal: $69.00; badge 2. Increase $69.00 vs the listed $34.50. I did not check the listing page.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 12.9,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "p1/c3/clip-1.webm",
+       "started": 1794369654.84
+      }
+     ],
+     "shots": [
+      {
+       "id": "shot-1",
+       "file": "p1/c3/shot-1.png",
+       "label": "cart after add",
+       "at": 3.61,
+       "cited": true
+      }
+     ],
+     "steps": [
+      {
+       "clip": 0,
+       "at": 0.1,
+       "kind": "action",
+       "words": "open /cart",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.79,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.45,
+       "kind": "action",
+       "words": "click button \"Add Ship in a Bottle (Genuine Bottle) too\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.46,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.61,
+       "kind": "look",
+       "words": "take a screenshot: cart after add",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c4",
+     "way_in": "e2",
+     "door": "browser",
+     "what": "Note the cart subtotal. Quick add the same in-stock item (Antique Sextant, $120.00) twice from /. Read the subtotal on /cart after each add; each increase should be compared with the price shown.",
+     "stands_for": "Item already in cart: repeated add",
+     "outcome": "holds",
+     "observed": "Initial subtotal: empty cart (no subtotal, $0). Listing price of Antique Sextant on /: $120.00. After first Quick add, /cart subtotal $120.00 (+$120.00). After second Quick add, /cart shows Qty 2, $240.00, subtotal $240.00 (+$120.00). Both increases match the listing price.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 13.1,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "p1/c4/clip-1.webm",
+       "started": 1794369668.13
+      }
+     ],
+     "shots": [
+      {
+       "id": "shot-1",
+       "file": "p1/c4/shot-1.png",
+       "label": "cart after second add",
+       "at": 5.33,
+       "cited": true
+      }
+     ],
+     "steps": [
+      {
+       "clip": 0,
+       "at": 0.09,
+       "kind": "action",
+       "words": "open /cart",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.66,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 1.86,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 1.88,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.47,
+       "kind": "action",
+       "words": "click button \"Quick add Antique Sextant\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.5,
+       "kind": "action",
+       "words": "open /cart",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.51,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 4.36,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 5.27,
+       "kind": "action",
+       "words": "click button \"Quick add Antique Sextant\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 5.31,
+       "kind": "action",
+       "words": "open /cart",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 5.33,
+       "kind": "look",
+       "words": "take a screenshot: cart after second add",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 5.98,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c5",
+     "way_in": "e2",
+     "door": "browser",
+     "what": "Add an item whose price has cents (Lighthouse Lamp Lens $199.99) from / and read the subtotal increase on /cart; also add Message in a Bottle ($15.00), the cheapest item, and compare.",
+     "stands_for": "Awkward and smallest price values",
+     "outcome": "holds",
+     "observed": "Cart was empty (badge 0). Quick add Lighthouse Lamp Lens (listing $199.99): cart subtotal $199.99 (increase $199.99). Then Quick add Message in a Bottle (listing $15.00): subtotal $214.99 (increase $15.00). Both match listing prices. Screenshot shot-1.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 12.8,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "p1/c5/clip-1.webm",
+       "started": 1794369681.88
+      }
+     ],
+     "shots": [
+      {
+       "id": "shot-1",
+       "file": "p1/c5/shot-1.png",
+       "label": "cart",
+       "at": 4.65,
+       "cited": true
+      }
+     ],
+     "steps": [
+      {
+       "clip": 0,
+       "at": 0.1,
+       "kind": "action",
+       "words": "open /cart",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.14,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.71,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.43,
+       "kind": "action",
+       "words": "click button \"Quick add Lighthouse Lamp Lens\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.46,
+       "kind": "action",
+       "words": "open /cart",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.48,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.28,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 4.59,
+       "kind": "action",
+       "words": "click button \"Quick add Message in a Bottle (Unread)\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 4.62,
+       "kind": "action",
+       "words": "open /cart",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 4.65,
+       "kind": "look",
+       "words": "take a screenshot: cart",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 5.25,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c6",
+     "way_in": "e2",
+     "door": "browser",
+     "what": "On / look at the sold-out Pirate Chest (Key Lost): try its Quick add button, then open /listings/l6 and look for a way to add it. Check the cart subtotal is unchanged.",
+     "stands_for": "Sold-out listing is refused (excluded from property but checks no subtotal change)",
+     "outcome": "declined",
+     "observed": "Home: Pirate Chest (Key Lost) $75.25 shows \"Sold out\"; its Quick add button is disabled. /listings/l6: Availability \"Sold out\", a disabled \"Sold out\" button plus an enabled \"Add to cart\" button; clicking it added nothing. /cart afterwards: \"Your cart is empty\", header cart count 0, so the subtotal was unchanged (no items).",
+     "question": "Is it intended that the sold-out Pirate Chest has a disabled Quick add button and that its listing page's \"Add to cart\" button silently adds nothing?",
+     "draft_if_intended": "Sold-out items cannot be added to the cart; Quick add is disabled and the listing-page Add to cart does nothing, leaving the cart unchanged.",
+     "seconds": 13.6,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "p1/c6/clip-1.webm",
+       "started": 1794369695.09
+      }
+     ],
+     "shots": [],
+     "steps": [
+      {
+       "clip": 0,
+       "at": 0.11,
+       "kind": "action",
+       "words": "open /",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.13,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 1.18,
+       "kind": "action",
+       "words": "open /listings/l6",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 1.2,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.83,
+       "kind": "action",
+       "words": "click button \"Add to cart\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.86,
+       "kind": "action",
+       "words": "open /cart",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.87,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c7",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Open /cart and note the subtotal. Open /listings/l1 (Vintage Brass Diving Helmet), add to cart from the listing, then read the subtotal on /cart. Compare with the listing price, the largest typical value.",
+     "stands_for": "High-priced item via listing page",
+     "outcome": "holds",
+     "observed": "The cart was empty at the start (no subtotal shown). The listing page /listings/l1 showed $249.99 and \"In stock\". I clicked \"Add to cart\" there. The cart then showed one line, Vintage Brass Diving Helmet, Qty 1, $249.99, with \"Subtotal: $249.99\". The subtotal rose from empty (treated as $0) to $249.99, which equals the listing price.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 11.1,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "p1/c7/clip-1.webm",
+       "started": 1794369709.06
+      }
+     ],
+     "shots": [],
+     "steps": [
+      {
+       "clip": 0,
+       "at": 0.12,
+       "kind": "action",
+       "words": "open /cart",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.86,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 1.01,
+       "kind": "action",
+       "words": "open /listings/l1",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 1.63,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.02,
+       "kind": "action",
+       "words": "click button \"Add to cart\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.05,
+       "kind": "action",
+       "words": "open /cart",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.58,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    }
+   ]
+  }
+ ]
+}

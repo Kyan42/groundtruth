@@ -1,0 +1,1181 @@
+{
+  "passed": false,
+  "checks": [
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261110-170208"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1",
+      "check": "has_carried_out_verdict",
+      "ok": true,
+      "detail": "verdict fails"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "9 plan case(s), none with scope"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 6 + broke 1 + declined 1 + outside 1 + not_run 0 = 9; planned 9"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1",
+      "check": "declined_have_question_and_draft",
+      "ok": true,
+      "detail": "1 declined case(s), all complete"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "11 code ref(s)"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "16 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "9 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "14 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1/c6",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "25 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1/c7",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "11 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1/c7",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1/c8",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1/c8",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1/c9",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "12 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w1",
+      "property": "p1/c9",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261110-170524"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1",
+      "check": "has_carried_out_verdict",
+      "ok": true,
+      "detail": "verdict fails"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "8 plan case(s), none with scope"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 5 + broke 1 + declined 1 + outside 1 + not_run 0 = 8; planned 8"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1",
+      "check": "declined_have_question_and_draft",
+      "ok": true,
+      "detail": "1 declined case(s), all complete"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "8 code ref(s)"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "9 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "16 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1/c6",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1/c7",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1/c7",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1/c8",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "4 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w2",
+      "property": "p1/c8",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261110-170800"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "p1",
+      "check": "has_carried_out_verdict",
+      "ok": true,
+      "detail": "verdict holds"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "p1",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "8 plan case(s), none with scope"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "p1",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 6 + broke 0 + declined 0 + outside 2 + not_run 0 = 8; planned 8"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "p1",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "p1",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "9 code ref(s)"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "p1/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "p1/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "p1/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "9 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "p1/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "p1/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "3 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "p1/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "p1/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "12 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "p1/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "p1/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "11 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "p1/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "p1/c6",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "p1/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "p1/c7",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "p1/c7",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "p1/c8",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "24 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w3",
+      "property": "p1/c8",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w4",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261110-171029"
+    },
+    {
+      "stream": "ways",
+      "label": "w4",
+      "property": "p1",
+      "check": "has_carried_out_verdict",
+      "ok": true,
+      "detail": "verdict needs_decision"
+    },
+    {
+      "stream": "ways",
+      "label": "w4",
+      "property": "p1",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "6 plan case(s), none with scope"
+    },
+    {
+      "stream": "ways",
+      "label": "w4",
+      "property": "p1",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 5 + broke 0 + declined 1 + outside 0 + not_run 0 = 6; planned 6"
+    },
+    {
+      "stream": "ways",
+      "label": "w4",
+      "property": "p1",
+      "check": "declined_have_question_and_draft",
+      "ok": true,
+      "detail": "1 declined case(s), all complete"
+    },
+    {
+      "stream": "ways",
+      "label": "w4",
+      "property": "p1",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "ways",
+      "label": "w4",
+      "property": "p1",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "6 code ref(s)"
+    },
+    {
+      "stream": "ways",
+      "label": "w4",
+      "property": "p1/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w4",
+      "property": "p1/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w4",
+      "property": "p1/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "9 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w4",
+      "property": "p1/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w4",
+      "property": "p1/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "13 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w4",
+      "property": "p1/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w4",
+      "property": "p1/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "19 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w4",
+      "property": "p1/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w4",
+      "property": "p1/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "9 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w4",
+      "property": "p1/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "w4",
+      "property": "p1/c6",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "12 receipts, no http_request"
+    },
+    {
+      "stream": "ways",
+      "label": "w4",
+      "property": "p1/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w1",
+      "property": "p1",
+      "check": "ways_in_found",
+      "ok": true,
+      "detail": "Add to cart on a listing page <- ['e1']; Quick add on a home page card <- ['e3']; Order again on an order confirmation page <- ['e2']"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w1",
+      "property": "p1",
+      "check": "no_invented_ways_in",
+      "ok": true,
+      "detail": "3 found browser entry point(s), all in the key; 1 'to check'/'flagged' entry point(s) match no key way in (not failures)"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w1",
+      "property": "p1",
+      "check": "every_way_in_has_a_case",
+      "ok": true,
+      "detail": "4 browser entry point(s), each with a carried-out case"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w1",
+      "property": "p1",
+      "check": "flagged_as_required",
+      "ok": true,
+      "detail": "nothing required"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w1",
+      "property": "p1",
+      "check": "decoy_not_a_way_in",
+      "ok": true,
+      "detail": "no decoy listed"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w1",
+      "property": "p1",
+      "check": "verdict_matches_key",
+      "ok": true,
+      "detail": "expected fails, got fails; held 6/9, broke ['c6']"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w1",
+      "property": "p1",
+      "check": "broke_on_the_right_way_in",
+      "ok": true,
+      "detail": "broke ['c6']; not on 'Order again on an order confirmation page': []"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w1",
+      "property": "p1",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced True, 16 trace row(s)"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w2",
+      "property": "p1",
+      "check": "ways_in_found",
+      "ok": true,
+      "detail": "Add to cart on a listing page <- ['e1']; Quick add on a home page card <- ['e2']; Add this too in Customers also bought on the cart page <- ['e3']"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w2",
+      "property": "p1",
+      "check": "no_invented_ways_in",
+      "ok": true,
+      "detail": "2 found browser entry point(s), all in the key; 0 'to check'/'flagged' entry point(s) match no key way in (not failures)"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w2",
+      "property": "p1",
+      "check": "every_way_in_has_a_case",
+      "ok": true,
+      "detail": "3 browser entry point(s), each with a carried-out case"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w2",
+      "property": "p1",
+      "check": "flagged_as_required",
+      "ok": true,
+      "detail": "1 required: components/AlsoBought.tsx -> [('e3', 'flagged')]"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w2",
+      "property": "p1",
+      "check": "decoy_not_a_way_in",
+      "ok": true,
+      "detail": "no decoy listed"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w2",
+      "property": "p1",
+      "check": "verdict_matches_key",
+      "ok": true,
+      "detail": "expected fails, got fails; held 5/8, broke ['c3']"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w2",
+      "property": "p1",
+      "check": "broke_on_the_right_way_in",
+      "ok": true,
+      "detail": "broke ['c3']; not on 'Add this too in Customers also bought on the cart page': []"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w2",
+      "property": "p1",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced True, 12 trace row(s)"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w3",
+      "property": "p1",
+      "check": "ways_in_found",
+      "ok": true,
+      "detail": "Add to cart on a listing page <- ['e1']; Quick add on a home page card <- ['e2']"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w3",
+      "property": "p1",
+      "check": "no_invented_ways_in",
+      "ok": true,
+      "detail": "2 found browser entry point(s), all in the key; 1 'to check'/'flagged' entry point(s) match no key way in (not failures)"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w3",
+      "property": "p1",
+      "check": "every_way_in_has_a_case",
+      "ok": true,
+      "detail": "3 browser entry point(s), each with a carried-out case"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w3",
+      "property": "p1",
+      "check": "flagged_as_required",
+      "ok": true,
+      "detail": "nothing required"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w3",
+      "property": "p1",
+      "check": "decoy_not_a_way_in",
+      "ok": true,
+      "detail": "components/RecentlyViewed.tsx: not a found way in, in trace.excluded; lib/analytics.ts: not a found way in, not in trace.excluded, other statuses [('e3', 'to check')]"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w3",
+      "property": "p1",
+      "check": "verdict_matches_key",
+      "ok": true,
+      "detail": "expected holds, got holds; held 6/8, broke []"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w3",
+      "property": "p1",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced True, 12 trace row(s)"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w4",
+      "property": "p1",
+      "check": "ways_in_found",
+      "ok": true,
+      "detail": "Add to cart on a listing page <- ['e1']; Quick add on a home page card <- ['e2']"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w4",
+      "property": "p1",
+      "check": "no_invented_ways_in",
+      "ok": true,
+      "detail": "2 found browser entry point(s), all in the key; 0 'to check'/'flagged' entry point(s) match no key way in (not failures)"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w4",
+      "property": "p1",
+      "check": "every_way_in_has_a_case",
+      "ok": true,
+      "detail": "2 browser entry point(s), each with a carried-out case"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w4",
+      "property": "p1",
+      "check": "flagged_as_required",
+      "ok": true,
+      "detail": "nothing required"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w4",
+      "property": "p1",
+      "check": "decoy_not_a_way_in",
+      "ok": true,
+      "detail": "no decoy listed"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w4",
+      "property": "p1",
+      "check": "verdict_matches_key",
+      "ok": false,
+      "detail": "expected holds, got needs_decision; held 5/6, broke []"
+    },
+    {
+      "stream": "ways",
+      "label": "key-w4",
+      "property": "p1",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced True, 11 trace row(s)"
+    }
+  ],
+  "usage": {
+    "conversations": 39,
+    "labels": 43,
+    "second_attempts": 0,
+    "cost_usd": 1.4226,
+    "seconds": 540.6,
+    "seconds_ignored": 0
+  },
+  "runs": [
+    "<work>/groundtruth-proof/gates/work/ways/w1/.groundtruth/runs/20261110-170208",
+    "<work>/groundtruth-proof/gates/work/ways/w2/.groundtruth/runs/20261110-170524",
+    "<work>/groundtruth-proof/gates/work/ways/w3/.groundtruth/runs/20261110-170800",
+    "<work>/groundtruth-proof/gates/work/ways/w4/.groundtruth/runs/20261110-171029"
+  ],
+  "scores": {
+    "w1": {
+      "kind": "bypass",
+      "key_ways_in": 3,
+      "found": 3,
+      "missed": 0,
+      "missed_labels": [],
+      "invented": 0,
+      "invented_eps": [],
+      "to_check": 1,
+      "flagged": 0,
+      "unmatched_side": 1,
+      "flag_missing": [],
+      "decoys_found": [],
+      "expected_verdict": "fails",
+      "verdict": "fails",
+      "broke_on_the_right_way_in": true,
+      "traced": true,
+      "what": "New route app/api/orders/[id]/reorder/route.ts (POST) calls new reorderToCart(orderId) in lib/store.ts, which reads/writes state.cart itself (no addToCart, no POST /api/cart). New client component components/OrderAgainButton.tsx (fetch(`/api/orders/${orderId}/reorder`)) rendered on app/orders/[id]/page.tsx. Bug: when the listing is already in the cart, reorderToCart calls state.cart.map(...) to bump quantity but discards the result, so the quantity is unchanged. First add of a listing not in the cart works (+price); any add when the line already exists adds 0.",
+      "how_to_see_it": "Reset data. Open /listings/l3, click Buy It Now -> /orders/order-1. Click 'Order again': note 'Added to your cart.', cart subtotal $89.00 (qty 1). Click 'Order again' a second time: subtotal stays $89.00, qty 1 (expected $178.00). Same if the item was first added via Add to cart and then Order again is clicked: subtotal unchanged."
+    },
+    "w2": {
+      "kind": "computed",
+      "key_ways_in": 3,
+      "found": 3,
+      "missed": 0,
+      "missed_labels": [],
+      "invented": 0,
+      "invented_eps": [],
+      "to_check": 0,
+      "flagged": 1,
+      "unmatched_side": 0,
+      "flag_missing": [],
+      "decoys_found": [],
+      "expected_verdict": "fails",
+      "verdict": "fails",
+      "broke_on_the_right_way_in": true,
+      "traced": true,
+      "what": "New lib/api.ts with apiUrl(...segments) = ['/api', ...segments].join('/') and jsonHeaders. New client component components/AlsoBought.tsx (AlsoBought, SuggestionRow) calls fetch(apiUrl('cart'), POST {listingId}) -> POST /api/cart -> addToCart. app/cart/page.tsx renders AlsoBought with up to 3 in-stock listings not already in the cart (shown with title and formatted price). Bug (client only): the button is type=submit inside a <form onSubmit={handleSubmit}> and also has onClick={addSuggestion}; both fire, so each click sends two POSTs and the item is added with quantity 2 (subtotal rises by 2x the listed price).",
+      "how_to_see_it": "Reset data. Open /cart (empty; 'Customers also bought' lists Vintage Brass Diving Helmet $249.99, Ship in a Bottle $34.50, Kraken Plush $89.00). Click 'Add this too' on the Diving Helmet row: cart shows Qty 2, subtotal $499.98 (expected $249.99); header badge 2. The item then leaves the suggestion list."
+    },
+    "w3": {
+      "kind": "decoy",
+      "key_ways_in": 2,
+      "found": 2,
+      "missed": 0,
+      "missed_labels": [],
+      "invented": 0,
+      "invented_eps": [],
+      "to_check": 1,
+      "flagged": 0,
+      "unmatched_side": 1,
+      "flag_missing": [],
+      "decoys_found": [],
+      "expected_verdict": "holds",
+      "verdict": "holds",
+      "traced": true,
+      "what": "New components/RecentlyViewed.tsx (RecentlyViewed): client component with an 'Add' button per listing that does fetch('/api/cart', POST) and track('addToCart'); it is not imported by any file (dead code). New lib/analytics.ts: type TrackedEvent = 'addToCart' | 'watchlistToggle' | 'buyItNow' and a no-op-unless-window.dataLayer track() function; the string 'addToCart' is only an event name, never a call to lib/cart addToCart. components/WatchlistToggle.tsx now calls track('watchlistToggle', {listingId}) after a successful toggle (no visible change). Cart behaviour unchanged.",
+      "how_to_see_it": "Nothing new is visible. No page renders RecentlyViewed (grep for 'RecentlyViewed' finds only its own file). Only Add to cart (listing page) and Quick add (home) add to the cart; cart page and order page have no add controls."
+    },
+    "w4": {
+      "kind": "clean",
+      "key_ways_in": 2,
+      "found": 2,
+      "missed": 0,
+      "missed_labels": [],
+      "invented": 0,
+      "invented_eps": [],
+      "to_check": 0,
+      "flagged": 0,
+      "unmatched_side": 0,
+      "flag_missing": [],
+      "decoys_found": [],
+      "expected_verdict": "holds",
+      "verdict": "needs_decision",
+      "traced": true,
+      "what": "No change: clone of cbay-two-doors with .groundtruth and data/state.json removed, rebuilt.",
+      "how_to_see_it": "Same as the starting point: Add to cart on /listings/:id and Quick add on / each raise the subtotal by the listed price."
+    }
+  },
+  "totals": {
+    "key_ways_in": 10,
+    "missed": 0,
+    "invented": 0
+  },
+  "key": {
+    "w1": {
+      "kind": "bypass",
+      "ways_in": [
+        {
+          "page": "/listings/:id",
+          "keywords": [
+            "add to cart"
+          ],
+          "label": "Add to cart on a listing page"
+        },
+        {
+          "page": "/",
+          "keywords": [
+            "quick add"
+          ],
+          "label": "Quick add on a home page card"
+        },
+        {
+          "page": "/orders/:id",
+          "keywords": [
+            "order again",
+            "reorder",
+            "buy again"
+          ],
+          "label": "Order again on an order confirmation page"
+        }
+      ],
+      "must_be_flagged": [],
+      "must_not_be_a_way_in": [],
+      "expected_verdict": "fails",
+      "broken_way_in": "Order again on an order confirmation page",
+      "what": "New route app/api/orders/[id]/reorder/route.ts (POST) calls new reorderToCart(orderId) in lib/store.ts, which reads/writes state.cart itself (no addToCart, no POST /api/cart). New client component components/OrderAgainButton.tsx (fetch(`/api/orders/${orderId}/reorder`)) rendered on app/orders/[id]/page.tsx. Bug: when the listing is already in the cart, reorderToCart calls state.cart.map(...) to bump quantity but discards the result, so the quantity is unchanged. First add of a listing not in the cart works (+price); any add when the line already exists adds 0.",
+      "how_to_see_it": "Reset data. Open /listings/l3, click Buy It Now -> /orders/order-1. Click 'Order again': note 'Added to your cart.', cart subtotal $89.00 (qty 1). Click 'Order again' a second time: subtotal stays $89.00, qty 1 (expected $178.00). Same if the item was first added via Add to cart and then Order again is clicked: subtotal unchanged."
+    },
+    "w2": {
+      "kind": "computed",
+      "ways_in": [
+        {
+          "page": "/listings/:id",
+          "keywords": [
+            "add to cart"
+          ],
+          "label": "Add to cart on a listing page"
+        },
+        {
+          "page": "/",
+          "keywords": [
+            "quick add"
+          ],
+          "label": "Quick add on a home page card"
+        },
+        {
+          "page": "/cart",
+          "keywords": [
+            "add this too",
+            "customers also bought",
+            "also bought"
+          ],
+          "label": "Add this too in Customers also bought on the cart page"
+        }
+      ],
+      "must_be_flagged": [
+        "components/AlsoBought.tsx"
+      ],
+      "must_not_be_a_way_in": [],
+      "expected_verdict": "fails",
+      "broken_way_in": "Add this too in Customers also bought on the cart page",
+      "what": "New lib/api.ts with apiUrl(...segments) = ['/api', ...segments].join('/') and jsonHeaders. New client component components/AlsoBought.tsx (AlsoBought, SuggestionRow) calls fetch(apiUrl('cart'), POST {listingId}) -> POST /api/cart -> addToCart. app/cart/page.tsx renders AlsoBought with up to 3 in-stock listings not already in the cart (shown with title and formatted price). Bug (client only): the button is type=submit inside a <form onSubmit={handleSubmit}> and also has onClick={addSuggestion}; both fire, so each click sends two POSTs and the item is added with quantity 2 (subtotal rises by 2x the listed price).",
+      "how_to_see_it": "Reset data. Open /cart (empty; 'Customers also bought' lists Vintage Brass Diving Helmet $249.99, Ship in a Bottle $34.50, Kraken Plush $89.00). Click 'Add this too' on the Diving Helmet row: cart shows Qty 2, subtotal $499.98 (expected $249.99); header badge 2. The item then leaves the suggestion list."
+    },
+    "w3": {
+      "kind": "decoy",
+      "ways_in": [
+        {
+          "page": "/listings/:id",
+          "keywords": [
+            "add to cart"
+          ],
+          "label": "Add to cart on a listing page"
+        },
+        {
+          "page": "/",
+          "keywords": [
+            "quick add"
+          ],
+          "label": "Quick add on a home page card"
+        }
+      ],
+      "must_be_flagged": [],
+      "must_not_be_a_way_in": [
+        "components/RecentlyViewed.tsx",
+        "lib/analytics.ts"
+      ],
+      "expected_verdict": "holds",
+      "broken_way_in": null,
+      "what": "New components/RecentlyViewed.tsx (RecentlyViewed): client component with an 'Add' button per listing that does fetch('/api/cart', POST) and track('addToCart'); it is not imported by any file (dead code). New lib/analytics.ts: type TrackedEvent = 'addToCart' | 'watchlistToggle' | 'buyItNow' and a no-op-unless-window.dataLayer track() function; the string 'addToCart' is only an event name, never a call to lib/cart addToCart. components/WatchlistToggle.tsx now calls track('watchlistToggle', {listingId}) after a successful toggle (no visible change). Cart behaviour unchanged.",
+      "how_to_see_it": "Nothing new is visible. No page renders RecentlyViewed (grep for 'RecentlyViewed' finds only its own file). Only Add to cart (listing page) and Quick add (home) add to the cart; cart page and order page have no add controls."
+    },
+    "w4": {
+      "kind": "clean",
+      "ways_in": [
+        {
+          "page": "/listings/:id",
+          "keywords": [
+            "add to cart"
+          ],
+          "label": "Add to cart on a listing page"
+        },
+        {
+          "page": "/",
+          "keywords": [
+            "quick add"
+          ],
+          "label": "Quick add on a home page card"
+        }
+      ],
+      "must_be_flagged": [],
+      "must_not_be_a_way_in": [],
+      "expected_verdict": "holds",
+      "broken_way_in": null,
+      "what": "No change: clone of cbay-two-doors with .groundtruth and data/state.json removed, rebuilt.",
+      "how_to_see_it": "Same as the starting point: Add to cart on /listings/:id and Quick add on / each raise the subtotal by the listed price."
+    }
+  }
+}

@@ -1,0 +1,118 @@
+/* One feature's summary (feature.html) and the reel of films. Tokens come from style.css. */
+.fpage{min-height:100vh;padding:24px 28px 80px}
+.ftop{max-width:760px;margin:0 auto 26px}
+.fmain{max-width:760px;margin:0 auto;display:grid;gap:14px}
+.fname{margin:0;font-size:13.5px;color:var(--faint);font-weight:500;overflow-wrap:anywhere}
+.goal{margin:0;font-size:27px;line-height:1.3;font-weight:700;letter-spacing:-.015em;overflow-wrap:anywhere}
+.fverdict{margin:6px 0 0;font-size:21px;font-weight:600;line-height:1.35}
+.fmeta{margin:0;font-size:14px;color:var(--mid)}
+.fstate{margin:12px 0 0;font-size:16px;color:var(--mid)}
+.fmain .banner{margin:4px 0}
+.fmain>.btns{margin-top:4px}
+
+.claims{display:grid;gap:18px;margin-top:18px}
+.claim{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;display:grid;gap:10px;min-width:0}
+.claim .said{margin:0;font-size:22px;line-height:1.4;font-weight:500;font-style:italic;color:var(--ink);padding-left:14px;border-left:3px solid var(--sel-line);overflow-wrap:anywhere;white-space:pre-wrap}
+.ctitle{margin:4px 0 0;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 14px;font-size:17px;line-height:1.35;font-weight:600}
+.ctitle .cname{min-width:0;overflow-wrap:anywhere;flex:1 1 260px}
+.cverdict{font-size:14.5px;font-weight:600;display:inline-flex;gap:6px;align-items:baseline;white-space:nowrap}
+.cstatement{margin:0;font-size:13.5px;line-height:1.5;color:var(--mid);overflow-wrap:anywhere;white-space:pre-wrap}
+.cwhen{margin:0;font-size:13px;color:var(--faint)}
+.tried-k{margin:8px 0 0;font-size:13px;font-weight:600;color:var(--mid)}
+.tried{list-style:none;margin:0;padding:0;display:grid;gap:0;border-top:1px solid var(--line)}
+.vrow{border-bottom:1px solid var(--line)}
+.vhead{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;width:100%;text-align:left;background:none;border:0;padding:10px 6px;font-size:15.5px;line-height:1.45;border-radius:8px}
+button.vhead:hover{background:rgba(14,105,78,.04)}
+.vrow.open button.vhead{background:var(--sel)}
+.vhead .m{margin-top:1px}
+.vtext{display:grid;gap:3px;min-width:0}
+.vs{overflow-wrap:anywhere;white-space:pre-wrap}
+.why{font-size:13.5px;line-height:1.45;overflow-wrap:anywhere;white-space:pre-wrap}
+.why.mid{color:var(--mid)}
+.vrow.notrun .vs{color:var(--mid)}
+.vopen{display:grid;gap:12px;padding:6px 6px 18px}
+.vopen .seen{margin:0;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.details{font-size:13.5px;font-weight:600;justify-self:start}
+.claim>.btns{margin-top:4px}
+
+.notchecked{margin-top:22px;display:grid;gap:8px}
+.notchecked h2{margin:0;font-size:17px;font-weight:600}
+.notchecked p{margin:0;color:var(--mid);font-size:14.5px}
+.notchecked ul{margin:0;padding-left:20px;font-size:15px;display:grid;gap:4px}
+.vnotes{display:grid;gap:4px;padding:0 6px 10px 38px}
+.vnotes .why{display:block}
+.vnotes .more{display:inline}
+.vnotes .more summary{display:inline;cursor:pointer;color:var(--accent);font-weight:600;margin-left:6px}
+.vnotes .more[open] summary{display:block;margin:4px 0 0}
+.vnotes .more p{margin:4px 0 0;white-space:pre-wrap}
+.cmpline{margin:0;font-size:13px;color:var(--faint);overflow-wrap:anywhere}
+.cmpline.bad{color:var(--bad)}
+.walkthrough{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;display:grid;gap:12px;min-width:0;margin-top:6px}
+.walkthrough .wt-h{margin:0;font-size:19px;font-weight:600}
+.wt-warn{margin:0;padding:10px 12px;border-radius:10px;border:1px solid #e6c4bd;background:rgba(192,61,41,.06);font-size:14.5px;overflow-wrap:anywhere}
+.wt-note{margin:0;font-size:13.5px;color:var(--mid)}
+.walkthrough .seen{margin:0;white-space:pre-wrap}
+
+/* ---------- the reel ---------- */
+body.reel-open{overflow:hidden}
+.reel{position:fixed;inset:0;z-index:50;background:#151916;color:#fff;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:12px;padding:14px 18px 18px}
+.reel-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.reel-progress{margin:0;font-size:14px;color:#d7dcda;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;min-width:0}
+.reel .btn{background:#262c28;color:#fff;border-color:#3a423d}
+.reel .btn.go{background:var(--accent);border-color:var(--accent)}
+.reel-ctrl{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.reel-pause{display:inline-flex;align-items:center;gap:8px}
+.reel-stage{display:grid;place-items:center;min-height:0;min-width:0}
+.reel-card{max-width:760px;width:100%;display:grid;gap:14px;text-align:center;padding:20px}
+.reel-said{margin:0;font-size:clamp(22px,3.4vw,34px);line-height:1.35;font-style:italic;font-weight:500;overflow-wrap:anywhere}
+.reel-title{margin:0;font-size:clamp(17px,2.2vw,22px);color:#d7dcda;font-weight:600;overflow-wrap:anywhere}
+.reel-title.big{font-size:clamp(22px,3.2vw,32px);color:#fff}
+.reel-k{margin:0;font-size:13px;color:#aab3ae;font-weight:600}
+.reel-sentence{margin:0;font-size:clamp(20px,3vw,30px);line-height:1.35;font-weight:600;overflow-wrap:anywhere}
+.reel-setting{margin:0;font-size:16px;color:#d7dcda;overflow-wrap:anywhere}
+.reel-result{margin:0;display:inline-flex;align-items:center;justify-content:center;gap:12px;font-size:clamp(18px,2.6vw,26px);font-weight:600;overflow-wrap:anywhere}
+.reel-card.result.bad .reel-result{color:#ffb3a6}
+.reel-card.result.ok .reel-result{color:#9be3c0}
+.reel-card.result.warn .reel-result{color:#f2d48a}
+.reel-card.result.mid .reel-result{color:#d7dcda}
+.reel-result .m{width:30px;height:30px;font-size:17px;border-radius:7px}
+/* the reel shows the same film and storyboard as the pages, on a light panel */
+.reel-stage{overflow:auto}
+.reel .sb.in-reel{width:min(100%,1240px);background:var(--page);color:var(--ink);border-radius:14px;padding:14px;align-self:start}
+.reel .sb.in-reel .sb-foot{display:none}
+@media (prefers-reduced-motion:no-preference){
+  .reel-card{animation:reel-in .25s ease-out}
+  @keyframes reel-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+}
+@media (max-width:700px){
+  .fpage{padding:18px 16px 60px}
+  .claim{padding:18px 16px}
+  .claim .said{font-size:19px}
+  .goal{font-size:23px}
+  .reel{padding:10px 10px 14px}
+}
+/* where a claim came from, what was asked, what changed, and what you think (style.css has the parts) */
+.claim .said + .source{margin-top:-4px;padding-left:17px}
+.claim .ctitle + .source{margin-top:-6px}
+.claim > .fb{margin:2px 0 0 -9px}
+.vopen .fb{margin-left:-9px}
+.vfb{margin:0;padding:0 6px 8px 38px;font-size:12.5px;color:var(--faint)}
+.vfb:empty,.vrow.open .vfb{display:none}
+.learned{display:grid;gap:6px;margin-top:2px}
+
+/* ---------- the film-first page: the film of the feature in use, large ---------- */
+.fpage.wide{padding:16px 24px 48px}
+.fpage.wide .ftop{max-width:1320px;margin-bottom:12px}
+.fpage.wide .fmain{max-width:1320px;gap:12px}
+.fbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.fbar .fname{font-size:15px;color:var(--ink);font-weight:600}
+.fchip{font-size:13.5px;font-weight:600;padding:3px 10px;border-radius:999px;border:1px solid var(--line);background:#fff}
+.fchip.ok{color:var(--ok);border-color:#b9d8c9}
+.fchip.bad{color:var(--bad);border-color:#e6c4bd}
+.fdetail{margin-left:auto;text-decoration:none;display:inline-flex;align-items:center;color:var(--accent)}
+@media (max-width:700px){.fdetail{margin-left:0}}
+.walkthrough.bare{padding:18px 20px;margin-top:0}
+/* More of the width goes to the film; the step card keeps enough to read. */
+@container (min-width:561px){.walkthrough.bare .sb-top{grid-template-columns:minmax(0,2.6fr) 34px minmax(250px,1fr)}}
+.notchecked.slim h2{font-size:14px;margin:8px 0 4px;color:var(--mid)}
+.notchecked.slim ul{margin:0;font-size:13.5px;color:var(--mid)}

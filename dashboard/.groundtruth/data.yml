@@ -1,0 +1,23 @@
+tools:
+  - name: make_run
+    does: "Puts one made-up run into the dashboard's store, with the given numbers of New and rerun tests, and returns the run page's address plus, for every test, its tab, its verdict, and each variation's outcome and film (name and length in seconds). A run with many tests and many variations is described more briefly, without the films."
+    takes:
+      new_tests:
+        type: integer
+        does: How many tests the run has in the New tab, from 0 to 6.
+      rerun_tests:
+        type: integer
+        does: How many rerun tests the run has in the Regression tab, from 0 to 6.
+      variations_each:
+        type: integer
+        optional: true
+        does: How many variations each test has, from 1 to 10. Three when not given.
+      verdicts:
+        type: string
+        optional: true
+        does: "One verdict per test in order, New tests first, separated by commas, for example holds,fails,holds. Each is holds, fails (one variation broke), needs_decision (one variation is waiting for the owner's answer), cant_tell (one variation could not run) or not_run (no variations). Tests not listed hold."
+      films:
+        type: boolean
+        optional: true
+        does: Whether each variation has a film. True when not given.
+    run: python3 .groundtruth/tools/make_run.py

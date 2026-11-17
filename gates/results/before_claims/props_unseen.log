@@ -1,0 +1,288 @@
+[unseen] service http://127.0.0.1:8795, app ports [3100, 3106, 3107]
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py register <work>/cbay/app --url http://127.0.0.1:3100 --reset /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset --routes next
+    Registered http://127.0.0.1:3100 (pid 17331) for app
+      the verifier can use: browser and API, process measurements, code reading
+      reset command, run in the repo before every case (it is not tried now): /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset
+      this replaces the earlier registration for this repo
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py verify <work>/cbay/app more
+    Run 20261110-201401: 2 properties against http://127.0.0.1:3100
+      p3/discovery: 5 cases through 2 entry point(s), kind behaviour
+      p4/discovery: 6 cases through 2 entry point(s), kind behaviour
+      p3/c1 holds: On /listings/l1 with an empty watchlist, the header heart count was 0 and the button read "♡ Watch". After one click the header count was 1 and the bu
+      p3/c2 holds: Initially unwatched, count 0. Clicked Watch: count 1 and button showed "♥ Watching". Clicked Watching to un-watch: count 0 and button back to "♡ Watch
+      p3/c3 holds: Header count before any action: 0. After watching l1 the count was 1 (read on loading l2). After watching l2 it was 2. After watching l3 it was 3. Aft
+      p3/c4 holds: Start: header count 0, button "♡ Watch". Clicked 3 times in succession (button labels seen: Watch, Watching, Watch). After settling 2s: button "♥ Watc
+      p3/c5 holds: On /listings/l6 (sold out), header count before: 0. Clicked "♡ Watch"; the button became "♥ Watching" and the header count read 1 (+1).
+      p4/c1 holds: Home page price $249.99; listing /listings/l1 showed In stock and $249.99; clicked Buy It Now; order page /orders/order-1 showed Item Vintage Brass Di
+      p4/c2 holds: Listing l5 Message in a Bottle (Unread) showed $15.00, In stock. Clicked Buy It Now and landed on /orders/order-1. The order page showed Item: Message
+      p4/c3 holds: Listing l7 (Taxidermy Swordfish, In stock) price shown: $310.00. Clicked Buy It Now and landed on /orders/order-1. Item: Taxidermy Swordfish. Total: $
+      p4/c4 holds: Ship in a Bottle: listing $34.50; Buy It Now led to /orders/order-1 with Total $34.50. Lighthouse Lamp Lens: listing $199.99; Buy It Now led to /order
+      p4/c5 holds: Listing price $89.00 on /listings/l3 (In stock). Added to cart and watchlist (both counters 1). Clicked Buy It Now and landed on /orders/order-1 showi
+      p4/c6 holds: Listing l4 Antique Sextant price $120.00, In stock. Buy It Now visit 1 -> /orders/order-1 Total $120.00. Reopened listing (still $120.00, in stock), B
+      p3 holds (5 of 5 cases): Watching an item raises the watchlist count in the header by one, and un-watching it lower
+      p4 holds (6 of 6 cases): Buying an in-stock item with Buy It Now leads to an order page whose total equals the pric
+    Result: 2 hold, 0 fail, 0 need your decision, 0 can't tell
+    Details: <work>/cbay/app/.groundtruth/runs/20261110-201401/run.json
+    Report: <work>/cbay/app/.groundtruth/runs/20261110-201401/report.html
+[unseen] reference: checking <work>/cbay/app/.groundtruth/runs/20261110-201401 with unseen-ref
+PASS  unseen  reference  -  run_ok  run 20261110-201401
+PASS  unseen  reference  p3  verdict_holds  holds; held 5/5, broke [], declined [], outside [], not run []
+PASS  unseen  reference  p4  verdict_holds  holds; held 6/6, broke [], declined [], outside [], not run []
+PASS  unseen  reference  p3  no_scope_key  5 plan case(s), none with scope
+PASS  unseen  reference  p3  counts_add_up  held 5 + broke 0 + declined 0 + outside 0 + not_run 0 = 5; planned 5
+PASS  unseen  reference  p3  was_traced  plan.traced true
+PASS  unseen  reference  p3  code_refs_present  3 code ref(s)
+PASS  unseen  reference  p4  no_scope_key  6 plan case(s), none with scope
+PASS  unseen  reference  p4  counts_add_up  held 6 + broke 0 + declined 0 + outside 0 + not_run 0 = 6; planned 6
+PASS  unseen  reference  p4  was_traced  plan.traced true
+PASS  unseen  reference  p4  code_refs_present  3 code ref(s)
+PASS  unseen  reference  p3/c1  browser_case_no_api  5 receipts, no http_request
+PASS  unseen  reference  p3/c1  no_source_tools  none given or used
+PASS  unseen  reference  p3/c2  browser_case_no_api  7 receipts, no http_request
+PASS  unseen  reference  p3/c2  no_source_tools  none given or used
+PASS  unseen  reference  p3/c3  browser_case_no_api  20 receipts, no http_request
+PASS  unseen  reference  p3/c3  no_source_tools  none given or used
+PASS  unseen  reference  p3/c4  browser_case_no_api  8 receipts, no http_request
+PASS  unseen  reference  p3/c4  no_source_tools  none given or used
+PASS  unseen  reference  p3/c5  browser_case_no_api  5 receipts, no http_request
+PASS  unseen  reference  p3/c5  no_source_tools  none given or used
+PASS  unseen  reference  p4/c1  browser_case_no_api  7 receipts, no http_request
+PASS  unseen  reference  p4/c1  no_source_tools  none given or used
+PASS  unseen  reference  p4/c2  browser_case_no_api  7 receipts, no http_request
+PASS  unseen  reference  p4/c2  no_source_tools  none given or used
+PASS  unseen  reference  p4/c3  browser_case_no_api  8 receipts, no http_request
+PASS  unseen  reference  p4/c3  no_source_tools  none given or used
+PASS  unseen  reference  p4/c4  browser_case_no_api  9 receipts, no http_request
+PASS  unseen  reference  p4/c4  no_source_tools  none given or used
+PASS  unseen  reference  p4/c5  browser_case_no_api  10 receipts, no http_request
+PASS  unseen  reference  p4/c5  no_source_tools  none given or used
+PASS  unseen  reference  p4/c6  browser_case_no_api  11 receipts, no http_request
+PASS  unseen  reference  p4/c6  no_source_tools  none given or used
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py register <work>/groundtruth-proof/gates/work/unseen/variant-a --url http://127.0.0.1:3106 --reset /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset --routes next
+    Registered http://127.0.0.1:3106 (pid 18065) for variant-a
+      the verifier can use: browser and API, process measurements, code reading
+      reset command, run in the repo before every case (it is not tried now): /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset
+      this replaces the earlier registration for this repo
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py verify <work>/groundtruth-proof/gates/work/unseen/variant-a all
+    Run 20261110-201758: 4 properties against http://127.0.0.1:3106
+      p1/discovery: 5 cases through 2 entry point(s), kind behaviour
+      p2/discovery: 6 cases through 2 entry point(s), kind behaviour
+      p3/discovery: 5 cases through 2 entry point(s), kind behaviour
+      p4/discovery: 6 cases through 2 entry point(s), kind behaviour
+      p1/c1 holds: Cart was empty (count 0). Listing price $249.99. After one Add to cart click, header count 1, cart line $249.99, Subtotal: $249.99 (increase 249.99 = 
+      p1/c2 holds: Cart empty before (subtotal $0, header count 0). Listing l2 price $34.50, In stock. After one Add to cart: header count 1, line item $34.50 Qty 1, Sub
+      p1/c3 holds: l5 listing price $15.00, in stock. Cart was empty (header 0). After the first add, /cart showed Qty 1, line $15.00, Subtotal $15.00, header 1. After t
+      p1/c4 holds: Cart had l1 ($249.99); subtotal before $249.99. l7 listing price $310.00, in stock. Added from its page. Cart count went 1→2. Subtotal after $559.99 (
+      p1/c5 holds: Cart was empty at the start (subtotal 0). l8 listing price $199.99, in stock. After adding it, the subtotal was $199.99 (+199.99) and the header count
+      p2/c1 holds: Cart before: empty, header count 0. On /listings/l6 (Pirate Chest, Availability: Sold out) I clicked the enabled 'Add to cart' button once. The page s
+      p2/c2 holds: Before: cart had 1 line, Vintage Brass Diving Helmet, Qty 1, $249.99, subtotal $249.99, badge 1. On /listings/l6 (Sold out) I clicked the enabled 'Add
+      p2/c3 holds: Cart was empty (badge 0) before. On /listings/l6 the 'Sold out' button is disabled and could not be clicked (not enabled). Clicking the enabled 'Add t
+      p2/c4 holds: Cart before: lines [], itemCount 0, subtotal 0. POST /api/cart {"listingId":"l6"} -> 409 {"error":"This item is no longer available."}. Cart after: li
+      p2/c5 holds: POST l1 returned 201 with itemCount 1. The first GET showed one line: l1, quantity 1, subtotal 24999. POST l6 returned 409 "This item is no longer ava
+      p2/c6 holds: Cart before: empty (0 lines, itemCount 0, subtotal 0). POST listingId "zzz" -> 404 "Listing not found." POST listingId 123 -> 400 "listingId is requir
+      p3/c1 holds: Home page header watchlist count 0. Opened /listings/l1 (Vintage Brass Diving Helmet), count 0, button "♡ Watch". Clicked once. Header count then 1, b
+      p3/c2 holds: Initially count 0, button "♡ Watch". I clicked Watch first (precondition): count 1, button "♥ Watching". Then clicked again to un-watch: count 0, butt
+      p3/c3 holds: Header count before: 0. Watched Ship in a Bottle (l2) -> 1. Watched Kraken Plush (l3) -> 2. Watched Antique Sextant (l4) -> 3. Un-watched Kraken Plush
+      p3/c4 holds: Opened /listings/l6 (Pirate Chest, Sold out). Header count before: 0. Clicked "♡ Watch" -> button became "♥ Watching", header count 1 (+1). Clicked "♥
+      p3/c5 holds: Start: header count 0, button "♡ Watch". Clicked twice in quick succession (the second click saw "♥ Watching"). Final: header count 0, button "♡ Watch
+      p4/c1 breaks: Listing l1 price $249.99. After Buy It Now, order page /orders/order-1 showed Total $2.50. Mismatch.
+      p4/c2 breaks: Listing /listings/l2 price $34.50, In stock. After Buy It Now, order page /orders/order-1 showed Total $0.35 (not $34.50; looks like cents/dollars mix
+      p4/c3 breaks: Listing l5 price $15.00, In stock. After Buy It Now, redirected to /orders/order-1, Total shows $0.15 (not $15.00).
+      p4/c4 breaks: Listing l7 price $310.00, In stock. Clicked Buy It Now, landed on /orders/order-1 showing Item Taxidermy Swordfish, Total $3.10. Total does not equal 
+      p4/c5 breaks: Listing l8 price $199.99, In stock. Clicked Buy It Now, went to /orders/order-1, which shows Item Lighthouse Lamp Lens, Total $2.00. $2.00 does not eq
+      p4/c6 outside: /listings/l6 (Pirate Chest, $75.25, Availability: Sold out) has no Buy It Now button. The buttons are a disabled "Sold out", "Add to cart" and "♡ Watc
+      p1 holds (5 of 5 cases): Adding an in-stock item to the cart raises the cart subtotal by the price shown on its lis
+      p2 holds (6 of 6 cases): A sold-out item can't be added to the cart, and trying to add it leaves the cart unchanged
+      p3 holds (5 of 5 cases): Watching an item raises the watchlist count in the header by one, and un-watching it lower
+      p4 fails (broke: c1, c2, c3, c4, c5): Buying an in-stock item with Buy It Now leads to an order page whose total equals the pric
+    Result: 3 hold, 1 fail, 0 need your decision, 0 can't tell
+    Details: <work>/groundtruth-proof/gates/work/unseen/variant-a/.groundtruth/runs/20261110-201758/run.json
+    Report: <work>/groundtruth-proof/gates/work/unseen/variant-a/.groundtruth/runs/20261110-201758/report.html
+[unseen] variant-a: checking <work>/groundtruth-proof/gates/work/unseen/variant-a/.groundtruth/runs/20261110-201758 with unseen-variant
+PASS  unseen  variant-a  -  run_ok  run 20261110-201758
+PASS  unseen  variant-a  p1  has_carried_out_verdict  verdict holds
+PASS  unseen  variant-a  p2  has_carried_out_verdict  verdict holds
+PASS  unseen  variant-a  p3  has_carried_out_verdict  verdict holds
+PASS  unseen  variant-a  p4  has_carried_out_verdict  verdict fails
+PASS  unseen  variant-a  p1  no_scope_key  5 plan case(s), none with scope
+PASS  unseen  variant-a  p1  counts_add_up  held 5 + broke 0 + declined 0 + outside 0 + not_run 0 = 5; planned 5
+PASS  unseen  variant-a  p1  was_traced  plan.traced true
+PASS  unseen  variant-a  p1  code_refs_present  3 code ref(s)
+PASS  unseen  variant-a  p2  no_scope_key  6 plan case(s), none with scope
+PASS  unseen  variant-a  p2  counts_add_up  held 6 + broke 0 + declined 0 + outside 0 + not_run 0 = 6; planned 6
+PASS  unseen  variant-a  p2  was_traced  plan.traced true
+PASS  unseen  variant-a  p2  code_refs_present  3 code ref(s)
+PASS  unseen  variant-a  p3  no_scope_key  5 plan case(s), none with scope
+PASS  unseen  variant-a  p3  counts_add_up  held 5 + broke 0 + declined 0 + outside 0 + not_run 0 = 5; planned 5
+PASS  unseen  variant-a  p3  was_traced  plan.traced true
+PASS  unseen  variant-a  p3  code_refs_present  3 code ref(s)
+PASS  unseen  variant-a  p4  no_scope_key  6 plan case(s), none with scope
+PASS  unseen  variant-a  p4  counts_add_up  held 0 + broke 5 + declined 0 + outside 1 + not_run 0 = 6; planned 6
+PASS  unseen  variant-a  p4  was_traced  plan.traced true
+PASS  unseen  variant-a  p4  code_refs_present  4 code ref(s)
+PASS  unseen  variant-a  p1/c1  browser_case_no_api  7 receipts, no http_request
+PASS  unseen  variant-a  p1/c1  no_source_tools  none given or used
+PASS  unseen  variant-a  p1/c2  browser_case_no_api  8 receipts, no http_request
+PASS  unseen  variant-a  p1/c2  no_source_tools  none given or used
+PASS  unseen  variant-a  p1/c3  browser_case_no_api  13 receipts, no http_request
+PASS  unseen  variant-a  p1/c3  no_source_tools  none given or used
+PASS  unseen  variant-a  p1/c4  browser_case_no_api  12 receipts, no http_request
+PASS  unseen  variant-a  p1/c4  no_source_tools  none given or used
+PASS  unseen  variant-a  p1/c5  browser_case_no_api  13 receipts, no http_request
+PASS  unseen  variant-a  p1/c5  no_source_tools  none given or used
+PASS  unseen  variant-a  p2/c1  browser_case_no_api  10 receipts, no http_request
+PASS  unseen  variant-a  p2/c1  no_source_tools  none given or used
+PASS  unseen  variant-a  p2/c2  browser_case_no_api  12 receipts, no http_request
+PASS  unseen  variant-a  p2/c2  no_source_tools  none given or used
+PASS  unseen  variant-a  p2/c3  browser_case_no_api  13 receipts, no http_request
+PASS  unseen  variant-a  p2/c3  no_source_tools  none given or used
+PASS  unseen  variant-a  p2/c4  api_case_no_browser  no browser tools given
+PASS  unseen  variant-a  p2/c4  no_source_tools  none given or used
+PASS  unseen  variant-a  p2/c5  api_case_no_browser  no browser tools given
+PASS  unseen  variant-a  p2/c5  no_source_tools  none given or used
+PASS  unseen  variant-a  p2/c6  api_case_no_browser  no browser tools given
+PASS  unseen  variant-a  p2/c6  no_source_tools  none given or used
+PASS  unseen  variant-a  p3/c1  browser_case_no_api  7 receipts, no http_request
+PASS  unseen  variant-a  p3/c1  no_source_tools  none given or used
+PASS  unseen  variant-a  p3/c2  browser_case_no_api  10 receipts, no http_request
+PASS  unseen  variant-a  p3/c2  no_source_tools  none given or used
+PASS  unseen  variant-a  p3/c3  browser_case_no_api  22 receipts, no http_request
+PASS  unseen  variant-a  p3/c3  no_source_tools  none given or used
+PASS  unseen  variant-a  p3/c4  browser_case_no_api  9 receipts, no http_request
+PASS  unseen  variant-a  p3/c4  no_source_tools  none given or used
+PASS  unseen  variant-a  p3/c5  browser_case_no_api  8 receipts, no http_request
+PASS  unseen  variant-a  p3/c5  no_source_tools  none given or used
+PASS  unseen  variant-a  p4/c1  browser_case_no_api  6 receipts, no http_request
+PASS  unseen  variant-a  p4/c1  no_source_tools  none given or used
+PASS  unseen  variant-a  p4/c2  browser_case_no_api  6 receipts, no http_request
+PASS  unseen  variant-a  p4/c2  no_source_tools  none given or used
+PASS  unseen  variant-a  p4/c3  browser_case_no_api  6 receipts, no http_request
+PASS  unseen  variant-a  p4/c3  no_source_tools  none given or used
+PASS  unseen  variant-a  p4/c4  browser_case_no_api  6 receipts, no http_request
+PASS  unseen  variant-a  p4/c4  no_source_tools  none given or used
+PASS  unseen  variant-a  p4/c5  browser_case_no_api  6 receipts, no http_request
+PASS  unseen  variant-a  p4/c5  no_source_tools  none given or used
+PASS  unseen  variant-a  p4/c6  browser_case_no_api  3 receipts, no http_request
+PASS  unseen  variant-a  p4/c6  no_source_tools  none given or used
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py register <work>/groundtruth-proof/gates/work/unseen/variant-b --url http://127.0.0.1:3107 --reset /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset --routes next
+    Registered http://127.0.0.1:3107 (pid 18889) for variant-b
+      the verifier can use: browser and API, process measurements, code reading
+      reset command, run in the repo before every case (it is not tried now): /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset
+      this replaces the earlier registration for this repo
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py verify <work>/groundtruth-proof/gates/work/unseen/variant-b all
+    Run 20261110-202608: 4 properties against http://127.0.0.1:3107
+      p1/discovery: 6 cases through 2 entry point(s), kind behaviour
+      p2/discovery: 5 cases through 2 entry point(s), kind behaviour
+      p3/discovery: 6 cases through 2 entry point(s), kind behaviour
+      p4/discovery: 5 cases through 2 entry point(s), kind behaviour
+      p1/c1 holds: Initial cart empty (no subtotal, count 0). Listing l1 price $249.99, In stock. After one Add to cart: header count 1, cart line Qty 1 $249.99, Subtota
+      p1/c2 holds: Cart seeded with l1 (Vintage Brass Diving Helmet): subtotal $249.99. l2 listing price $34.50 (In stock). After Add to cart, cart showed both items, su
+      p1/c3 holds: Listing l3 price $89.00, in stock. The cart was empty at first, so I added once (subtotal $89.00). Second add: subtotal $178.00 (+$89.00). Third add: 
+      p1/c4 declined: Added l5 ($15.00) three times: cart showed Qty 3, $45.00, Subtotal $45.00, header count 3. Fourth click on Add to cart: message "You can add at most 3
+      p1/c5 outside: /listings/l6 (Pirate Chest, price $75.25, Availability: Sold out) shows a disabled "Sold out" button plus an enabled "Add to cart" button. Clicking it
+      p1/c6 holds: Cart started empty (header 0). Add l4 ($120.00): subtotal $120.00 (change +120.00). Add l5 ($15.00): subtotal $135.00 (change +15.00). Add l8 ($199.99
+      p2/c1 holds: Before: cart badge 1, cart had Vintage Brass Diving Helmet Qty 1 $249.99, subtotal $249.99 (added from l1). On /listings/l6 (Availability: Sold out), 
+      p2/c2 holds: Started with badge 0. On /listings/l6 the 'Add to cart' button was enabled and I clicked it twice. On /cart the page said "Your cart is empty. The sea
+      p2/c3 holds: Added l1 (Vintage Brass Diving Helmet); cart badge went to 1. On /listings/l6 (Sold out) clicked the enabled 'Add to cart'; page showed 'This item is 
+      p2/c4 holds: Cart before: lines [], itemCount 0, subtotalCents 0. POST /api/cart {"listingId":"l6"} -> 409 {"error":"This item is no longer available."}. Cart afte
+      p2/c5 holds: Cart before: l1 x1, itemCount 1, subtotal 24999. POST l6 twice: both 409 "This item is no longer available." POST zzz: 404 "Listing not found." (a dif
+      p3/c1 holds: Header count before: 0; button "♡ Watch". After one click: header count 1; button "♥ Watching".
+      p3/c2 holds: Header count before watching: 0. After Watch click: 1, and the button read "♥ Watching". After the second click (un-watch): 0, and the button read "♡ 
+      p3/c3 holds: Header count before: 0. After watching l1: 1. After watching l2: 2. After watching l3: 3. On l2 it showed 3 with "Watching". After un-watching l2: 2. 
+      p3/c4 holds: Before: header 0, button "♡ Watch". After watching: 1, "♥ Watching". After reload: 1, Watching. After navigating to / and back: 1, Watching. After un-
+      p3/c5 holds: On /listings/l6 (sold out), header count before: 0. After clicking Watch (button became "♥ Watching"): 1. After clicking again: 0 (shot-1).
+      p3/c6 holds: Start: header count 0, button "♡ Watch". Clicked toggle twice in succession (second click saw "♥ Watching"). Settled: header count 0, button "♡ Watch"
+      p4/c1 holds: Home page price $249.99; listing page /listings/l1 price $249.99 (In stock); after Buy It Now, /orders/order-1 shows Item Vintage Brass Diving Helmet,
+      p4/c2 holds: Listing l5 price $15.00, In stock. After Buy It Now, order page /orders/order-1 shows Item Message in a Bottle (Unread), Total $15.00. Matches.
+      p4/c3 holds: Listing l7 Taxidermy Swordfish showed $310.00, In stock. Clicked Buy It Now and landed on /orders/order-1 with Item Taxidermy Swordfish and Total $310
+      p4/c4 holds: Ship in a Bottle: listing price $34.50 (in stock); Buy It Now led to /orders/order-1 with Total $34.50. Lighthouse Lamp Lens: listing price $199.99 (i
+      p4/c5 declined: Listing l6 Pirate Chest (Key Lost): price $75.25, Availability "Sold out". There is no Buy It Now button; in its place is a disabled "Sold out" button
+      p1 needs_decision (your call on: c4): Adding an in-stock item to the cart raises the cart subtotal by the price shown on its lis
+      p2 holds (5 of 5 cases): A sold-out item can't be added to the cart, and trying to add it leaves the cart unchanged
+      p3 holds (6 of 6 cases): Watching an item raises the watchlist count in the header by one, and un-watching it lower
+      p4 needs_decision (your call on: c5): Buying an in-stock item with Buy It Now leads to an order page whose total equals the pric
+    Result: 2 hold, 0 fail, 2 need your decision, 0 can't tell
+    Details: <work>/groundtruth-proof/gates/work/unseen/variant-b/.groundtruth/runs/20261110-202608/run.json
+    Report: <work>/groundtruth-proof/gates/work/unseen/variant-b/.groundtruth/runs/20261110-202608/report.html
+[unseen] variant-b: checking <work>/groundtruth-proof/gates/work/unseen/variant-b/.groundtruth/runs/20261110-202608 with unseen-variant
+PASS  unseen  variant-b  -  run_ok  run 20261110-202608
+PASS  unseen  variant-b  p1  has_carried_out_verdict  verdict needs_decision
+PASS  unseen  variant-b  p2  has_carried_out_verdict  verdict holds
+PASS  unseen  variant-b  p3  has_carried_out_verdict  verdict holds
+PASS  unseen  variant-b  p4  has_carried_out_verdict  verdict needs_decision
+PASS  unseen  variant-b  p1  no_scope_key  6 plan case(s), none with scope
+PASS  unseen  variant-b  p1  counts_add_up  held 4 + broke 0 + declined 1 + outside 1 + not_run 0 = 6; planned 6
+PASS  unseen  variant-b  p1  declined_have_question_and_draft  1 declined case(s), all complete
+PASS  unseen  variant-b  p1  was_traced  plan.traced true
+PASS  unseen  variant-b  p1  code_refs_present  3 code ref(s)
+PASS  unseen  variant-b  p2  no_scope_key  5 plan case(s), none with scope
+PASS  unseen  variant-b  p2  counts_add_up  held 5 + broke 0 + declined 0 + outside 0 + not_run 0 = 5; planned 5
+PASS  unseen  variant-b  p2  was_traced  plan.traced true
+PASS  unseen  variant-b  p2  code_refs_present  3 code ref(s)
+PASS  unseen  variant-b  p3  no_scope_key  6 plan case(s), none with scope
+PASS  unseen  variant-b  p3  counts_add_up  held 6 + broke 0 + declined 0 + outside 0 + not_run 0 = 6; planned 6
+PASS  unseen  variant-b  p3  was_traced  plan.traced true
+PASS  unseen  variant-b  p3  code_refs_present  3 code ref(s)
+PASS  unseen  variant-b  p4  no_scope_key  5 plan case(s), none with scope
+PASS  unseen  variant-b  p4  counts_add_up  held 4 + broke 0 + declined 1 + outside 0 + not_run 0 = 5; planned 5
+PASS  unseen  variant-b  p4  declined_have_question_and_draft  1 declined case(s), all complete
+PASS  unseen  variant-b  p4  was_traced  plan.traced true
+PASS  unseen  variant-b  p4  code_refs_present  4 code ref(s)
+PASS  unseen  variant-b  p1/c1  browser_case_no_api  8 receipts, no http_request
+PASS  unseen  variant-b  p1/c1  no_source_tools  none given or used
+PASS  unseen  variant-b  p1/c2  browser_case_no_api  11 receipts, no http_request
+PASS  unseen  variant-b  p1/c2  no_source_tools  none given or used
+PASS  unseen  variant-b  p1/c3  browser_case_no_api  14 receipts, no http_request
+PASS  unseen  variant-b  p1/c3  no_source_tools  none given or used
+PASS  unseen  variant-b  p1/c4  browser_case_no_api  15 receipts, no http_request
+PASS  unseen  variant-b  p1/c4  no_source_tools  none given or used
+PASS  unseen  variant-b  p1/c5  browser_case_no_api  10 receipts, no http_request
+PASS  unseen  variant-b  p1/c5  no_source_tools  none given or used
+PASS  unseen  variant-b  p1/c6  browser_case_no_api  17 receipts, no http_request
+PASS  unseen  variant-b  p1/c6  no_source_tools  none given or used
+PASS  unseen  variant-b  p2/c1  browser_case_no_api  12 receipts, no http_request
+PASS  unseen  variant-b  p2/c1  no_source_tools  none given or used
+PASS  unseen  variant-b  p2/c2  browser_case_no_api  7 receipts, no http_request
+PASS  unseen  variant-b  p2/c2  no_source_tools  none given or used
+PASS  unseen  variant-b  p2/c3  browser_case_no_api  9 receipts, no http_request
+PASS  unseen  variant-b  p2/c3  no_source_tools  none given or used
+PASS  unseen  variant-b  p2/c4  api_case_no_browser  no browser tools given
+PASS  unseen  variant-b  p2/c4  no_source_tools  none given or used
+PASS  unseen  variant-b  p2/c5  api_case_no_browser  no browser tools given
+PASS  unseen  variant-b  p2/c5  no_source_tools  none given or used
+PASS  unseen  variant-b  p3/c1  browser_case_no_api  5 receipts, no http_request
+PASS  unseen  variant-b  p3/c1  no_source_tools  none given or used
+PASS  unseen  variant-b  p3/c2  browser_case_no_api  8 receipts, no http_request
+PASS  unseen  variant-b  p3/c2  no_source_tools  none given or used
+PASS  unseen  variant-b  p3/c3  browser_case_no_api  18 receipts, no http_request
+PASS  unseen  variant-b  p3/c3  no_source_tools  none given or used
+PASS  unseen  variant-b  p3/c4  browser_case_no_api  14 receipts, no http_request
+PASS  unseen  variant-b  p3/c4  no_source_tools  none given or used
+PASS  unseen  variant-b  p3/c5  browser_case_no_api  8 receipts, no http_request
+PASS  unseen  variant-b  p3/c5  no_source_tools  none given or used
+PASS  unseen  variant-b  p3/c6  browser_case_no_api  10 receipts, no http_request
+PASS  unseen  variant-b  p3/c6  no_source_tools  none given or used
+PASS  unseen  variant-b  p4/c1  browser_case_no_api  8 receipts, no http_request
+PASS  unseen  variant-b  p4/c1  no_source_tools  none given or used
+PASS  unseen  variant-b  p4/c2  browser_case_no_api  7 receipts, no http_request
+PASS  unseen  variant-b  p4/c2  no_source_tools  none given or used
+PASS  unseen  variant-b  p4/c3  browser_case_no_api  8 receipts, no http_request
+PASS  unseen  variant-b  p4/c3  no_source_tools  none given or used
+PASS  unseen  variant-b  p4/c4  browser_case_no_api  11 receipts, no http_request
+PASS  unseen  variant-b  p4/c4  no_source_tools  none given or used
+PASS  unseen  variant-b  p4/c5  browser_case_no_api  6 receipts, no http_request
+PASS  unseen  variant-b  p4/c5  no_source_tools  none given or used
+PASS  unseen  key  variant-a/p1  matches_key  expected holds, got holds
+PASS  unseen  key  variant-a/p2  matches_key  expected holds, got holds
+PASS  unseen  key  variant-a/p3  matches_key  expected holds, got holds
+PASS  unseen  key  variant-a/p4  matches_key  expected fails, got fails
+PASS  unseen  key  variant-b/p1  matches_key  expected needs_decision, got needs_decision
+PASS  unseen  key  variant-b/p2  matches_key  expected holds, got holds
+PASS  unseen  key  variant-b/p3  matches_key  expected holds, got holds
+FAIL  unseen  key  variant-b/p4  matches_key  expected holds, got needs_decision
+[unseen] variant-a planted: app/api/orders/route.ts, POST handler: createOrder(listing.id, listing.title, listing.priceCents / 100) - the price is divided by 100 (cents treated as dollars) before being stored as the order's totalCents, so every Buy It Now order total is 1/100 of the listing price. Order is still created (201) and the confirmation page appears.
+[unseen] variant-a how to see it: Reset data. Open /listings/l1 (shows $249.99), click Buy It Now. Lands on /orders/order-1 with 'Order confirmed' but Total shows $2.50; should show $249.99. Same for every in-stock item: l5 $15.00 -> $0.15, l4 $120.00 -> $1.20. API: POST /api/orders {"listingId":"l1"} -> 201 {orderId}; data/state.json order totalCents is 249.99 instead of 24999. Cart, watchlist and sold-out behaviour unchanged.
+[unseen] variant-b planted: lib/cart.ts addToCart: new MAX_QUANTITY_PER_LISTING = 3; if the item's existing cart line already has quantity 3, returns {ok:false, code:'quantity_limit'} before any write. app/api/cart/route.ts POST maps that code to HTTP 422 {error: 'You can add at most 3 of this item to your cart.'}, which AddToCartButton shows in its existing add-error paragraph. Sold-out check still runs first (409 unchanged).
+[unseen] variant-b how to see it: Reset data. Open /listings/l2 ($34.50) and click Add to cart three times: subtotal goes $34.50, $69.00, $103.50. A fourth click shows 'You can add at most 3 of this item to your cart.' under the button, cart badge stays 3, cart subtotal stays $103.50, state.json unchanged. API: 4th POST /api/cart {"listingId":"l2"} -> 422 with that error body. Under the original app the 4th add would raise the subtotal to $138.00. Adding other items (up to 3 each) still raises the subtotal by their listing price.
+[unseen] FAILED: 172/173 checks; usage {'conversations': 75, 'labels': 44, 'second_attempts': 0, 'cost_usd': 2.6785, 'seconds': 1056.2, 'seconds_ignored': 0}; wrote <work>/groundtruth-proof/gates/results/props_unseen.json
+exit 1

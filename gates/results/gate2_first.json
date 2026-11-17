@@ -1,0 +1,661 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204156",
+      "claim": "c1",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected holds, got holds"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204156",
+      "claim": "c1",
+      "check": "used_browser",
+      "ok": true,
+      "detail": "used click_and_watch, fill, navigate, observe, read_attribute"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204156",
+      "claim": "c2",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected fails, got fails"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204156",
+      "claim": "c2",
+      "check": "measured_around_trigger",
+      "ok": true,
+      "detail": "trigger at call #2; gpu_check before=1, after=1"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204156",
+      "claim": "c2",
+      "check": "no_code_read",
+      "ok": true,
+      "detail": "no grep/read_lines calls"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204156",
+      "claim": "c2",
+      "check": "no_excerpts",
+      "ok": true,
+      "detail": "0 excerpt(s)"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204156",
+      "claim": "c3",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected holds, got holds"
+    },
+    {
+      "label": "agent-c2-2",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204253",
+      "claim": "c2",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected fails, got fails"
+    },
+    {
+      "label": "agent-c2-2",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204253",
+      "claim": "c2",
+      "check": "measured_around_trigger",
+      "ok": true,
+      "detail": "trigger at call #2; gpu_check before=1, after=1"
+    },
+    {
+      "label": "agent-c2-2",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204253",
+      "claim": "c2",
+      "check": "no_code_read",
+      "ok": true,
+      "detail": "no grep/read_lines calls"
+    },
+    {
+      "label": "agent-c2-2",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204253",
+      "claim": "c2",
+      "check": "no_excerpts",
+      "ok": true,
+      "detail": "0 excerpt(s)"
+    },
+    {
+      "label": "agent-c2-3",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204305",
+      "claim": "c2",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected fails, got fails"
+    },
+    {
+      "label": "agent-c2-3",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204305",
+      "claim": "c2",
+      "check": "measured_around_trigger",
+      "ok": true,
+      "detail": "trigger at call #2; gpu_check before=1, after=1"
+    },
+    {
+      "label": "agent-c2-3",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204305",
+      "claim": "c2",
+      "check": "no_code_read",
+      "ok": true,
+      "detail": "no grep/read_lines calls"
+    },
+    {
+      "label": "agent-c2-3",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204305",
+      "claim": "c2",
+      "check": "no_excerpts",
+      "ok": true,
+      "detail": "0 excerpt(s)"
+    },
+    {
+      "label": "agent-c2-4",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204319",
+      "claim": "c2",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected fails, got fails"
+    },
+    {
+      "label": "agent-c2-4",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204319",
+      "claim": "c2",
+      "check": "measured_around_trigger",
+      "ok": true,
+      "detail": "trigger at call #2; gpu_check before=1, after=1"
+    },
+    {
+      "label": "agent-c2-4",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204319",
+      "claim": "c2",
+      "check": "no_code_read",
+      "ok": true,
+      "detail": "no grep/read_lines calls"
+    },
+    {
+      "label": "agent-c2-4",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204319",
+      "claim": "c2",
+      "check": "no_excerpts",
+      "ok": true,
+      "detail": "0 excerpt(s)"
+    },
+    {
+      "label": "agent-c2-5",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204334",
+      "claim": "c2",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected fails, got fails"
+    },
+    {
+      "label": "agent-c2-5",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204334",
+      "claim": "c2",
+      "check": "measured_around_trigger",
+      "ok": true,
+      "detail": "trigger at call #2; gpu_check before=1, after=1"
+    },
+    {
+      "label": "agent-c2-5",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204334",
+      "claim": "c2",
+      "check": "no_code_read",
+      "ok": true,
+      "detail": "no grep/read_lines calls"
+    },
+    {
+      "label": "agent-c2-5",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204334",
+      "claim": "c2",
+      "check": "no_excerpts",
+      "ok": true,
+      "detail": "0 excerpt(s)"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204346",
+      "claim": "c1",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected holds, got holds"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204346",
+      "claim": "c1",
+      "check": "used_browser",
+      "ok": true,
+      "detail": "used click_and_watch, fill, navigate, observe"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204346",
+      "claim": "c2",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected holds, got holds"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204346",
+      "claim": "c2",
+      "check": "measured_around_trigger",
+      "ok": true,
+      "detail": "trigger at call #2; gpu_check before=1, after=1"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204346",
+      "claim": "c2",
+      "check": "no_code_read",
+      "ok": true,
+      "detail": "no grep/read_lines calls"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204346",
+      "claim": "c2",
+      "check": "no_excerpts",
+      "ok": true,
+      "detail": "0 excerpt(s)"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204346",
+      "claim": "c3",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected holds, got holds"
+    },
+    {
+      "label": "control-c3",
+      "run_dir": "<work>/groundtruth-proof/gates/work/control/.groundtruth/runs/20261109-204448",
+      "claim": "c3",
+      "check": "verdict",
+      "ok": true,
+      "detail": "expected fails, got fails"
+    },
+    {
+      "label": "control-c3",
+      "run_dir": "<work>/groundtruth-proof/gates/work/control/.groundtruth/runs/20261109-204448",
+      "claim": "c3",
+      "check": "excerpt_render_py",
+      "ok": true,
+      "detail": "excerpt paths: ['render.py']"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204156",
+      "claim": "c1",
+      "check": "went_through_service",
+      "ok": true,
+      "detail": "service run 33b52539ce6c, model claude-sonnet-5-5"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204156",
+      "claim": "c1",
+      "check": "no_source_read_in_first_conversation",
+      "ok": true,
+      "detail": "first-conversation source reads: none"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204156",
+      "claim": "c1",
+      "check": "conversations",
+      "ok": true,
+      "detail": "expected 1, got 1"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204156",
+      "claim": "c1",
+      "check": "settled_by",
+      "ok": true,
+      "detail": "expected behaviour, got behaviour"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204156",
+      "claim": "c2",
+      "check": "went_through_service",
+      "ok": true,
+      "detail": "service run 33b52539ce6c, model claude-sonnet-5-5"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204156",
+      "claim": "c2",
+      "check": "no_source_read_in_first_conversation",
+      "ok": true,
+      "detail": "first-conversation source reads: none"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204156",
+      "claim": "c2",
+      "check": "conversations",
+      "ok": true,
+      "detail": "expected 1, got 1"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204156",
+      "claim": "c2",
+      "check": "settled_by",
+      "ok": true,
+      "detail": "expected measurement, got measurement"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204156",
+      "claim": "c3",
+      "check": "went_through_service",
+      "ok": true,
+      "detail": "service run 33b52539ce6c, model claude-sonnet-5-5"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204156",
+      "claim": "c3",
+      "check": "no_source_read_in_first_conversation",
+      "ok": true,
+      "detail": "first-conversation source reads: none"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204156",
+      "claim": "c3",
+      "check": "conversations",
+      "ok": true,
+      "detail": "expected 2, got 2"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204156",
+      "claim": "c3",
+      "check": "settled_by",
+      "ok": true,
+      "detail": "expected code, got code"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204156",
+      "claim": "c3",
+      "check": "escalation_reason_recorded",
+      "ok": true,
+      "detail": "The claim is about how the code is organised: whether render.py uses visemes.py and define"
+    },
+    {
+      "label": "agent-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204156",
+      "claim": "c3",
+      "check": "cites_real_lines",
+      "ok": true,
+      "detail": "1 excerpt(s): [('visemes.py', 4, 15)]"
+    },
+    {
+      "label": "agent-c2-2",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204253",
+      "claim": "c2",
+      "check": "went_through_service",
+      "ok": true,
+      "detail": "service run 24b335f208e2, model claude-sonnet-5-5"
+    },
+    {
+      "label": "agent-c2-2",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204253",
+      "claim": "c2",
+      "check": "no_source_read_in_first_conversation",
+      "ok": true,
+      "detail": "first-conversation source reads: none"
+    },
+    {
+      "label": "agent-c2-2",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204253",
+      "claim": "c2",
+      "check": "conversations",
+      "ok": true,
+      "detail": "expected 1, got 1"
+    },
+    {
+      "label": "agent-c2-2",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204253",
+      "claim": "c2",
+      "check": "settled_by",
+      "ok": true,
+      "detail": "expected measurement, got measurement"
+    },
+    {
+      "label": "agent-c2-3",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204305",
+      "claim": "c2",
+      "check": "went_through_service",
+      "ok": true,
+      "detail": "service run de107c43fdda, model claude-sonnet-5-5"
+    },
+    {
+      "label": "agent-c2-3",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204305",
+      "claim": "c2",
+      "check": "no_source_read_in_first_conversation",
+      "ok": true,
+      "detail": "first-conversation source reads: none"
+    },
+    {
+      "label": "agent-c2-3",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204305",
+      "claim": "c2",
+      "check": "conversations",
+      "ok": true,
+      "detail": "expected 1, got 1"
+    },
+    {
+      "label": "agent-c2-3",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204305",
+      "claim": "c2",
+      "check": "settled_by",
+      "ok": true,
+      "detail": "expected measurement, got measurement"
+    },
+    {
+      "label": "agent-c2-4",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204319",
+      "claim": "c2",
+      "check": "went_through_service",
+      "ok": true,
+      "detail": "service run c703942d3003, model claude-sonnet-5-5"
+    },
+    {
+      "label": "agent-c2-4",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204319",
+      "claim": "c2",
+      "check": "no_source_read_in_first_conversation",
+      "ok": true,
+      "detail": "first-conversation source reads: none"
+    },
+    {
+      "label": "agent-c2-4",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204319",
+      "claim": "c2",
+      "check": "conversations",
+      "ok": true,
+      "detail": "expected 1, got 1"
+    },
+    {
+      "label": "agent-c2-4",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204319",
+      "claim": "c2",
+      "check": "settled_by",
+      "ok": true,
+      "detail": "expected measurement, got measurement"
+    },
+    {
+      "label": "agent-c2-5",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204334",
+      "claim": "c2",
+      "check": "went_through_service",
+      "ok": true,
+      "detail": "service run f63fdc591434, model claude-sonnet-5-5"
+    },
+    {
+      "label": "agent-c2-5",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204334",
+      "claim": "c2",
+      "check": "no_source_read_in_first_conversation",
+      "ok": true,
+      "detail": "first-conversation source reads: none"
+    },
+    {
+      "label": "agent-c2-5",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204334",
+      "claim": "c2",
+      "check": "conversations",
+      "ok": true,
+      "detail": "expected 1, got 1"
+    },
+    {
+      "label": "agent-c2-5",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204334",
+      "claim": "c2",
+      "check": "settled_by",
+      "ok": true,
+      "detail": "expected measurement, got measurement"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204346",
+      "claim": "c1",
+      "check": "went_through_service",
+      "ok": true,
+      "detail": "service run dbe0d6a2d5a6, model claude-sonnet-5-5"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204346",
+      "claim": "c1",
+      "check": "no_source_read_in_first_conversation",
+      "ok": true,
+      "detail": "first-conversation source reads: none"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204346",
+      "claim": "c1",
+      "check": "conversations",
+      "ok": true,
+      "detail": "expected 1, got 1"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204346",
+      "claim": "c1",
+      "check": "settled_by",
+      "ok": true,
+      "detail": "expected behaviour, got behaviour"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204346",
+      "claim": "c2",
+      "check": "went_through_service",
+      "ok": true,
+      "detail": "service run dbe0d6a2d5a6, model claude-sonnet-5-5"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204346",
+      "claim": "c2",
+      "check": "no_source_read_in_first_conversation",
+      "ok": true,
+      "detail": "first-conversation source reads: none"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204346",
+      "claim": "c2",
+      "check": "conversations",
+      "ok": true,
+      "detail": "expected 1, got 1"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204346",
+      "claim": "c2",
+      "check": "settled_by",
+      "ok": true,
+      "detail": "expected measurement, got measurement"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204346",
+      "claim": "c3",
+      "check": "went_through_service",
+      "ok": true,
+      "detail": "service run dbe0d6a2d5a6, model claude-sonnet-5-5"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204346",
+      "claim": "c3",
+      "check": "no_source_read_in_first_conversation",
+      "ok": true,
+      "detail": "first-conversation source reads: none"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204346",
+      "claim": "c3",
+      "check": "conversations",
+      "ok": true,
+      "detail": "expected 2, got 2"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204346",
+      "claim": "c3",
+      "check": "settled_by",
+      "ok": true,
+      "detail": "expected code, got code"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204346",
+      "claim": "c3",
+      "check": "escalation_reason_recorded",
+      "ok": true,
+      "detail": "This is a claim about how the code is organised (whether render.py or accel.py defines a s"
+    },
+    {
+      "label": "fixed-all",
+      "run_dir": "<work>/groundtruth-proof/demo/.groundtruth/runs/20261109-204346",
+      "claim": "c3",
+      "check": "cites_real_lines",
+      "ok": true,
+      "detail": "2 excerpt(s): [('render.py', 2, 10), ('visemes.py', 4, 15)]"
+    },
+    {
+      "label": "control-c3",
+      "run_dir": "<work>/groundtruth-proof/gates/work/control/.groundtruth/runs/20261109-204448",
+      "claim": "c3",
+      "check": "went_through_service",
+      "ok": true,
+      "detail": "service run dd440d313773, model claude-sonnet-5-5"
+    },
+    {
+      "label": "control-c3",
+      "run_dir": "<work>/groundtruth-proof/gates/work/control/.groundtruth/runs/20261109-204448",
+      "claim": "c3",
+      "check": "no_source_read_in_first_conversation",
+      "ok": true,
+      "detail": "first-conversation source reads: none"
+    },
+    {
+      "label": "control-c3",
+      "run_dir": "<work>/groundtruth-proof/gates/work/control/.groundtruth/runs/20261109-204448",
+      "claim": "c3",
+      "check": "conversations",
+      "ok": true,
+      "detail": "expected 2, got 2"
+    },
+    {
+      "label": "control-c3",
+      "run_dir": "<work>/groundtruth-proof/gates/work/control/.groundtruth/runs/20261109-204448",
+      "claim": "c3",
+      "check": "settled_by",
+      "ok": true,
+      "detail": "expected code, got code"
+    },
+    {
+      "label": "control-c3",
+      "run_dir": "<work>/groundtruth-proof/gates/work/control/.groundtruth/runs/20261109-204448",
+      "claim": "c3",
+      "check": "escalation_reason_recorded",
+      "ok": true,
+      "detail": "The claim is about code structure: whether render.py reuses VISEMES/viseme_for and defines"
+    },
+    {
+      "label": "control-c3",
+      "run_dir": "<work>/groundtruth-proof/gates/work/control/.groundtruth/runs/20261109-204448",
+      "claim": "c3",
+      "check": "cites_real_lines",
+      "ok": true,
+      "detail": "1 excerpt(s): [('render.py', 3, 14)]"
+    }
+  ]
+}

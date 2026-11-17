@@ -1,0 +1,656 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261112-124936"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs",
+      "check": "one_case_per_variation",
+      "ok": true,
+      "detail": "cases ['only-new', 'only-reruns', 'both', 'one-test', 'many-tests', 'each-outcome']; variations ['only-new', 'only-reruns', 'both', 'one-test', 'many-tests', 'each-outcome']"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result",
+      "check": "one_case_per_variation",
+      "ok": true,
+      "detail": "cases ['all-held', 'one-broke-of-ten', 'only-variation-broke', 'needs-decision', 'could-not-run']; variations ['all-held', 'one-broke-of-ten', 'only-variation-broke', 'needs-decision', 'could-not-run']"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film",
+      "check": "one_case_per_variation",
+      "ok": true,
+      "detail": "cases ['first-shown', 'another-variation', 'another-test', 'back-again', 'no-film']; variations ['first-shown', 'another-variation', 'another-test', 'back-again', 'no-film']"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs",
+      "check": "none_broke",
+      "ok": true,
+      "detail": "broke []"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result",
+      "check": "none_broke",
+      "ok": true,
+      "detail": "broke []"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film",
+      "check": "none_broke",
+      "ok": true,
+      "detail": "broke []"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs",
+      "check": "verdict_holds",
+      "ok": true,
+      "detail": "holds; held 6/6, broke [], declined [], outside [], not run []"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result",
+      "check": "verdict_holds",
+      "ok": true,
+      "detail": "holds; held 5/5, broke [], declined [], outside [], not run []"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "6 plan case(s), none with scope"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 6 + broke 0 + declined 0 + outside 0 + not_run 0 = 6; planned 6"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "5 plan case(s), none with scope"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 5 + broke 0 + declined 0 + outside 0 + not_run 0 = 5; planned 5"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "5 plan case(s), none with scope"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 5 + broke 0 + declined 0 + outside 0 + not_run 0 = 5; planned 5"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/only-new",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/only-new",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/only-reruns",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "6 receipts, no http_request"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/only-reruns",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/both",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "6 receipts, no http_request"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/both",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/one-test",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/one-test",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/many-tests",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "6 receipts, no http_request"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/many-tests",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/each-outcome",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "6 receipts, no http_request"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/each-outcome",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result/all-held",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "4 receipts, no http_request"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result/all-held",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result/one-broke-of-ten",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "4 receipts, no http_request"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result/one-broke-of-ten",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result/only-variation-broke",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "4 receipts, no http_request"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result/only-variation-broke",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result/needs-decision",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "4 receipts, no http_request"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result/needs-decision",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result/could-not-run",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "4 receipts, no http_request"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result/could-not-run",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film/first-shown",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "6 receipts, no http_request"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film/first-shown",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film/another-variation",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film/another-variation",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film/another-test",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "10 receipts, no http_request"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film/another-test",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film/back-again",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "11 receipts, no http_request"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film/back-again",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film/no-film",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film/no-film",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/only-new",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/only-new",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 7 receipts, none after another call"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/only-reruns",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/only-reruns",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 6 receipts, none after another call"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/both",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/both",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 6 receipts, none after another call"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/one-test",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/one-test",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 7 receipts, none after another call"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/many-tests",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/many-tests",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 6 receipts, none after another call"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/each-outcome",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "tabs/each-outcome",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 6 receipts, none after another call"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result/all-held",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result/all-held",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 4 receipts, none after another call"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result/one-broke-of-ten",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result/one-broke-of-ten",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 4 receipts, none after another call"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result/only-variation-broke",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result/only-variation-broke",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 4 receipts, none after another call"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result/needs-decision",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result/needs-decision",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 4 receipts, none after another call"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result/could-not-run",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "result/could-not-run",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 4 receipts, none after another call"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film/first-shown",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film/first-shown",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 6 receipts, none after another call"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film/another-variation",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film/another-variation",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 8 receipts, none after another call"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film/another-test",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film/another-test",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 10 receipts, none after another call"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film/back-again",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film/back-again",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 11 receipts, none after another call"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film/no-film",
+      "check": "no_data_tool_in_conversation",
+      "ok": true,
+      "detail": "9 tools given, no set_up or data_tools"
+    },
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film/no-film",
+      "check": "set_up_only_before_case",
+      "ok": true,
+      "detail": "1 set_up of 7 receipts, none after another call"
+    }
+  ],
+  "usage": {
+    "conversations": 19,
+    "labels": 0,
+    "second_attempts": 0,
+    "cost_usd": 0.6664,
+    "seconds": 223.4,
+    "seconds_ignored": 0
+  },
+  "runs": [
+    "<work>/gp-data/gates/work/dash-clean/.groundtruth/runs/20261112-124936"
+  ],
+  "notes": [
+    {
+      "stream": "claimsclean",
+      "label": "claims-clean",
+      "property": "film",
+      "note": "verdict holds (reported, not judged); held 5/5"
+    }
+  ]
+}

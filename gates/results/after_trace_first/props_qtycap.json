@@ -1,0 +1,176 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "stream": "qtycap",
+      "label": "qty-cap",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261110-152048"
+    },
+    {
+      "stream": "qtycap",
+      "label": "qty-cap",
+      "property": "p1",
+      "check": "verdict_fails",
+      "ok": true,
+      "detail": "fails; held 3/6, broke ['c3'], declined [], outside ['c5', 'c6'], not run []"
+    },
+    {
+      "stream": "qtycap",
+      "label": "qty-cap",
+      "property": "p1",
+      "check": "broken_cases_are_repeat_adds",
+      "ok": true,
+      "detail": "broke ['c3']; not repeat-adds []; c3: Open a listing that is already in the cart (e.g. the helmet). Note the"
+    },
+    {
+      "stream": "qtycap",
+      "label": "qty-cap",
+      "property": "p1",
+      "check": "some_case_holds",
+      "ok": true,
+      "detail": "held ['c1', 'c2', 'c4']"
+    },
+    {
+      "stream": "qtycap",
+      "label": "qty-cap",
+      "property": "p1",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "6 plan case(s), none with scope"
+    },
+    {
+      "stream": "qtycap",
+      "label": "qty-cap",
+      "property": "p1",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 3 + broke 1 + declined 0 + outside 2 + not_run 0 = 6; planned 6"
+    },
+    {
+      "stream": "qtycap",
+      "label": "qty-cap",
+      "property": "p1",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "qtycap",
+      "label": "qty-cap",
+      "property": "p1",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "2 code ref(s)"
+    },
+    {
+      "stream": "qtycap",
+      "label": "qty-cap",
+      "property": "p1/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "9 receipts, no http_request"
+    },
+    {
+      "stream": "qtycap",
+      "label": "qty-cap",
+      "property": "p1/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "qtycap",
+      "label": "qty-cap",
+      "property": "p1/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "14 receipts, no http_request"
+    },
+    {
+      "stream": "qtycap",
+      "label": "qty-cap",
+      "property": "p1/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "qtycap",
+      "label": "qty-cap",
+      "property": "p1/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "20 receipts, no http_request"
+    },
+    {
+      "stream": "qtycap",
+      "label": "qty-cap",
+      "property": "p1/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "qtycap",
+      "label": "qty-cap",
+      "property": "p1/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "14 receipts, no http_request"
+    },
+    {
+      "stream": "qtycap",
+      "label": "qty-cap",
+      "property": "p1/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "qtycap",
+      "label": "qty-cap",
+      "property": "p1/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "9 receipts, no http_request"
+    },
+    {
+      "stream": "qtycap",
+      "label": "qty-cap",
+      "property": "p1/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "qtycap",
+      "label": "qty-cap",
+      "property": "p1/c6",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "5 receipts, no http_request"
+    },
+    {
+      "stream": "qtycap",
+      "label": "qty-cap",
+      "property": "p1/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    }
+  ],
+  "usage": {
+    "conversations": 8,
+    "labels": 6,
+    "second_attempts": 0,
+    "cost_usd": 0.2644,
+    "seconds": 119.2,
+    "seconds_ignored": 0
+  },
+  "runs": [
+    "<work>/groundtruth-proof/gates/work/cbay-qty-cap/.groundtruth/runs/20261110-152048"
+  ]
+}

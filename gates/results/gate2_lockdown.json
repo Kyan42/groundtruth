@@ -1,0 +1,445 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "run finished",
+      "ok": true,
+      "detail": "run dir 20261114-135959; service saw 6 result posts"
+    },
+    {
+      "name": "begin_claim p1/c1 accepted",
+      "ok": true,
+      "detail": "ready"
+    },
+    {
+      "name": "end_claim p1/c1 accepted",
+      "ok": true,
+      "detail": "saved"
+    },
+    {
+      "name": "refused cmd_shell",
+      "ok": true,
+      "detail": "isError=True text=\"refused: unknown tool 'shell'\""
+    },
+    {
+      "name": "refused cmd_bash",
+      "ok": true,
+      "detail": "isError=True text=\"refused: unknown tool 'bash'\""
+    },
+    {
+      "name": "refused cmd_exec",
+      "ok": true,
+      "detail": "isError=True text=\"refused: unknown tool 'exec'\""
+    },
+    {
+      "name": "refused cmd_run_command",
+      "ok": true,
+      "detail": "isError=True text=\"refused: unknown tool 'run_command'\""
+    },
+    {
+      "name": "refused cmd_write_file",
+      "ok": true,
+      "detail": "isError=True text=\"refused: unknown tool 'write_file'\""
+    },
+    {
+      "name": "refused host_http",
+      "ok": true,
+      "detail": "isError=True text=\"refused: only the app's own address is allowed\""
+    },
+    {
+      "name": "refused host_navigate",
+      "ok": true,
+      "detail": "isError=True text=\"refused: only the app's own address is allowed\""
+    },
+    {
+      "name": "refused host_file_scheme",
+      "ok": true,
+      "detail": "isError=True text=\"refused: only the app's own address is allowed\""
+    },
+    {
+      "name": "refused out_dotdot",
+      "ok": true,
+      "detail": "isError=True text='refused: path is outside the repo'"
+    },
+    {
+      "name": "refused out_abs",
+      "ok": true,
+      "detail": "isError=True text='refused: path is outside the repo'"
+    },
+    {
+      "name": "refused out_glob",
+      "ok": true,
+      "detail": "isError=True text=\"refused: the glob must be repo-relative and must not contain '..'\""
+    },
+    {
+      "name": "refused too_long",
+      "ok": true,
+      "detail": "isError=True text='refused: at most 15 lines per read; narrow the range'"
+    },
+    {
+      "name": "refused proto_bad_claim",
+      "ok": true,
+      "detail": "isError=True text='refused: not a property of this run, or already finished'"
+    },
+    {
+      "name": "refused proto_phase3",
+      "ok": true,
+      "detail": "isError=True text=\"refused: unknown tool 'begin_phase'\""
+    },
+    {
+      "name": "refused proto_not_dict",
+      "ok": true,
+      "detail": "isError=True text='refused: malformed action'"
+    },
+    {
+      "name": "refused proto_wrong_arg",
+      "ok": true,
+      "detail": "isError=True text=\"refused: bad arguments for read_lines: missing a required argument: 'path'\""
+    },
+    {
+      "name": "refused proto_reset",
+      "ok": true,
+      "detail": "isError=True text='refused: no reset command is registered'"
+    },
+    {
+      "name": "refused up_push",
+      "ok": true,
+      "detail": "isError=True text=\"refused: unknown tool 'push'\""
+    },
+    {
+      "name": "refused up_upload",
+      "ok": true,
+      "detail": "isError=True text=\"refused: unknown tool 'upload'\""
+    },
+    {
+      "name": "refused up_store",
+      "ok": true,
+      "detail": "isError=True text=\"refused: unknown tool 'store'\""
+    },
+    {
+      "name": "refused up_push_run",
+      "ok": true,
+      "detail": "isError=True text=\"refused: unknown tool 'push_run'\""
+    },
+    {
+      "name": "refused up_upload_file",
+      "ok": true,
+      "detail": "isError=True text=\"refused: unknown tool 'upload_file'\""
+    },
+    {
+      "name": "refused up_publish",
+      "ok": true,
+      "detail": "isError=True text=\"refused: unknown tool 'publish'\""
+    },
+    {
+      "name": "refused up_store_http",
+      "ok": true,
+      "detail": "isError=True text=\"refused: only the app's own address is allowed\""
+    },
+    {
+      "name": "refused up_store_navigate",
+      "ok": true,
+      "detail": "isError=True text=\"refused: only the app's own address is allowed\""
+    },
+    {
+      "name": "refused ref_selector_click",
+      "ok": true,
+      "detail": "isError=True text='refused: a reference looks like e12, copied from the latest observe'"
+    },
+    {
+      "name": "refused ref_selector_fill",
+      "ok": true,
+      "detail": "isError=True text='refused: a reference looks like e12, copied from the latest observe'"
+    },
+    {
+      "name": "refused ref_selector_read",
+      "ok": true,
+      "detail": "isError=True text='refused: a reference looks like e12, copied from the latest observe'"
+    },
+    {
+      "name": "refused unit_dotdot_case (begin_claim 'p1/../x')",
+      "ok": true,
+      "detail": "isError=True text='refused: not a property of this run, or already finished'"
+    },
+    {
+      "name": "refused unit_dotdot_lead (begin_claim '../p1/c1')",
+      "ok": true,
+      "detail": "isError=True text='refused: not a property of this run, or already finished'"
+    },
+    {
+      "name": "refused unit_three_parts (begin_claim 'p1/c1/extra')",
+      "ok": true,
+      "detail": "isError=True text='refused: not a property of this run, or already finished'"
+    },
+    {
+      "name": "refused unit_unknown_property (begin_claim 'zz/c1')",
+      "ok": true,
+      "detail": "isError=True text='refused: not a property of this run, or already finished'"
+    },
+    {
+      "name": "refused unit_no_case_part (begin_claim 'p1')",
+      "ok": true,
+      "detail": "isError=True text='refused: not a property of this run, or already finished'"
+    },
+    {
+      "name": "refused unit_case_40_chars (begin_claim 'p1/cccccccccccccccccccccccccccccccccccccccc')",
+      "ok": true,
+      "detail": "isError=True text='refused: not a property of this run, or already finished'"
+    },
+    {
+      "name": "refused begin_claim p1/c1 again after it was finished",
+      "ok": true,
+      "detail": "isError=True text='refused: not a property of this run, or already finished'"
+    },
+    {
+      "name": "works http_request GET /",
+      "ok": true,
+      "detail": "'200\\n<!doctype html><html><head><title>lock</title></head><body><h1>Lock app</h1>'"
+    },
+    {
+      "name": "works read_lines src/small.py 1-3",
+      "ok": true,
+      "detail": "\"   1 def lock():\\n   2     return 'locked'\\n   3 \""
+    },
+    {
+      "name": "works list_files (has src/small.py, nothing under .groundtruth)",
+      "ok": true,
+      "detail": "files=['src/big.py', 'src/small.py']"
+    },
+    {
+      "name": "canary does not exist",
+      "ok": true,
+      "detail": "CANARY_MUST_NOT_EXIST"
+    },
+    {
+      "name": "other host received zero requests",
+      "ok": true,
+      "detail": "hits=[]"
+    },
+    {
+      "name": "the results store received zero requests during the run",
+      "ok": true,
+      "detail": "hits=[]"
+    },
+    {
+      "name": "the upload code was never loaded by the run",
+      "ok": true,
+      "detail": "toolserver.push"
+    },
+    {
+      "name": "outside.txt content never sent to the service",
+      "ok": true,
+      "detail": "0 results contained it"
+    },
+    {
+      "name": "receipts.jsonl has a refused entry for every catalog-level refusal",
+      "ok": true,
+      "detail": "29 receipts; missing=[]"
+    },
+    {
+      "name": "report keeps exactly the one valid excerpt with its real lines",
+      "ok": true,
+      "detail": "excerpts=[('src/small.py', 1, 3, ['def lock():', \"    return 'locked'\", ''])]"
+    },
+    {
+      "name": "report screenshots empty",
+      "ok": true,
+      "detail": "screenshots=[]"
+    },
+    {
+      "name": "report notes mention dropped excerpts and screenshot",
+      "ok": true,
+      "detail": "notes=['An excerpt from src/big.py was dropped because it is longer than 15 lines.', 'An excerpt from ../outside.txt was dropped because path is outside the repo.', \"Screenshot 'shot-99' was dropped because no such screenshot was taken.\"]"
+    },
+    {
+      "name": "sent.json has no value containing the repo path",
+      "ok": true,
+      "detail": "keys=['feature', 'goal', 'env', 'properties', 'plan_only']; env={'url': 'http://127.0.0.1:56043', 'has_pid': True, 'has_repo': True, 'has_reset': False, 'has_routes': False, 'data_tools': []}"
+    },
+    {
+      "name": "what the service received matches sent.json and leaks no path",
+      "ok": true,
+      "detail": "client=3"
+    },
+    {
+      "name": "the pid value is not sent (only has_pid)",
+      "ok": true,
+      "detail": "pid 91385"
+    },
+    {
+      "name": "reset run finished",
+      "ok": true,
+      "detail": "run dir 20261114-140000; service saw 5 result posts"
+    },
+    {
+      "name": "begin_claim with reset:true and a failing reset is an error naming the reset",
+      "ok": true,
+      "detail": "isError=True text='the registered reset command failed (error: reset failed (exit 3): )'"
+    },
+    {
+      "name": "begin_claim with reset:false still works",
+      "ok": true,
+      "detail": "isError=False text='ready'"
+    },
+    {
+      "name": "end_claim p1/c1 accepted after reset:false",
+      "ok": true,
+      "detail": "'saved'"
+    },
+    {
+      "name": "data tools run finished",
+      "ok": true,
+      "detail": "run dir 20261114-140000; service saw 10 result posts"
+    },
+    {
+      "name": "data tools: dd_begin accepted with a reset",
+      "ok": true,
+      "detail": "'ready; reset done'"
+    },
+    {
+      "name": "data tools: d1_begin accepted with a reset",
+      "ok": true,
+      "detail": "'ready; reset done'"
+    },
+    {
+      "name": "data tools: d2_begin accepted with a reset",
+      "ok": true,
+      "detail": "'ready; reset done'"
+    },
+    {
+      "name": "data_tools lists the declared tool with what it takes",
+      "ok": true,
+      "detail": "data=[{'name': 'make_listing', 'does': 'Creates one listing and returns its id and the address of its page.', 'takes': {'title': {'type': 'string', 'optional': False, 'does': ''}, 'price_cents': {'type': 'integer', 'optional': False, 'does': 'The price in cents.'}, 'sold_out': {'type': 'boolean', 'optional': True, 'does': ''}}}]"
+    },
+    {
+      "name": "no result sent to the service contains a tool's run command",
+      "ok": true,
+      "detail": "searched every result and sent.json"
+    },
+    {
+      "name": "refused set_up: d_in_discovery (discovery)",
+      "ok": true,
+      "detail": "receipt=True text='refused: set_up is not allowed while finding cases (a discovery unit only looks)'"
+    },
+    {
+      "name": "refused set_up: d_undeclared (no data tool named)",
+      "ok": true,
+      "detail": "receipt=True text=\"refused: no data tool named 'drop_all_tables' is declared (declared: make_listing)\""
+    },
+    {
+      "name": "refused set_up: d_extra (no input named 'colour')",
+      "ok": true,
+      "detail": "receipt=True text=\"refused: make_listing has no input named 'colour' (it takes: title, price_cents, sold_out)\""
+    },
+    {
+      "name": "refused set_up: d_missing (needs the input 'price_cents')",
+      "ok": true,
+      "detail": "receipt=True text=\"refused: make_listing needs the input 'price_cents'\""
+    },
+    {
+      "name": "refused set_up: d_wrong_type (must be an integer)",
+      "ok": true,
+      "detail": "receipt=True text=\"refused: the input 'price_cents' of make_listing must be an integer, got str '1200'\""
+    },
+    {
+      "name": "refused set_up: d_bool_not_int (must be an integer)",
+      "ok": true,
+      "detail": "receipt=True text=\"refused: the input 'price_cents' of make_listing must be an integer, got bool True\""
+    },
+    {
+      "name": "refused set_up: d_long (at most 500)",
+      "ok": true,
+      "detail": "receipt=True text=\"refused: the input 'title' of make_listing is 501 characters long; at most 500 are allowed\""
+    },
+    {
+      "name": "refused set_up: d_run_arg (bad arguments)",
+      "ok": true,
+      "detail": "receipt=True text=\"refused: bad arguments for set_up: got an unexpected keyword argument 'run'\""
+    },
+    {
+      "name": "refused set_up: d_seventh (6 set_up calls)",
+      "ok": true,
+      "detail": "receipt=True text='refused: this case has already made 6 set_up calls, the most allowed'"
+    },
+    {
+      "name": "refused set_up: d_after_call (already ran http_request)",
+      "ok": true,
+      "detail": "receipt=True text='refused: set_up must come before anything else in a case, and this case already ran http_request'"
+    },
+    {
+      "name": "data tools: the other call in p1/c2 worked",
+      "ok": true,
+      "detail": "'200\\n<!doctype html><html><head><title>lock</title></head><body><h1>Lock app</h"
+    },
+    {
+      "name": "set_up sh_semicolon: the value arrived only on standard input, intact",
+      "ok": true,
+      "detail": "on stdin 1 time(s); on a command line or in the environment 0 time(s)"
+    },
+    {
+      "name": "set_up sh_dollar: the value arrived only on standard input, intact",
+      "ok": true,
+      "detail": "on stdin 1 time(s); on a command line or in the environment 0 time(s)"
+    },
+    {
+      "name": "set_up sh_backtick: the value arrived only on standard input, intact",
+      "ok": true,
+      "detail": "on stdin 1 time(s); on a command line or in the environment 0 time(s)"
+    },
+    {
+      "name": "data canary does not exist",
+      "ok": true,
+      "detail": "DATA_CANARY_MUST_NOT_EXIST"
+    },
+    {
+      "name": "every set_up command got GROUNDTRUTH_APP_URL",
+      "ok": true,
+      "detail": "6 runs"
+    },
+    {
+      "name": "exactly 6 set_up commands ran in p1/c1 and none elsewhere",
+      "ok": true,
+      "detail": "6 ran"
+    },
+    {
+      "name": "a successful set_up's receipt records the tool, the input and what came back",
+      "ok": true,
+      "detail": "6 successful set_up receipts; first={\"t\": 1794693600.17, \"phase\": 1, \"tool\": \"set_up\", \"args\": {\"tool\": \"make_listing\", \"input\": {\"title\": \"\\\"; touch <tmp>"
+    },
+    {
+      "name": "the saved result lists every set_up asked for in order: 7 refused, 6 that returned, 1 refused, and not the claimed one",
+      "ok": true,
+      "detail": "14 steps, 6 returned, 8 failed; first made=[{\"tool\": \"make_listing\", \"input\": {\"title\": \"\\\"; touch <tmp>/gt-gate2-oa4ywt"
+    },
+    {
+      "name": "only a step's reason is taken from the report, by position",
+      "ok": true,
+      "detail": "['the first reason', '', '', '', '', '', '', '', '', '', '', '', '', '']"
+    },
+    {
+      "name": "a claimed set-up is replaced by the refused one that was really asked for",
+      "ok": true,
+      "detail": "[{\"tool\": \"make_listing\", \"input\": {\"title\": \"Lamp\", \"price_cents\": 1200}, \"error\": \"refused: set_up must come before anything else in a case, and this case already ran http_request\", \"because\": \"x\"}]"
+    },
+    {
+      "name": "a discovery's saved result shows its refused set_up as an error and nothing made",
+      "ok": true,
+      "detail": "[{\"tool\": \"make_listing\", \"input\": {\"title\": \"Lamp\", \"price_cents\": 1200}, \"error\": \"refused: set_up is not allowed while finding cases (a discovery unit only looks)\", \"because\": \"\"}]"
+    },
+    {
+      "name": "refused set_up: n_set_up (no reset command)",
+      "ok": true,
+      "detail": "receipt=True text=\"refused: no reset command is registered. A case that sets up data must start from clean data, or one case's data would leak into the next\""
+    },
+    {
+      "name": "no set_up command ran without a reset command",
+      "ok": true,
+      "detail": "received.jsonl"
+    },
+    {
+      "name": "a broken data.yml stops verify at the start, in plain words, before the service is contacted",
+      "ok": true,
+      "detail": "\".groundtruth/data.yml: tool 'make_listing' has no `does`. Add one plain sentence saying what the tool makes. Fix the file, then run verify again.\""
+    }
+  ]
+}

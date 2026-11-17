@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+demo/.groundtruth/runs/
+demo/.groundtruth/env.json
+gates/work/
+gates/results/*.log
+
+.store/
+dashboard/.groundtruth/runs/
+dashboard/.groundtruth/env.json
+dashboard/.groundtruth/decisions/
+dashboard/.groundtruth/test-store/
+/.venv
+.run/

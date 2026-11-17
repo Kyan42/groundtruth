@@ -1,0 +1,40 @@
+[qtycap] service http://127.0.0.1:8792, app ports [3103]
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py register <work>/groundtruth-proof/gates/work/cbay-qty-cap --url http://127.0.0.1:3103 --reset /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset --routes next
+    Registered http://127.0.0.1:3103 (pid 17473) for cbay-qty-cap
+      the verifier can use: browser and API, process measurements, code reading
+      reset command, run in the repo before every case (it is not tried now): /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset
+      this replaces the earlier registration for this repo
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py verify <work>/groundtruth-proof/gates/work/cbay-qty-cap cart --only p1
+    Run 20261110-201453: 1 property against http://127.0.0.1:3103
+      p1/discovery: 5 cases through 2 entry point(s), kind behaviour
+      p1/c1 holds: Cart badge was 0 before. Listing price $249.99, In stock. After Add to cart: badge 1; /cart line "Vintage Brass Diving Helmet" Qty 1 $249.99; Subtotal
+      p1/c2 holds: Cart was empty at start, so I added Ship in a Bottle (l2) first. Subtotal $34.50. Then I added Kraken Plush (l3, listing $89.00) with its add-to-cart 
+      p1/c3 holds: Cart was empty (badge 0) at start. Add l5 ($15.00): subtotal $15.00 (+15.00). Add l7 ($310.00): subtotal $325.00 (+310.00). Add l2 ($34.50): subtotal 
+      p1/c4 breaks: Listing l4 shows $120.00, In stock. First add: cart badge 1, line Qty 1, subtotal $120.00. Second add (clicked Add to cart on /listings/l4, no error s
+      p1/c5 declined: /listings/l6 shows $75.25, Availability "Sold out", a disabled "Sold out" button and an enabled "Add to cart" button. I clicked it and then opened /ca
+      p1 fails (broke: c4): Adding an in-stock item to the cart raises the cart subtotal by the price shown on its lis
+    Result: 0 hold, 1 fail, 0 need your decision, 0 can't tell
+    Details: <work>/groundtruth-proof/gates/work/cbay-qty-cap/.groundtruth/runs/20261110-201453/run.json
+    Report: <work>/groundtruth-proof/gates/work/cbay-qty-cap/.groundtruth/runs/20261110-201453/report.html
+[qtycap] qty-cap: checking <work>/groundtruth-proof/gates/work/cbay-qty-cap/.groundtruth/runs/20261110-201453 with qtycap
+PASS  qtycap  qty-cap  -  run_ok  run 20261110-201453
+PASS  qtycap  qty-cap  p1  verdict_fails  fails; held 3/5, broke ['c4'], declined ['c5'], outside [], not run []
+PASS  qtycap  qty-cap  p1  broken_cases_are_repeat_adds  broke ['c4']; not repeat-adds []; c4: Add /listings/l4 (Antique Sextant, $120.00) once and note the subtotal
+PASS  qtycap  qty-cap  p1  some_case_holds  held ['c1', 'c2', 'c3']
+PASS  qtycap  qty-cap  p1  no_scope_key  5 plan case(s), none with scope
+PASS  qtycap  qty-cap  p1  counts_add_up  held 3 + broke 1 + declined 1 + outside 0 + not_run 0 = 5; planned 5
+PASS  qtycap  qty-cap  p1  declined_have_question_and_draft  1 declined case(s), all complete
+PASS  qtycap  qty-cap  p1  was_traced  plan.traced true
+PASS  qtycap  qty-cap  p1  code_refs_present  3 code ref(s)
+PASS  qtycap  qty-cap  p1/c1  browser_case_no_api  6 receipts, no http_request
+PASS  qtycap  qty-cap  p1/c1  no_source_tools  none given or used
+PASS  qtycap  qty-cap  p1/c2  browser_case_no_api  13 receipts, no http_request
+PASS  qtycap  qty-cap  p1/c2  no_source_tools  none given or used
+PASS  qtycap  qty-cap  p1/c3  browser_case_no_api  17 receipts, no http_request
+PASS  qtycap  qty-cap  p1/c3  no_source_tools  none given or used
+PASS  qtycap  qty-cap  p1/c4  browser_case_no_api  16 receipts, no http_request
+PASS  qtycap  qty-cap  p1/c4  no_source_tools  none given or used
+PASS  qtycap  qty-cap  p1/c5  browser_case_no_api  11 receipts, no http_request
+PASS  qtycap  qty-cap  p1/c5  no_source_tools  none given or used
+[qtycap] PASSED: 19/19 checks; usage {'conversations': 7, 'labels': 8, 'second_attempts': 0, 'cost_usd': 0.2958, 'seconds': 112.6, 'seconds_ignored': 0}; wrote <work>/groundtruth-proof/gates/results/props_qtycap.json
+exit 0

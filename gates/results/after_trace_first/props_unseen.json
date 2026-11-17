@@ -1,0 +1,1480 @@
+{
+  "passed": false,
+  "checks": [
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261110-152830"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p3",
+      "check": "verdict_holds",
+      "ok": true,
+      "detail": "holds; held 6/6, broke [], declined [], outside [], not run []"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p4",
+      "check": "verdict_holds",
+      "ok": false,
+      "detail": "needs_decision; held 5/6, broke [], declined ['c5'], outside [], not run []"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p3",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "6 plan case(s), none with scope"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p3",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 6 + broke 0 + declined 0 + outside 0 + not_run 0 = 6; planned 6"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p3",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p3",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "2 code ref(s)"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p4",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "6 plan case(s), none with scope"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p4",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 5 + broke 0 + declined 1 + outside 0 + not_run 0 = 6; planned 6"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p4",
+      "check": "declined_have_question_and_draft",
+      "ok": true,
+      "detail": "1 declined case(s), all complete"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p4",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p4",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "3 code ref(s)"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p3/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p3/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p3/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "10 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p3/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p3/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "12 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p3/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p3/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "11 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p3/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p3/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p3/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p3/c6",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "5 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p3/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p4/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p4/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p4/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p4/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p4/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "5 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p4/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p4/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "9 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p4/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p4/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "6 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p4/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p4/c6",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "10 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "reference",
+      "property": "p4/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261110-153227"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p1",
+      "check": "has_carried_out_verdict",
+      "ok": true,
+      "detail": "verdict needs_decision"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p2",
+      "check": "has_carried_out_verdict",
+      "ok": true,
+      "detail": "verdict holds"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p3",
+      "check": "has_carried_out_verdict",
+      "ok": true,
+      "detail": "verdict holds"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p4",
+      "check": "has_carried_out_verdict",
+      "ok": true,
+      "detail": "verdict fails"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p1",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "5 plan case(s), none with scope"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p1",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 4 + broke 0 + declined 1 + outside 0 + not_run 0 = 5; planned 5"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p1",
+      "check": "declined_have_question_and_draft",
+      "ok": true,
+      "detail": "1 declined case(s), all complete"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p1",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p1",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "2 code ref(s)"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p2",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "6 plan case(s), none with scope"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p2",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 5 + broke 0 + declined 0 + outside 1 + not_run 0 = 6; planned 6"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p2",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p2",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "2 code ref(s)"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p3",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "6 plan case(s), none with scope"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p3",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 6 + broke 0 + declined 0 + outside 0 + not_run 0 = 6; planned 6"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p3",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p3",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "2 code ref(s)"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p4",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "5 plan case(s), none with scope"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p4",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 0 + broke 4 + declined 1 + outside 0 + not_run 0 = 5; planned 5"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p4",
+      "check": "declined_have_question_and_draft",
+      "ok": true,
+      "detail": "1 declined case(s), all complete"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p4",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p4",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "3 code ref(s)"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p1/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p1/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p1/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "15 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p1/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p1/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "13 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p1/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p1/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "13 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p1/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p1/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "14 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p1/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p2/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "9 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p2/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p2/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "14 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p2/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p2/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "9 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p2/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p2/c4",
+      "check": "api_case_no_browser",
+      "ok": true,
+      "detail": "no browser tools given"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p2/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p2/c5",
+      "check": "api_case_no_browser",
+      "ok": true,
+      "detail": "no browser tools given"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p2/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p2/c6",
+      "check": "api_case_no_browser",
+      "ok": true,
+      "detail": "no browser tools given"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p2/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p3/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p3/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p3/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p3/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p3/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "17 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p3/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p3/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "11 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p3/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p3/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p3/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p3/c6",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p3/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p4/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "6 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p4/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p4/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "6 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p4/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p4/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "6 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p4/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p4/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "6 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p4/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p4/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "4 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-a",
+      "property": "p4/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261110-154035"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p1",
+      "check": "has_carried_out_verdict",
+      "ok": true,
+      "detail": "verdict needs_decision"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p2",
+      "check": "has_carried_out_verdict",
+      "ok": true,
+      "detail": "verdict holds"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p3",
+      "check": "has_carried_out_verdict",
+      "ok": true,
+      "detail": "verdict holds"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p4",
+      "check": "has_carried_out_verdict",
+      "ok": true,
+      "detail": "verdict needs_decision"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p1",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "6 plan case(s), none with scope"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p1",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 4 + broke 0 + declined 1 + outside 1 + not_run 0 = 6; planned 6"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p1",
+      "check": "declined_have_question_and_draft",
+      "ok": true,
+      "detail": "1 declined case(s), all complete"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p1",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p1",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "2 code ref(s)"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p2",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "5 plan case(s), none with scope"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p2",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 5 + broke 0 + declined 0 + outside 0 + not_run 0 = 5; planned 5"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p2",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p2",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "2 code ref(s)"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p3",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "6 plan case(s), none with scope"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p3",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 6 + broke 0 + declined 0 + outside 0 + not_run 0 = 6; planned 6"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p3",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p3",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "2 code ref(s)"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p4",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "6 plan case(s), none with scope"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p4",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 5 + broke 0 + declined 1 + outside 0 + not_run 0 = 6; planned 6"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p4",
+      "check": "declined_have_question_and_draft",
+      "ok": true,
+      "detail": "1 declined case(s), all complete"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p4",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p4",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "3 code ref(s)"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p1/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "10 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p1/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p1/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "15 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p1/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p1/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "17 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p1/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p1/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "18 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p1/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p1/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "12 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p1/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p1/c6",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "12 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p1/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p2/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "11 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p2/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p2/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "16 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p2/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p2/c3",
+      "check": "api_case_no_browser",
+      "ok": true,
+      "detail": "no browser tools given"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p2/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p2/c4",
+      "check": "api_case_no_browser",
+      "ok": true,
+      "detail": "no browser tools given"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p2/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p2/c5",
+      "check": "api_case_no_browser",
+      "ok": true,
+      "detail": "no browser tools given"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p2/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p3/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "6 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p3/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p3/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p3/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p3/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "15 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p3/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p3/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "11 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p3/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p3/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p3/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p3/c6",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "10 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p3/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p4/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p4/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p4/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p4/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p4/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p4/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p4/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p4/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p4/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "12 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p4/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p4/c6",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "6 receipts, no http_request"
+    },
+    {
+      "stream": "unseen",
+      "label": "variant-b",
+      "property": "p4/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "unseen",
+      "label": "key",
+      "property": "variant-a/p1",
+      "check": "matches_key",
+      "ok": false,
+      "detail": "expected holds, got needs_decision"
+    },
+    {
+      "stream": "unseen",
+      "label": "key",
+      "property": "variant-a/p2",
+      "check": "matches_key",
+      "ok": true,
+      "detail": "expected holds, got holds"
+    },
+    {
+      "stream": "unseen",
+      "label": "key",
+      "property": "variant-a/p3",
+      "check": "matches_key",
+      "ok": true,
+      "detail": "expected holds, got holds"
+    },
+    {
+      "stream": "unseen",
+      "label": "key",
+      "property": "variant-a/p4",
+      "check": "matches_key",
+      "ok": true,
+      "detail": "expected fails, got fails"
+    },
+    {
+      "stream": "unseen",
+      "label": "key",
+      "property": "variant-b/p1",
+      "check": "matches_key",
+      "ok": true,
+      "detail": "expected needs_decision, got needs_decision"
+    },
+    {
+      "stream": "unseen",
+      "label": "key",
+      "property": "variant-b/p2",
+      "check": "matches_key",
+      "ok": true,
+      "detail": "expected holds, got holds"
+    },
+    {
+      "stream": "unseen",
+      "label": "key",
+      "property": "variant-b/p3",
+      "check": "matches_key",
+      "ok": true,
+      "detail": "expected holds, got holds"
+    },
+    {
+      "stream": "unseen",
+      "label": "key",
+      "property": "variant-b/p4",
+      "check": "matches_key",
+      "ok": false,
+      "detail": "expected holds, got needs_decision"
+    }
+  ],
+  "usage": {
+    "conversations": 77,
+    "labels": 46,
+    "second_attempts": 0,
+    "cost_usd": 2.3497,
+    "seconds": 1095.4,
+    "seconds_ignored": 0
+  },
+  "runs": [
+    "<work>/cbay/app/.groundtruth/runs/20261110-152830",
+    "<work>/groundtruth-proof/gates/work/unseen/variant-a/.groundtruth/runs/20261110-153227",
+    "<work>/groundtruth-proof/gates/work/unseen/variant-b/.groundtruth/runs/20261110-154035"
+  ],
+  "key": {
+    "variant-a": {
+      "expected": {
+        "p1": "holds",
+        "p2": "holds",
+        "p3": "holds",
+        "p4": "fails"
+      },
+      "what": "app/api/orders/route.ts, POST handler: createOrder(listing.id, listing.title, listing.priceCents / 100) - the price is divided by 100 (cents treated as dollars) before being stored as the order's totalCents, so every Buy It Now order total is 1/100 of the listing price. Order is still created (201) and the confirmation page appears.",
+      "how_to_see_it": "Reset data. Open /listings/l1 (shows $249.99), click Buy It Now. Lands on /orders/order-1 with 'Order confirmed' but Total shows $2.50; should show $249.99. Same for every in-stock item: l5 $15.00 -> $0.15, l4 $120.00 -> $1.20. API: POST /api/orders {\"listingId\":\"l1\"} -> 201 {orderId}; data/state.json order totalCents is 249.99 instead of 24999. Cart, watchlist and sold-out behaviour unchanged."
+    },
+    "variant-b": {
+      "expected": {
+        "p1": "needs_decision",
+        "p2": "holds",
+        "p3": "holds",
+        "p4": "holds"
+      },
+      "what": "lib/cart.ts addToCart: new MAX_QUANTITY_PER_LISTING = 3; if the item's existing cart line already has quantity 3, returns {ok:false, code:'quantity_limit'} before any write. app/api/cart/route.ts POST maps that code to HTTP 422 {error: 'You can add at most 3 of this item to your cart.'}, which AddToCartButton shows in its existing add-error paragraph. Sold-out check still runs first (409 unchanged).",
+      "how_to_see_it": "Reset data. Open /listings/l2 ($34.50) and click Add to cart three times: subtotal goes $34.50, $69.00, $103.50. A fourth click shows 'You can add at most 3 of this item to your cart.' under the button, cart badge stays 3, cart subtotal stays $103.50, state.json unchanged. API: 4th POST /api/cart {\"listingId\":\"l2\"} -> 422 with that error body. Under the original app the 4th add would raise the subtotal to $138.00. Adding other items (up to 3 each) still raises the subtotal by their listing price."
+    }
+  }
+}

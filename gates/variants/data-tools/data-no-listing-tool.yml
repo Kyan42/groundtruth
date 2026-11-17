@@ -1,0 +1,8 @@
+tools:
+  - name: make_order
+    does: Places one Buy It Now order for an in-stock listing through the shop's own order endpoint, and returns the order id and the address of its page.
+    takes:
+      listing_id:
+        type: string
+        does: "The id of the listing to buy, for example l2."
+    run: node scripts/groundtruth/make-order.mjs

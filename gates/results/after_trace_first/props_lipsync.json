@@ -1,0 +1,1258 @@
+{
+  "passed": false,
+  "checks": [
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261110-151006"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1",
+      "check": "verdict_fails",
+      "ok": true,
+      "detail": "fails; held 0/6, broke ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'], declined [], outside [], not run []"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2",
+      "check": "verdict_holds",
+      "ok": true,
+      "detail": "holds; held 8/8, broke [], declined [], outside [], not run []"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g3",
+      "check": "verdict_holds",
+      "ok": false,
+      "detail": "cant_tell; held 4/6, broke [], declined [], outside ['c6'], not run ['c3']"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1",
+      "check": "kind_measurement",
+      "ok": true,
+      "detail": "plan kind measurement"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2",
+      "check": "kind_behaviour",
+      "ok": true,
+      "detail": "plan kind behaviour"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g3",
+      "check": "kind_code",
+      "ok": false,
+      "detail": "plan kind behaviour"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1",
+      "check": "measured_first",
+      "ok": true,
+      "detail": "order ['g1', 'g2', 'g3']"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "6 plan case(s), none with scope"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 0 + broke 6 + declined 0 + outside 0 + not_run 0 = 6; planned 6"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "2 code ref(s)"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "8 plan case(s), none with scope"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 8 + broke 0 + declined 0 + outside 0 + not_run 0 = 8; planned 8"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "2 code ref(s)"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g3",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "6 plan case(s), none with scope"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g3",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 4 + broke 0 + declined 0 + outside 1 + not_run 1 = 6; planned 6"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g3",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g3",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "2 code ref(s)"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "10 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c1",
+      "check": "gpu_check_before_action",
+      "ok": true,
+      "detail": "breaks; first gpu_check at 1, first action at 3"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c1",
+      "check": "baseline_recorded",
+      "ok": true,
+      "detail": "412 chars"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c2",
+      "check": "api_case_no_browser",
+      "ok": true,
+      "detail": "no browser tools given"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c2",
+      "check": "gpu_check_before_action",
+      "ok": true,
+      "detail": "breaks; first gpu_check at 1, first action at 3"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c2",
+      "check": "baseline_recorded",
+      "ok": true,
+      "detail": "443 chars"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c3",
+      "check": "api_case_no_browser",
+      "ok": true,
+      "detail": "no browser tools given"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c3",
+      "check": "gpu_check_before_action",
+      "ok": true,
+      "detail": "breaks; first gpu_check at 1, first action at 3"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c3",
+      "check": "baseline_recorded",
+      "ok": true,
+      "detail": "443 chars"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c4",
+      "check": "api_case_no_browser",
+      "ok": true,
+      "detail": "no browser tools given"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c4",
+      "check": "gpu_check_before_action",
+      "ok": true,
+      "detail": "breaks; first gpu_check at 1, first action at 3"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c4",
+      "check": "baseline_recorded",
+      "ok": true,
+      "detail": "443 chars"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c5",
+      "check": "api_case_no_browser",
+      "ok": true,
+      "detail": "no browser tools given"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c5",
+      "check": "gpu_check_before_action",
+      "ok": true,
+      "detail": "breaks; first gpu_check at 1, first action at 3"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c5",
+      "check": "baseline_recorded",
+      "ok": true,
+      "detail": "443 chars"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c6",
+      "check": "api_case_no_browser",
+      "ok": true,
+      "detail": "no browser tools given"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c6",
+      "check": "gpu_check_before_action",
+      "ok": true,
+      "detail": "breaks; first gpu_check at 1, first action at 3"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g1/c6",
+      "check": "baseline_recorded",
+      "ok": true,
+      "detail": "443 chars"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "6 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "6 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "12 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2/c6",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "21 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2/c7",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2/c7",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2/c8",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g2/c8",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g3/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g3/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g3/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "4 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g3/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g3/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g3/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g3/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g3/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g3/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g3/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g3/c6",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "5 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "agent",
+      "property": "g3/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261110-152031"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1",
+      "check": "verdict_holds",
+      "ok": false,
+      "detail": "cant_tell; held 4/5, broke [], declined [], outside [], not run ['c4']"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2",
+      "check": "verdict_holds",
+      "ok": false,
+      "detail": "fails; held 8/9, broke ['c7'], declined [], outside [], not run []"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g3",
+      "check": "verdict_holds",
+      "ok": true,
+      "detail": "holds; held 5/5, broke [], declined [], outside [], not run []"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1",
+      "check": "kind_measurement",
+      "ok": true,
+      "detail": "plan kind measurement"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2",
+      "check": "kind_behaviour",
+      "ok": true,
+      "detail": "plan kind behaviour"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g3",
+      "check": "kind_code",
+      "ok": false,
+      "detail": "plan kind behaviour"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1",
+      "check": "measured_first",
+      "ok": true,
+      "detail": "order ['g1', 'g2', 'g3']"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "5 plan case(s), none with scope"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 4 + broke 0 + declined 0 + outside 0 + not_run 1 = 5; planned 5"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "1 code ref(s)"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "9 plan case(s), none with scope"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 8 + broke 1 + declined 0 + outside 0 + not_run 0 = 9; planned 9"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "2 code ref(s)"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g3",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "5 plan case(s), none with scope"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g3",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 5 + broke 0 + declined 0 + outside 0 + not_run 0 = 5; planned 5"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g3",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g3",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "1 code ref(s)"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "9 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1/c1",
+      "check": "gpu_check_before_action",
+      "ok": true,
+      "detail": "holds; first gpu_check at 1, first action at 3"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1/c1",
+      "check": "baseline_recorded",
+      "ok": true,
+      "detail": "412 chars"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "16 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1/c2",
+      "check": "gpu_check_before_action",
+      "ok": true,
+      "detail": "holds; first gpu_check at 1, first action at 3"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1/c2",
+      "check": "baseline_recorded",
+      "ok": true,
+      "detail": "412 chars"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "14 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1/c3",
+      "check": "gpu_check_before_action",
+      "ok": true,
+      "detail": "holds; first gpu_check at 1, first action at 3"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1/c3",
+      "check": "baseline_recorded",
+      "ok": true,
+      "detail": "412 chars"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "5 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1/c4",
+      "check": "gpu_check_before_action",
+      "ok": true,
+      "detail": "cant_run; first gpu_check at 1, first action at 3"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1/c4",
+      "check": "baseline_recorded",
+      "ok": true,
+      "detail": "412 chars"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1/c5",
+      "check": "api_case_no_browser",
+      "ok": true,
+      "detail": "no browser tools given"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1/c5",
+      "check": "gpu_check_before_action",
+      "ok": true,
+      "detail": "holds; first gpu_check at 1, first action at 3"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g1/c5",
+      "check": "baseline_recorded",
+      "ok": true,
+      "detail": "412 chars"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "6 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "5 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "6 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "6 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "6 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2/c6",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "6 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2/c6",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2/c7",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "14 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2/c7",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2/c8",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "12 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2/c8",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2/c9",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "6 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g2/c9",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g3/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "4 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g3/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g3/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g3/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g3/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g3/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g3/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "8 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g3/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g3/c5",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "13 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "fixed",
+      "property": "g3/c5",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "control",
+      "property": "-",
+      "check": "run_ok",
+      "ok": true,
+      "detail": "run 20261110-153026"
+    },
+    {
+      "stream": "lipsync",
+      "label": "control",
+      "property": "g3",
+      "check": "verdict_fails",
+      "ok": false,
+      "detail": "cant_tell; held 1/4, broke [], declined [], outside [], not run ['c1', 'c3', 'c4']"
+    },
+    {
+      "stream": "lipsync",
+      "label": "control",
+      "property": "g3",
+      "check": "kind_code",
+      "ok": false,
+      "detail": "plan kind behaviour"
+    },
+    {
+      "stream": "lipsync",
+      "label": "control",
+      "property": "g3",
+      "check": "no_scope_key",
+      "ok": true,
+      "detail": "4 plan case(s), none with scope"
+    },
+    {
+      "stream": "lipsync",
+      "label": "control",
+      "property": "g3",
+      "check": "counts_add_up",
+      "ok": true,
+      "detail": "held 1 + broke 0 + declined 0 + outside 0 + not_run 3 = 4; planned 4"
+    },
+    {
+      "stream": "lipsync",
+      "label": "control",
+      "property": "g3",
+      "check": "was_traced",
+      "ok": true,
+      "detail": "plan.traced true"
+    },
+    {
+      "stream": "lipsync",
+      "label": "control",
+      "property": "g3",
+      "check": "code_refs_present",
+      "ok": true,
+      "detail": "2 code ref(s)"
+    },
+    {
+      "stream": "lipsync",
+      "label": "control",
+      "property": "g3/c1",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "7 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "control",
+      "property": "g3/c1",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "control",
+      "property": "g3/c2",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "10 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "control",
+      "property": "g3/c2",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "control",
+      "property": "g3/c3",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "11 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "control",
+      "property": "g3/c3",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    },
+    {
+      "stream": "lipsync",
+      "label": "control",
+      "property": "g3/c4",
+      "check": "browser_case_no_api",
+      "ok": true,
+      "detail": "9 receipts, no http_request"
+    },
+    {
+      "stream": "lipsync",
+      "label": "control",
+      "property": "g3/c4",
+      "check": "no_source_tools",
+      "ok": true,
+      "detail": "none given or used"
+    }
+  ],
+  "usage": {
+    "conversations": 58,
+    "labels": 69,
+    "second_attempts": 1,
+    "cost_usd": 2.1055,
+    "seconds": 1248.2,
+    "seconds_ignored": 0
+  },
+  "runs": [
+    "<work>/groundtruth-proof/demo/.groundtruth/runs/20261110-151006",
+    "<work>/groundtruth-proof/demo/.groundtruth/runs/20261110-152031",
+    "<work>/groundtruth-proof/gates/work/control/.groundtruth/runs/20261110-153026"
+  ]
+}

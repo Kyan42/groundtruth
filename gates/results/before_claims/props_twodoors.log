@@ -1,0 +1,82 @@
+[twodoors] service http://127.0.0.1:8794, app ports [3104, 3105]
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py register <work>/groundtruth-proof/gates/work/cbay-two-doors --url http://127.0.0.1:3104 --reset /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset --routes next
+    Registered http://127.0.0.1:3104 (pid 15181) for cbay-two-doors
+      the verifier can use: browser and API, process measurements, code reading
+      reset command, run in the repo before every case (it is not tried now): /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset
+      this replaces the earlier registration for this repo
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py verify <work>/groundtruth-proof/gates/work/cbay-two-doors cart --only p1
+    Run 20261110-200647: 1 property against http://127.0.0.1:3104
+      p1/discovery: 6 cases through 3 entry point(s), kind behaviour
+      p1/c1 holds: Cart empty before (subtotal none). Listing l2 price $34.50 per the case. After Add to cart: line "Ship in a Bottle (Genuine Bottle)" Qty 1 $34.50; Sub
+      p1/c2 holds: Cart was empty at start (visited /cart first, then /). Quick add on Kraken Plush, Six Feet (listing $89.00) once. Cart: 1 line, Qty 1, $89.00; Subtota
+      p1/c3 holds: Setup: l1 ($249.99) added, then l2 ($34.50 listing price, In stock) added once; cart subtotal $284.49 (l2 qty 1). Click 1 on /listings/l2: l2 Qty 2, $
+      p1/c4 holds: Cart started empty (badge 0). After the helmet add, the subtotal was $249.99 (+249.99). After the lens add, it was $449.98 (+199.99). After the messag
+      p1/c5 outside: /listings/l6 Pirate Chest, $75.25, Availability "Sold out". The "Sold out" button is disabled and "Add to cart" is enabled. I clicked Add to cart. The
+      p1/c6 holds: Home card l1 $249.99; detail page $249.99 (In stock); cart before: empty (badge 0); after Add to cart: line Qty 1 at $249.99, Subtotal $249.99 (increa
+      p1 holds (5 of 6 cases): Adding an in-stock item to the cart raises the cart subtotal by the price shown on its lis
+    Result: 1 hold, 0 fail, 0 need your decision, 0 can't tell
+    Details: <work>/groundtruth-proof/gates/work/cbay-two-doors/.groundtruth/runs/20261110-200647/run.json
+    Report: <work>/groundtruth-proof/gates/work/cbay-two-doors/.groundtruth/runs/20261110-200647/report.html
+[twodoors] two-doors: checking <work>/groundtruth-proof/gates/work/cbay-two-doors/.groundtruth/runs/20261110-200647 with twodoors
+PASS  twodoors  two-doors  -  run_ok  run 20261110-200647
+PASS  twodoors  two-doors  p1  two_browser_entry_points_listing_and_quick  2 found browser: e1: Listing detail page /listings/:id: the 'Add to cart' button next to 'B | e2: Home page /: the 'Quick add <title>' button under each listing card (d
+PASS  twodoors  two-doors  p1  listing_entry_point_has_case  e1: ['c1', 'c3', 'c5', 'c6']
+PASS  twodoors  two-doors  p1  quick_entry_point_has_case  e2: ['c2', 'c4']
+PASS  twodoors  two-doors  p1  verdict_holds  holds; held 5/6, broke [], declined [], outside ['c5'], not run []
+PASS  twodoors  two-doors  p1  no_scope_key  6 plan case(s), none with scope
+PASS  twodoors  two-doors  p1  counts_add_up  held 5 + broke 0 + declined 0 + outside 1 + not_run 0 = 6; planned 6
+PASS  twodoors  two-doors  p1  was_traced  plan.traced true
+PASS  twodoors  two-doors  p1  code_refs_present  6 code ref(s)
+PASS  twodoors  two-doors  p1/c1  browser_case_no_api  7 receipts, no http_request
+PASS  twodoors  two-doors  p1/c1  no_source_tools  none given or used
+PASS  twodoors  two-doors  p1/c2  browser_case_no_api  6 receipts, no http_request
+PASS  twodoors  two-doors  p1/c2  no_source_tools  none given or used
+PASS  twodoors  two-doors  p1/c3  browser_case_no_api  19 receipts, no http_request
+PASS  twodoors  two-doors  p1/c3  no_source_tools  none given or used
+PASS  twodoors  two-doors  p1/c4  browser_case_no_api  15 receipts, no http_request
+PASS  twodoors  two-doors  p1/c4  no_source_tools  none given or used
+PASS  twodoors  two-doors  p1/c5  browser_case_no_api  6 receipts, no http_request
+PASS  twodoors  two-doors  p1/c5  no_source_tools  none given or used
+PASS  twodoors  two-doors  p1/c6  browser_case_no_api  8 receipts, no http_request
+PASS  twodoors  two-doors  p1/c6  no_source_tools  none given or used
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py register <work>/groundtruth-proof/gates/work/cbay-two-doors-broken --url http://127.0.0.1:3105 --reset /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset --routes next
+    Registered http://127.0.0.1:3105 (pid 16007) for cbay-two-doors-broken
+      the verifier can use: browser and API, process measurements, code reading
+      reset command, run in the repo before every case (it is not tried now): /opt/homebrew/opt/node@22/bin/node scripts/seed.mjs --reset
+      this replaces the earlier registration for this repo
+$ <work>/groundtruth-proof/.venv/bin/python -u <work>/groundtruth-proof/groundtruth.py verify <work>/groundtruth-proof/gates/work/cbay-two-doors-broken cart --only p1
+    Run 20261110-200856: 1 property against http://127.0.0.1:3105
+      p1/discovery: 5 cases through 3 entry point(s), kind behaviour
+      p1/c1 holds: Cart before: empty. Listing l1 price $249.99, In stock. After one click on Add to cart, cart shows Vintage Brass Diving Helmet, Qty 1, $249.99; Subtot
+      p1/c2 breaks: Cart before: empty (no subtotal, badge 0). Clicked 'Quick add' once on Ship in a Bottle (listing $34.50). Cart after: Qty 2, line $69.00, Subtotal $69
+      p1/c3 breaks: Cart was empty, so I quick-added Message in a Bottle ($15.00) once to seed it. /cart then showed Qty 2, $30.00, subtotal $30.00, and the header badge 
+      p1/c4 breaks: Cart was empty (badge 0). I clicked Quick add once on Message in a Bottle ($15.00) and once on Lighthouse Lamp Lens ($199.99). The cart then showed Me
+      p1/c5 holds: /listings/l6 Pirate Chest, $75.25, Availability Sold out. It shows a disabled "Sold out" button and an enabled "Add to cart" button. I clicked "Add to
+      p1 fails (broke: c2, c3, c4): Adding an in-stock item to the cart raises the cart subtotal by the price shown on its lis
+    Result: 0 hold, 1 fail, 0 need your decision, 0 can't tell
+    Details: <work>/groundtruth-proof/gates/work/cbay-two-doors-broken/.groundtruth/runs/20261110-200856/run.json
+    Report: <work>/groundtruth-proof/gates/work/cbay-two-doors-broken/.groundtruth/runs/20261110-200856/report.html
+[twodoors] two-doors-broken: checking <work>/groundtruth-proof/gates/work/cbay-two-doors-broken/.groundtruth/runs/20261110-200856 with twodoors-broken
+PASS  twodoors  two-doors-broken  -  run_ok  run 20261110-200856
+PASS  twodoors  two-doors-broken  p1  two_browser_entry_points_listing_and_quick  2 found browser: e1: Listing detail page /listings/:id: the add-to-cart button (AddToCartBu | e2: Home page /: the 'Quick add' button beside each listing card (disabled
+PASS  twodoors  two-doors-broken  p1  listing_entry_point_has_case  e1: ['c1', 'c5']
+PASS  twodoors  two-doors-broken  p1  quick_entry_point_has_case  e2: ['c2', 'c3', 'c4']
+PASS  twodoors  two-doors-broken  p1  verdict_fails  fails; held 2/5, broke ['c2', 'c3', 'c4'], declined [], outside [], not run []
+PASS  twodoors  two-doors-broken  p1  broken_cases_all_quick_add  broken ['c2', 'c3', 'c4']; not on e2: []
+PASS  twodoors  two-doors-broken  p1  listing_cases_all_hold  2 listing case(s); not holding []
+PASS  twodoors  two-doors-broken  p1  no_scope_key  5 plan case(s), none with scope
+PASS  twodoors  two-doors-broken  p1  counts_add_up  held 2 + broke 3 + declined 0 + outside 0 + not_run 0 = 5; planned 5
+PASS  twodoors  two-doors-broken  p1  was_traced  plan.traced true
+PASS  twodoors  two-doors-broken  p1  code_refs_present  6 code ref(s)
+PASS  twodoors  two-doors-broken  p1/c1  browser_case_no_api  8 receipts, no http_request
+PASS  twodoors  two-doors-broken  p1/c1  no_source_tools  none given or used
+PASS  twodoors  two-doors-broken  p1/c2  browser_case_no_api  9 receipts, no http_request
+PASS  twodoors  two-doors-broken  p1/c2  no_source_tools  none given or used
+PASS  twodoors  two-doors-broken  p1/c3  browser_case_no_api  13 receipts, no http_request
+PASS  twodoors  two-doors-broken  p1/c3  no_source_tools  none given or used
+PASS  twodoors  two-doors-broken  p1/c4  browser_case_no_api  11 receipts, no http_request
+PASS  twodoors  two-doors-broken  p1/c4  no_source_tools  none given or used
+PASS  twodoors  two-doors-broken  p1/c5  browser_case_no_api  7 receipts, no http_request
+PASS  twodoors  two-doors-broken  p1/c5  no_source_tools  none given or used
+[twodoors] PASSED: 42/42 checks; usage {'conversations': 15, 'labels': 16, 'second_attempts': 0, 'cost_usd': 0.5995, 'seconds': 208.0, 'seconds_ignored': 0}; wrote <work>/groundtruth-proof/gates/results/props_twodoors.json
+exit 0

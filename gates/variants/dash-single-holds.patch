@@ -1,0 +1,13 @@
+--- a/js/run.js
++++ b/js/run.js
+@@ -64,8 +64,9 @@
+ const titleOf = (p) => (typeof p.title === "string" ? p.title.trim() : "");
+ 
+ function card(p) {
+-  const v = verdict(p.verdict);
+   const cases = p.cases || [];
++  const broke = cases.slice(1).some((c) => c.outcome === "breaks");
++  const v = verdict(p.verdict === "fails" && !broke ? "holds" : p.verdict);
+   const notRun = p.verdict === "not_run";
+   const descId = `pd-${p.id}`;
+   const name = titleOf(p) || p.statement || "No sentence given";

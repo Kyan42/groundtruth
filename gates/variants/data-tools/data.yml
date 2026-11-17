@@ -1,0 +1,22 @@
+tools:
+  - name: make_listing
+    does: Puts one listing up for sale in the shop, in stock unless sold_out is true, and returns its id and the address of its page.
+    takes:
+      title:
+        type: string
+        does: The listing's title as shoppers see it.
+      price_cents:
+        type: integer
+        does: "The price in cents, for example 2599 for $25.99."
+      sold_out:
+        type: boolean
+        optional: true
+        does: True to make the listing sold out.
+    run: node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/groundtruth/make-listing.mjs
+  - name: make_order
+    does: Places one Buy It Now order for an in-stock listing through the shop's own order endpoint, and returns the order id and the address of its page.
+    takes:
+      listing_id:
+        type: string
+        does: "The id of the listing to buy, for example l2."
+    run: node scripts/groundtruth/make-order.mjs

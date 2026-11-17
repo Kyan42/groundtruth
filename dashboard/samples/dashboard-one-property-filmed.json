@@ -1,0 +1,691 @@
+{
+ "schema": 1,
+ "project": "groundtruth-cli",
+ "feature": "review-page",
+ "goal": "A reviewer opens a feature's run page to see every claim the user decided on for that feature, the regressions that were run, and the recorded video for each.",
+ "run": "20261110-195106",
+ "ran_at": "2026-11-10T19:51:06",
+ "ran_against": {
+  "url": "http://127.0.0.1:4410",
+  "commit": "721de9b",
+  "uncommitted_changes": true,
+  "platform": "macOS-27.2-arm64-arm-64bit",
+  "process_started": "Tue Nov 10 16:39:31 2026",
+  "registered_at": "2026-11-10T16:52:35",
+  "could_measure": true,
+  "could_read_code": true,
+  "had_reset": false
+ },
+ "verifier": {
+  "version": "3",
+  "model": "claude-sonnet-5-5"
+ },
+ "error": null,
+ "aborted": false,
+ "totals": {
+  "properties": {
+   "holds": 1,
+   "fails": 0,
+   "needs_decision": 0,
+   "cant_tell": 0,
+   "planned": 0,
+   "not_run": 2
+  },
+  "cases": {
+   "holds": 3,
+   "breaks": 0,
+   "declined": 0,
+   "outside": 2,
+   "nothing_there": 0,
+   "cant_run": 0,
+   "planned": 0
+  },
+  "seconds": 121.1,
+  "cost_usd": 0.3017
+ },
+ "properties": [
+  {
+   "id": "p1",
+   "statement": "Every claim the user decided on for the current feature shows in the Intent section, with its own card.",
+   "example": "",
+   "group": "new",
+   "verdict": "not_run",
+   "kind": null,
+   "searched": false,
+   "read_as": {
+    "applies_to": "",
+    "action": "",
+    "compares": ""
+   },
+   "how_found": "",
+   "not_covered": "",
+   "no_plan_because": null,
+   "ways_in": [],
+   "left_out": [],
+   "search_notes": [],
+   "counts": {
+    "holds": 0,
+    "breaks": 0,
+    "declined": 0,
+    "outside": 0,
+    "nothing_there": 0,
+    "cant_run": 0,
+    "planned": 0
+   },
+   "seconds": 0,
+   "cost_usd": 0,
+   "cases": []
+  },
+  {
+   "id": "p2",
+   "statement": "Every claim whose regression was run appears in the Regression section.",
+   "example": "",
+   "group": "new",
+   "verdict": "not_run",
+   "kind": null,
+   "searched": false,
+   "read_as": {
+    "applies_to": "",
+    "action": "",
+    "compares": ""
+   },
+   "how_found": "",
+   "not_covered": "",
+   "no_plan_because": null,
+   "ways_in": [],
+   "left_out": [],
+   "search_notes": [],
+   "counts": {
+    "holds": 0,
+    "breaks": 0,
+    "declined": 0,
+    "outside": 0,
+    "nothing_there": 0,
+    "cant_run": 0,
+    "planned": 0
+   },
+   "seconds": 0,
+   "cost_usd": 0,
+   "cases": []
+  },
+  {
+   "id": "p3",
+   "statement": "Clicking a claim's card shows the video for that claim.",
+   "example": "",
+   "group": "new",
+   "verdict": "holds",
+   "kind": "behaviour",
+   "searched": true,
+   "read_as": {
+    "applies_to": "claim/journey cards on the review run page",
+    "action": "click a card, which selects it and sets the main video player's source",
+    "compares": "the video shown vs the clicked card's own claim video (reference)"
+   },
+   "how_found": "Plain code searched the codebase for video\\.src\\b, \\bcurrent\\b\\s*=, videoFor (the video player's source for the selected card), then for the name of each function that changes it, then for the address of each route that reaches it, and followed every file that mentions one up to the pages. 0 search hits were each labelled by their own model call. This gave 1 way(s) in through the pages and 0 route(s); 0 file(s) were excluded because no page shows them.",
+   "not_covered": "Direct API calls: none listed. Other runs not planned, since only shopping-cart exists. The page rendered an empty accessibility tree when I observed it, so the card layout is taken from the code and not confirmed on screen.",
+   "no_plan_because": null,
+   "ways_in": [
+    {
+     "id": "e1",
+     "door": "browser",
+     "status": "found",
+     "where": "Run detail page for a run (open the Test runs list at /runs, then the shopping-cart run). The control is each journey/claim card in the left list (and the regression-check cards in the Regression tab of the list switch); clicking a card switches to the journey view and loads that card's video in the main player.",
+     "page": "/review/run.html",
+     "route": null,
+     "file": "review/run.html"
+    }
+   ],
+   "left_out": [],
+   "search_notes": [
+    "12 lines mention the video player's source for the selected card without writing it (as far as plain code can tell); they were not followed."
+   ],
+   "counts": {
+    "holds": 3,
+    "breaks": 0,
+    "declined": 0,
+    "outside": 2,
+    "nothing_there": 0,
+    "cant_run": 0,
+    "planned": 0
+   },
+   "seconds": 121.1,
+   "cost_usd": 0.3017,
+   "cases": [
+    {
+     "id": "c1",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "Open /runs, open the shopping-cart run. Note which video is initially in the main player. Click the first journey card in the list, then read the main video player's source and which card is marked as current. Then click the second journey card and read them again.",
+     "stands_for": "Basic case: clicking each journey card selects it and the main player shows that card's own video.",
+     "outcome": "holds",
+     "observed": "Initial main video: c1.webm (6.88s). Clicked card 1 (C1): main video c1.webm, card 1 marked active, panel shows C1. Clicked card 2 (C2, 0:08): main visible video became c2.webm (7.68s), matching the card's length 0:08. Did not check the Regression tab (0 items).",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 14.2,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "p3/c1/clip-1.webm",
+       "started": 1794369114.96
+      }
+     ],
+     "shots": [
+      {
+       "id": "shot-1",
+       "file": "p3/c1/shot-1.png",
+       "label": "after second card",
+       "at": 6.01,
+       "cited": true
+      }
+     ],
+     "steps": [
+      {
+       "clip": 0,
+       "at": 0.08,
+       "kind": "action",
+       "words": "open /runs",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.63,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.06,
+       "kind": "action",
+       "words": "click link \"? shopping-cart 2 of 3 verified Nov 9, 2026, 4:31 PM 3 claims e…",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.08,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.1,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.95,
+       "kind": "action",
+       "words": "click listitem \"Items go into the cart 0:07 ✓ C1\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.96,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 4.54,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 5.97,
+       "kind": "action",
+       "words": "click listitem \"Items go into the cart 0:08 ✓ C2\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 5.98,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 6.01,
+       "kind": "look",
+       "words": "take a screenshot: after second card",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [
+      {
+       "at": 2.08,
+       "text": "1. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      },
+      {
+       "at": 3.96,
+       "text": "1. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      },
+      {
+       "at": 5.98,
+       "text": "1. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      }
+     ],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c2",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "On the shopping-cart run page, click the second journey card, then click the first, then the second again. After each click read the player's video source and the highlighted card. Compare each source against the thumbnail/video of the clicked card.",
+     "stands_for": "Switching between cards back and forth always shows the clicked card's video, not a stale one.",
+     "outcome": "holds",
+     "observed": "Initial: C1 selected, visible player c1.webm (6.88s). Click card 2 (C2, 0:08): visible player c2.webm (7.68s), claim panel C2. Click card 1 (C1, 0:07): visible c1.webm. Click card 2 again: visible c2.webm, 0:01/0:08. Each source matched the clicked card's claim. The highlighted card was not exposed in the tree beyond [active] on the clicked item; the claim panel shown matched the clicked card (C2 after the card-2 click).",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 18.3,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "p3/c2/clip-1.webm",
+       "started": 1794369129.53
+      }
+     ],
+     "shots": [
+      {
+       "id": "shot-1",
+       "file": "p3/c2/shot-1.png",
+       "label": "final",
+       "at": 8.51,
+       "cited": true
+      }
+     ],
+     "steps": [
+      {
+       "clip": 0,
+       "at": 0.07,
+       "kind": "action",
+       "words": "open /runs",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.79,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.28,
+       "kind": "action",
+       "words": "click link \"? shopping-cart 2 of 3 verified Nov 9, 2026, 4:31 PM 3 claims e…",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.01,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.03,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 4.65,
+       "kind": "action",
+       "words": "click listitem \"Items go into the cart 0:08 ✓ C2\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 4.66,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 5.3,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 6.9,
+       "kind": "action",
+       "words": "click listitem \"Items go into the cart 0:07 ✓ C1\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 6.91,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 8.47,
+       "kind": "action",
+       "words": "click listitem \"Items go into the cart 0:08 ✓ C2\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 8.47,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 8.51,
+       "kind": "look",
+       "words": "take a screenshot: final",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [
+      {
+       "at": 3.03,
+       "text": "1. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      },
+      {
+       "at": 4.66,
+       "text": "1. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      },
+      {
+       "at": 6.91,
+       "text": "1. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      },
+      {
+       "at": 8.47,
+       "text": "1. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      }
+     ],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c3",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "On the shopping-cart run page, click the same journey card twice in a row. Read the player source and whether playback or the video state is disrupted.",
+     "stands_for": "Re-clicking the already-selected card (same source) keeps the right video.",
+     "outcome": "holds",
+     "observed": "Before clicks: visible player src /runs/shopping-cart/videos/c1.webm, at 1 s, not playing. After first click on card C1: same src c1.webm, visible, at 1 s, not playing. After second click: same src c1.webm, at 1 s, loaded, no disruption (no reload or reset). The other players (c1, c2) stayed hidden.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 13.1,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "p3/c3/clip-1.webm",
+       "started": 1794369148.44
+      }
+     ],
+     "shots": [],
+     "steps": [
+      {
+       "clip": 0,
+       "at": 0.06,
+       "kind": "action",
+       "words": "open /runs",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.67,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.2,
+       "kind": "action",
+       "words": "click link \"? shopping-cart 2 of 3 verified Nov 9, 2026, 4:31 PM 3 claims e…",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.23,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.06,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.97,
+       "kind": "action",
+       "words": "click span \"Items go into the cart 0:07 ✓ C1\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.97,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 4.58,
+       "kind": "action",
+       "words": "click span \"Items go into the cart 0:07 ✓ C1\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 4.59,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [
+      {
+       "at": 3.06,
+       "text": "1. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      },
+      {
+       "at": 3.97,
+       "text": "1. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      },
+      {
+       "at": 4.59,
+       "text": "1. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      }
+     ],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c4",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "On the shopping-cart run page, find any journey card that has no video (if one exists). Click it and read whether the player is hidden and a 'No video for this journey' notice appears. Then click a card with a video and check the notice goes away and the video returns. If every card has a video, report that.",
+     "stands_for": "Card with no video: the previous video must not remain showing.",
+     "outcome": "outside",
+     "observed": "Shopping-cart run has 2 intent cards (C1 0:07, C2 0:08), both with durations; Regression tab count is 0. Clicking C2 loaded /runs/shopping-cart/videos/c2.webm in the visible player (length 7.68s), the C1 video is c1.webm. No card lacks a video, so the 'No video for this journey' notice case could not be exercised. Video shown matched the clicked card's own video.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 13.1,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "p3/c4/clip-1.webm",
+       "started": 1794369161.88
+      }
+     ],
+     "shots": [],
+     "steps": [
+      {
+       "clip": 0,
+       "at": 0.07,
+       "kind": "action",
+       "words": "open /runs",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.76,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.37,
+       "kind": "action",
+       "words": "click link \"? shopping-cart 2 of 3 verified Nov 9, 2026, 4:31 PM 3 claims e…",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.4,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.99,
+       "kind": "action",
+       "words": "click listitem \"Items go into the cart 0:08 ✓ C2\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 4.0,
+       "kind": "reading",
+       "words": "read what each player has loaded",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [
+      {
+       "at": 4.0,
+       "text": "1. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 1 s; not playing; loaded, 1280x720; visible\n2. video source /runs/shopping-cart/videos/c1.webm; length 6.88 s; at 0 s; not playing; loaded, 1280x720; hidden\n3. video source /runs/shopping-cart/videos/c2.webm; length 7.68 s; at 0 s; not playing; loaded, 1280x720; hidden"
+      }
+     ],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    },
+    {
+     "id": "c5",
+     "way_in": "e1",
+     "door": "browser",
+     "what": "On the shopping-cart run page, switch the list to the regression checks view using the list switch buttons (if there are any regression cards). Click a regression card and read the main player source; compare to that card's thumbnail video. If there are no regression cards, report that.",
+     "stands_for": "Regression-check cards also select and show their own video.",
+     "outcome": "outside",
+     "observed": "On /runs/shopping-cart the list switch shows \"Intent 2\" and \"Regression 0\". Clicking Regression shows \"No regression checks ran on this PR.\" with no cards. The property covers clicking a claim's card, and there is no regression card to click, so the case has nothing to act on. The main player stayed on the c1 video. Screenshot: shot-1.",
+     "question": null,
+     "draft_if_intended": null,
+     "seconds": 15.6,
+     "attempts": 1,
+     "clips": [
+      {
+       "file": "p3/c5/clip-1.webm",
+       "started": 1794369175.31
+      }
+     ],
+     "shots": [
+      {
+       "id": "shot-1",
+       "file": "p3/c5/shot-1.png",
+       "label": "regression tab",
+       "at": 3.81,
+       "cited": true
+      }
+     ],
+     "steps": [
+      {
+       "clip": 0,
+       "at": 0.07,
+       "kind": "action",
+       "words": "open /runs",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 0.66,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.17,
+       "kind": "action",
+       "words": "click link \"? shopping-cart 2 of 3 verified Nov 9, 2026, 4:31 PM 3 claims e…",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 2.2,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.77,
+       "kind": "action",
+       "words": "click button \"Regression0\"",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 3.81,
+       "kind": "look",
+       "words": "take a screenshot: regression tab",
+       "ok": true
+      },
+      {
+       "clip": 0,
+       "at": 4.38,
+       "kind": "look",
+       "words": "look at the page",
+       "ok": true
+      }
+     ],
+     "requests": [],
+     "readings": [],
+     "media": [],
+     "excerpts": [],
+     "checks": [],
+     "notes": []
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,119 @@
+{
+  "passed": false,
+  "checks": [
+    {
+      "claim": "-",
+      "check": "route_list",
+      "ok": true,
+      "detail": "5 handlers, sources ['next-build', 'next-files'], agree True"
+    },
+    {
+      "claim": "r1",
+      "check": "verdict",
+      "ok": true,
+      "detail": "holds: The app has 3 POST routes: /api/cart, /api/orders and /api/watchlist. I sent each one the malformed body \"{not"
+    },
+    {
+      "claim": "r1",
+      "check": "settled_by_every_item_check",
+      "ok": true,
+      "detail": "for_each, 1 probe check(s)"
+    },
+    {
+      "claim": "r1",
+      "check": "covered_all_3_post_routes",
+      "ok": true,
+      "detail": "[(3, 0)]"
+    },
+    {
+      "claim": "r2",
+      "check": "verdict",
+      "ok": true,
+      "detail": "fails: The app has three POST routes. With {\"listingId\":\"l6\"}, POST /api/cart and POST /api/orders returned 409 (\"Thi"
+    },
+    {
+      "claim": "r2",
+      "check": "names_the_violator",
+      "ok": true,
+      "detail": "violators []"
+    },
+    {
+      "claim": "r3",
+      "check": "zero_items_did_not_pass",
+      "ok": false,
+      "detail": "holds: The route list (next-build and next-files agree) shows no DELETE routes. DELETE with {} to /api/cart, /api/wat"
+    },
+    {
+      "claim": "r4",
+      "check": "verdict",
+      "ok": true,
+      "detail": "holds: All 4 route files under app/api contain none of \"fs\", \"readFileSync\", \"writeFileSync\" or \"node:fs\". The \"fs\" p"
+    },
+    {
+      "claim": "r4",
+      "check": "settled_by_code_after_escalating",
+      "ok": true,
+      "detail": "code, 2 conversation(s)"
+    },
+    {
+      "claim": "r4",
+      "check": "covered_all_4_route_files",
+      "ok": true,
+      "detail": "[(4, 0)]"
+    },
+    {
+      "claim": "r5",
+      "check": "verdict",
+      "ok": true,
+      "detail": "fails: Only 2 of 4 route files import from @/lib/store (orders, watchlist). cart/route.ts imports @/lib/cart instead,"
+    },
+    {
+      "claim": "r5",
+      "check": "names_a_violating_file",
+      "ok": true,
+      "detail": "app/api/cart/route.ts app/api/health/route.ts app/api/cart/route.ts app/api/health/route.ts Only 2 of 4 route files import from @/lib/store "
+    },
+    {
+      "claim": "r1",
+      "check": "no_source_read_in_first_conversation",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "claim": "r2",
+      "check": "no_source_read_in_first_conversation",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "claim": "r3",
+      "check": "no_source_read_in_first_conversation",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "claim": "r4",
+      "check": "no_source_read_in_first_conversation",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "claim": "r5",
+      "check": "no_source_read_in_first_conversation",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "claim": "-",
+      "check": "rule_saved_for_r1",
+      "ok": true,
+      "detail": "saved rules for: ['r1', 'r4']"
+    },
+    {
+      "claim": "-",
+      "check": "replay_with_no_model",
+      "ok": true,
+      "detail": "exit 0"
+    }
+  ]
+}

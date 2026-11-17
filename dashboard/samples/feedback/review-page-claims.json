@@ -1,0 +1,18 @@
+[
+ {
+  "id": "seed0001",
+  "property": "p2",
+  "case": "one-regression",
+  "kind": "wrong_result",
+  "note": "It is listed when I open the page myself.",
+  "at": "2026-11-11T10:20:00Z"
+ },
+ {
+  "id": "seed0002",
+  "property": "p1",
+  "case": null,
+  "kind": "right",
+  "note": "",
+  "at": "2026-11-11T10:21:00Z"
+ }
+]
